@@ -7,6 +7,7 @@ export interface Post {
   date: string;
   readingTime: string;
   image: string;
+  content: string; // 新增：文章正文支持 Markdown 或 HTML 字符串
 }
 
 export interface Message {

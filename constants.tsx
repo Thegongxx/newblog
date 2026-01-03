@@ -5,30 +5,33 @@ import { Post } from './types';
 export const BLOG_POSTS: Post[] = [
   {
     id: '1',
-    title: 'Designing for the Future of Spatial Computing',
-    excerpt: 'How the shift from 2D screens to 3D spaces is redefining our relationship with technology and interfaces.',
-    category: 'Design',
-    date: 'Oct 12, 2023',
-    readingTime: '6 min',
-    image: 'https://picsum.photos/seed/spatial/1200/800'
+    title: '空间计算的未来设计',
+    excerpt: '从 2D 屏幕到 3D 空间的转变如何重新定义我们与技术的关系。',
+    category: '设计',
+    date: '2023年10月12日',
+    readingTime: '6 分钟',
+    image: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=2070&auto=format&fit=crop',
+    content: `
+      <p>在数字时代，复杂性往往被误认为是先进。但真正的创新在于能够将深刻的想法提炼成简单、优雅的形式。</p>
+      <p>随着我们转向感觉更像环境而非工具的界面，设计的语言必须进化。这不再仅仅关乎你点击哪里，而关乎居住在数字空间中的感受。</p>
+      <blockquote class="border-l-2 border-white/20 pl-6 italic text-2xl font-light text-white my-12">
+        “设计不仅仅是外观和感觉。设计是它是如何工作的。”
+      </blockquote>
+      <p>Aura 的哲学就建立在这个基础上。我们寻求在嘈杂的世界中创造清晰的时刻，利用技术不是为了分散注意力，而是为了集中思想。</p>
+    `
   },
   {
     id: '2',
-    title: 'The Poetics of Minimalism',
-    excerpt: 'Exploring why less is often more, and how subtractive design leads to more meaningful experiences.',
-    category: 'Philosophy',
-    date: 'Sep 28, 2023',
-    readingTime: '4 min',
-    image: 'https://picsum.photos/seed/minimal/1200/800'
-  },
-  {
-    id: '3',
-    title: 'Large Language Models as Creative Partners',
-    excerpt: 'A deep dive into how AI is becoming a collaborator rather than just a tool for modern developers.',
-    category: 'Tech',
-    date: 'Aug 15, 2023',
-    readingTime: '8 min',
-    image: 'https://picsum.photos/seed/ai/1200/800'
+    title: '极简主义的诗学',
+    excerpt: '探讨为什么“少即是多”，以及减法设计如何带来更有意义的体验。',
+    category: '哲学',
+    date: '2023年9月28日',
+    readingTime: '4 分钟',
+    image: 'https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?q=80&w=2067&auto=format&fit=crop',
+    content: `
+      <p>极简主义不是为了空无一物，而是为了去除那些阻碍我们体验本质的杂质。</p>
+      <p>当我们减少视觉上的噪音，留白便开始说话。每一个线条，每一个像素都承担了更多的责任。</p>
+    `
   }
 ];
 
