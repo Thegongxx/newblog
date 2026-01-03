@@ -1,0 +1,7 @@
+{
+  "name": "Aura - Minimalist Personal Space",
+  "description": "An Apple-inspired personal blog with fluid animations, spatial layouts, and an integrated Gemini AI assistant for content exploration.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
