@@ -19,8 +19,8 @@ export enum ViewState {
   INTRO = 'INTRO',
   FEED = 'FEED',
   POST = 'POST',
+  PROJECTS = 'PROJECTS',
   ARCHIVE = 'ARCHIVE',
   NOTEBOOK = 'NOTEBOOK',
-  PHILOSOPHY = 'PHILOSOPHY',
   ABOUT = 'ABOUT'
 }

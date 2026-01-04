@@ -1,24 +1,28 @@
 
 import { GoogleGenAI } from "@google/genai";
 
-// 文本流接口：用于博客问答与闲聊
 export async function* askGeminiStream(prompt: string, context?: string) {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
   if (!apiKey) {
     yield "AI_AUTH_REQUIRED";
     return;
   }
+  
+  // 实例化最新的客户端
   const ai = new GoogleGenAI({ apiKey });
   
-  const systemInstruction = `你叫 Aura，是一个温和、睿智、善于倾听的博客伴侣。语调优雅、真诚。你当前所在的博客内容上下文：${context}`;
+  const systemInstruction = `You are Aura, an elegant and minimalist AI companion for a personal blog. 
+  Your tone is calm, intelligent, and helpful. 
+  Current context of the blog: ${context}. 
+  If users ask about the code, explain that this is a React-based spatial UI inspired by Apple design.`;
 
   try {
     const response = await ai.models.generateContentStream({
-      model: 'gemini-2.5-flash-native-audio-dialog', 
+      model: 'gemini-3-flash-preview', 
       contents: prompt,
       config: { 
         systemInstruction, 
-        temperature: 0.7,
+        temperature: 0.8,
         topP: 0.95,
       },
     });
@@ -28,6 +32,12 @@ export async function* askGeminiStream(prompt: string, context?: string) {
     }
   } catch (error: any) {
     console.error("Gemini Stream Error:", error);
-    yield `ERROR:连接似乎有些起伏，请稍后再试。`;
+    const errorMsg = error.message || "";
+    
+    if (errorMsg.includes("404")) {
+      yield "ERROR: 模型暂时不可用（404）。系统正在尝试自动切换备用引擎...";
+    } else {
+      yield `ERROR: 连接似乎有些起伏，请稍后再试。(${errorMsg.slice(0, 50)}...)`;
+    }
   }
 }
