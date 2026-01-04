@@ -14,7 +14,7 @@ export async function* askGeminiStream(prompt: string, context?: string) {
 
   try {
     const response = await ai.models.generateContentStream({
-      model: 'gemini-3-flash-preview', 
+      model: 'gemini-2.5-flash-native-audio-dialog', 
       contents: prompt,
       config: { 
         systemInstruction, 
