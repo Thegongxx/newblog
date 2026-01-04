@@ -1,18 +1,16 @@
 
 import { GoogleGenAI } from "@google/genai";
 
+// Ask Gemini for assistance based on prompt and context
 export async function askGemini(prompt: string, context?: string) {
   try {
-    // 检查环境变量是否存在
-    const apiKey = process.env.API_KEY;
-    
-    if (!apiKey) {
-      console.error("API_KEY is not defined in the environment.");
-      return "Assistant setup incomplete: API Key is missing. Please check your Vercel Environment Variables and ensure the key name is exactly 'API_KEY'.";
+    // Check if API key exists in environment
+    if (!process.env.API_KEY) {
+      throw new Error("AUTH_REQUIRED");
     }
 
-    // 将初始化移入 try 块，捕获可能的构造函数错误
-    const ai = new GoogleGenAI({ apiKey });
+    // Always create a new instance right before the call to ensure the latest API key is used
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     
     const systemInstruction = `You are a sophisticated AI assistant for a minimalist design blog called 'Aura'. 
     Your tone is calm, insightful, and precise. You help readers understand the nuances of the blog posts. 
@@ -31,9 +29,13 @@ export async function askGemini(prompt: string, context?: string) {
   } catch (error: any) {
     console.error("Gemini Error:", error);
     
-    // 处理特定错误，例如模型不存在或权限问题
-    if (error.message?.includes("not found")) {
-      return "The requested AI model is currently unavailable in your region or for this API key.";
+    if (error.message === "AUTH_REQUIRED") {
+      return "AI_AUTH_MISSING";
+    }
+    
+    // Handle 'Requested entity was not found' as per guidelines to trigger re-authentication
+    if (error.message?.toLowerCase().includes("not found") || error.message?.includes("404")) {
+      return "AI_ERROR_NOT_FOUND";
     }
     
     return `Connection error: ${error.message || "The stars are misaligned."}`;
