@@ -3,7 +3,7 @@ import { GoogleGenAI } from "@google/genai";
 
 export async function askGemini(prompt: string, context?: string) {
   try {
-    const apiKey = process.env.API_KEY;
+    const apiKey = process.env.NEXT_PUBLIC_API_KEY;;
     
     if (!apiKey) {
       return "AI_AUTH_REQUIRED";
