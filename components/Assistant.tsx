@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { ICONS } from '../constants';
+import { ICONS, BLOG_POSTS } from '../constants';
 import { askGemini } from '../services/geminiService';
 import { Message } from '../types';
 
@@ -25,7 +25,10 @@ const Assistant: React.FC = () => {
     setInput('');
     setIsLoading(true);
 
-    const response = await askGemini(input);
+    // Create a context summary from current BLOG_POSTS
+    const blogContext = `The blog currently has these posts: ${BLOG_POSTS.map(p => `"${p.title}" (Category: ${p.category}, Summary: ${p.excerpt})`).join('; ')}`;
+
+    const response = await askGemini(input, blogContext);
     const assistantMsg: Message = { role: 'assistant', content: response };
     
     setMessages(prev => [...prev, assistantMsg]);
