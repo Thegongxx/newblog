@@ -3,7 +3,7 @@ import { GoogleGenAI } from "@google/genai";
 
 // 文本流接口：用于博客问答与闲聊
 export async function* askGeminiStream(prompt: string, context?: string) {
-  const apiKey = process.env.API_KEY;
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
   if (!apiKey) {
     yield "AI_AUTH_REQUIRED";
     return;
