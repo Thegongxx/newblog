@@ -75,7 +75,8 @@ export async function connectAuraLive(callbacks: {
   onError: (err: any) => void;
   onClose: () => void;
 }) {
-  const apiKey = process.env.API_KEY;
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+
   if (!apiKey) throw new Error("AI_AUTH_REQUIRED");
 
   const ai = new GoogleGenAI({ apiKey });
