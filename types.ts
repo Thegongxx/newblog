@@ -7,7 +7,7 @@ export interface Post {
   date: string;
   readingTime: string;
   image: string;
-  content: string; // 新增：文章正文支持 Markdown 或 HTML 字符串
+  content: string;
 }
 
 export interface Message {
@@ -18,5 +18,9 @@ export interface Message {
 export enum ViewState {
   INTRO = 'INTRO',
   FEED = 'FEED',
-  POST = 'POST'
+  POST = 'POST',
+  ARCHIVE = 'ARCHIVE',
+  NOTEBOOK = 'NOTEBOOK',
+  PHILOSOPHY = 'PHILOSOPHY',
+  ABOUT = 'ABOUT'
 }
