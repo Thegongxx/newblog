@@ -4,14 +4,13 @@ import { ICONS, BLOG_POSTS } from '../constants';
 import { askGemini } from '../services/geminiService';
 import { Message } from '../types';
 
-// Use correct global interface declaration to fix TypeScript errors
 declare global {
   interface AIStudio {
     hasSelectedApiKey: () => Promise<boolean>;
     openSelectKey: () => Promise<void>;
   }
   interface Window {
-    aistudio: AIStudio;
+    aistudio?: AIStudio;
   }
 }
 
@@ -24,17 +23,14 @@ const Assistant: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [messages, isLoading]);
-
-  // Check for API Key selection on mount
-  useEffect(() => {
     const checkAuth = async () => {
       if (window.aistudio) {
-        const hasKey = await window.aistudio.hasSelectedApiKey();
-        if (!hasKey && !process.env.API_KEY) {
+        try {
+          const hasKey = await window.aistudio.hasSelectedApiKey();
+          if (!hasKey && !process.env.API_KEY) {
+            setNeedsAuth(true);
+          }
+        } catch (e) {
           setNeedsAuth(true);
         }
       }
@@ -42,19 +38,28 @@ const Assistant: React.FC = () => {
     checkAuth();
   }, []);
 
-  const handleInitKey = async () => {
-    try {
-      if (window.aistudio) {
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({
+        top: scrollRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
+  }, [messages, isLoading]);
+
+  const handleInitKey = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (window.aistudio) {
+      try {
         await window.aistudio.openSelectKey();
-        // Assume key selection was successful after triggering openSelectKey to avoid race conditions
         setNeedsAuth(false);
         setMessages([{
           role: 'assistant',
-          content: 'AI initialized successfully. How can I help you today?'
+          content: '核心架构已连接。我是 Aura，你的深思伙伴。'
         }]);
+      } catch (err) {
+        console.error("Auth Failed", err);
       }
-    } catch (e) {
-      console.error("Key selection failed", e);
     }
   };
 
@@ -68,32 +73,16 @@ const Assistant: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const blogContext = `The blog currently has these posts: ${BLOG_POSTS.map(p => `"${p.title}" (Category: ${p.category}, Summary: ${p.excerpt})`).join('; ')}`;
-
+      const blogContext = `文章列表: ${BLOG_POSTS.map(p => p.title).join(', ')}。主题: 设计、科技与哲学的交集。`;
       const response = await askGemini(currentInput, blogContext);
       
-      if (response === "AI_AUTH_MISSING") {
+      if (response === "AI_AUTH_REQUIRED") {
         setNeedsAuth(true);
-        setMessages(prev => [...prev, { 
-          role: 'assistant', 
-          content: 'I need authorization to access the AI brain. Please click the button below to initialize.' 
-        }]);
-      } else if (response === "AI_ERROR_NOT_FOUND") {
-        // If Requested entity was not found, reset key selection state
-        setNeedsAuth(true);
-        setMessages(prev => [...prev, { 
-          role: 'assistant', 
-          content: 'The requested AI resource was not found. Please re-select your API key via the button below.' 
-        }]);
       } else {
-        const assistantMsg: Message = { role: 'assistant', content: response };
-        setMessages(prev => [...prev, assistantMsg]);
+        setMessages(prev => [...prev, { role: 'assistant', content: response }]);
       }
-    } catch (error: any) {
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
-        content: `Error: Unable to connect. (${error.message})` 
-      }]);
+    } catch (error) {
+      setMessages(prev => [...prev, { role: 'assistant', content: '连接有些波动，思维正在重组。' }]);
     } finally {
       setIsLoading(false);
     }
@@ -103,88 +92,86 @@ const Assistant: React.FC = () => {
     <>
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className={`fixed bottom-8 right-8 z-50 flex items-center justify-center h-14 transition-all duration-500 bg-white text-black hover:scale-105 active:scale-95 shadow-2xl ${isOpen ? 'w-14 rounded-full rotate-45' : 'px-6 rounded-2xl'}`}
+        className={`fixed bottom-8 right-8 z-[100] flex items-center justify-center h-14 transition-all duration-700 bg-white text-black hover:scale-110 active:scale-90 shadow-[0_20px_50px_rgba(255,255,255,0.15)] ${isOpen ? 'w-14 rounded-full rotate-90' : 'px-6 rounded-2xl'}`}
       >
-        {isOpen ? (
-          <span className="text-2xl font-light">×</span>
-        ) : (
-          <div className="flex items-center gap-3">
-            {ICONS.AI}
-            <span className="font-medium">Ask Aura</span>
-          </div>
-        )}
+        {isOpen ? <span className="text-2xl font-light">×</span> : <div className="flex items-center gap-3">{ICONS.AI}<span className="font-semibold tracking-tight">Aura Pro</span></div>}
       </button>
 
       <div 
-        className={`fixed bottom-28 right-8 z-40 w-[calc(100vw-4rem)] md:w-96 max-h-[70vh] bg-black/80 backdrop-blur-2xl border border-white/10 rounded-[2rem] flex flex-col overflow-hidden transition-all duration-500 shadow-2xl origin-bottom-right ${isOpen ? 'scale-100 opacity-100 translate-y-0' : 'scale-90 opacity-0 translate-y-10 pointer-events-none'}`}
+        className={`fixed bottom-28 right-8 z-[90] w-[calc(100vw-4rem)] md:w-[420px] max-h-[75vh] bg-black/80 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] flex flex-col overflow-hidden transition-all duration-700 shadow-[0_50px_100px_rgba(0,0,0,0.8)] origin-bottom-right ${
+          isOpen ? 'scale-100 opacity-100 translate-y-0' : 'scale-95 opacity-0 translate-y-10 pointer-events-none'
+        }`}
       >
-        <div className="p-6 border-b border-white/5 flex items-center justify-between">
-          <h3 className="text-white font-semibold flex items-center gap-2">
-            <span className={`w-2 h-2 rounded-full ${isLoading ? 'bg-blue-500 animate-pulse' : 'bg-green-500'}`}></span>
-            Assistant
-          </h3>
-          <button onClick={() => {setMessages([]); setNeedsAuth(false);}} className="text-white/40 text-xs hover:text-white transition-colors">Clear</button>
+        <div className="p-7 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+          <div className="flex items-center gap-3">
+            <div className={`w-2 h-2 rounded-full shadow-[0_0_10px_rgba(255,255,255,0.5)] ${isLoading ? 'bg-blue-400 animate-pulse' : 'bg-white'}`} />
+            <h3 className="text-white text-sm font-bold tracking-widest uppercase">Aura Intelligence</h3>
+          </div>
+          <button onClick={() => setMessages([])} className="text-white/20 text-[10px] uppercase tracking-widest hover:text-white transition-colors">Reset</button>
         </div>
 
-        <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-4 min-h-[300px]">
-          {messages.length === 0 && (
-            <div className="h-full flex flex-col items-center justify-center text-center px-4">
-              <div className="p-4 bg-white/5 rounded-full mb-4">
-                {ICONS.AI}
-              </div>
-              <p className="text-white/60 text-sm font-light">
-                I'm your spatial assistant. Ask me anything about the blog.
+        <div ref={scrollRef} className="flex-1 overflow-y-auto p-8 space-y-8 min-h-[400px]">
+          {messages.length === 0 && !needsAuth && (
+            <div className="h-full flex flex-col items-center justify-center text-center opacity-20">
+              <div className="mb-6 scale-150">{ICONS.AI}</div>
+              <p className="text-xs font-light tracking-[0.2em] leading-loose max-w-[200px]">
+                输入你的思考<br/>
+                Aura 将为你深度解析
               </p>
             </div>
           )}
-          
+
           {messages.map((m, i) => (
-            <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[85%] px-4 py-2 rounded-2xl text-sm leading-relaxed ${m.role === 'user' ? 'bg-white text-black rounded-tr-none' : 'bg-white/10 text-white rounded-tl-none border border-white/5'}`}>
+            <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2 duration-500`}>
+              <div className={`max-w-[90%] px-5 py-3.5 rounded-3xl text-[15px] leading-relaxed tracking-wide ${m.role === 'user' ? 'bg-white text-black font-medium rounded-tr-none shadow-xl' : 'bg-white/[0.05] text-white/90 rounded-tl-none border border-white/10'}`}>
                 {m.content}
               </div>
             </div>
           ))}
-          
+
           {needsAuth && (
-            <div className="flex flex-col items-center p-4 bg-white/5 rounded-2xl border border-white/10 animate-pulse">
-              <p className="text-xs text-white/60 mb-3 text-center">API Key selection required for AI access.</p>
+            <div className="flex flex-col items-center justify-center p-10 bg-white/[0.03] rounded-[3rem] border border-white/10 mx-2 animate-in zoom-in duration-500">
+              <div className="w-16 h-16 bg-white/10 rounded-[2rem] flex items-center justify-center mb-6 scale-110">{ICONS.AI}</div>
+              <h4 className="text-white text-lg font-bold mb-3 tracking-tight">唤醒高级智能</h4>
+              <p className="text-white/40 text-xs text-center mb-8 leading-relaxed px-4">
+                点击下方按钮进行安全验证，<br/>解锁基于 Gemini 3 Pro 的深度推理能力。
+              </p>
               <button 
                 onClick={handleInitKey}
-                className="w-full py-2 bg-white text-black text-sm font-bold rounded-xl hover:bg-white/90 transition-colors"
+                className="w-full py-4 bg-white text-black text-sm font-black rounded-2xl hover:bg-gray-200 transition-all active:scale-[0.97] shadow-2xl"
               >
-                Initialize AI
+                连接 AURA 核心
               </button>
-              <a href="https://ai.google.dev/gemini-api/docs/billing" target="_blank" className="text-[10px] text-white/20 mt-2 hover:underline">About Billing</a>
             </div>
           )}
 
           {isLoading && (
             <div className="flex justify-start">
-              <div className="bg-white/5 p-3 rounded-2xl flex gap-1">
-                <span className="w-1.5 h-1.5 bg-white/40 rounded-full animate-bounce"></span>
-                <span className="w-1.5 h-1.5 bg-white/40 rounded-full animate-bounce [animation-delay:0.2s]"></span>
-                <span className="w-1.5 h-1.5 bg-white/40 rounded-full animate-bounce [animation-delay:0.4s]"></span>
+              <div className="bg-white/[0.03] px-5 py-4 rounded-3xl flex gap-2 items-center border border-white/5">
+                <div className="w-1.5 h-1.5 bg-white/40 rounded-full animate-[bounce_1s_infinite]" />
+                <div className="w-1.5 h-1.5 bg-white/40 rounded-full animate-[bounce_1s_infinite_0.2s]" />
+                <div className="w-1.5 h-1.5 bg-white/40 rounded-full animate-[bounce_1s_infinite_0.4s]" />
+                <span className="ml-2 text-[10px] text-white/20 uppercase tracking-widest font-bold">Thinking</span>
               </div>
             </div>
           )}
         </div>
 
-        <div className="p-4 bg-white/5">
-          <div className="flex items-center gap-2 bg-white/5 rounded-xl p-2 pl-4 border border-white/10 focus-within:border-white/30 transition-colors">
+        <div className="p-6 bg-black border-t border-white/5">
+          <div className={`flex items-center gap-3 bg-white/[0.04] rounded-[2rem] p-2 pl-6 border border-white/10 focus-within:border-white/40 focus-within:bg-white/[0.07] transition-all duration-500 ${needsAuth ? 'opacity-20 pointer-events-none' : 'opacity-100'}`}>
             <input 
               type="text" 
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-              placeholder={needsAuth ? "Please initialize first" : "What's on your mind?"}
+              placeholder={needsAuth ? "等待连接..." : "在此处输入你的洞见..."}
+              className="flex-1 bg-transparent border-none outline-none text-[15px] text-white placeholder-white/10 py-2"
               disabled={isLoading || needsAuth}
-              className="flex-1 bg-transparent border-none outline-none text-sm text-white placeholder-white/30"
             />
             <button 
               onClick={handleSend}
               disabled={isLoading || !input.trim() || needsAuth}
-              className="p-2 bg-white text-black rounded-lg hover:bg-opacity-80 transition-all disabled:opacity-20"
+              className="w-11 h-11 flex items-center justify-center bg-white text-black rounded-full hover:scale-105 active:scale-90 transition-all disabled:opacity-0 shadow-lg"
             >
               {ICONS.CHEVRON_RIGHT}
             </button>
