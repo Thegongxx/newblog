@@ -1,15 +1,17 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Intro from './components/Intro';
 import Assistant from './components/Assistant';
 import BlogCard from './components/BlogCard';
-import { BLOG_POSTS, ICONS } from './constants';
+import { BLOG_POSTS, PROJECTS_DATA, ICONS, CONTACT_INFO } from './constants';
 import { ViewState, Post } from './types';
 
 const App: React.FC = () => {
   const [view, setView] = useState<ViewState>(ViewState.INTRO);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [scrolled, setScrolled] = useState(false);
+  const [copyStatus, setCopyStatus] = useState<{id: string, count: number} | null>(null);
+  const copyTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 30);
@@ -23,6 +25,22 @@ const App: React.FC = () => {
     setView(newView);
   };
 
+  const handleCopy = (text: string, id: string) => {
+    // 允许连击：清除之前的定时器并更新计数器以强制重新渲染动画
+    if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
+    
+    navigator.clipboard.writeText(text).then(() => {
+      setCopyStatus(prev => ({
+        id,
+        count: (prev?.id === id ? prev.count + 1 : 0)
+      }));
+      
+      copyTimeoutRef.current = setTimeout(() => {
+        setCopyStatus(null);
+      }, 1400); // 稍微延长显示时间，但响应依然迅速
+    });
+  };
+
   if (view === ViewState.INTRO) {
     return <Intro onComplete={() => setView(ViewState.FEED)} />;
   }
@@ -30,13 +48,13 @@ const App: React.FC = () => {
   const renderContent = () => {
     if (selectedPost) {
       return (
-        <div className="view-transition max-w-4xl mx-auto">
+        <div className="max-w-4xl mx-auto">
           <button 
             onClick={() => setSelectedPost(null)}
-            className="group flex items-center gap-2 text-white/40 hover:text-white transition-all mb-12 px-5 py-2 rounded-full glass"
+            className="group flex items-center gap-2 text-white/40 hover:text-white transition-all mb-12 px-5 py-2 rounded-full glass active:scale-95"
           >
             <div className="rotate-180 group-hover:-translate-x-1 transition-transform">{ICONS.CHEVRON_RIGHT}</div>
-            <span className="text-sm font-medium">Back to feed</span>
+            <span className="text-sm font-medium">返回列表</span>
           </button>
 
           <header className="mb-20">
@@ -69,18 +87,14 @@ const App: React.FC = () => {
     switch (view) {
       case ViewState.PROJECTS:
         return (
-          <div className="view-transition py-12">
-            <h2 className="text-7xl font-bold tracking-tighter mb-16">Selected <br/><span className="text-white/30 italic">Repositories.</span></h2>
+          <div className="py-12">
+            <h2 className="text-7xl font-bold tracking-tighter mb-16">精选项目 <br/><span className="text-white/30 italic">Selected.</span></h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[
-                { name: 'Aura UI', tech: 'React, Tailwind', desc: 'A spatial design system for personal branding.', stars: '1.2k' },
-                { name: 'GenAI Service', tech: 'TypeScript, Gemini', desc: 'Universal wrapper for Google Gemini models.', stars: '840' },
-                { name: 'Fluid Motion', tech: 'GSAP, Canvas', desc: 'Physics-based animation engine for smooth UIs.', stars: '2.4k' }
-              ].map((proj, i) => (
+              {PROJECTS_DATA.map((proj, i) => (
                 <div key={i} className="group glass p-10 rounded-[3rem] space-y-8 hover:bg-white/[0.08] transition-all duration-700 cursor-pointer border border-white/5 hover:border-white/20 hover:-translate-y-2">
                   <div className="flex justify-between items-start">
                     <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center text-white/20">
-                      <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
+                      <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
                     </div>
                     <div className="px-4 py-1 rounded-full bg-white/5 text-[10px] font-bold text-white/30 border border-white/5">★ {proj.stars}</div>
                   </div>
@@ -99,8 +113,8 @@ const App: React.FC = () => {
         );
       case ViewState.ARCHIVE:
         return (
-          <div className="view-transition py-12">
-            <h2 className="text-6xl font-bold tracking-tighter mb-16">The Archive</h2>
+          <div className="py-12">
+            <h2 className="text-6xl font-bold tracking-tighter mb-16">归档文章</h2>
             <div className="grid grid-cols-1 gap-4">
               {BLOG_POSTS.map(post => (
                 <div 
@@ -122,19 +136,19 @@ const App: React.FC = () => {
         );
       case ViewState.ABOUT:
         return (
-          <div className="view-transition max-w-2xl py-12">
-            <h2 className="text-7xl font-bold tracking-tighter mb-10">Hello.</h2>
+          <div className="max-w-2xl py-12">
+            <h2 className="text-7xl font-bold tracking-tighter mb-10">关于我.</h2>
             <p className="text-2xl text-white/60 leading-relaxed font-light mb-12">
-              Aura is a digital sanctuary where minimal aesthetics meet high-performance intelligence.
+              Aura 是一个极简主义的数字避风港，在这里美学与智能相遇。
             </p>
             <div className="h-[1px] w-full bg-white/10 mb-12" />
             <div className="grid grid-cols-2 gap-12">
                <div>
-                 <h4 className="text-xs uppercase tracking-widest text-white/20 mb-4 font-bold">Concept</h4>
-                 <p className="text-white/60 font-light italic">Spatial, Poetic, Intelligent.</p>
+                 <h4 className="text-xs uppercase tracking-widest text-white/20 mb-4 font-bold">设计理念</h4>
+                 <p className="text-white/60 font-light italic">空间感, 诗意, 智能交互。</p>
                </div>
                <div>
-                 <h4 className="text-xs uppercase tracking-widest text-white/20 mb-4 font-bold">Intelligence</h4>
+                 <h4 className="text-xs uppercase tracking-widest text-white/20 mb-4 font-bold">底层驱动</h4>
                  <p className="text-white/60 font-light italic">Powered by Gemini 3 Flash.</p>
                </div>
             </div>
@@ -142,15 +156,15 @@ const App: React.FC = () => {
         );
       default:
         return (
-          <div className="space-y-40 view-transition">
+          <div className="space-y-40">
             <section>
               <div className="max-w-3xl mb-24">
                 <h4 className="text-white/20 uppercase tracking-[0.5em] text-[10px] font-black mb-8">Personal Space</h4>
                 <h2 className="text-6xl md:text-[8rem] font-bold tracking-tighter mb-12 leading-[0.85]">
-                  Curating <br/><span className="text-white/30 italic">Pure Moments.</span>
+                  探索 <br/><span className="text-white/30 italic">纯粹瞬间.</span>
                 </h2>
                 <p className="text-xl md:text-2xl text-white/40 font-light max-w-xl">
-                  Exploring the invisible lines that connect technology, architecture, and human emotion.
+                  在这里，我们探索技术、建筑与人类情感之间那些无形的联系。
                 </p>
               </div>
               
@@ -167,9 +181,8 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen">
-      {/* 动态悬浮导航栏：增加弹性反馈 */}
-      <nav className={`fixed top-8 inset-x-0 z-[60] px-6 flex justify-center transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${scrolled ? 'translate-y-[-10px] scale-[0.96]' : 'translate-y-0'}`}>
-        <div className={`flex items-center gap-1.5 p-2 rounded-full glass transition-all duration-700 ${scrolled ? 'shadow-[0_40px_100px_rgba(0,0,0,0.7)] bg-black/50 border-white/15 backdrop-blur-[40px]' : ''}`}>
+      <nav className={`fixed top-8 inset-x-0 z-[60] px-6 flex justify-center transition-all duration-1000 ease-[cubic-bezier(0.22,1,0.36,1)] ${scrolled ? 'translate-y-[-10px] scale-[0.96]' : 'translate-y-0'}`}>
+        <div className={`flex items-center gap-1.5 p-2 rounded-full glass transition-all duration-1000 ${scrolled ? 'shadow-[0_40px_100px_rgba(0,0,0,0.7)] bg-black/50 border-white/15 backdrop-blur-[40px]' : ''}`}>
           <button 
             onClick={() => navigateTo(ViewState.FEED)}
             className="group px-6 py-2.5 text-sm font-bold tracking-tight hover:bg-white/10 rounded-full transition-all duration-500 flex items-center gap-3 active:scale-95"
@@ -184,14 +197,14 @@ const App: React.FC = () => {
           <div className="h-5 w-[1px] bg-white/10 mx-2" />
 
           {[
-            {label: 'Works', view: ViewState.PROJECTS},
-            {label: 'Archive', view: ViewState.ARCHIVE},
-            {label: 'About', view: ViewState.ABOUT}
+            {label: '作品', view: ViewState.PROJECTS},
+            {label: '归档', view: ViewState.ARCHIVE},
+            {label: '关于', view: ViewState.ABOUT}
           ].map(item => (
             <button 
               key={item.label}
               onClick={() => navigateTo(item.view)}
-              className={`px-5 py-2.5 text-[11px] uppercase tracking-[0.2em] font-black rounded-full transition-all duration-500 active:scale-95 ${view === item.view ? 'bg-white text-black shadow-lg' : 'text-white/30 hover:text-white hover:bg-white/5'}`}
+              className={`px-5 py-2.5 text-[11px] uppercase tracking-[0.2em] font-black rounded-full transition-all duration-500 active:scale-95 ${view === item.view && !selectedPost ? 'bg-white text-black shadow-lg' : 'text-white/30 hover:text-white hover:bg-white/5'}`}
             >
               {item.label}
             </button>
@@ -204,18 +217,49 @@ const App: React.FC = () => {
       </nav>
 
       <main className="relative pt-56 pb-64 px-8 max-w-7xl mx-auto">
-        {renderContent()}
+        <div key={selectedPost ? `post-${selectedPost.id}` : `view-${view}`} className="view-transition">
+          {renderContent()}
+        </div>
       </main>
 
       <Assistant />
 
       <footer className="py-40 px-8 border-t border-white/5">
-        <div className="max-w-7xl mx-auto flex flex-col items-center text-center">
+        <div className="max-w-7xl auto flex flex-col items-center text-center">
           <div className="text-4xl font-bold tracking-tighter mb-12 opacity-10 select-none">Aura</div>
           <div className="flex gap-16 text-[10px] uppercase tracking-[0.4em] font-bold text-white/20">
-            <a href="#" className="hover:text-white transition-colors">GitHub</a>
-            <a href="#" className="hover:text-white transition-colors">Twitter</a>
-            <a href="#" className="hover:text-white transition-colors">Mail</a>
+            {[
+              { id: 'qq', label: 'QQ', value: CONTACT_INFO.QQ },
+              { id: 'wx', label: 'WX', value: CONTACT_INFO.WX },
+              { id: 'mail', label: 'MAIL', value: CONTACT_INFO.MAIL }
+            ].map((contact) => (
+              <button 
+                key={contact.id}
+                onClick={() => handleCopy(contact.value, contact.id)} 
+                className="group relative overflow-hidden h-8 min-w-[5.5em] hover:text-white transition-all duration-300 active:scale-[0.8] active:translate-y-0.5"
+              >
+                {/* 原始文本：使用 transform-gpu 加速，并增加弹性曲线 */}
+                <div className={`transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] transform-gpu ${
+                  copyStatus?.id === contact.id ? '-translate-y-full opacity-0 blur-sm scale-90' : 'translate-y-0 opacity-100 scale-100'
+                }`}>
+                  {contact.label}
+                </div>
+                
+                {/* 反馈层：通过 key={copyStatus?.count} 强制连击时重置入场动画 */}
+                <div className={`absolute inset-0 flex items-center justify-center transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] transform-gpu ${
+                  copyStatus?.id === contact.id 
+                    ? 'translate-y-0 opacity-100 blur-0 scale-100 text-blue-400' 
+                    : 'translate-y-full opacity-0 blur-md scale-110'
+                }`}>
+                  <span 
+                    key={copyStatus?.id === contact.id ? copyStatus.count : 'idle'}
+                    className="animate-in zoom-in-75 slide-in-from-bottom-2 duration-300 shadow-[0_0_25px_rgba(59,130,246,0.4)] font-black italic tracking-widest"
+                  >
+                    COPY
+                  </span>
+                </div>
+              </button>
+            ))}
           </div>
           <p className="mt-24 text-[9px] text-white/5 tracking-[0.5em] uppercase font-medium">
             Designed for clarity &copy; 2024
@@ -225,12 +269,26 @@ const App: React.FC = () => {
 
       <style>{`
         .view-transition {
-          animation: fadeScaleIn 1.2s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+          animation: appleSoftEntrance 1.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+          will-change: transform, opacity, filter;
         }
-        @keyframes fadeScaleIn {
-          from { opacity: 0; transform: translateY(30px) scale(0.96); filter: blur(20px); }
-          to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+
+        @keyframes appleSoftEntrance {
+          0% {
+            opacity: 0;
+            transform: translateY(20px) scale(0.985);
+            filter: blur(40px);
+          }
+          30% {
+            opacity: 0.3;
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            filter: blur(0);
+          }
         }
+
         .prose blockquote {
           quotes: none;
           font-style: italic;

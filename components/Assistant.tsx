@@ -105,7 +105,7 @@ const Assistant: React.FC = () => {
             <div className="w-2 h-2 rounded-full bg-white/20 animate-pulse" />
             <h3 className="text-white/40 text-[10px] font-black uppercase tracking-[0.3em]">Assistant Aura</h3>
           </div>
-          <div className="text-[10px] font-bold text-white/10 tracking-widest relative z-10">v2.5 FLASH</div>
+          <div className="text-[10px] font-bold text-white/10 tracking-widest relative z-10">GEMINI 3 FLASH</div>
         </div>
 
         {/* 动态消息流 */}

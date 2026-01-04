@@ -2,6 +2,14 @@
 import React from 'react';
 import { Post } from './types';
 
+// 1. 这里修改你的联系方式（点击对应按钮会复制这里的内容）
+export const CONTACT_INFO = {
+  QQ: '123456789',        // 替换为你的QQ号
+  WX: 'Your_WX_ID',       // 替换为你的微信号
+  MAIL: 'hello@aura.com'  // 替换为你的邮箱
+};
+
+// 2. 这里修改你的博客文章
 export const BLOG_POSTS: Post[] = [
   {
     id: '1',
@@ -15,7 +23,7 @@ export const BLOG_POSTS: Post[] = [
       <p>在数字时代，复杂性往往被误认为是先进。但真正的创新在于能够将深刻的想法提炼成简单、优雅的形式。</p>
       <p>随着我们转向感觉更像环境而非工具的界面，设计的语言必须进化。这不再仅仅关乎你点击哪里，而关乎居住在数字空间中的感受。</p>
       <blockquote class="border-l-2 border-white/20 pl-6 italic text-2xl font-light text-white my-12">
-        “设计不仅仅是外观和感觉。设计是它是如何工作的。”
+        “设计不仅仅是外观 and 感觉。设计是它是如何工作的。”
       </blockquote>
       <p>Aura 的哲学就建立在这个基础上。我们寻求在嘈杂的世界中创造清晰的时刻，利用技术不是为了分散注意力，而是为了集中思想。</p>
     `
@@ -36,7 +44,7 @@ export const BLOG_POSTS: Post[] = [
   {
     id: '3',
     title: '数字时代的寂静',
-    excerpt: '在信息爆炸的洪流中，如何通过设计为心灵留出一片空白。',
+    excerpt: '在信息爆炸的洪流中，如何通过设计为心灵留出一片空白处理。',
     category: '生活',
     date: '2024年1月15日',
     readingTime: '5 分钟',
@@ -47,6 +55,28 @@ export const BLOG_POSTS: Post[] = [
       <h3 class="text-2xl font-bold text-white mt-12 mb-6">呼吸的空间</h3>
       <p>在 Aura 中，我们大量使用留白（Whitespace）。这不是浪费空间，而是给内容以呼吸的自由。正如建筑中的窗户，它决定了光的流入方式。</p>
     `
+  }
+];
+
+// 3. 这里修改你的项目作品 (Works 页面)
+export const PROJECTS_DATA = [
+  { 
+    name: 'Aura UI', 
+    tech: 'React, Tailwind', 
+    desc: '一个专为个人品牌设计的空间感交互系统。', 
+    stars: '1.2k' 
+  },
+  { 
+    name: 'GenAI Service', 
+    tech: 'TypeScript, Gemini', 
+    desc: '基于 Google Gemini 模型的高级 API 封装服务。', 
+    stars: '840' 
+  },
+  { 
+    name: 'Fluid Motion', 
+    tech: 'GSAP, Canvas', 
+    desc: '为极简 UI 打造的基于物理特性的动画引擎。', 
+    stars: '2.4k' 
   }
 ];
 

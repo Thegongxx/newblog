@@ -1,15 +1,17 @@
 
 import { GoogleGenAI } from "@google/genai";
 
+// Use process.env.API_KEY for the API key as per the @google/genai coding guidelines.
 export async function* askGeminiStream(prompt: string, context?: string) {
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  // Use process.env.API_KEY as the exclusive source for the API key.
+  const apiKey = process.env.API_KEY;
   if (!apiKey) {
     yield "AI_AUTH_REQUIRED";
     return;
   }
   
-  // 实例化最新的客户端
-  const ai = new GoogleGenAI({ apiKey });
+  // Initialize the GoogleGenAI client with the API key from environment variables.
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
   const systemInstruction = `You are Aura, an elegant and minimalist AI companion for a personal blog. 
   Your tone is calm, intelligent, and helpful. 
@@ -17,6 +19,7 @@ export async function* askGeminiStream(prompt: string, context?: string) {
   If users ask about the code, explain that this is a React-based spatial UI inspired by Apple design.`;
 
   try {
+    // Use generateContentStream to query GenAI with both the model name and prompt.
     const response = await ai.models.generateContentStream({
       model: 'gemini-3-flash-preview', 
       contents: prompt,
@@ -28,6 +31,7 @@ export async function* askGeminiStream(prompt: string, context?: string) {
     });
     
     for await (const chunk of response) {
+      // The text property on the chunk directly returns the generated string.
       if (chunk.text) yield chunk.text;
     }
   } catch (error: any) {
