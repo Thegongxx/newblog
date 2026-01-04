@@ -22,17 +22,27 @@ const Assistant: React.FC = () => {
 
     const userMsg: Message = { role: 'user', content: input };
     setMessages(prev => [...prev, userMsg]);
+    const currentInput = input;
     setInput('');
     setIsLoading(true);
 
-    // Create a context summary from current BLOG_POSTS
-    const blogContext = `The blog currently has these posts: ${BLOG_POSTS.map(p => `"${p.title}" (Category: ${p.category}, Summary: ${p.excerpt})`).join('; ')}`;
+    try {
+      // Create a context summary from current BLOG_POSTS
+      const blogContext = `The blog currently has these posts: ${BLOG_POSTS.map(p => `"${p.title}" (Category: ${p.category}, Summary: ${p.excerpt})`).join('; ')}`;
 
-    const response = await askGemini(input, blogContext);
-    const assistantMsg: Message = { role: 'assistant', content: response };
-    
-    setMessages(prev => [...prev, assistantMsg]);
-    setIsLoading(false);
+      const response = await askGemini(currentInput, blogContext);
+      const assistantMsg: Message = { role: 'assistant', content: response };
+      setMessages(prev => [...prev, assistantMsg]);
+    } catch (error: any) {
+      console.error("Assistant component error:", error);
+      setMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: `Error: Unable to connect to the brain. (${error.message})` 
+      }]);
+    } finally {
+      // 无论成功还是失败，都要关闭加载动画
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -43,7 +53,7 @@ const Assistant: React.FC = () => {
         className={`fixed bottom-8 right-8 z-50 flex items-center justify-center h-14 transition-all duration-500 bg-white text-black hover:scale-105 active:scale-95 shadow-2xl ${isOpen ? 'w-14 rounded-full rotate-45' : 'px-6 rounded-2xl'}`}
       >
         {isOpen ? (
-          <span className="text-2xl">+</span>
+          <span className="text-2xl font-light">×</span>
         ) : (
           <div className="flex items-center gap-3">
             {ICONS.AI}
@@ -58,7 +68,7 @@ const Assistant: React.FC = () => {
       >
         <div className="p-6 border-b border-white/5 flex items-center justify-between">
           <h3 className="text-white font-semibold flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+            <span className={`w-2 h-2 rounded-full ${isLoading ? 'bg-blue-500 animate-pulse' : 'bg-green-500'}`}></span>
             Assistant
           </h3>
           <button onClick={() => setMessages([])} className="text-white/40 text-xs hover:text-white transition-colors">Clear chat</button>
@@ -70,15 +80,15 @@ const Assistant: React.FC = () => {
               <div className="p-4 bg-white/5 rounded-full mb-4">
                 {ICONS.AI}
               </div>
-              <p className="text-white/60 text-sm">
-                Ask me anything about the blog posts, design, or the meaning of life.
+              <p className="text-white/60 text-sm font-light leading-relaxed">
+                I'm your spatial assistant. Ask me about the blog posts or design philosophy.
               </p>
             </div>
           )}
           
           {messages.map((m, i) => (
             <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[85%] px-4 py-2 rounded-2xl text-sm leading-relaxed ${m.role === 'user' ? 'bg-white text-black rounded-tr-none' : 'bg-white/10 text-white rounded-tl-none'}`}>
+              <div className={`max-w-[85%] px-4 py-2 rounded-2xl text-sm leading-relaxed ${m.role === 'user' ? 'bg-white text-black rounded-tr-none' : 'bg-white/10 text-white rounded-tl-none border border-white/5'}`}>
                 {m.content}
               </div>
             </div>
@@ -102,12 +112,14 @@ const Assistant: React.FC = () => {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-              placeholder="What's on your mind?"
-              className="flex-1 bg-transparent border-none outline-none text-sm text-white placeholder-white/30"
+              placeholder={isLoading ? "Aura is thinking..." : "What's on your mind?"}
+              disabled={isLoading}
+              className="flex-1 bg-transparent border-none outline-none text-sm text-white placeholder-white/30 disabled:opacity-50"
             />
             <button 
               onClick={handleSend}
-              className="p-2 bg-white text-black rounded-lg hover:bg-opacity-80 transition-opacity"
+              disabled={isLoading || !input.trim()}
+              className="p-2 bg-white text-black rounded-lg hover:bg-opacity-80 transition-all disabled:opacity-50 disabled:scale-95"
             >
               {ICONS.CHEVRON_RIGHT}
             </button>
