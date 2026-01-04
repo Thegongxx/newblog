@@ -3,7 +3,8 @@ import { GoogleGenAI } from "@google/genai";
 
 export async function* askGeminiStream(prompt: string, context?: string) {
   // 直接从环境变量获取 API_KEY
-  const apiKey = process.env.API_KEY;
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+
 
   if (!apiKey) {
     yield "AI_AUTH_REQUIRED";
