@@ -26,7 +26,6 @@ const App: React.FC = () => {
   };
 
   const handleCopy = (text: string, id: string) => {
-    // 允许连击：清除之前的定时器并更新计数器以强制重新渲染动画
     if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
     
     navigator.clipboard.writeText(text).then(() => {
@@ -37,7 +36,7 @@ const App: React.FC = () => {
       
       copyTimeoutRef.current = setTimeout(() => {
         setCopyStatus(null);
-      }, 1400); // 稍微延长显示时间，但响应依然迅速
+      }, 1400);
     });
   };
 
@@ -216,7 +215,7 @@ const App: React.FC = () => {
         </div>
       </nav>
 
-      <main className="relative pt-56 pb-64 px-8 max-w-7xl mx-auto">
+      <main className="relative pt-56 pb-48 px-8 max-w-7xl mx-auto">
         <div key={selectedPost ? `post-${selectedPost.id}` : `view-${view}`} className="view-transition">
           {renderContent()}
         </div>
@@ -224,10 +223,12 @@ const App: React.FC = () => {
 
       <Assistant />
 
-      <footer className="py-40 px-8 border-t border-white/5">
-        <div className="max-w-7xl auto flex flex-col items-center text-center">
-          <div className="text-4xl font-bold tracking-tighter mb-12 opacity-10 select-none">Aura</div>
-          <div className="flex gap-16 text-[10px] uppercase tracking-[0.4em] font-bold text-white/20">
+      <footer className="py-24 md:py-40 px-6 border-t border-white/5 bg-gradient-to-b from-transparent to-white/[0.01]">
+        <div className="max-w-7xl mx-auto flex flex-col items-center text-center">
+          <div className="text-4xl font-bold tracking-tighter mb-12 opacity-10 select-none grayscale contrast-200">Aura</div>
+          
+          {/* 联系方式容器：移动端缩小 gap，确保居中紧凑 */}
+          <div className="flex flex-row justify-center items-center gap-8 md:gap-20 text-[10px] uppercase tracking-[0.4em] font-bold text-white/20">
             {[
               { id: 'qq', label: 'QQ', value: CONTACT_INFO.QQ },
               { id: 'wx', label: 'WX', value: CONTACT_INFO.WX },
@@ -236,16 +237,14 @@ const App: React.FC = () => {
               <button 
                 key={contact.id}
                 onClick={() => handleCopy(contact.value, contact.id)} 
-                className="group relative overflow-hidden h-8 min-w-[5.5em] hover:text-white transition-all duration-300 active:scale-[0.8] active:translate-y-0.5"
+                className="group relative overflow-hidden h-8 min-w-[3.5em] md:min-w-[5.5em] hover:text-white transition-all duration-300 active:scale-[0.8] active:translate-y-0.5 focus:outline-none"
               >
-                {/* 原始文本：使用 transform-gpu 加速，并增加弹性曲线 */}
                 <div className={`transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] transform-gpu ${
                   copyStatus?.id === contact.id ? '-translate-y-full opacity-0 blur-sm scale-90' : 'translate-y-0 opacity-100 scale-100'
                 }`}>
                   {contact.label}
                 </div>
                 
-                {/* 反馈层：通过 key={copyStatus?.count} 强制连击时重置入场动画 */}
                 <div className={`absolute inset-0 flex items-center justify-center transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] transform-gpu ${
                   copyStatus?.id === contact.id 
                     ? 'translate-y-0 opacity-100 blur-0 scale-100 text-blue-400' 
@@ -253,7 +252,7 @@ const App: React.FC = () => {
                 }`}>
                   <span 
                     key={copyStatus?.id === contact.id ? copyStatus.count : 'idle'}
-                    className="animate-in zoom-in-75 slide-in-from-bottom-2 duration-300 shadow-[0_0_25px_rgba(59,130,246,0.4)] font-black italic tracking-widest"
+                    className="animate-in zoom-in-75 slide-in-from-bottom-2 duration-300 shadow-[0_0_25px_rgba(59,130,246,0.4)] font-black italic tracking-widest text-[9px]"
                   >
                     COPY
                   </span>
@@ -261,9 +260,13 @@ const App: React.FC = () => {
               </button>
             ))}
           </div>
-          <p className="mt-24 text-[9px] text-white/5 tracking-[0.5em] uppercase font-medium">
-            Designed for clarity &copy; 2024
-          </p>
+
+          <div className="mt-20 md:mt-32 space-y-4">
+            <p className="text-[9px] text-white/5 tracking-[0.6em] uppercase font-medium">
+              Designed for clarity &copy; 2024
+            </p>
+            <div className="w-8 h-[1px] bg-white/5 mx-auto" />
+          </div>
         </div>
       </footer>
 
