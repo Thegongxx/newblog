@@ -13,13 +13,21 @@
         :root {
             --apple-blue: #0071e3;
         }
-        body {
+        
+        /* High-performance Custom Cursor */
+        html, body {
+            cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Ccircle cx='4' cy='4' r='3' fill='white' /%3E%3C/svg%3E") 4 4, auto;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             -webkit-font-smoothing: antialiased;
             background-color: #000;
             color: #fff;
             overflow-x: hidden;
             margin: 0;
+        }
+
+        /* Pointer Cursor for interactive elements */
+        a, button, [role="button"], input, textarea, .cursor-pointer {
+            cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Ccircle cx='5' cy='5' r='4' fill='white' /%3E%3C/svg%3E") 5 5, pointer !important;
         }
 
         /* Animated Mesh Gradient Background */
@@ -60,6 +68,26 @@
             background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(20px) saturate(180%);
             border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Click Glimmer Bloom Effect */
+        .click-glimmer {
+            position: fixed;
+            pointer-events: none;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 70%);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            z-index: 9999;
+            animation: glimmer-bloom 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes glimmer-bloom {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0.8; }
+            100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; }
         }
     </style>
 <script type="importmap">

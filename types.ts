@@ -10,6 +10,12 @@ export interface Post {
   content: string;
 }
 
+export interface Quote {
+  text: string;
+  author: string;
+  date: string;
+}
+
 export interface Message {
   role: 'user' | 'assistant';
   content: string;
@@ -19,7 +25,6 @@ export enum ViewState {
   INTRO = 'INTRO',
   FEED = 'FEED',
   POST = 'POST',
-  PROJECTS = 'PROJECTS',
   ARCHIVE = 'ARCHIVE',
   NOTEBOOK = 'NOTEBOOK',
   ABOUT = 'ABOUT'
