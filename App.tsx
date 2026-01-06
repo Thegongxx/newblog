@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Intro from './components/Intro';
 import Assistant from './components/Assistant';
 import BlogCard from './components/BlogCard';
-import { BLOG_POSTS as INITIAL_POSTS, QUOTES_DATA, ICONS, CONTACT_INFO } from './constants';
+import { BLOG_POSTS, QUOTES_DATA, ICONS, CONTACT_INFO } from './constants';
 import { ViewState, Post } from './types';
 
 const App: React.FC = () => {
@@ -12,27 +12,36 @@ const App: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [copyStatus, setCopyStatus] = useState<{id: string, count: number} | null>(null);
   
-  // 恢复为纯静态数据驱动
-  const posts = INITIAL_POSTS;
-  
   const copyTimeoutRef = useRef<any>(null);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 30);
+    
+    // 全局鼠标事件处理：点击光晕 + 聚光灯追踪
+    const handleGlobalMouseMove = (e: MouseEvent) => {
+      // 更新 CSS 变量，实现背景聚光灯跟随
+      const x = (e.clientX / window.innerWidth) * 100;
+      const y = (e.clientY / window.innerHeight) * 100;
+      document.documentElement.style.setProperty('--mouse-x', `${x}%`);
+      document.documentElement.style.setProperty('--mouse-y', `${y}%`);
+    };
+
     const handleMouseDown = (e: MouseEvent) => {
       const glimmer = document.createElement('div');
       glimmer.className = 'click-glimmer';
       glimmer.style.left = `${e.clientX}px`;
       glimmer.style.top = `${e.clientY}px`;
       document.body.appendChild(glimmer);
-      setTimeout(() => glimmer.remove(), 500);
+      setTimeout(() => glimmer.remove(), 600);
     };
 
     window.addEventListener('scroll', handleScroll);
+    window.addEventListener('mousemove', handleGlobalMouseMove);
     window.addEventListener('mousedown', handleMouseDown);
     
     return () => {
       window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('mousemove', handleGlobalMouseMove);
       window.removeEventListener('mousedown', handleMouseDown);
     };
   }, []);
@@ -105,7 +114,7 @@ const App: React.FC = () => {
           <div className="py-12">
             <h2 className="text-6xl font-bold tracking-tighter mb-16">归档文章</h2>
             <div className="grid grid-cols-1 gap-4">
-              {posts.map((post, i) => (
+              {BLOG_POSTS.map((post, i) => (
                 <div key={post.id} className="glass p-8 rounded-[2.5rem] flex items-center justify-between group cursor-pointer hover:bg-white/[0.08] transition-all border border-white/5 animate-in fade-in slide-in-from-bottom-2" style={{ animationDelay: `${i * 50}ms` }} onClick={() => setSelectedPost(post)}>
                   <div className="space-y-1 flex-1">
                     <p className="text-white/30 text-[10px] uppercase tracking-widest">{post.date}</p>
@@ -147,7 +156,7 @@ const App: React.FC = () => {
                 <p className="text-xl md:text-2xl text-white/40 font-light max-w-xl leading-relaxed">在这里，我们探索技术、建筑与人类情感之间那些无形的联系。</p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                {posts.slice(0, 4).map((post, i) => (
+                {BLOG_POSTS.slice(0, 4).map((post, i) => (
                   <div key={post.id} className="animate-in fade-in slide-in-from-bottom-8" style={{ animationDelay: `${i * 150}ms` }}>
                     <BlogCard post={post} onClick={() => setSelectedPost(post)} />
                   </div>
