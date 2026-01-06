@@ -16,10 +16,10 @@ const Intro: React.FC<IntroProps> = ({ onComplete }) => {
   const intervalRef = useRef<any>(null);
 
   useEffect(() => {
-    // 1. Expansion Sequence
-    const t1 = setTimeout(() => setPhase('expand'), 800);
+    // 1. Expansion Sequence - Slower start (1.2s delay)
+    const t1 = setTimeout(() => setPhase('expand'), 1200);
     
-    // 2. Cipher Text Effect (Starts slightly after expansion)
+    // 2. Cipher Text Effect - Starts later (2.0s) and decodes slower
     const tCipher = setTimeout(() => {
       let iteration = 0;
       clearInterval(intervalRef.current);
@@ -41,16 +41,18 @@ const Intro: React.FC<IntroProps> = ({ onComplete }) => {
           clearInterval(intervalRef.current);
         }
         
-        iteration += 1 / 3; // Controls the speed of decryption
-      }, 30);
-    }, 1100);
+        // Slower decryption speed: require 4 cycles to lock a letter instead of 3
+        iteration += 1 / 4; 
+      }, 50); // Slower tick rate (50ms instead of 30ms)
+    }, 2000);
 
-    // 3. Subtext Fade In
-    const tSub = setTimeout(() => setSubTextOpacity(1), 1800);
+    // 3. Subtext Fade In - Much later (3.5s)
+    const tSub = setTimeout(() => setSubTextOpacity(1), 3500);
 
-    // 4. Exit Sequence
-    const t2 = setTimeout(() => setPhase('fade'), 3200);
-    const t3 = setTimeout(onComplete, 3800);
+    // 4. Exit Sequence - Let it linger (5.5s)
+    const t2 = setTimeout(() => setPhase('fade'), 5500);
+    // 5. Unmount (6.5s)
+    const t3 = setTimeout(onComplete, 6500);
 
     return () => {
       clearTimeout(t1);
@@ -63,21 +65,21 @@ const Intro: React.FC<IntroProps> = ({ onComplete }) => {
   }, [onComplete]);
 
   return (
-    <div className={`fixed inset-0 z-[100] bg-black flex items-center justify-center transition-opacity duration-1000 ${phase === 'fade' ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-      {/* Expanding Iris Effect */}
+    <div className={`fixed inset-0 z-[100] bg-black flex items-center justify-center transition-opacity duration-[2000ms] ease-in-out ${phase === 'fade' ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+      {/* Expanding Iris Effect - Slower expansion (2500ms) */}
       <div 
-        className={`absolute rounded-full bg-white transition-all duration-[1500ms] ease-[cubic-bezier(0.23,1,0.32,1)] ${phase === 'dot' ? 'w-1 h-1' : 'w-[250vmax] h-[250vmax]'}`}
+        className={`absolute rounded-full bg-white transition-all duration-[2500ms] ease-[cubic-bezier(0.23,1,0.32,1)] ${phase === 'dot' ? 'w-1 h-1' : 'w-[250vmax] h-[250vmax]'}`}
       />
       
       <div className="relative z-10 flex flex-col items-center mix-blend-difference">
-        {/* Cipher Text Title */}
-        <h1 className={`text-7xl md:text-9xl font-bold tracking-tighter transition-all duration-1000 ${phase === 'expand' ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'} text-white font-mono`}>
+        {/* Cipher Text Title - Slower transition */}
+        <h1 className={`text-7xl md:text-9xl font-bold tracking-tighter transition-all duration-[1500ms] ${phase === 'expand' ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'} text-white font-mono`}>
           {displayText}
         </h1>
         
-        {/* Subtext */}
+        {/* Subtext - Slower transition */}
         <div 
-          className="mt-6 flex items-center gap-3 transition-all duration-1000"
+          className="mt-6 flex items-center gap-3 transition-all duration-[1500ms]"
           style={{ opacity: subTextOpacity, transform: subTextOpacity ? 'translateY(0)' : 'translateY(10px)' }}
         >
           <div className="h-[1px] w-8 bg-white/50" />

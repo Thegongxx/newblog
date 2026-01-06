@@ -10,9 +10,10 @@ const App: React.FC = () => {
   const [view, setView] = useState<ViewState>(ViewState.INTRO);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [scrolled, setScrolled] = useState(false);
-  const [copyStatus, setCopyStatus] = useState<{id: string, count: number} | null>(null);
   
-  const copyTimeoutRef = useRef<any>(null);
+  // Toast State for "Apple-style" popup
+  const [toast, setToast] = useState<{show: boolean, msg: string}>({show: false, msg: ''});
+  const toastTimeoutRef = useRef<any>(null);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 30);
@@ -52,11 +53,16 @@ const App: React.FC = () => {
     setView(newView);
   };
 
-  const handleCopy = (text: string, id: string) => {
+  const handleCopy = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
-    setCopyStatus(prev => ({ id, count: (prev?.id === id ? prev.count + 1 : 0) }));
-    if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
-    copyTimeoutRef.current = setTimeout(() => setCopyStatus(null), 2000);
+    
+    // Show Toast
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    setToast({ show: true, msg: `${label} 已复制到剪贴板` });
+    
+    toastTimeoutRef.current = setTimeout(() => {
+      setToast({ show: false, msg: '' });
+    }, 2500);
   };
 
   if (view === ViewState.INTRO) {
@@ -170,6 +176,12 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen selection:bg-white/20 selection:text-white">
+      {/* Toast Notification - Apple Dynamic Island Style */}
+      <div className={`fixed top-12 left-1/2 -translate-x-1/2 z-[200] flex items-center gap-3 px-6 py-3 rounded-full bg-[#1a1a1a]/60 backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1) ${toast.show ? 'translate-y-0 opacity-100' : '-translate-y-8 opacity-0 pointer-events-none'}`}>
+        <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]"></div>
+        <span className="text-xs font-medium tracking-wide text-white/90">{toast.msg}</span>
+      </div>
+
       <nav className={`fixed top-8 inset-x-0 z-[60] px-4 md:px-6 flex justify-center transition-all duration-1000 ease-[cubic-bezier(0.22,1,0.36,1)] ${scrolled ? 'translate-y-[-10px] scale-[0.96]' : 'translate-y-0'}`}>
         <div className={`flex items-center gap-0.5 md:gap-1.5 p-1.5 md:p-2 rounded-full glass transition-all duration-1000 ${scrolled ? 'shadow-[0_40px_100px_rgba(0,0,0,0.7)] bg-black/50 border-white/15 backdrop-blur-[40px]' : ''}`}>
           <button onClick={() => navigateTo(ViewState.FEED)} className="group px-3 md:px-6 py-2.5 text-xs md:text-sm font-bold tracking-tight hover:bg-white/10 rounded-full transition-all duration-500 flex items-center gap-2 md:gap-3 active:scale-95">
@@ -194,10 +206,19 @@ const App: React.FC = () => {
           <div className="text-4xl font-bold tracking-tighter mb-12 opacity-10 select-none grayscale contrast-200">AURA</div>
           <div className="flex flex-row justify-center items-center gap-8 md:gap-20 text-[10px] uppercase tracking-[0.4em] font-bold text-white/20">
             {[ { id: 'qq', label: 'QQ', value: CONTACT_INFO.QQ }, { id: 'wx', label: 'WX', value: CONTACT_INFO.WX }, { id: 'mail', label: 'MAIL', value: CONTACT_INFO.MAIL } ].map((contact) => (
-              <button key={contact.id} onClick={() => handleCopy(contact.value, contact.id)} className="group relative overflow-hidden h-8 min-w-[3.5em] md:min-w-[5.5em] hover:text-white transition-all duration-300 active:scale-[0.8] active:translate-y-0.5 focus:outline-none">
-                <div className={`transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] transform-gpu ${copyStatus?.id === contact.id ? '-translate-y-full opacity-0 blur-sm scale-90' : 'translate-y-0 opacity-100 scale-100'}`}>{contact.label}</div>
-                <div className={`absolute inset-0 flex items-center justify-center transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] transform-gpu ${copyStatus?.id === contact.id ? 'translate-y-0 opacity-100 blur-0 scale-100 text-blue-400' : 'translate-y-full opacity-0 blur-md scale-110'}`}>
-                  <span key={copyStatus?.id === contact.id ? copyStatus.count : 'idle'} className="animate-in zoom-in-75 slide-in-from-bottom-2 duration-300 shadow-[0_0_25px_rgba(59,130,246,0.4)] font-black italic tracking-widest text-[9px]">COPY</span>
+              <button 
+                key={contact.id} 
+                onClick={() => handleCopy(contact.value, contact.label)} 
+                className="group relative overflow-hidden h-8 w-[5em] md:w-[6em] focus:outline-none"
+              >
+                {/* Default Text (Slides up on hover) */}
+                <div className="absolute inset-0 flex items-center justify-center transition-transform duration-500 ease-[cubic-bezier(0.19,1,0.22,1)] group-hover:-translate-y-full group-active:scale-90">
+                  {contact.label}
+                </div>
+                
+                {/* Hover Text (Slides up from bottom) */}
+                <div className="absolute inset-0 flex items-center justify-center translate-y-full transition-transform duration-500 ease-[cubic-bezier(0.19,1,0.22,1)] group-hover:translate-y-0 group-active:scale-90 text-white font-bold">
+                  COPY
                 </div>
               </button>
             ))}
