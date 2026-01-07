@@ -39,9 +39,8 @@ export default function CommentSection({ postId }: CommentSectionProps) {
     // 提交评论
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        if (!formData.author || !formData.email || !formData.content) {
-            alert('请填写所有必填字段');
+        if (!formData.author || !formData.content) {
+            alert('请填写姓名和内容哦 🌿');
             return;
         }
 
@@ -62,7 +61,6 @@ export default function CommentSection({ postId }: CommentSectionProps) {
 
             // 重新加载评论
             await loadComments();
-
             alert('评论已提交！');
         } catch (error) {
             console.error('Failed to submit comment:', error);
@@ -160,11 +158,10 @@ export default function CommentSection({ postId }: CommentSectionProps) {
                             />
                             <input
                                 type="email"
-                                placeholder="邮箱 *（不会公开）"
+                                placeholder="邮箱（可选，不会公开）"
                                 value={formData.email}
                                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                 className="px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/30 transition-colors"
-                                required
                             />
                         </div>
                         <textarea

@@ -14,29 +14,36 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
     const [liked, setLiked] = useState(false);
     const [count, setCount] = useState(initialCount);
     const [animating, setAnimating] = useState(false);
+    const [locked, setLocked] = useState(false);
+    const [sessionClicks, setSessionClicks] = useState(0);
 
     useEffect(() => {
-        // 初始化点赞状态
-        setLiked(checkIfLikedLocal(targetType, targetId));
-
-        // 从后端获取实时点赞数
-        const fetchCount = async () => {
+        const fetchInitial = async () => {
             try {
-                const remoteCount = await engagementApi.getLikeCount(targetType, targetId);
-                setCount(remoteCount);
+                const c = await engagementApi.getLikeCount(targetType, targetId);
+                setCount(c);
+                const isLiked = checkIfLikedLocal(targetType, targetId);
+                setLiked(isLiked);
             } catch (err) {
-                console.error('Failed to fetch like count:', err);
+                console.error('Failed to fetch initial like data:', err);
             }
         };
-        fetchCount();
+        fetchInitial();
     }, [targetType, targetId]);
 
     const handleLike = async (e: React.MouseEvent) => {
         e.stopPropagation();
+        if (locked || sessionClicks >= 5) return;
 
         // 立即反馈 UI
         const newCount = count + 1;
+        const newSessionClicks = sessionClicks + 1;
         setCount(newCount);
+        setSessionClicks(newSessionClicks);
+
+        if (newSessionClicks >= 5) {
+            setLocked(true);
+        }
 
         // 触发点击动画
         setAnimating(true);
@@ -49,15 +56,20 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
         // 后端同步
         try {
             const fingerprint = getBrowserFingerprint();
-            await engagementApi.toggleLike(targetType, targetId, fingerprint);
+            const result = await engagementApi.toggleLike(targetType, targetId, fingerprint);
             setLiked(true);
             setLikedLocal(targetType, targetId, true);
+            // 如果后端反馈已达上限，则锁定
+            if (result && result.count >= 5) setLocked(true); // Assuming result might contain updated count or status
         } catch (err: any) {
             if (err.message === 'DAILY_LIMIT_REACHED') {
-                setCount(prev => prev - 1); // 回滚 UI
+                setLocked(true);
+                setCount(prev => prev - 1); // Rollback UI count
                 alert('你今天已经点过很多赞啦，明天再来吧！🌿');
             } else {
                 console.error('Failed to toggle like:', err);
+                setCount(prev => prev - 1); // Rollback UI count on other errors too
+                setSessionClicks(prev => prev - 1); // Rollback session clicks
             }
         }
     };
@@ -65,7 +77,8 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
     return (
         <button
             onClick={handleLike}
-            className={`group flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-500 active:scale-90 ${liked
+            disabled={locked}
+            className={`group flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-500 ${locked ? 'opacity-30 cursor-not-allowed grayscale' : 'active:scale-90'} ${liked
                 ? 'bg-rose-500/10 text-rose-500 border-rose-500/20'
                 : 'bg-white/5 text-white/40 hover:text-white/60 hover:bg-white/10 border-white/5'
                 } border ${className}`}

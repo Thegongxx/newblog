@@ -33,7 +33,10 @@ export default function HomepageComments() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!formData.author || !formData.email || !formData.content) return;
+        if (!formData.author || !formData.content) {
+            alert('请填写姓名和内容哦 🌿');
+            return;
+        }
 
         try {
             setLoading(true);
@@ -90,14 +93,13 @@ export default function HomepageComments() {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-[10px] uppercase tracking-[0.2em] text-white/20 font-bold ml-4">你的邮箱</label>
+                                <label className="text-[10px] uppercase tracking-[0.2em] text-white/20 font-bold ml-4">你的邮箱 (可选)</label>
                                 <input
                                     type="email"
                                     value={formData.email}
                                     onChange={e => setFormData({ ...formData, email: e.target.value })}
-                                    className="w-full h-14 bg-white/5 border border-white/5 rounded-2xl px-6 text-white outline-none focus:border-white/20 transition-all"
-                                    placeholder="hello@example.com"
-                                    required
+                                    className="w-full h-14 bg-white/5 border border-white/5 rounded-2xl px-6 text-white outline-none focus:border-white/20 transition-all font-light"
+                                    placeholder="your@email.com (optional)"
                                 />
                             </div>
                         </div>
