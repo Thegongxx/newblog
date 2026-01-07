@@ -6,39 +6,31 @@ import { type Comment } from '../types';
  * 采用原生 fetch 实现以减少外部依赖
  */
 export async function* askNvidiaStream(prompt: string, context?: string) {
-    const apiKey = import.meta.env.VITE_NVIDIA_API_KEY;
-    if (!apiKey) {
-        yield "AI_AUTH_REQUIRED";
-        return;
-    }
-
     const systemInstruction = `You are Aura, an elegant and minimalist AI companion for a personal blog. 
   Your tone is calm, intelligent, and helpful. 
-  Current context: ${context}. 
-  Explain things simply and elegantly.`;
+  Current context of the blog: ${context}. 
+  If users ask about the code, explain that this is a React-based spatial UI inspired by Apple design.`;
 
     try {
-        const response = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
+        // 调用我们自己的 Vercel Serverless 后端，解决 CORS 并保护 API Key
+        const response = await fetch("/api/ai", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${apiKey}`
             },
             body: JSON.stringify({
-                model: "qwen/qwen2.5-72b-instruct", // 默认推荐的高质量模型，或使用用户指定的 qwen3-next-80b
-                messages: [
-                    { role: "system", content: systemInstruction },
-                    { role: "user", content: prompt }
-                ],
-                temperature: 0.6,
-                top_p: 0.7,
-                max_tokens: 4096,
-                stream: true
+                prompt,
+                systemInstruction
             })
         });
 
         if (!response.ok) {
-            throw new Error(`NVIDIA API Error: ${response.statusText}`);
+            const errorMsg = await response.text();
+            if (response.status === 401 || errorMsg.includes("API Key")) {
+                yield "AI_AUTH_REQUIRED";
+                return;
+            }
+            throw new Error(`Server Error: ${response.statusText}`);
         }
 
         const reader = response.body?.getReader();
@@ -51,6 +43,7 @@ export async function* askNvidiaStream(prompt: string, context?: string) {
             if (done) break;
 
             const chunk = decoder.decode(value);
+            // 解析流式数据
             const lines = chunk.split("\n");
 
             for (const line of lines) {
