@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { commentsApi } from '../services/supabaseService';
+import LikeButton from './LikeButton';
 import type { Comment } from '../types';
 
 interface CommentSectionProps {
@@ -92,12 +93,19 @@ export default function CommentSection({ postId }: CommentSectionProps) {
                                 {new Date(comment.created_at).toLocaleDateString('zh-CN')}
                             </span>
                         </div>
-                        <button
-                            onClick={() => handleReply(comment.id, comment.author)}
-                            className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
-                        >
-                            回复
-                        </button>
+                        <div className="flex items-center gap-4">
+                            <LikeButton
+                                targetType="comment"
+                                targetId={comment.id}
+                                className="h-8 !px-3 !py-1 text-[10px]"
+                            />
+                            <button
+                                onClick={() => handleReply(comment.id, comment.author)}
+                                className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
+                            >
+                                回复
+                            </button>
+                        </div>
                     </div>
                     <p className="text-white/70 leading-relaxed">{comment.content}</p>
                 </div>
