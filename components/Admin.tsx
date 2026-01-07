@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { supabase, postsApi, engagementApi } from '../services/supabaseService';
+import { supabase, postsApi, engagementApi, storageApi } from '../services/supabaseService';
 import { ICONS } from '../constants';
 import type { Post, Comment } from '../types';
 import matter from 'gray-matter';
@@ -145,13 +145,16 @@ function PostEditor({ post, onSave, onCancel }: { post: Partial<Post>, onSave: (
     const [formData, setFormData] = useState({
         title: post.title || '',
         slug: post.slug || '',
+        excerpt: post.excerpt || '',
         content: post.content || '',
         category: post.category || 'Thought',
         cover_image: post.cover_image || '',
         published: post.published ?? false
     });
     const [loading, setLoading] = useState(false);
+    const [uploading, setUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const imageInputRef = useRef<HTMLInputElement>(null);
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -164,6 +167,7 @@ function PostEditor({ post, onSave, onCancel }: { post: Partial<Post>, onSave: (
                 ...formData,
                 title: data.title || formData.title,
                 slug: data.slug || formData.slug || (data.title ? data.title.toLowerCase().replace(/ /g, '-') : ''),
+                excerpt: data.excerpt || formData.excerpt,
                 content: content || formData.content,
                 category: data.category || formData.category,
                 cover_image: data.cover_image || formData.cover_image,
@@ -171,6 +175,43 @@ function PostEditor({ post, onSave, onCancel }: { post: Partial<Post>, onSave: (
             });
         };
         reader.readAsText(file);
+    };
+
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        try {
+            setUploading(true);
+            const url = await storageApi.uploadImage(file);
+            setFormData(prev => ({
+                ...prev,
+                content: prev.content + `\n\n![${file.name}](${url})`
+            }));
+        } catch (err) {
+            alert('图片上传失败，请检查存储桶配置');
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const handleDrop = async (e: React.DragEvent) => {
+        e.preventDefault();
+        const file = e.dataTransfer.files?.[0];
+        if (!file || !file.type.startsWith('image/')) return;
+
+        try {
+            setUploading(true);
+            const url = await storageApi.uploadImage(file);
+            setFormData(prev => ({
+                ...prev,
+                content: prev.content + `\n\n![${file.name}](${url})`
+            }));
+        } catch (err) {
+            alert('图片拖拽上传失败');
+        } finally {
+            setUploading(false);
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -208,17 +249,69 @@ function PostEditor({ post, onSave, onCancel }: { post: Partial<Post>, onSave: (
             <form className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                 <div className="space-y-8">
                     <input type="text" placeholder="Title" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} className="w-full bg-transparent border-none text-4xl md:text-6xl font-black tracking-tighter placeholder:text-white/5 outline-none" />
-                    <div className="grid grid-cols-2 gap-6">
-                        <input type="text" placeholder="Slug" value={formData.slug} onChange={e => setFormData({ ...formData, slug: e.target.value })} className="bg-white/5 border border-white/10 rounded-xl h-12 px-4 text-xs outline-none" />
-                        <select value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })} className="bg-white/5 border border-white/10 rounded-xl h-12 px-4 text-xs outline-none appearance-none">
-                            <option value="Technical">Technical</option>
-                            <option value="Design">Design</option>
-                            <option value="Thought">Thought</option>
-                            <option value="Life">Life</option>
-                        </select>
+
+                    <div className="space-y-4">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-white/20 ml-2">Introduction (Excerpt)</label>
+                        <textarea
+                            placeholder="写一段简洁的介绍..."
+                            value={formData.excerpt}
+                            onChange={e => setFormData({ ...formData, excerpt: e.target.value })}
+                            className="w-full h-32 bg-white/5 border border-white/10 rounded-2xl p-6 text-sm outline-none focus:border-white/20 transition-all resize-none"
+                        />
                     </div>
-                    <input type="text" placeholder="Cover Image URL" value={formData.cover_image} onChange={e => setFormData({ ...formData, cover_image: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl h-12 px-4 text-xs outline-none" />
-                    <textarea value={formData.content} onChange={e => setFormData({ ...formData, content: e.target.value })} className="w-full min-h-[500px] bg-white/[0.02] border border-white/5 rounded-[2rem] p-8 text-lg font-light leading-relaxed outline-none focus:border-white/10 transition-all resize-none" placeholder="Write your story..." />
+
+                    <div className="grid grid-cols-2 gap-6">
+                        <div className="space-y-4">
+                            <label className="text-[10px] font-black uppercase tracking-widest text-white/20 ml-2">Technical URL Slug</label>
+                            <input type="text" placeholder="Slug" value={formData.slug} onChange={e => setFormData({ ...formData, slug: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl h-12 px-4 text-xs outline-none" />
+                        </div>
+                        <div className="space-y-4">
+                            <label className="text-[10px] font-black uppercase tracking-widest text-white/20 ml-2">Category</label>
+                            <select value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl h-12 px-4 text-xs outline-none appearance-none">
+                                <option value="Technical">Technical</option>
+                                <option value="Design">Design</option>
+                                <option value="Thought">Thought</option>
+                                <option value="Life">Life</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div className="space-y-4">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-white/20 ml-2">Cover Image</label>
+                        <div className="flex gap-4">
+                            <input type="text" placeholder="URL or select below" value={formData.cover_image} onChange={e => setFormData({ ...formData, cover_image: e.target.value })} className="flex-1 bg-white/5 border border-white/10 rounded-xl h-12 px-4 text-xs outline-none" />
+                            <input type="file" ref={imageInputRef} onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                    setUploading(true);
+                                    const url = await storageApi.uploadImage(file);
+                                    setFormData(prev => ({ ...prev, cover_image: url }));
+                                    setUploading(false);
+                                }
+                            }} className="hidden" accept="image/*" />
+                            <button type="button" onClick={() => imageInputRef.current?.click()} className="w-12 h-12 flex items-center justify-center bg-white text-black rounded-xl hover:scale-105 active:scale-95 transition-all text-xl font-light">+</button>
+                        </div>
+                    </div>
+
+                    <div className="space-y-4 relative">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-white/20 ml-2 flex justify-between">
+                            <span>Markdown Editor</span>
+                            <span className="opacity-40 italic">Support Drag & Drop Images</span>
+                        </label>
+                        <textarea
+                            value={formData.content}
+                            onChange={e => setFormData({ ...formData, content: e.target.value })}
+                            onDragOver={e => e.preventDefault()}
+                            onDrop={handleDrop}
+                            className={`w-full min-h-[500px] bg-white/[0.02] border ${uploading ? 'border-blue-500/50' : 'border-white/5'} rounded-[2rem] p-8 text-lg font-light leading-relaxed outline-none focus:border-white/10 transition-all resize-none shadow-inner`}
+                            placeholder="Write your story..."
+                        />
+                        {uploading && (
+                            <div className="absolute inset-x-0 bottom-8 flex justify-center">
+                                <div className="px-6 py-2 bg-blue-500 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-full animate-pulse">Uploading Media...</div>
+                            </div>
+                        )}
+                    </div>
                 </div>
                 <div className="hidden lg:block sticky top-40 h-[calc(100vh-200px)]">
                     <div className="w-full h-full glass rounded-[3rem] p-12 overflow-y-auto prose prose-invert max-w-none prose-p:text-white/60 prose-headings:text-white prose-headings:tracking-tighter prose-img:rounded-3xl">

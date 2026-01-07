@@ -48,18 +48,25 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, onClick }) => {
           <span>{post.readingTime}</span>
         </div>
 
-        <h3 className="text-3xl font-bold text-white mb-6 tracking-tighter leading-tight group-hover:text-white transition-colors duration-500">
-          {post.title}
-        </h3>
+        {/* 悬停显示的详细内容容器 */}
+        <div className="flex-1 flex flex-col transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]">
+          <h3 className="text-3xl font-bold text-white mb-4 tracking-tighter leading-tight group-hover:text-white transition-colors duration-500">
+            {post.title}
+          </h3>
 
-        <p className="text-white/40 text-lg font-light leading-relaxed mb-8 line-clamp-2">
-          {post.excerpt}
-        </p>
+          <div className="grid grid-rows-[0fr] group-hover:grid-rows-[1fr] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]">
+            <div className="overflow-hidden opacity-0 group-hover:opacity-100 transition-all duration-700 delay-100">
+              <p className="text-white/40 text-lg font-light leading-relaxed mb-8 line-clamp-3">
+                {post.excerpt}
+              </p>
 
-        <div className="mt-auto flex items-center gap-2 text-white/30 text-xs font-bold uppercase tracking-[0.2em] group-hover:text-white transition-all duration-500">
-          <span>阅读全文</span>
-          <div className="transition-transform duration-500 group-hover:translate-x-2">
-            {ICONS.CHEVRON_RIGHT}
+              <div className="flex items-center gap-2 text-white/30 text-xs font-bold uppercase tracking-[0.2em] group-hover:text-white transition-all duration-500">
+                <span>阅读全文</span>
+                <div className="transition-transform duration-500 group-hover:translate-x-2">
+                  {ICONS.CHEVRON_RIGHT}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

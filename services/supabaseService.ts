@@ -216,3 +216,25 @@ export const engagementApi = {
         if (error) throw error;
     }
 };
+
+// 后增：存储相关 API (Image Uploads)
+export const storageApi = {
+    async uploadImage(file: File) {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+        const filePath = `blog-media/${fileName}`;
+
+        const { data, error } = await supabase.storage
+            .from('media') // 确保已经在 Supabase 控制台创建并配置了名为 'media' 的公共存储桶
+            .upload(filePath, file);
+
+        if (error) throw error;
+
+        // 获取公共 URL
+        const { data: { publicUrl } } = supabase.storage
+            .from('media')
+            .getPublicUrl(filePath);
+
+        return publicUrl;
+    }
+};
