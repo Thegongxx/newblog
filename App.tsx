@@ -88,9 +88,10 @@ const App: React.FC = () => {
       setTimeout(() => glimmer.remove(), 600);
     };
 
-    // 管理后台快捷键：Ctrl + Shift + A
+    // 管理后台快捷键：Ctrl + ,
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.shiftKey && e.key === 'A') {
+      if (e.ctrlKey && e.key === ',') {
+        e.preventDefault(); // 防止触发浏览器默认行为（如某些浏览器的设置）
         navigateTo(ViewState.ADMIN);
       }
     };
