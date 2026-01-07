@@ -33,6 +33,12 @@ export const postsApi = {
         return data;
     },
 
+    // 删除文章
+    async delete(id: string) {
+        const { error } = await supabase.from('posts').delete().eq('id', id);
+        if (error) throw error;
+    },
+
     // 创建新文章（需要认证）
     async create(post: {
         title: string;
@@ -89,11 +95,11 @@ export const commentsApi = {
     },
 
     // 删除评论（需要认证）
-    async delete(commentId: string) {
+    async delete(id: string) {
         const { error } = await supabase
             .from('comments')
             .delete()
-            .eq('id', commentId);
+            .eq('id', id);
 
         if (error) throw error;
     }
@@ -103,35 +109,65 @@ export const commentsApi = {
 export const engagementApi = {
     // 点赞相关
     async toggleLike(targetType: 'post' | 'quote' | 'homepage', targetId: string, fingerprint: string) {
-        // 检查是否已点赞
-        const { data: existing } = await supabase
+        const today = new Date().toISOString().split('T')[0];
+
+        // 1. 获取该用户今天的点赞总数（基于指纹和日期）
+        const { data: dailyLikes, error: dailyLikesError } = await supabase
             .from('likes')
-            .select('id')
-            .match({ target_type: targetType, target_id: targetId, user_fingerprint: fingerprint })
+            .select('count')
+            .eq('target_type', targetType)
+            .eq('target_id', targetId)
+            .eq('user_fingerprint', fingerprint)
+            .gte('created_at', today);
+
+        if (dailyLikesError) throw dailyLikesError;
+
+        const currentTotal = dailyLikes?.reduce((acc, curr) => acc + (curr.count || 0), 0) || 0;
+
+        if (currentTotal >= 5) {
+            throw new Error('DAILY_LIMIT_REACHED');
+        }
+
+        // 2. 检查当前是否已有该记录（累加逻辑）
+        const { data: existing, error: existingError } = await supabase
+            .from('likes')
+            .select('id, count')
+            .eq('target_type', targetType)
+            .eq('target_id', targetId)
+            .eq('user_fingerprint', fingerprint)
+            .gte('created_at', today)
             .single();
 
+        if (existingError && existingError.code !== 'PGRST116') { // PGRST116 means no rows found
+            throw existingError;
+        }
+
         if (existing) {
-            // 取消点赞
-            await supabase.from('likes').delete().eq('id', existing.id);
-            return { liked: false };
+            // 累加
+            const { error: updateError } = await supabase.from('likes').update({ count: existing.count + 1 }).eq('id', existing.id);
+            if (updateError) throw updateError;
+            return { liked: true, count: existing.count + 1 };
         } else {
-            // 添加点赞
-            await supabase.from('likes').insert([{
+            // 新增
+            const { error: insertError } = await supabase.from('likes').insert([{
                 target_type: targetType,
                 target_id: targetId,
-                user_fingerprint: fingerprint
+                user_fingerprint: fingerprint,
+                count: 1
             }]);
-            return { liked: true };
+            if (insertError) throw insertError;
+            return { liked: true, count: 1 };
         }
     },
 
     async getLikeCount(targetType: string, targetId: string) {
-        const { count, error } = await supabase
+        const { data, error } = await supabase
             .from('likes')
-            .select('*', { count: 'exact', head: true })
-            .match({ target_type: targetType, target_id: targetId });
+            .select('count')
+            .eq('target_type', targetType)
+            .eq('target_id', targetId);
         if (error) return 0;
-        return count || 0;
+        return data?.reduce((acc, curr) => acc + (curr.count || 0), 0) || 0;
     },
 
     // 浏览量统计 (简单的 RPC 或直接在前端逻辑里顺便更新)
@@ -173,5 +209,11 @@ export const engagementApi = {
             .single();
         if (error) throw error;
         return data;
+    },
+
+    async deleteHomepageComment(id: string) {
+        const { error } = await supabase.from('homepage_comments').delete().eq('id', id);
+        if (error) throw error;
     }
 };
+```

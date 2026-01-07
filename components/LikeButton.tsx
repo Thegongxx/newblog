@@ -34,17 +34,14 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
     const handleLike = async (e: React.MouseEvent) => {
         e.stopPropagation();
 
-        // 立即反馈 UI (Apple 风格的即时性)
-        const newLiked = !liked;
-        setLiked(newLiked);
-        setCount(prev => newLiked ? prev + 1 : Math.max(0, prev - 1));
-        setLikedLocal(targetType, targetId, newLiked);
+        // 立即反馈 UI
+        const newCount = count + 1;
+        setCount(newCount);
 
         // 触发点击动画
         setAnimating(true);
         setTimeout(() => setAnimating(false), 600);
 
-        // 轻触反馈 (如果支持的话)
         if (window.navigator && window.navigator.vibrate) {
             window.navigator.vibrate(10);
         }
@@ -53,9 +50,15 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
         try {
             const fingerprint = getBrowserFingerprint();
             await engagementApi.toggleLike(targetType, targetId, fingerprint);
-        } catch (err) {
-            console.error('Failed to toggle like:', err);
-            // 失败时不回滚，保持 UI 流畅，下次加载会同步
+            setLiked(true);
+            setLikedLocal(targetType, targetId, true);
+        } catch (err: any) {
+            if (err.message === 'DAILY_LIMIT_REACHED') {
+                setCount(prev => prev - 1); // 回滚 UI
+                alert('你今天已经点过很多赞啦，明天再来吧！🌿');
+            } else {
+                console.error('Failed to toggle like:', err);
+            }
         }
     };
 
@@ -63,8 +66,8 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
         <button
             onClick={handleLike}
             className={`group flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-500 active:scale-90 ${liked
-                    ? 'bg-rose-500/10 text-rose-500 border-rose-500/20'
-                    : 'bg-white/5 text-white/40 hover:text-white/60 hover:bg-white/10 border-white/5'
+                ? 'bg-rose-500/10 text-rose-500 border-rose-500/20'
+                : 'bg-white/5 text-white/40 hover:text-white/60 hover:bg-white/10 border-white/5'
                 } border ${className}`}
         >
             <div className={`relative transition-transform duration-500 ${animating ? 'scale-125' : 'scale-100'}`}>
