@@ -12,7 +12,7 @@ interface BlogCardProps {
 const BlogCard: React.FC<BlogCardProps> = ({ post, onClick }) => {
   return (
     <div
-      className="group relative h-full flex flex-col bg-white/[0.02] border border-white/5 rounded-[2.5rem] overflow-hidden hover:bg-white/[0.04] transition-all duration-700 hover:-translate-y-2 cursor-pointer shadow-2xl hover:shadow-white/10"
+      className="group relative h-[420px] bg-[#0a0a0a] border border-white/5 rounded-[2rem] overflow-hidden transition-all duration-700 hover:border-white/10 cursor-pointer shadow-2xl"
       onClick={onClick}
     >
       {/* 封面图容器 */}
@@ -40,32 +40,28 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, onClick }) => {
         </div>
       </div>
 
-      {/* 内容区域 */}
-      <div className="p-10 flex flex-col flex-1">
-        <div className="flex items-center gap-3 mb-6 text-white/20 text-[9px] font-bold uppercase tracking-[0.3em]">
+      {/* 内容区域 - 默认仅标题 */}
+      <div className="absolute inset-x-0 bottom-0 p-8 flex flex-col justify-end min-h-[160px] bg-gradient-to-t from-black/90 via-black/40 to-transparent transition-all duration-700">
+        <div className="flex items-center gap-3 mb-3 text-white/20 text-[8px] font-bold uppercase tracking-[0.2em]">
           <span>{post.date}</span>
-          <span className="w-1 h-1 rounded-full bg-white/20" />
+          <span className="w-1 h-1 rounded-full bg-white/10" />
           <span>{post.readingTime}</span>
         </div>
 
-        {/* 悬停显示的详细内容容器 */}
-        <div className="flex-1 flex flex-col transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]">
-          <h3 className="text-3xl font-bold text-white mb-4 tracking-tighter leading-tight group-hover:text-white transition-colors duration-500">
-            {post.title}
-          </h3>
+        <h3 className="text-2xl font-bold text-white mb-2 tracking-tighter leading-tight transition-all duration-700 group-hover:-translate-y-2">
+          {post.title}
+        </h3>
 
-          <div className="grid grid-rows-[0fr] group-hover:grid-rows-[1fr] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]">
-            <div className="overflow-hidden opacity-0 group-hover:opacity-100 transition-all duration-700 delay-100">
-              <p className="text-white/40 text-lg font-light leading-relaxed mb-8 line-clamp-3">
-                {post.excerpt}
-              </p>
+        {/* 悬停缓缓显现的内容 */}
+        <div className="opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] delay-75 blur-lg group-hover:blur-0">
+          <p className="text-white/40 text-sm font-light leading-relaxed mb-6 line-clamp-2">
+            {post.excerpt}
+          </p>
 
-              <div className="flex items-center gap-2 text-white/30 text-xs font-bold uppercase tracking-[0.2em] group-hover:text-white transition-all duration-500">
-                <span>阅读全文</span>
-                <div className="transition-transform duration-500 group-hover:translate-x-2">
-                  {ICONS.CHEVRON_RIGHT}
-                </div>
-              </div>
+          <div className="flex items-center gap-2 text-white/30 text-[10px] font-bold uppercase tracking-[0.1em]">
+            <span>阅读全文</span>
+            <div className="transition-transform duration-500 group-hover:translate-x-1">
+              {ICONS.CHEVRON_RIGHT}
             </div>
           </div>
         </div>

@@ -238,15 +238,15 @@ const App: React.FC = () => {
             <section>
               <div className="max-w-3xl mb-24 animate-in fade-in slide-in-from-bottom-4 duration-1000">
                 <h4 className="text-white/20 uppercase tracking-[0.5em] text-[10px] font-black mb-8">Personal Space</h4>
-                <h2 className="text-6xl md:text-8xl font-bold tracking-tighter mb-12 leading-[0.9]">探索 <br /><span className="text-white/30 italic">纯粹瞬间.</span></h2>
-                <p className="text-xl md:text-2xl text-white/40 font-light max-w-xl leading-relaxed">在这里，我们探索技术、建筑与人类情感之间那些无形的联系。</p>
+                <h2 className="text-5xl md:text-7xl font-bold tracking-tighter mb-8 leading-[0.95]">探索 <br /><span className="text-white/20 italic">纯粹瞬间.</span></h2>
+                <p className="text-lg text-white/30 font-light max-w-lg leading-relaxed">在这里，我们探索技术、建筑与人类情感之间那些无形的联系。</p>
               </div>
               {loading ? (
                 <div className="text-center text-white/40 py-12">加载中...</div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                  {posts.slice(0, 4).map((post, i) => (
-                    <div key={post.id} className="animate-in fade-in slide-in-from-bottom-8" style={{ animationDelay: `${i * 150}ms` }}>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {posts.slice(0, 6).map((post, i) => (
+                    <div key={post.id} className="animate-in fade-in slide-in-from-bottom-8" style={{ animationDelay: `${i * 100}ms` }}>
                       <BlogCard post={post} onClick={() => setSelectedPost(post)} />
                     </div>
                   ))}
@@ -319,6 +319,10 @@ const App: React.FC = () => {
         @keyframes auraEntrance { 0% { opacity: 0; transform: translateY(20px) scale(0.985); filter: blur(20px); } 100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); } }
         .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px) saturate(180%); border: 1px solid rgba(255, 255, 255, 0.08); }
         .prose blockquote { border-left-width: 2px; border-color: rgba(255,255,255,0.2); padding-left: 2rem; margin: 3rem 0; font-style: italic; color: rgba(255,255,255,0.8); }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
       `}</style>
     </div>
   );

@@ -155,6 +155,15 @@ function PostEditor({ post, onSave, onCancel }: { post: Partial<Post>, onSave: (
     const [uploading, setUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const imageInputRef = useRef<HTMLInputElement>(null);
+    const [previewContent, setPreviewContent] = useState(formData.content);
+
+    // 性能优化：防抖预览渲染，解决导入大文档或快速输入时的卡顿
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setPreviewContent(formData.content);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [formData.content]);
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -246,7 +255,7 @@ function PostEditor({ post, onSave, onCancel }: { post: Partial<Post>, onSave: (
                     </button>
                 </div>
             </div>
-            <form className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <form className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
                 <div className="space-y-8">
                     <input type="text" placeholder="Title" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} className="w-full bg-transparent border-none text-4xl md:text-6xl font-black tracking-tighter placeholder:text-white/5 outline-none" />
 
@@ -313,10 +322,10 @@ function PostEditor({ post, onSave, onCancel }: { post: Partial<Post>, onSave: (
                         )}
                     </div>
                 </div>
-                <div className="hidden lg:block sticky top-40 h-[calc(100vh-200px)]">
-                    <div className="w-full h-full glass rounded-[3rem] p-12 overflow-y-auto prose prose-invert max-w-none prose-p:text-white/60 prose-headings:text-white prose-headings:tracking-tighter prose-img:rounded-3xl">
+                <div className="hidden lg:block sticky top-8 h-[calc(100vh-64px)] overflow-hidden">
+                    <div className="w-full h-full glass rounded-[3rem] p-12 overflow-y-auto prose prose-invert max-w-none prose-p:text-white/60 prose-headings:text-white prose-headings:tracking-tighter prose-img:rounded-3xl custom-scrollbar">
                         <h1 className="text-4xl font-black mb-8 italic tracking-tighter">{formData.title || 'Preview'}</h1>
-                        <div dangerouslySetInnerHTML={{ __html: marked(formData.content) }} />
+                        <div dangerouslySetInnerHTML={{ __html: marked(previewContent) }} />
                     </div>
                 </div>
             </form>
