@@ -164,24 +164,49 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                     {count}
                 </span>
 
-                {/* 悬浮粒子效果 (锁定后不显示) */}
-                {!locked && (
-                    <div className="absolute -top-12 left-1/2 -translate-x-1/2 pointer-events-none">
-                        {animating && [1, 2, 3].map(i => (
+                {/* 悬浮粒子扩散效果 */}
+                {!locked && animating && (
+                    <div className="absolute inset-0 pointer-events-none">
+                        {[...Array(12)].map((_, i) => (
                             <div
                                 key={i}
-                                className="absolute bg-rose-500/40 rounded-full animate-float-particle"
+                                className="absolute left-1/2 top-1/2 animate-apple-particle"
                                 style={{
-                                    width: `${Math.random() * 6 + 2}px`,
-                                    height: `${Math.random() * 6 + 2}px`,
-                                    left: `${(Math.random() - 0.5) * 40}px`,
-                                    animationDelay: `${i * 0.1}s`
+                                    '--angle': `${Math.random() * 360}deg`,
+                                    '--distance': `${Math.random() * 60 + 40}px`,
+                                    '--size': `${Math.random() * 4 + 4}px`,
+                                    '--delay': `${Math.random() * 0.2}s`,
+                                    width: 'var(--size)',
+                                    height: 'var(--size)',
                                 } as React.CSSProperties}
-                            />
+                            >
+                                <div className="w-full h-full bg-rose-500/40 rounded-full blur-[1px]" />
+                            </div>
                         ))}
                     </div>
                 )}
             </button>
+
+            <style>{`
+                @keyframes apple-particle {
+                    0% {
+                        transform: translate(-50%, -50%) rotate(0deg) scale(0);
+                        opacity: 0;
+                    }
+                    20% {
+                        opacity: 1;
+                        transform: translate(-50%, -50%) rotate(var(--angle)) translateY(0) scale(1.2);
+                    }
+                    100% {
+                        transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(-1 * var(--distance))) scale(0);
+                        opacity: 0;
+                    }
+                }
+                .animate-apple-particle {
+                    animation: apple-particle 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                    animation-delay: var(--delay);
+                }
+            `}</style>
         </div>
     );
 }
