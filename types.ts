@@ -43,3 +43,8 @@ export enum ViewState {
   ABOUT = 'assistant',
   ADMIN = 'aura-admin'
 }
+
+export interface Message {
+  role: 'user' | 'assistant';
+  content: string;
+}
