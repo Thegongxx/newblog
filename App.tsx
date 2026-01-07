@@ -4,8 +4,11 @@ import Intro from './components/Intro';
 import Assistant from './components/Assistant';
 import BlogCard from './components/BlogCard';
 import CommentSection from './components/CommentSection';
+import LikeButton from './components/LikeButton';
+import HomepageComments from './components/HomepageComments';
+import Admin from './components/Admin';
 import { QUOTES_DATA, ICONS, CONTACT_INFO } from './constants';
-import { postsApi } from './services/supabaseService';
+import { postsApi, engagementApi } from './services/supabaseService';
 import { ViewState, Post } from './types';
 
 const App: React.FC = () => {
@@ -50,6 +53,20 @@ const App: React.FC = () => {
     loadPosts();
   }, []);
 
+  // 访问统计
+  useEffect(() => {
+    if (selectedPost) {
+      const trackView = async () => {
+        try {
+          await engagementApi.incrementView(selectedPost.id);
+        } catch (err) {
+          console.error('Failed to track view:', err);
+        }
+      };
+      trackView();
+    }
+  }, [selectedPost]);
+
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 30);
 
@@ -71,14 +88,23 @@ const App: React.FC = () => {
       setTimeout(() => glimmer.remove(), 600);
     };
 
+    // 管理后台快捷键：Ctrl + Shift + A
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.shiftKey && e.key === 'A') {
+        navigateTo(ViewState.ADMIN);
+      }
+    };
+
     window.addEventListener('scroll', handleScroll);
     window.addEventListener('mousemove', handleGlobalMouseMove);
     window.addEventListener('mousedown', handleMouseDown);
+    window.addEventListener('keydown', handleKeyDown);
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('mousemove', handleGlobalMouseMove);
       window.removeEventListener('mousedown', handleMouseDown);
+      window.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
 
@@ -119,7 +145,16 @@ const App: React.FC = () => {
               <span>{selectedPost.category}</span>
             </div>
             <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-10 leading-tight">{selectedPost.title}</h1>
-            <div className="h-[2px] w-20 bg-white/20 mb-10" />
+            <div className="flex items-center justify-between">
+              <div className="h-[2px] w-20 bg-white/20 mb-10" />
+              <div className="flex items-center gap-6 mb-10">
+                <div className="flex flex-col items-end">
+                  <span className="text-[10px] uppercase tracking-widest text-white/20 font-bold mb-1">VIEWS</span>
+                  <span className="text-lg font-light text-white/40 tabular-nums">{selectedPost.views || 0}</span>
+                </div>
+                <LikeButton targetType="post" targetId={selectedPost.id} initialCount={selectedPost.likes_count} />
+              </div>
+            </div>
             <p className="text-xl md:text-2xl text-white/50 leading-relaxed font-light">{selectedPost.excerpt}</p>
           </header>
           <div className="rounded-[3rem] overflow-hidden mb-24 aspect-[16/9] glass shadow-2xl"><img src={selectedPost.image} className="w-full h-full object-cover" /></div>
@@ -146,13 +181,15 @@ const App: React.FC = () => {
                   <p className="text-xl md:text-2xl font-light leading-relaxed text-white/80 mb-10 pt-10">“{quote.text}”</p>
                   <div className="flex items-center justify-between border-t border-white/5 pt-8">
                     <span className="text-xs font-bold tracking-[0.3em] text-white/40 uppercase">— {quote.author}</span>
-                    <span className="text-[10px] font-medium text-white/10 uppercase tracking-widest">{quote.date}</span>
+                    <LikeButton targetType="quote" targetId={`quote-${i}`} className="scale-75 origin-right !bg-transparent !border-none !px-0" />
                   </div>
                 </div>
               ))}
             </div>
           </div>
         );
+      case ViewState.ADMIN:
+        return <Admin />;
       case ViewState.ARCHIVE:
         return (
           <div className="py-12">
@@ -215,6 +252,9 @@ const App: React.FC = () => {
                 </div>
               )}
             </section>
+
+            {/* 主页留言板 */}
+            <HomepageComments />
           </div>
         );
     }

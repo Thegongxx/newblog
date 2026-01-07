@@ -40,5 +40,6 @@ export enum ViewState {
   FEED = 'list',
   NOTEBOOK = 'notes',
   ARCHIVE = 'detail',
-  ABOUT = 'assistant'
+  ABOUT = 'assistant',
+  ADMIN = 'aura-admin'
 }
