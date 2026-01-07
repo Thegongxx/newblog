@@ -155,15 +155,26 @@ function PostEditor({ post, onSave, onCancel }: { post: Partial<Post>, onSave: (
     const [uploading, setUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const imageInputRef = useRef<HTMLInputElement>(null);
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const previewRef = useRef<HTMLDivElement>(null);
     const [previewContent, setPreviewContent] = useState(formData.content);
+    const [mediaLibrary, setMediaLibrary] = useState<string[]>([]); // 临时存储本次上传的图片，供拖拽重用
 
-    // 性能优化：防抖预览渲染，解决导入大文档或快速输入时的卡顿
+    // 性能优化：防抖预览渲染
     useEffect(() => {
         const timer = setTimeout(() => {
             setPreviewContent(formData.content);
         }, 300);
         return () => clearTimeout(timer);
     }, [formData.content]);
+
+    // 同步滚动核心逻辑
+    const handleEditorScroll = (e: React.UIEvent<HTMLTextAreaElement>) => {
+        if (!previewRef.current) return;
+        const textarea = e.currentTarget;
+        const ratio = textarea.scrollTop / (textarea.scrollHeight - textarea.clientHeight);
+        previewRef.current.scrollTop = ratio * (previewRef.current.scrollHeight - previewRef.current.clientHeight);
+    };
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -193,9 +204,10 @@ function PostEditor({ post, onSave, onCancel }: { post: Partial<Post>, onSave: (
         try {
             setUploading(true);
             const url = await storageApi.uploadImage(file);
+            setMediaLibrary(prev => [url, ...prev]);
             setFormData(prev => ({
                 ...prev,
-                content: prev.content + `\n\n![${file.name}](${url})`
+                content: prev.content + `\n\n![Image](${url})`
             }));
         } catch (err) {
             alert('图片上传失败，请检查存储桶配置');
@@ -212,9 +224,10 @@ function PostEditor({ post, onSave, onCancel }: { post: Partial<Post>, onSave: (
         try {
             setUploading(true);
             const url = await storageApi.uploadImage(file);
+            setMediaLibrary(prev => [url, ...prev]);
             setFormData(prev => ({
                 ...prev,
-                content: prev.content + `\n\n![${file.name}](${url})`
+                content: prev.content + `\n\n![Image](${url})`
             }));
         } catch (err) {
             alert('图片拖拽上传失败');
@@ -308,22 +321,47 @@ function PostEditor({ post, onSave, onCancel }: { post: Partial<Post>, onSave: (
                             <span className="opacity-40 italic">Support Drag & Drop Images</span>
                         </label>
                         <textarea
+                            ref={textareaRef}
                             value={formData.content}
                             onChange={e => setFormData({ ...formData, content: e.target.value })}
+                            onScroll={handleEditorScroll}
                             onDragOver={e => e.preventDefault()}
                             onDrop={handleDrop}
-                            className={`w-full min-h-[500px] bg-white/[0.02] border ${uploading ? 'border-blue-500/50' : 'border-white/5'} rounded-[2rem] p-8 text-lg font-light leading-relaxed outline-none focus:border-white/10 transition-all resize-none shadow-inner`}
+                            className={`w-full min-h-[600px] bg-white/[0.02] border ${uploading ? 'border-blue-500/50' : 'border-white/5'} rounded-[2rem] p-10 text-lg font-light leading-relaxed outline-none focus:border-white/10 transition-all resize-none shadow-inner custom-scrollbar`}
                             placeholder="Write your story..."
                         />
                         {uploading && (
                             <div className="absolute inset-x-0 bottom-8 flex justify-center">
-                                <div className="px-6 py-2 bg-blue-500 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-full animate-pulse">Uploading Media...</div>
+                                <div className="px-6 py-2 bg-blue-500 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-full animate-pulse shadow-lg z-20">Uploading to Media Bank...</div>
                             </div>
                         )}
                     </div>
+
+                    {/* 素材池 (Media Bank) */}
+                    {mediaLibrary.length > 0 && (
+                        <div className="p-8 bg-white/[0.02] border border-white/5 rounded-[2rem]">
+                            <h4 className="text-[10px] font-black uppercase tracking-widest text-white/20 mb-6">Media Bank (Assets)</h4>
+                            <div className="flex flex-wrap gap-4">
+                                {mediaLibrary.map((url, i) => (
+                                    <div
+                                        key={i}
+                                        draggable
+                                        onDragStart={(e) => e.dataTransfer.setData('text/plain', `\n\n![Media](${url})`)}
+                                        onClick={() => setFormData(prev => ({ ...prev, content: prev.content + `\n\n![Media](${url})` }))}
+                                        className="w-20 h-20 rounded-xl overflow-hidden border border-white/10 hover:border-white/30 cursor-grab active:cursor-grabbing transition-all group relative"
+                                    >
+                                        <img src={url} className="w-full h-full object-cover group-hover:scale-110 transition-transform" />
+                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                            <span className="text-[8px] font-bold text-white uppercase">Insert</span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
                 <div className="hidden lg:block sticky top-8 h-[calc(100vh-64px)] overflow-hidden">
-                    <div className="w-full h-full glass rounded-[3rem] p-12 overflow-y-auto prose prose-invert max-w-none prose-p:text-white/60 prose-headings:text-white prose-headings:tracking-tighter prose-img:rounded-3xl custom-scrollbar">
+                    <div ref={previewRef} className="w-full h-full glass rounded-[3rem] p-12 overflow-y-auto prose prose-invert max-w-none prose-p:text-white/60 prose-headings:text-white prose-headings:tracking-tighter prose-img:rounded-3xl custom-scrollbar">
                         <h1 className="text-4xl font-black mb-8 italic tracking-tighter">{formData.title || 'Preview'}</h1>
                         <div dangerouslySetInnerHTML={{ __html: marked(previewContent) }} />
                     </div>
