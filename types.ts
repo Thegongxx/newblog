@@ -2,12 +2,31 @@
 export interface Post {
   id: string;
   title: string;
+  slug: string;
+  content: string;
+  html_content?: string;
   excerpt: string;
   category: string;
-  date: string;
-  readingTime: string;
-  image: string;
+  cover_image: string;
+  reading_time: number;
+  published: boolean;
+  created_at: string;
+  updated_at: string;
+  // 为了向后兼容，添加旧格式字段
+  image?: string;
+  date?: string;
+  readingTime?: string;
+}
+
+export interface Comment {
+  id: string;
+  post_id: string;
+  author: string;
+  email: string;
   content: string;
+  parent_id?: string;
+  approved: boolean;
+  created_at: string;
 }
 
 export interface Quote {
@@ -16,16 +35,10 @@ export interface Quote {
   date: string;
 }
 
-export interface Message {
-  role: 'user' | 'assistant';
-  content: string;
-}
-
 export enum ViewState {
-  INTRO = 'INTRO',
-  FEED = 'FEED',
-  POST = 'POST',
-  ARCHIVE = 'ARCHIVE',
-  NOTEBOOK = 'NOTEBOOK',
-  ABOUT = 'ABOUT'
+  INTRO = 'intro',
+  FEED = 'list',
+  NOTEBOOK = 'notes',
+  ARCHIVE = 'detail',
+  ABOUT = 'assistant'
 }

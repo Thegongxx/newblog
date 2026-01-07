@@ -3,21 +3,56 @@ import React, { useState, useEffect, useRef } from 'react';
 import Intro from './components/Intro';
 import Assistant from './components/Assistant';
 import BlogCard from './components/BlogCard';
-import { BLOG_POSTS, QUOTES_DATA, ICONS, CONTACT_INFO } from './constants';
+import CommentSection from './components/CommentSection';
+import { QUOTES_DATA, ICONS, CONTACT_INFO } from './constants';
+import { postsApi } from './services/supabaseService';
 import { ViewState, Post } from './types';
 
 const App: React.FC = () => {
   const [view, setView] = useState<ViewState>(ViewState.INTRO);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [scrolled, setScrolled] = useState(false);
-  
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
+
   // Toast State for "Apple-style" popup
-  const [toast, setToast] = useState<{show: boolean, msg: string}>({show: false, msg: ''});
+  const [toast, setToast] = useState<{ show: boolean, msg: string }>({ show: false, msg: '' });
   const toastTimeoutRef = useRef<any>(null);
+
+  // 加载文章
+  useEffect(() => {
+    const loadPosts = async () => {
+      try {
+        setLoading(true);
+        const data = await postsApi.getAll();
+        // 转换数据格式以兼容现有组件
+        const formattedPosts = data.map((post: any) => ({
+          ...post,
+          // 兼容旧格式
+          image: post.cover_image,
+          date: new Date(post.created_at).toLocaleDateString('zh-CN', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          }),
+          readingTime: `${post.reading_time} 分钟`,
+          content: post.html_content || post.content
+        }));
+        setPosts(formattedPosts);
+      } catch (error) {
+        console.error('Failed to load posts:', error);
+        // 如果加载失败，使用空数组
+        setPosts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadPosts();
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 30);
-    
+
     // 全局鼠标事件处理：点击光晕 + 聚光灯追踪
     const handleGlobalMouseMove = (e: MouseEvent) => {
       // 更新 CSS 变量，实现背景聚光灯跟随
@@ -39,7 +74,7 @@ const App: React.FC = () => {
     window.addEventListener('scroll', handleScroll);
     window.addEventListener('mousemove', handleGlobalMouseMove);
     window.addEventListener('mousedown', handleMouseDown);
-    
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('mousemove', handleGlobalMouseMove);
@@ -55,11 +90,11 @@ const App: React.FC = () => {
 
   const handleCopy = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
-    
+
     // Show Toast
     if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
     setToast({ show: true, msg: `${label} 已复制到剪贴板` });
-    
+
     toastTimeoutRef.current = setTimeout(() => {
       setToast({ show: false, msg: '' });
     }, 2500);
@@ -89,6 +124,9 @@ const App: React.FC = () => {
           </header>
           <div className="rounded-[3rem] overflow-hidden mb-24 aspect-[16/9] glass shadow-2xl"><img src={selectedPost.image} className="w-full h-full object-cover" /></div>
           <article className="prose prose-invert max-w-none prose-p:text-white/60 prose-p:leading-[1.9] prose-p:text-xl prose-p:font-light prose-headings:font-bold prose-headings:tracking-tighter prose-blockquote:border-white/20 prose-blockquote:text-white/80" dangerouslySetInnerHTML={{ __html: selectedPost.content }} />
+
+          {/* 评论区 */}
+          <CommentSection postId={selectedPost.id} />
         </div>
       );
     }
@@ -97,41 +135,45 @@ const App: React.FC = () => {
       case ViewState.NOTEBOOK:
         return (
           <div className="py-12">
-             <header className="mb-24">
-                <h2 className="text-6xl md:text-8xl font-bold tracking-tighter mb-8 italic">NOTES.</h2>
-                <p className="text-xl text-white/30 font-light max-w-lg">那些转瞬即逝的思想，在留白间沉淀。</p>
-             </header>
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-               {QUOTES_DATA.map((quote, i) => (
-                 <div key={i} className="glass p-10 rounded-[2.5rem] relative group border border-white/5 hover:border-white/20 transition-all duration-700 hover:-translate-y-1 animate-in fade-in slide-in-from-bottom-4" style={{ animationDelay: `${i * 100}ms` }}>
-                   <div className="absolute top-8 left-8">{ICONS.QUOTES}</div>
-                   <p className="text-xl md:text-2xl font-light leading-relaxed text-white/80 mb-10 pt-10">“{quote.text}”</p>
-                   <div className="flex items-center justify-between border-t border-white/5 pt-8">
-                      <span className="text-xs font-bold tracking-[0.3em] text-white/40 uppercase">— {quote.author}</span>
-                      <span className="text-[10px] font-medium text-white/10 uppercase tracking-widest">{quote.date}</span>
-                   </div>
-                 </div>
-               ))}
-             </div>
+            <header className="mb-24">
+              <h2 className="text-6xl md:text-8xl font-bold tracking-tighter mb-8 italic">NOTES.</h2>
+              <p className="text-xl text-white/30 font-light max-w-lg">那些转瞬即逝的思想，在留白间沉淀。</p>
+            </header>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {QUOTES_DATA.map((quote, i) => (
+                <div key={i} className="glass p-10 rounded-[2.5rem] relative group border border-white/5 hover:border-white/20 transition-all duration-700 hover:-translate-y-1 animate-in fade-in slide-in-from-bottom-4" style={{ animationDelay: `${i * 100}ms` }}>
+                  <div className="absolute top-8 left-8">{ICONS.QUOTES}</div>
+                  <p className="text-xl md:text-2xl font-light leading-relaxed text-white/80 mb-10 pt-10">“{quote.text}”</p>
+                  <div className="flex items-center justify-between border-t border-white/5 pt-8">
+                    <span className="text-xs font-bold tracking-[0.3em] text-white/40 uppercase">— {quote.author}</span>
+                    <span className="text-[10px] font-medium text-white/10 uppercase tracking-widest">{quote.date}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         );
       case ViewState.ARCHIVE:
         return (
           <div className="py-12">
             <h2 className="text-6xl font-bold tracking-tighter mb-16">归档文章</h2>
-            <div className="grid grid-cols-1 gap-4">
-              {BLOG_POSTS.map((post, i) => (
-                <div key={post.id} className="glass p-8 rounded-[2.5rem] flex items-center justify-between group cursor-pointer hover:bg-white/[0.08] transition-all border border-white/5 animate-in fade-in slide-in-from-bottom-2" style={{ animationDelay: `${i * 50}ms` }} onClick={() => setSelectedPost(post)}>
-                  <div className="space-y-1 flex-1">
-                    <p className="text-white/30 text-[10px] uppercase tracking-widest">{post.date}</p>
-                    <h3 className="text-2xl font-semibold group-hover:translate-x-2 transition-transform duration-500">{post.title}</h3>
+            {loading ? (
+              <div className="text-center text-white/40 py-12">加载中...</div>
+            ) : (
+              <div className="grid grid-cols-1 gap-4">
+                {posts.map((post, i) => (
+                  <div key={post.id} className="glass p-8 rounded-[2.5rem] flex items-center justify-between group cursor-pointer hover:bg-white/[0.08] transition-all border border-white/5 animate-in fade-in slide-in-from-bottom-2" style={{ animationDelay: `${i * 50}ms` }} onClick={() => setSelectedPost(post)}>
+                    <div className="space-y-1 flex-1">
+                      <p className="text-white/30 text-[10px] uppercase tracking-widest">{post.date}</p>
+                      <h3 className="text-2xl font-semibold group-hover:translate-x-2 transition-transform duration-500">{post.title}</h3>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <div className="p-4 rounded-full bg-white/5 group-hover:bg-white group-hover:text-black transition-all">{ICONS.CHEVRON_RIGHT}</div>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <div className="p-4 rounded-full bg-white/5 group-hover:bg-white group-hover:text-black transition-all">{ICONS.CHEVRON_RIGHT}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         );
       case ViewState.ABOUT:
@@ -141,14 +183,14 @@ const App: React.FC = () => {
             <p className="text-2xl text-white/60 leading-relaxed font-light mb-16">Aura 是一个极简主义的数字避风港，在这里美学与智能相遇。我们旨在重新探讨极简美学与人工智能之间的和谐共生。</p>
             <div className="h-[1px] w-full bg-white/10 mb-16" />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
-               <div>
-                  <h4 className="text-xs uppercase tracking-[0.3em] text-white/20 mb-6 font-bold">设计理念</h4>
-                  <p className="text-white/60 font-light leading-relaxed">追求空间感、诗意以及克制的智能交互。每一像素都经过深思熟虑。</p>
-               </div>
-               <div>
-                  <h4 className="text-xs uppercase tracking-[0.3em] text-white/20 mb-6 font-bold">底层驱动</h4>
-                  <p className="text-white/60 font-light leading-relaxed">Powered by Gemini 3 Flash Pro. 为内容探索提供深度见解。</p>
-               </div>
+              <div>
+                <h4 className="text-xs uppercase tracking-[0.3em] text-white/20 mb-6 font-bold">设计理念</h4>
+                <p className="text-white/60 font-light leading-relaxed">追求空间感、诗意以及克制的智能交互。每一像素都经过深思熟虑。</p>
+              </div>
+              <div>
+                <h4 className="text-xs uppercase tracking-[0.3em] text-white/20 mb-6 font-bold">底层驱动</h4>
+                <p className="text-white/60 font-light leading-relaxed">Powered by Gemini 3 Flash Pro. 为内容探索提供深度见解。</p>
+              </div>
             </div>
           </div>
         );
@@ -158,16 +200,20 @@ const App: React.FC = () => {
             <section>
               <div className="max-w-3xl mb-24 animate-in fade-in slide-in-from-bottom-4 duration-1000">
                 <h4 className="text-white/20 uppercase tracking-[0.5em] text-[10px] font-black mb-8">Personal Space</h4>
-                <h2 className="text-6xl md:text-8xl font-bold tracking-tighter mb-12 leading-[0.9]">探索 <br/><span className="text-white/30 italic">纯粹瞬间.</span></h2>
+                <h2 className="text-6xl md:text-8xl font-bold tracking-tighter mb-12 leading-[0.9]">探索 <br /><span className="text-white/30 italic">纯粹瞬间.</span></h2>
                 <p className="text-xl md:text-2xl text-white/40 font-light max-w-xl leading-relaxed">在这里，我们探索技术、建筑与人类情感之间那些无形的联系。</p>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                {BLOG_POSTS.slice(0, 4).map((post, i) => (
-                  <div key={post.id} className="animate-in fade-in slide-in-from-bottom-8" style={{ animationDelay: `${i * 150}ms` }}>
-                    <BlogCard post={post} onClick={() => setSelectedPost(post)} />
-                  </div>
-                ))}
-              </div>
+              {loading ? (
+                <div className="text-center text-white/40 py-12">加载中...</div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                  {posts.slice(0, 4).map((post, i) => (
+                    <div key={post.id} className="animate-in fade-in slide-in-from-bottom-8" style={{ animationDelay: `${i * 150}ms` }}>
+                      <BlogCard post={post} onClick={() => setSelectedPost(post)} />
+                    </div>
+                  ))}
+                </div>
+              )}
             </section>
           </div>
         );
@@ -189,7 +235,7 @@ const App: React.FC = () => {
             <span className="group-hover:translate-x-0.5 transition-transform hidden xs:inline">Aura</span>
           </button>
           <div className="h-4 md:h-5 w-[1px] bg-white/10 mx-1 md:mx-2" />
-          {[ {label: 'NOTES', view: ViewState.NOTEBOOK}, {label: 'ARCHIVE', view: ViewState.ARCHIVE}, {label: 'ABOUT', view: ViewState.ABOUT} ].map(item => (
+          {[{ label: 'NOTES', view: ViewState.NOTEBOOK }, { label: 'ARCHIVE', view: ViewState.ARCHIVE }, { label: 'ABOUT', view: ViewState.ABOUT }].map(item => (
             <button key={item.label} onClick={() => navigateTo(item.view)} className={`px-3 md:px-5 py-2.5 text-[9px] md:text-[11px] uppercase tracking-[0.2em] font-black rounded-full transition-all duration-500 active:scale-95 whitespace-nowrap ${view === item.view && !selectedPost ? 'bg-white text-black shadow-lg' : 'text-white/30 hover:text-white hover:bg-white/5'}`}>{item.label}</button>
           ))}
         </div>
@@ -205,17 +251,17 @@ const App: React.FC = () => {
         <div className="max-w-7xl mx-auto flex flex-col items-center text-center">
           <div className="text-4xl font-bold tracking-tighter mb-12 opacity-10 select-none grayscale contrast-200">AURA</div>
           <div className="flex flex-row justify-center items-center gap-8 md:gap-20 text-[10px] uppercase tracking-[0.4em] font-bold text-white/20">
-            {[ { id: 'qq', label: 'QQ', value: CONTACT_INFO.QQ }, { id: 'wx', label: 'WX', value: CONTACT_INFO.WX }, { id: 'mail', label: 'MAIL', value: CONTACT_INFO.MAIL } ].map((contact) => (
-              <button 
-                key={contact.id} 
-                onClick={() => handleCopy(contact.value, contact.label)} 
+            {[{ id: 'qq', label: 'QQ', value: CONTACT_INFO.QQ }, { id: 'wx', label: 'WX', value: CONTACT_INFO.WX }, { id: 'mail', label: 'MAIL', value: CONTACT_INFO.MAIL }].map((contact) => (
+              <button
+                key={contact.id}
+                onClick={() => handleCopy(contact.value, contact.label)}
                 className="group relative overflow-hidden h-8 w-[5em] md:w-[6em] focus:outline-none"
               >
                 {/* Default Text (Slides up on hover) */}
                 <div className="absolute inset-0 flex items-center justify-center transition-transform duration-500 ease-[cubic-bezier(0.19,1,0.22,1)] group-hover:-translate-y-full group-active:scale-90">
                   {contact.label}
                 </div>
-                
+
                 {/* Hover Text (Slides up from bottom) */}
                 <div className="absolute inset-0 flex items-center justify-center translate-y-full transition-transform duration-500 ease-[cubic-bezier(0.19,1,0.22,1)] group-hover:translate-y-0 group-active:scale-90 text-white font-bold">
                   COPY
