@@ -26,57 +26,69 @@ if (!supabaseUrl || !supabaseKey) {
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 const POSTS_DIR = path.resolve(__dirname, '../content/posts');
+const NOTES_DIR = path.resolve(__dirname, '../content/notes');
 
 async function syncPosts() {
-    console.log('🚀 Starting Obsidian to Supabase Sync...');
+    console.log('🚀 Starting Content Sync (Posts & Notes)...');
 
-    if (!fs.existsSync(POSTS_DIR)) {
-        console.error(`❌ Dir not found: $\{POSTS_DIR\}`);
+    // 1. 同步文章 (Posts)
+    await syncCollection(POSTS_DIR, 'posts', (data, content) => ({
+        title: data.title,
+        slug: data.slug,
+        content: content,
+        html_content: marked.parse(content) as string,
+        excerpt: data.excerpt || '',
+        category: data.category || 'Thought',
+        cover_image: data.cover_image || '',
+        published: data.published ?? true,
+        reading_time: Math.ceil(content.length / 500)
+    }));
+
+    // 2. 同步随感 (Notes)
+    await syncCollection(NOTES_DIR, 'notes', (data, content) => ({
+        text: content.trim(),
+        author: data.author || 'Aura',
+        slug: data.slug || path.parse(data.file).name, // 自动生成 slug 用于冲突检测
+        created_at: data.date ? new Date(data.date).toISOString() : new Date().toISOString()
+    }));
+
+    console.log('✨ All Sync Complete.');
+}
+
+async function syncCollection(dir: string, table: string, mapper: (data: any, content: string) => any) {
+    if (!fs.existsSync(dir)) {
+        console.warn(`⚠️ Warning: Dir not found: ${dir}. Skipping.`);
         return;
     }
 
-    const files = fs.readdirSync(POSTS_DIR).filter(f => f.endsWith('.md'));
-    console.log(`📂 Found $\{files.length\} markdown files.`);
+    const files = fs.readdirSync(dir).filter(f => f.endsWith('.md'));
+    console.log(`📂 Found ${files.length} markdown files in ${path.basename(dir)}/`);
 
     for (const file of files) {
-        const filePath = path.join(POSTS_DIR, file);
+        const filePath = path.join(dir, file);
         const fileContent = fs.readFileSync(filePath, 'utf-8');
         const { data, content } = matter(fileContent);
 
-        if (!data.title || !data.slug) {
-            console.warn(`⚠️ Skipping $\{file\}: Missing title or slug in front matter.`);
+        // 传递文件名给 mapper 以便生成 slug
+        const postObj = mapper({ ...data, file: file }, content);
+
+        if (!postObj.slug && table === 'posts') {
+            console.warn(`⚠️ Skipping ${file}: Missing slug.`);
             continue;
         }
 
-        const html_content = await marked(content);
-        const reading_time = Math.ceil(content.length / 500);
-
-        const postObj = {
-            title: data.title,
-            slug: data.slug,
-            content: content,
-            html_content: html_content,
-            excerpt: data.excerpt || '',
-            category: data.category || 'Thought',
-            cover_image: data.cover_image || '',
-            published: data.published ?? true,
-            reading_time: reading_time
-        };
-
-        console.log(`🔄 Syncing: $\{data.title\}...`);
+        console.log(`🔄 Syncing: ${postObj.title || file} -> ${table}`);
 
         const { error } = await supabase
-            .from('posts')
+            .from(table)
             .upsert(postObj, { onConflict: 'slug' });
 
         if (error) {
-            console.error(`❌ Error syncing $\{data.title\}:`, error.message);
+            console.error(`❌ Error syncing to ${table}:`, error.message);
         } else {
-            console.log(`✅ Success: $\{data.title\}`);
+            console.log(`✅ Success: ${file}`);
         }
     }
-
-    console.log('✨ Sync Complete.');
 }
 
 syncPosts();

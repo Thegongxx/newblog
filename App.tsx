@@ -8,7 +8,7 @@ import LikeButton from './components/LikeButton';
 import HomepageComments from './components/HomepageComments';
 import Admin from './components/Admin';
 import { QUOTES_DATA, ICONS, CONTACT_INFO } from './constants';
-import { postsApi, engagementApi } from './services/supabaseService';
+import { postsApi, engagementApi, notesApi } from './services/supabaseService';
 import { ViewState, Post } from './types';
 
 const App: React.FC = () => {
@@ -16,6 +16,7 @@ const App: React.FC = () => {
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const [posts, setPosts] = useState<Post[]>([]);
+  const [notes, setNotes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Toast State for "Apple-style" popup
@@ -24,14 +25,18 @@ const App: React.FC = () => {
 
   // 加载文章
   useEffect(() => {
-    const loadPosts = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const data = await postsApi.getAll();
-        // 转换数据格式以兼容现有组件
-        const formattedPosts = data.map((post: any) => ({
+        // 并行加载文章和随感
+        const [postsData, notesData] = await Promise.all([
+          postsApi.getAll(),
+          notesApi.getAll()
+        ]);
+
+        // 转换文章数据
+        const formattedPosts = postsData.map((post: any) => ({
           ...post,
-          // 兼容旧格式
           image: post.cover_image,
           date: new Date(post.created_at).toLocaleDateString('zh-CN', {
             year: 'numeric',
@@ -41,16 +46,22 @@ const App: React.FC = () => {
           readingTime: `${post.reading_time} 分钟`,
           content: post.html_content || post.content
         }));
+
+        // 转换笔记数据
+        const formattedNotes = notesData.map((note: any) => ({
+          ...note,
+          date: new Date(note.created_at).toLocaleDateString('zh-CN')
+        }));
+
         setPosts(formattedPosts);
+        setNotes(formattedNotes);
       } catch (error) {
-        console.error('Failed to load posts:', error);
-        // 如果加载失败，使用空数组
-        setPosts([]);
+        console.error('Failed to load data:', error);
       } finally {
         setLoading(false);
       }
     };
-    loadPosts();
+    fetchData();
   }, []);
 
   // 访问统计
@@ -176,16 +187,22 @@ const App: React.FC = () => {
               <p className="text-xl text-white/30 font-light max-w-lg">那些转瞬即逝的思想，在留白间沉淀。</p>
             </header>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {QUOTES_DATA.map((quote, i) => (
-                <div key={i} className="glass p-10 rounded-[2.5rem] relative group border border-white/5 hover:border-white/20 transition-all duration-700 hover:-translate-y-1 animate-in fade-in slide-in-from-bottom-4" style={{ animationDelay: `${i * 100}ms` }}>
-                  <div className="absolute top-8 left-8">{ICONS.QUOTES}</div>
-                  <p className="text-xl md:text-2xl font-light leading-relaxed text-white/80 mb-10 pt-10">“{quote.text}”</p>
-                  <div className="flex items-center justify-between border-t border-white/5 pt-8">
-                    <span className="text-xs font-bold tracking-[0.3em] text-white/40 uppercase">— {quote.author}</span>
-                    <LikeButton targetType="quote" targetId={`quote-${i}`} className="scale-75 origin-right !bg-transparent !border-none !px-0" />
-                  </div>
+              {notes.length === 0 ? (
+                <div className="col-span-full py-20 text-center text-white/20 font-light border border-dashed border-white/5 rounded-[3rem]">
+                  暂无笔记。在 Obsidian 的 content/notes 中写点什么吧。
                 </div>
-              ))}
+              ) : (
+                notes.map((quote, i) => (
+                  <div key={quote.id || i} className="glass p-10 rounded-[2.5rem] relative group border border-white/5 hover:border-white/20 transition-all duration-700 hover:-translate-y-1 animate-in fade-in slide-in-from-bottom-4" style={{ animationDelay: `${i * 100}ms` }}>
+                    <div className="absolute top-8 left-8">{ICONS.QUOTES}</div>
+                    <p className="text-xl md:text-2xl font-light leading-relaxed text-white/80 mb-10 pt-10">“{quote.text}”</p>
+                    <div className="flex items-center justify-between border-t border-white/5 pt-8">
+                      <span className="text-xs font-bold tracking-[0.3em] text-white/40 uppercase">— {quote.author}</span>
+                      <LikeButton targetType="note" targetId={quote.id} initialCount={quote.likes_count} className="scale-75 origin-right !bg-transparent !border-none !px-0" />
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         );

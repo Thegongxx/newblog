@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
@@ -127,7 +126,7 @@ export const notesApi = {
 // 后增：互动相关 API (Likes, Views, Homepage Comments)
 export const engagementApi = {
     // 点赞相关
-    async toggleLike(targetType: 'post' | 'quote' | 'homepage' | 'comment' | 'homepage_comment', targetId: string, fingerprint: string) {
+    async toggleLike(targetType: 'post' | 'quote' | 'homepage' | 'comment' | 'homepage_comment' | 'note', targetId: string, fingerprint: string) {
         const today = new Date().toISOString().split('T')[0];
 
         // 1. 获取该用户今天的点赞总数（基于指纹和日期）

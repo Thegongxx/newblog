@@ -3,7 +3,7 @@ import { engagementApi, supabase } from '../services/supabaseService';
 import { getBrowserFingerprint, checkIfLikedLocal, setLikedLocal } from '../utils/engagement';
 
 interface LikeButtonProps {
-    targetType: 'post' | 'quote' | 'homepage' | 'comment' | 'homepage_comment';
+    targetType: 'post' | 'quote' | 'homepage' | 'comment' | 'homepage_comment' | 'note';
     targetId: string;
     initialCount?: number;
     className?: string;
