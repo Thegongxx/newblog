@@ -180,8 +180,8 @@ const AppInner: React.FC = () => {
           <React.Suspense fallback={<div className="min-h-[60vh] flex items-center justify-center text-white/10 tracking-[0.5em] uppercase text-xs animate-pulse">Establishing Connection...</div>}>
             <Routes>
               <Route path="/" element={<Feed posts={posts} loading={loading} onSelectPost={(p) => navigate(`/post/${p.slug}`)} />} />
-              <Route path="/post/:slug" element={<PostDetail posts={posts} />} />
-              <Route path="/notes" element={<Notes notes={notes} />} />
+              <Route path="/post/:slug" element={<PostDetail posts={posts} loading={loading} />} />
+              <Route path="/notes" element={<Notes notes={notes} loading={loading} />} />
               <Route path="/archive" element={<Archive />} />
               <Route path="/about" element={<About />} />
               <Route path="/admin" element={<Admin />} />

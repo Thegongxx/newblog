@@ -9,9 +9,10 @@ import { Post } from '../types';
 
 interface PostDetailProps {
     posts: Post[];
+    loading?: boolean;
 }
 
-const PostDetail: React.FC<PostDetailProps> = ({ posts }) => {
+const PostDetail: React.FC<PostDetailProps> = ({ posts, loading }) => {
     const { slug } = useParams<{ slug: string }>();
     const navigate = useNavigate();
     const post = posts.find(p => p.slug === slug);
@@ -28,6 +29,26 @@ const PostDetail: React.FC<PostDetailProps> = ({ posts }) => {
             trackView();
         }
     }, [post]);
+
+    // 加载状态下的骨架屏 (Loading Skeleton)
+    if (loading) {
+        return (
+            <div className="max-w-4xl mx-auto animate-pulse">
+                <div className="h-10 w-32 bg-white/5 rounded-full mb-12" />
+                <div className="space-y-6 mb-20">
+                    <div className="h-4 w-40 bg-white/5 rounded" />
+                    <div className="h-20 w-3/4 bg-white/5 rounded" />
+                    <div className="h-6 w-1/2 bg-white/5 rounded" />
+                </div>
+                <div className="rounded-[3rem] aspect-[16/9] bg-white/5 mb-24" />
+                <div className="space-y-4">
+                    <div className="h-4 w-full bg-white/5 rounded" />
+                    <div className="h-4 w-full bg-white/5 rounded" />
+                    <div className="h-4 w-2/3 bg-white/5 rounded" />
+                </div>
+            </div>
+        );
+    }
 
     if (!post) {
         return (

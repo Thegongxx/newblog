@@ -5,9 +5,10 @@ import { ICONS } from '../constants';
 
 interface NotesProps {
     notes: any[];
+    loading?: boolean;
 }
 
-const Notes: React.FC<NotesProps> = ({ notes }) => {
+const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
     return (
         <div className="py-12">
             <Helmet>
@@ -19,8 +20,25 @@ const Notes: React.FC<NotesProps> = ({ notes }) => {
                 <h2 className="text-6xl md:text-8xl font-bold tracking-tighter mb-8 italic">NOTES.</h2>
                 <p className="text-xl text-white/30 font-light max-w-lg">那些转瞬即逝的思想，在留白间沉淀。</p>
             </header>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {notes.length === 0 ? (
+                {loading ? (
+                    // 加载状态下的骨架屏 (Loading Skeleton)
+                    Array.from({ length: 4 }).map((_, i) => (
+                        <div key={i} className="glass p-10 rounded-[2.5rem] border border-white/5 animate-pulse">
+                            <div className="w-8 h-8 bg-white/5 rounded mb-10" />
+                            <div className="space-y-4 mb-10">
+                                <div className="h-4 w-full bg-white/5 rounded" />
+                                <div className="h-4 w-full bg-white/5 rounded" />
+                                <div className="h-4 w-2/3 bg-white/5 rounded" />
+                            </div>
+                            <div className="flex justify-between border-t border-white/5 pt-8">
+                                <div className="h-3 w-24 bg-white/5 rounded" />
+                                <div className="h-6 w-12 bg-white/5 rounded-full" />
+                            </div>
+                        </div>
+                    ))
+                ) : notes.length === 0 ? (
                     <div className="col-span-full py-20 text-center text-white/20 font-light border border-dashed border-white/5 rounded-[3rem]">
                         暂无笔记。在 Obsidian 的 content/notes 中写点什么吧。
                     </div>
