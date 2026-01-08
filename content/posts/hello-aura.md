@@ -1,7 +1,6 @@
 ---
 title: 空间计算的未来设计
-slug: spatial-computing-future
-category: Design
+slug: "1"
 cover_image: https://images.unsplash.com/photo-1622979135225-d2ba269cf1ac?q=80&w=2070
 excerpt: 探讨在数字时代，如何通过极简主义重新定义我们与空间计算设备的交互。
 published: true
