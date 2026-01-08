@@ -76,11 +76,11 @@ const SubtleAura: React.FC = () => {
                     const distance = Math.sqrt(dx * dx + dy * dy);
 
                     if (distance < radius) {
-                        // 力度微增，但依然保持细腻
+                        // 力度稍微加强以便感知
                         const force = (radius - distance) / radius;
                         const angle = Math.atan2(dy, dx);
-                        p.vx -= Math.cos(angle) * force * 1.2;
-                        p.vy -= Math.sin(angle) * force * 1.2;
+                        p.vx -= Math.cos(angle) * force * 1.5;
+                        p.vy -= Math.sin(angle) * force * 1.5;
                     }
                 }
 
@@ -93,13 +93,13 @@ const SubtleAura: React.FC = () => {
                 p.x += p.vx;
                 p.y += p.vy;
 
-                // 提升粒子表现：带有一点点发光感
+                // 显著亮度：基础 0.5，运动时增加
                 const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
-                ctx.fillStyle = `rgba(255, 255, 255, ${0.4 + speed * 2})`;
+                ctx.fillStyle = `rgba(255, 255, 255, ${Math.min(0.5 + speed * 3, 1)})`;
 
                 ctx.beginPath();
-                // 增大粒子以便肉眼可见
-                ctx.arc(p.x, p.y, 1.2, 0, Math.PI * 2);
+                // 1.5px 确保可见
+                ctx.arc(p.x, p.y, 1.5, 0, Math.PI * 2);
                 ctx.fill();
             });
 
@@ -119,7 +119,6 @@ const SubtleAura: React.FC = () => {
         <canvas
             ref={canvasRef}
             className="fixed inset-0 z-0 pointer-events-none"
-            style={{ mixBlendMode: 'screen' }}
         />
     );
 };
