@@ -32,10 +32,10 @@ const FluidAura: React.FC = () => {
 
             // 初始化 4 个具有不同特性的流体光团
             blobs.current = [
-                { x: 0, y: 0, sx: 0, sy: 0, radius: 450, color: 'rgba(56, 189, 248, 0.08)', lerp: 0.04 }, // Blue
-                { x: 0, y: 0, sx: 0, sy: 0, radius: 350, color: 'rgba(255, 255, 255, 0.04)', lerp: 0.02 }, // White
-                { x: 0, y: 0, sx: 0, sy: 0, radius: 550, color: 'rgba(139, 92, 246, 0.05)', lerp: 0.015 }, // Purple
-                { x: 0, y: 0, sx: 0, sy: 0, radius: 400, color: 'rgba(244, 114, 182, 0.03)', lerp: 0.03 }, // Pink
+                { x: 0, y: 0, sx: 0, sy: 0, radius: 500, color: 'rgba(56, 189, 248, 0.15)', lerp: 0.04 }, // Blue
+                { x: 0, y: 0, sx: 0, sy: 0, radius: 400, color: 'rgba(255, 255, 255, 0.08)', lerp: 0.02 }, // White
+                { x: 0, y: 0, sx: 0, sy: 0, radius: 600, color: 'rgba(139, 92, 246, 0.12)', lerp: 0.015 }, // Purple
+                { x: 0, y: 0, sx: 0, sy: 0, radius: 450, color: 'rgba(244, 114, 182, 0.10)', lerp: 0.03 }, // Pink
             ];
 
             // 给光团一个初始的中心位置
@@ -98,7 +98,7 @@ const FluidAura: React.FC = () => {
     return (
         <canvas
             ref={canvasRef}
-            className="fixed inset-0 -z-10 pointer-events-none"
+            className="fixed inset-0 z-0 pointer-events-none"
         />
     );
 };
