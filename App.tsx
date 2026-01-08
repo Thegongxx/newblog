@@ -7,7 +7,7 @@ import CommentSection from './components/CommentSection';
 import LikeButton from './components/LikeButton';
 import HomepageComments from './components/HomepageComments';
 import Admin from './components/Admin';
-import AboutInteractiveBg from './components/AboutInteractiveBg';
+import InteractiveParticles from './components/InteractiveParticles';
 import { QUOTES_DATA, ICONS, CONTACT_INFO } from './constants';
 import { postsApi, engagementApi, notesApi } from './services/supabaseService';
 import { ViewState, Post } from './types';
@@ -235,7 +235,6 @@ const App: React.FC = () => {
       case ViewState.ABOUT:
         return (
           <div className="max-w-3xl py-12 relative">
-            <AboutInteractiveBg />
             <div className="relative z-10">
               <h2 className="text-7xl font-bold tracking-tighter mb-10">关于我.</h2>
               <p className="text-2xl text-white/60 leading-relaxed font-light mb-16">Aura 是一个极简主义的数字避风港，在这里美学与智能相遇。我们旨在重新探讨极简美学与人工智能之间的和谐共生。</p>
@@ -308,6 +307,7 @@ const App: React.FC = () => {
       </main>
 
       <Assistant />
+      <InteractiveParticles />
 
       <footer className="py-24 md:py-40 px-6 border-t border-white/5 bg-gradient-to-b from-transparent to-white/[0.01]">
         <div className="max-w-7xl mx-auto flex flex-col items-center text-center">
