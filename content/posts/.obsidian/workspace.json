@@ -190,7 +190,7 @@
             }
           }
         ],
-        "currentTab": 5
+        "currentTab": 4
       }
     ],
     "direction": "horizontal",
@@ -208,7 +208,7 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "ee99bd827af2b95a",
+  "active": "f977b1bd252639eb",
   "lastOpenFiles": [
     "hello-aura.md",
     "test-automation.md",

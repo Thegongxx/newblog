@@ -105,6 +105,25 @@ export const commentsApi = {
     }
 };
 
+// 随想笔记 (Notes) 相关 API
+export const notesApi = {
+    // 获取所有笔记
+    async getAll() {
+        const { data, error } = await supabase
+            .from('notes')
+            .select('*')
+            .order('created_at', { ascending: false });
+        if (error) throw error;
+        return data;
+    },
+
+    // 删除笔记 (需要认证)
+    async delete(id: string) {
+        const { error } = await supabase.from('notes').delete().eq('id', id);
+        if (error) throw error;
+    }
+};
+
 // 后增：互动相关 API (Likes, Views, Homepage Comments)
 export const engagementApi = {
     // 点赞相关
