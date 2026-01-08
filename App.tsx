@@ -7,7 +7,7 @@ import CommentSection from './components/CommentSection';
 import LikeButton from './components/LikeButton';
 import HomepageComments from './components/HomepageComments';
 import Admin from './components/Admin';
-import InteractiveParticles from './components/InteractiveParticles';
+import FluidAura from './components/FluidAura';
 import { QUOTES_DATA, ICONS, CONTACT_INFO } from './constants';
 import { postsApi, engagementApi, notesApi } from './services/supabaseService';
 import { ViewState, Post } from './types';
@@ -307,7 +307,7 @@ const App: React.FC = () => {
       </main>
 
       <Assistant />
-      <InteractiveParticles />
+      <FluidAura />
 
       <footer className="relative z-10 py-24 md:py-40 px-6 border-t border-white/5 bg-gradient-to-b from-transparent to-white/[0.01]">
         <div className="max-w-7xl mx-auto flex flex-col items-center text-center">
