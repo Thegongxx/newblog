@@ -218,23 +218,62 @@ export const engagementApi = {
 };
 
 // 后增：存储相关 API (Image Uploads)
+// 存储与媒体库 API
 export const storageApi = {
     async uploadImage(file: File) {
         const fileExt = file.name.split('.').pop();
-        const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+        const fileName = `${Math.round(Math.random() * 1000000)}-${Date.now()}.${fileExt}`;
         const filePath = `blog-media/${fileName}`;
 
-        const { data, error } = await supabase.storage
-            .from('media') // 确保已经在 Supabase 控制台创建并配置了名为 'media' 的公共存储桶
+        const { error } = await supabase.storage
+            .from('media')
             .upload(filePath, file);
 
         if (error) throw error;
 
-        // 获取公共 URL
         const { data: { publicUrl } } = supabase.storage
             .from('media')
             .getPublicUrl(filePath);
 
         return publicUrl;
+    },
+
+    async listMedia() {
+        const { data, error } = await supabase.storage
+            .from('media')
+            .list('blog-media', {
+                limit: 100,
+                offset: 0,
+                sortBy: { column: 'created_at', order: 'desc' }
+            });
+
+        if (error) throw error;
+
+        return data.map(file => {
+            const { data: { publicUrl } } = supabase.storage
+                .from('media')
+                .getPublicUrl(`blog-media/${file.name}`);
+            return publicUrl;
+        });
+    }
+};
+
+// 统计数据 API
+export const statsApi = {
+    async getOverview() {
+        const [posts, likes, comments, guestbook] = await Promise.all([
+            supabase.from('posts').select('id', { count: 'exact', head: true }),
+            supabase.from('posts').select('likes_count'),
+            supabase.from('comments').select('id', { count: 'exact', head: true }),
+            supabase.from('homepage_comments').select('id', { count: 'exact', head: true })
+        ]);
+
+        const totalLikes = (likes.data as any[])?.reduce((acc, p) => acc + (p.likes_count || 0), 0) || 0;
+
+        return {
+            postsCount: posts.count || 0,
+            likesCount: totalLikes,
+            commentsCount: (comments.count || 0) + (guestbook.count || 0)
+        };
     }
 };
