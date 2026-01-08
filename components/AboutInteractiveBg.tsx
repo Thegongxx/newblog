@@ -17,14 +17,17 @@ const AboutInteractiveBg: React.FC = () => {
 
         let frameId: number;
         const animate = () => {
-            // 对每个 Blob 应用不同的插值因子，产生层次感(惯性延迟)
-            const factors = [0.08, 0.05, 0.03];
+            // 优化：针对 120Hz+ 屏幕，使用略大的插值系数可以减少“粘滞感”
+            // 同时保持不同 Blob 之间的差速，营造空间深度
+            const factors = [0.12, 0.08, 0.04];
 
             smoothed.current.forEach((pos, i) => {
+                // 经典的 LERP (线性插值) 算法
                 pos.x += (mouse.current.x - pos.x) * factors[i];
                 pos.y += (mouse.current.y - pos.y) * factors[i];
 
                 if (blobRefs[i].current) {
+                    // 使用 translate3d 强制触发 GPU 合成层
                     blobRefs[i].current!.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0) translate(-50%, -50%)`;
                 }
             });

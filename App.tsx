@@ -253,7 +253,7 @@ const App: React.FC = () => {
             </div>
           </div>
         );
- Miranda      default:
+      default:
         return (
           <div className="space-y-40">
             <section>
