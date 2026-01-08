@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "sync": "ts-node scripts/sync-posts.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.3",
