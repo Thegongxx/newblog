@@ -302,14 +302,14 @@ const App: React.FC = () => {
         </div>
       </nav>
 
-      <main className="relative pt-44 md:pt-56 pb-48 px-6 md:px-8 max-w-7xl mx-auto">
+      <main className="relative z-10 pt-44 md:pt-56 pb-48 px-6 md:px-8 max-w-7xl mx-auto">
         <div key={selectedPost ? `post-${selectedPost.id}` : `view-${view}`} className="view-transition">{renderContent()}</div>
       </main>
 
       <Assistant />
       <InteractiveParticles />
 
-      <footer className="py-24 md:py-40 px-6 border-t border-white/5 bg-gradient-to-b from-transparent to-white/[0.01]">
+      <footer className="relative z-10 py-24 md:py-40 px-6 border-t border-white/5 bg-gradient-to-b from-transparent to-white/[0.01]">
         <div className="max-w-7xl mx-auto flex flex-col items-center text-center">
           <div className="text-4xl font-bold tracking-tighter mb-12 opacity-10 select-none grayscale contrast-200">AURA</div>
           <div className="flex flex-row justify-center items-center gap-8 md:gap-20 text-[10px] uppercase tracking-[0.4em] font-bold text-white/20">

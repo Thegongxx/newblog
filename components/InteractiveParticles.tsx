@@ -78,11 +78,11 @@ const InteractiveParticles: React.FC = () => {
             const mouseActive = mouse.current.active;
             const mx = mouse.current.x;
             const my = mouse.current.y;
-            const radius = 150; // 影响半径
-            const friction = 0.92; // 磨擦系数力
-            const ease = 0.15; // 回弹系数
+            const radius = 180; // 增大影响半径使其更明显
+            const friction = 0.88; // 稍微增加摩擦力使其更紧致
+            const ease = 0.12; // 调整回弹系数
 
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.4)'; // 显著提升粒子亮度
 
             for (let i = 0; i < particles.current.length; i++) {
                 const p = particles.current[i];
@@ -94,10 +94,11 @@ const InteractiveParticles: React.FC = () => {
                     const distance = Math.sqrt(dx * dx + dy * dy);
 
                     if (distance < radius) {
+                        // 改进算法：提供更强的磁力感
                         const force = (radius - distance) / radius;
                         const angle = Math.atan2(dy, dx);
-                        const moveX = Math.cos(angle) * force * 15;
-                        const moveY = Math.sin(angle) * force * 15;
+                        const moveX = Math.cos(angle) * force * 20;
+                        const moveY = Math.sin(angle) * force * 20;
 
                         p.vx -= moveX;
                         p.vy -= moveY;
@@ -116,9 +117,10 @@ const InteractiveParticles: React.FC = () => {
 
                 // 绘制 (根据速度调整大小，产生动态感)
                 const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
-                const dynamicSize = p.size + speed * 1.5;
+                const dynamicSize = p.size + speed * 0.8;
 
                 ctx.beginPath();
+                // 增加发光感：根据距离调整亮度
                 ctx.arc(p.x, p.y, dynamicSize, 0, Math.PI * 2);
                 ctx.fill();
             }
@@ -139,8 +141,8 @@ const InteractiveParticles: React.FC = () => {
     return (
         <canvas
             ref={canvasRef}
-            className="fixed inset-0 -z-50 pointer-events-none opacity-40 bg-black"
-            style={{ mixBlendMode: 'screen' }}
+            className="fixed inset-0 z-[0] pointer-events-none"
+            style={{ opacity: 0.6 }}
         />
     );
 };
