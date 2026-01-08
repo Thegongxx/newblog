@@ -7,7 +7,6 @@ import CommentSection from './components/CommentSection';
 import LikeButton from './components/LikeButton';
 import HomepageComments from './components/HomepageComments';
 import Admin from './components/Admin';
-import SubtleAura from './components/SubtleAura';
 import { QUOTES_DATA, ICONS, CONTACT_INFO } from './constants';
 import { postsApi, engagementApi, notesApi } from './services/supabaseService';
 import { ViewState, Post } from './types';
@@ -235,7 +234,6 @@ const App: React.FC = () => {
       case ViewState.ABOUT:
         return (
           <div className="max-w-3xl py-12 relative min-h-[600px]">
-            <SubtleAura />
             <div className="relative z-10">
               <h2 className="text-7xl font-bold tracking-tighter mb-10">关于我.</h2>
               <p className="text-2xl text-white/60 leading-relaxed font-light mb-16">Aura 是一个极简主义的数字避风港，在这里美学与智能相遇。我们旨在重新探讨极简美学与人工智能之间的和谐共生。</p>
