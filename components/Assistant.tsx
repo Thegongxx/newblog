@@ -93,8 +93,9 @@ const Assistant: React.FC = () => {
 
       {/* 苹果风格弹性弹出面板 */}
       <div
-        className={`fixed bottom-28 right-8 z-[90] w-[calc(100vw-4rem)] md:w-[420px] max-h-[75vh] bg-[#0d0d0d]/80 backdrop-blur-[60px] border border-white/10 rounded-[3rem] flex flex-col overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] shadow-[0_80px_160px_-40px_rgba(0,0,0,0.9)] origin-bottom-right ${isOpen ? 'scale-100 opacity-100 translate-y-0 translate-x-0' : 'scale-[0.85] opacity-0 translate-y-12 translate-x-4 pointer-events-none blur-xl'
+        className={`fixed bottom-28 right-8 z-[90] w-[calc(100vw-4rem)] md:w-[420px] max-h-[75vh] bg-[#0d0d0d]/85 border border-white/10 rounded-[3rem] flex flex-col overflow-hidden transition-[transform,opacity,filter] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] shadow-[0_80px_160px_-40px_rgba(0,0,0,0.9)] origin-bottom-right will-change-[transform,opacity,filter] ${isOpen ? 'scale-100 opacity-100 translate-y-0 translate-x-0' : 'scale-[0.85] opacity-0 translate-y-12 translate-x-4 pointer-events-none blur-xl'
           }`}
+        style={{ backdropFilter: 'blur(32px) saturate(180%)' }}
       >
         {/* 高级感页眉 */}
         <div className="px-10 py-8 flex items-center justify-between relative overflow-hidden">
@@ -107,10 +108,10 @@ const Assistant: React.FC = () => {
         </div>
 
         {/* 动态消息流 */}
-        <div ref={scrollRef} className="flex-1 overflow-y-auto px-10 space-y-10 custom-scrollbar pb-10">
+        <div ref={scrollRef} className="flex-1 overflow-y-auto px-10 space-y-10 custom-scrollbar pb-10 overscroll-contain">
           {messages.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-center py-16 animate-in fade-in slide-in-from-bottom-4 duration-1000 ease-out">
-              <div className="w-20 h-20 mb-10 rounded-[2rem] glass-strong flex items-center justify-center text-white/5 rotate-3 scale-110">
+              <div className="w-20 h-20 mb-10 rounded-[2rem] bg-white/[0.03] border border-white/10 flex items-center justify-center text-white/5 rotate-3 scale-110">
                 <div className="scale-150 opacity-40">{ICONS.AI}</div>
               </div>
               <h4 className="text-white text-2xl font-bold tracking-tighter mb-4">随时待命。</h4>
@@ -126,8 +127,8 @@ const Assistant: React.FC = () => {
                 style={{ animationDelay: `${i * 50}ms` }}
               >
                 <div className={`max-w-[85%] px-7 py-5 rounded-[2.2rem] text-[15px] leading-[1.7] tracking-wide ${m.role === 'user'
-                    ? 'bg-white text-black font-semibold rounded-tr-none shadow-[0_15px_35px_-5px_rgba(255,255,255,0.15)]'
-                    : 'text-white/90 rounded-tl-none bg-white/[0.04] border border-white/5'
+                  ? 'bg-white text-black font-semibold rounded-tr-none shadow-[0_15px_35px_-5px_rgba(255,255,255,0.15)]'
+                  : 'text-white/90 rounded-tl-none bg-white/[0.04] border border-white/5'
                   }`}>
                   {m.content || (
                     <div className="flex gap-2 py-2">
@@ -151,13 +152,13 @@ const Assistant: React.FC = () => {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
               placeholder="有什有趣的想法吗？"
-              className="w-full bg-white/[0.05] border border-white/10 rounded-[1.8rem] px-8 py-5 text-[15px] text-white placeholder-white/10 focus:outline-none focus:border-white/20 focus:bg-white/[0.08] transition-all duration-500 shadow-inner"
+              className="w-full bg-white/[0.05] border border-white/10 rounded-[1.8rem] px-8 py-5 text-[15px] text-white placeholder-white/10 focus:outline-none focus:border-white/20 focus:bg-white/[0.08] transition-all duration-300 shadow-inner"
               disabled={isLoading}
             />
             <button
               onClick={handleSend}
               disabled={!input.trim() || isLoading}
-              className={`absolute right-3 top-3 w-11 h-11 rounded-[1.2rem] bg-white text-black flex items-center justify-center transition-all duration-500 ${input.trim() ? 'opacity-100 translate-x-0 scale-100' : 'opacity-0 translate-x-4 scale-75'
+              className={`absolute right-3 top-3 w-11 h-11 rounded-[1.2rem] bg-white text-black flex items-center justify-center transition-all duration-300 ${input.trim() ? 'opacity-100 translate-x-0 scale-100' : 'opacity-0 translate-x-4 scale-75'
                 } hover:scale-105 active:scale-90`}
             >
               {ICONS.CHEVRON_RIGHT}
@@ -167,14 +168,10 @@ const Assistant: React.FC = () => {
       </div>
 
       <style>{`
-        .glass-strong {
-          background: rgba(255, 255, 255, 0.03);
-          backdrop-filter: blur(40px) saturate(200%);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .custom-scrollbar::-webkit-scrollbar { width: 3px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 2px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { 
-          background: rgba(255,255,255,0.05); 
+          background: rgba(255,255,255,0.08); 
           border-radius: 10px;
         }
       `}</style>

@@ -315,9 +315,9 @@ const App: React.FC = () => {
       </footer>
 
       <style>{`
-        .view-transition { animation: auraEntrance 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards; will-change: transform, opacity, filter; }
-        @keyframes auraEntrance { 0% { opacity: 0; transform: translateY(20px) scale(0.985); filter: blur(20px); } 100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); } }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px) saturate(180%); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .view-transition { animation: auraEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; will-change: transform, opacity, filter; }
+        @keyframes auraEntrance { 0% { opacity: 0; transform: translateY(15px) scale(0.995); filter: blur(10px); } 100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); } }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(16px) saturate(180%); border: 1px solid rgba(255, 255, 255, 0.08); }
         .prose blockquote { border-left-width: 2px; border-color: rgba(255,255,255,0.2); padding-left: 2rem; margin: 3rem 0; font-style: italic; color: rgba(255,255,255,0.8); }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
