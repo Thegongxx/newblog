@@ -84,8 +84,7 @@
               "title": "书签"
             }
           }
-        ],
-        "currentTab": 2
+        ]
       }
     ],
     "direction": "horizontal",
@@ -203,7 +202,7 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "8e3b71807fd4a30e",
+  "active": "3f43afccb4e94487",
   "lastOpenFiles": [
     "hello-aura.md",
     "未命名.canvas",
