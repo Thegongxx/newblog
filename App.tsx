@@ -1,14 +1,11 @@
-import { BrowserRouter as Router, Routes, Route, useNavigate, useParams, useLocation, Navigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { HelmetProvider, Helmet } from 'react-helmet-async';
 import Intro from './components/Intro';
 import Assistant from './components/Assistant';
-import BlogCard from './components/BlogCard';
-import CommentSection from './components/CommentSection';
-import LikeButton from './components/LikeButton';
-import HomepageComments from './components/HomepageComments';
-import { QUOTES_DATA, ICONS, CONTACT_INFO } from './constants';
-import { postsApi, engagementApi, notesApi } from './services/supabaseService';
-import { ViewState, Post } from './types';
+import { ICONS, CONTACT_INFO } from './constants';
+import { postsApi, notesApi } from './services/supabaseService';
+import { Post } from './types';
 
 // Pages
 import Feed from './pages/Feed';
@@ -16,7 +13,7 @@ import PostDetail from './pages/PostDetail';
 import Notes from './pages/Notes';
 import About from './pages/About';
 
-// Lazy load Admin
+// Lazy load components
 const Admin = React.lazy(() => import('./components/Admin'));
 
 const AppInner: React.FC = () => {
@@ -28,11 +25,10 @@ const AppInner: React.FC = () => {
   const [notes, setNotes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Toast State for "Apple-style" popup
+  // Toast State
   const [toast, setToast] = useState<{ show: boolean, msg: string }>({ show: false, msg: '' });
   const toastTimeoutRef = useRef<any>(null);
 
-  // 加载文章
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -117,10 +113,6 @@ const AppInner: React.FC = () => {
     }, 2500);
   };
 
-  if (showIntro && location.pathname === '/') {
-    return <Intro onComplete={() => setShowIntro(false)} />;
-  }
-
   const Archive = () => (
     <div className="py-12">
       <Helmet>
@@ -152,6 +144,10 @@ const AppInner: React.FC = () => {
     { label: 'ARCHIVE', path: '/archive' },
     { label: 'ABOUT', path: '/about' }
   ];
+
+  if (showIntro && location.pathname === '/') {
+    return <Intro onComplete={() => setShowIntro(false)} />;
+  }
 
   return (
     <div className="min-h-screen selection:bg-white/20 selection:text-white">
@@ -207,12 +203,9 @@ const AppInner: React.FC = () => {
                 onClick={() => handleCopy(contact.value, contact.label)}
                 className="group relative overflow-hidden h-8 w-[5em] md:w-[6em] focus:outline-none"
               >
-                {/* Default Text (Slides up on hover) */}
                 <div className="absolute inset-0 flex items-center justify-center transition-transform duration-500 ease-[cubic-bezier(0.19,1,0.22,1)] group-hover:-translate-y-full group-active:scale-90">
                   {contact.label}
                 </div>
-
-                {/* Hover Text (Slides up from bottom) */}
                 <div className="absolute inset-0 flex items-center justify-center translate-y-full transition-transform duration-500 ease-[cubic-bezier(0.19,1,0.22,1)] group-hover:translate-y-0 group-active:scale-90 text-white font-bold">
                   COPY
                 </div>
@@ -235,14 +228,16 @@ const AppInner: React.FC = () => {
       `}</style>
     </div>
   );
-  const App: React.FC = () => {
-    return (
-      <HelmetProvider>
-        <Router>
-          <AppInner />
-        </Router>
-      </HelmetProvider>
-    );
-  };
+};
 
-  export default App;
+const App: React.FC = () => {
+  return (
+    <HelmetProvider>
+      <Router>
+        <AppInner />
+      </Router>
+    </HelmetProvider>
+  );
+};
+
+export default App;

@@ -12,6 +12,8 @@ export interface Post {
   published: boolean;
   created_at: string;
   updated_at: string;
+  views?: number;
+  likes_count?: number;
   // 为了向后兼容，添加旧格式字段
   image?: string;
   date?: string;
