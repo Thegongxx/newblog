@@ -4,17 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "3f4dee903a88f49c",
+        "id": "8ed1a431e8413461",
         "type": "tabs",
         "children": [
           {
-            "id": "51e721fae00c9075",
+            "id": "cd3a77ceb175262a",
             "type": "leaf",
             "state": {
-              "type": "graph",
-              "state": {},
-              "icon": "lucide-git-fork",
-              "title": "关系图谱"
+              "type": "markdown",
+              "state": {
+                "file": "notes/freedom.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "freedom"
             }
           }
         ]
@@ -90,6 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
+                "file": "notes/freedom.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -99,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "反向链接"
+              "title": "freedom 的反向链接列表"
             }
           },
           {
@@ -175,12 +180,13 @@
       "bases:创建新数据库": false
     }
   },
-  "active": "51e721fae00c9075",
+  "active": "cd3a77ceb175262a",
   "lastOpenFiles": [
-    "posts/hello-aura.md",
-    "未命名.canvas",
-    "notes/freedom.md",
     "notes/heroism.md",
+    "posts/hello-aura.md",
+    "2024-03-12.md",
+    "notes/freedom.md",
+    "未命名.canvas",
     "posts/test-automation.md"
   ]
 }
