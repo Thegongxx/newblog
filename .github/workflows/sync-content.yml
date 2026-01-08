@@ -2,8 +2,6 @@ name: Sync Content to Supabase
 
 on:
   push:
-    paths:
-      - 'content/posts/**'
     branches:
       - main
 
