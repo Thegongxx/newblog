@@ -303,11 +303,23 @@ function PostEditor({ post, onSave, onCancel }: { post: Partial<Post>, onSave: (
         return () => clearTimeout(timer);
     }, [formData.content]);
 
+    // 同步滚动核心逻辑 - 增强版比例算法
     const handleEditorScroll = (e: React.UIEvent<HTMLTextAreaElement>) => {
-        if (!previewRef.current) return;
-        const textarea = e.currentTarget;
-        const ratio = textarea.scrollTop / (textarea.scrollHeight - textarea.clientHeight);
-        previewRef.current.scrollTop = ratio * (previewRef.current.scrollHeight - previewRef.current.clientHeight);
+        if (!previewRef.current || !textareaRef.current) return;
+
+        const editor = textareaRef.current;
+        const preview = previewRef.current;
+
+        // 计算当前滚动百分比
+        const scrollPercentage = editor.scrollTop / (editor.scrollHeight - editor.clientHeight);
+
+        // 应用于预览窗口，考虑预览窗口的实际可滚动高度
+        const targetScroll = scrollPercentage * (preview.scrollHeight - preview.clientHeight);
+
+        preview.scrollTo({
+            top: targetScroll,
+            behavior: 'auto' // 使用 auto 保证实时性，smooth 会产生延迟
+        });
     };
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {

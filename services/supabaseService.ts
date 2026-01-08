@@ -225,11 +225,14 @@ export const storageApi = {
         const fileName = `${Math.round(Math.random() * 1000000)}-${Date.now()}.${fileExt}`;
         const filePath = `blog-media/${fileName}`;
 
-        const { error } = await supabase.storage
+        const { data, error } = await supabase.storage
             .from('media')
             .upload(filePath, file);
 
-        if (error) throw error;
+        if (error) {
+            console.error('Supabase Storage Error:', error);
+            throw new Error(`Upload failed: ${error.message}`);
+        }
 
         const { data: { publicUrl } } = supabase.storage
             .from('media')
