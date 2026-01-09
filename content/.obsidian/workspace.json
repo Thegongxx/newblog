@@ -4,21 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "65c3fd115b8a5d27",
+        "id": "4ace9b6f0ef8f06b",
         "type": "tabs",
         "children": [
           {
-            "id": "926c63e651e05c0b",
+            "id": "b48af9c770638b12",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "notes/未命名.md",
-                "mode": "source",
-                "source": false
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "未命名"
+              "title": "新标签页"
             }
           }
         ]
@@ -193,10 +189,10 @@
       "bases:创建新数据库": false
     }
   },
-  "active": "926c63e651e05c0b",
+  "active": "b54ba60a41261cdf",
   "lastOpenFiles": [
+    "notes/测试.md",
     "notes/daily-reflection.md",
-    "notes/未命名.md",
     "notes/test-note-1.md",
     "notes/test-note-2.md",
     "notes/reading-notes.md",
