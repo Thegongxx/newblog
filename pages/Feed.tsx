@@ -45,7 +45,7 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
       opacity: 1,
       transition: {
         duration: 0.6,
-        ease: [0.4, 0.0, 0.2, 1],
+        ease: "easeOut" as const,
         staggerChildren: 0.1
       }
     }
@@ -58,7 +58,7 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
       y: 0,
       transition: {
         duration: 0.6,
-        ease: [0.4, 0.0, 0.2, 1]
+        ease: "easeOut" as const
       }
     }
   };
@@ -67,15 +67,21 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
     initial: { opacity: 0, y: 20, scale: 0.98 },
     whileInView: { opacity: 1, y: 0, scale: 1 },
     viewport: { once: true, margin: "-50px" },
-    transition: { duration: 0.8, ease: [0.4, 0.0, 0.2, 1] }
+    transition: { duration: 0.8, ease: "easeOut" as const }
   };
 
   return (
-    <div className="space-y-32 md:space-y-64 overflow-hidden animate-in fade-in slide-in-from-bottom-12 duration-1000 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]">
-      {/* 1. 全新分屏 Hero 区域 */}
+    <motion.div 
+      className="space-y-32 md:space-y-64 overflow-hidden"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      {/* 1. Google Material Design 风格 Hero 区域 */}
       <motion.section
         {...fadeInReveal}
         className="min-h-[60vh] flex flex-col md:flex-row items-center gap-16 md:gap-24"
+        variants={itemVariants}
       >
         <div className="flex-1 space-y-10">
           <div className="space-y-6">
@@ -116,7 +122,7 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
               <span className="text-[10px] font-black tracking-[0.2em] text-white uppercase mr-4">
                 Daily Note
               </span>
-              {randomNote.tags.map(tag => (
+              {(randomNote as any).tags?.map((tag: string) => (
                 <span key={tag} className="text-[10px] uppercase tracking-widest text-white/30">#{tag}</span>
               ))}
             </div>
@@ -124,17 +130,17 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
             {/* Middle: Content (Left Aligned) */}
             <div className="space-y-6">
               <h3 className="text-3xl md:text-4xl font-bold text-white tracking-tight leading-tight text-left">
-                {randomNote.title}
+                {(randomNote as any).title || (randomNote as any).text?.substring(0, 50) + '...'}
               </h3>
               <p className="text-lg md:text-xl font-light text-white/70 leading-relaxed max-w-md text-left whitespace-pre-line">
-                {randomNote.content}
+                {(randomNote as any).content || (randomNote as any).text}
               </p>
             </div>
 
             {/* Bottom: Date (Right Aligned) */}
             <div className="flex justify-end pt-4 border-t border-white/5">
               <p className="text-[10px] font-mono text-white/30 uppercase tracking-widest">
-                Recorded on {randomNote.date}
+                Recorded on {(randomNote as any).date || new Date().toLocaleDateString()}
               </p>
             </div>
           </div>
@@ -174,30 +180,39 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
           {bentoPosts.map((post, i) => (
             <motion.div
               key={post.id}
-              initial={{ opacity: 0, y: 100 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{
-                duration: 1.2,
-                delay: i * 0.2,
-                ease: [0.22, 1, 0.36, 1] as any
-              }}
               className="group"
+              variants={itemVariants}
+              whileHover={{ 
+                y: -8,
+                transition: { duration: 0.3, ease: [0.4, 0.0, 0.2, 1] }
+              }}
             >
-              <BlogCard post={post} onClick={() => onSelectPost(post)} />
-              {/* 纯净的底部描述，移出卡片内部以增加留白 */}
-              <div className="mt-6 flex justify-between items-center opacity-40 group-hover:opacity-100 transition-opacity duration-500 px-2">
+              <motion.div
+                className="material-shadow-1 hover:material-shadow-2 rounded-[2rem] transition-all duration-300"
+                whileHover={{ scale: 1.02 }}
+              >
+                <BlogCard post={post} onClick={() => onSelectPost(post)} />
+              </motion.div>
+              {/* Google Material Design 风格的底部描述 */}
+              <motion.div 
+                className="mt-6 flex justify-between items-center opacity-40 group-hover:opacity-100 transition-opacity duration-300 px-2"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 0.4 }}
+                whileHover={{ opacity: 1 }}
+              >
                 <span className="text-[10px] uppercase tracking-widest">{post.date}</span>
                 <span className="text-[10px] uppercase tracking-widest">{post.readingTime}</span>
-              </div>
+              </motion.div>
             </motion.div>
           ))}
         </div>
       </motion.section>
 
       {/* 4. 主页留言板 */}
-      <HomepageComments />
-    </div>
+      <motion.div variants={itemVariants}>
+        <HomepageComments />
+      </motion.div>
+    </motion.div>
   );
 };
 
