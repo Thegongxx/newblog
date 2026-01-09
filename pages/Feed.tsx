@@ -12,19 +12,15 @@ interface FeedProps {
 }
 
 const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
-  // 1. 增强随机性：对文章进行加权随机处理
-  const { featuredPost, bentoPosts } = useMemo(() => {
-    if (posts.length === 0) return { featuredPost: null, bentoPosts: [] };
-
-    // 克隆并打乱数组（Fisher-Yates shuffle）
-    const shuffled = [...posts].sort(() => Math.random() - 0.5);
-
-    // 第一个作为 Featured，剩下的作为 Bento 网格
-    return {
-      featuredPost: shuffled[0],
-      bentoPosts: shuffled.slice(1, 10) // 取剩下的前 9 篇
-    };
+  // 按时间排序，最新的文章在前面
+  const sortedPosts = useMemo(() => {
+    return [...posts].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [posts]);
+
+  // 第一篇作为 Hero 展示，其余作为 Bento 网格
+  const featuredPost = sortedPosts[0] || null;
+  const bentoPosts = sortedPosts.slice(1, 5); // 只取 4 篇，保持约两行
+
 
   const randomQuote = useMemo(() => {
     return QUOTES_DATA[Math.floor(Math.random() * QUOTES_DATA.length)];
@@ -101,47 +97,29 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-x-8 gap-y-12 md:gap-y-24">
-            {/* 整合：在 Bento 序列中随机插入格言卡片 */}
-            {(() => {
-              // 创建一个随机位置来插入格言卡片
-              const quotePosition = Math.floor(Math.random() * Math.min(bentoPosts.length, 5)) + 1;
-              const items: any[] = [];
-              bentoPosts.slice(0, 7).forEach((post, idx) => {
-                if (idx === quotePosition) {
-                  items.push({ isQuote: true });
-                }
-                items.push(post);
-              });
-              return items;
-            })().map((item: any, i) => {
-              if (item.isQuote) {
-                return (
-                  <motion.div
-                    key="quote-card"
-                    {...fadeInReveal}
-                    className="md:col-span-2 lg:col-span-2 group relative h-[450px] bg-white/[0.02] backdrop-blur-xl rounded-[2.5rem] p-10 flex flex-col justify-center items-center text-center overflow-hidden transition-all duration-700 hover:bg-white/[0.04]"
-                  >
-                    <div className="relative z-10 space-y-8">
-                      <div className="flex justify-center opacity-20 group-hover:opacity-40 transition-opacity">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-8 h-8">
-                          <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
-                        </svg>
-                      </div>
-                      <p className="text-xl md:text-2xl font-light italic text-white/80 leading-snug">
-                        "{randomQuote.text}"
-                      </p>
-                      <div className="space-y-1">
-                        <p className="text-[9px] uppercase tracking-[0.4em] font-black text-white/30">— {randomQuote.author}</p>
-                      </div>
-                    </div>
-                  </motion.div>
-                );
-              }
+          <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-x-8 gap-y-12">
+            {/* 格言卡片 - 完全无边框，融入背景 */}
+            <motion.div
+              key="quote-card"
+              {...fadeInReveal}
+              className="md:col-span-2 lg:col-span-2 group relative h-[450px] p-10 flex flex-col justify-center items-center text-center"
+            >
+              <div className="relative z-10 space-y-8">
+                <div className="flex justify-center opacity-20 group-hover:opacity-40 transition-opacity">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-8 h-8">
+                    <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+                  </svg>
+                </div>
+                <p className="text-xl md:text-2xl font-light italic text-white/70 leading-snug">
+                  “{randomQuote.text}”
+                </p>
+                <p className="text-[9px] uppercase tracking-[0.4em] font-black text-white/25">— {randomQuote.author}</p>
+              </div>
+            </motion.div>
 
-              const post = item as Post;
-              // 真正的随机大卡片：根据随机化后的索引决定
-              const isLarge = Math.random() > 0.6;
+            {/* 最新文章卡片 */}
+            {bentoPosts.map((post, i) => {
+              const isLarge = i === 1; // 第二篇稍大一些
               return (
                 <motion.div
                   key={post.id}
@@ -150,12 +128,12 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
                   viewport={{ once: true }}
                   transition={{
                     duration: 1,
-                    delay: (i % 3) * 0.1,
+                    delay: i * 0.1,
                     ease: [0.22, 1, 0.36, 1] as any
                   }}
-                  className={`${isLarge ? 'md:col-span-2 lg:col-span-3' : 'md:col-span-2 lg:col-span-2'}`}
+                  className={`${isLarge ? 'md:col-span-2 lg:col-span-2' : 'md:col-span-2 lg:col-span-2'}`}
                 >
-                  <BlogCard post={post} onClick={() => onSelectPost(post)} featured={isLarge} />
+                  <BlogCard post={post} onClick={() => onSelectPost(post)} />
                 </motion.div>
               );
             })}
