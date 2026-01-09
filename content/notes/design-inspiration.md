@@ -3,7 +3,8 @@ title: 设计灵感收集
 author: Aura
 date: 2024-01-10
 category: 设计
-tags: design, inspiration, ui, ux
+tags:
+  - sadfsdf
 ---
 
 记录一些令人印象深刻的设计灵感和想法。
