@@ -232,7 +232,6 @@ const AppInner: React.FC = () => {
             
             <div className="flex gap-6 text-sm font-medium">
               {[
-                { path: '/', label: 'Feed' },
                 { path: '/notes', label: 'Notes' },
                 { path: '/archive', label: 'Archive' },
                 { path: '/about', label: 'About' }
