@@ -205,8 +205,8 @@ const AppInner: React.FC = () => {
       <nav className="fixed top-0 left-0 right-0 z-40 flex justify-center pt-6">
         <div className={`relative transition-all duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] ${
           scrolled 
-            ? 'bg-black/8 backdrop-blur-3xl border border-white/8 rounded-full px-10 py-3 shadow-[0_8px_32px_rgba(0,0,0,0.12)] scale-100' 
-            : 'bg-white/[0.03] backdrop-blur-2xl border border-white/[0.05] rounded-full px-10 py-3 shadow-[0_4px_16px_rgba(0,0,0,0.06)] scale-95'
+            ? 'bg-black/8 backdrop-blur-3xl rounded-full px-10 py-3 shadow-[0_8px_32px_rgba(0,0,0,0.12)] scale-100' 
+            : 'bg-white/[0.03] backdrop-blur-2xl rounded-full px-10 py-3 shadow-[0_4px_16px_rgba(0,0,0,0.06)] scale-95'
         }`}
         style={{ 
           backdropFilter: 'blur(40px) saturate(180%)',
@@ -252,7 +252,7 @@ const AppInner: React.FC = () => {
                   {item.label}
                   {/* 苹果风格活跃指示器 */}
                   {location.pathname === item.path && (
-                    <div className="absolute inset-0 rounded-full bg-gradient-to-b from-white/[0.08] to-white/[0.02] border border-white/10" />
+                    <div className="absolute inset-0 rounded-full bg-gradient-to-b from-white/[0.08] to-white/[0.02]" />
                   )}
                   {/* 苹果风格悬停效果 */}
                   <div className="absolute -inset-1 rounded-full bg-white/[0.02] opacity-0 group-hover:opacity-100 transition-all duration-300 blur-sm" />
