@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "notes/哼哈篇.md",
+                "file": "pages/about.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "哼哈篇"
+              "title": "about"
             }
           }
         ]
@@ -172,6 +172,7 @@
   },
   "left-ribbon": {
     "hiddenItems": {
+      "obsidian-git:Open Git source control": false,
       "switcher:打开快速切换": false,
       "graph:查看关系图谱": false,
       "canvas:新建白板": false,
@@ -181,14 +182,14 @@
       "bases:创建新数据库": false
     }
   },
-  "active": "7e10470c96e8d527",
+  "active": "b54ba60a41261cdf",
   "lastOpenFiles": [
+    "notes/哼哈篇.md",
     "pages/about.md",
     "notes/数字时代的思考.md",
     "notes/设计的本质.md",
     "posts/极简主义的美学.md",
     "未命名.base",
-    "notes/哼哈篇.md",
     "posts/你好.md",
     "notes/freedom.md",
     "posts/hello-aura.md",
