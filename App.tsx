@@ -282,11 +282,11 @@ const AppInner: React.FC = () => {
       {/* AI Assistant */}
       <Assistant />
 
-      {/* Simple Footer */}
-      <footer className="py-24 px-6 border-t border-white/5">
+      {/* 增强版底部 */}
+      <footer className="py-32 px-6 border-t border-white/10 bg-gradient-to-b from-transparent via-white/[0.01] to-white/[0.02]">
         <div className="max-w-7xl mx-auto flex flex-col items-center text-center">
-          <div className="text-4xl font-bold tracking-tighter mb-12 opacity-10">AURA</div>
-          <div className="flex gap-8 text-xs uppercase tracking-wider font-bold text-white/40">
+          <div className="text-5xl font-bold tracking-tighter mb-16 opacity-20 select-none">AURA</div>
+          <div className="flex gap-12 text-sm uppercase tracking-wider font-bold text-white/60">
             {[
               { label: 'QQ', value: CONTACT_INFO.QQ },
               { label: 'WX', value: CONTACT_INFO.WX },
@@ -295,15 +295,26 @@ const AppInner: React.FC = () => {
               <button
                 key={contact.label}
                 onClick={() => handleCopy(contact.value, contact.label)}
-                className="hover:text-white transition-colors"
+                className="group relative overflow-hidden h-12 w-20 focus:outline-none hover:text-white transition-all duration-500 focus-ring rounded-lg"
+                aria-label={`复制${contact.label}`}
               >
-                {contact.label}
+                {/* 默认显示的标签 */}
+                <div className="absolute inset-0 flex items-center justify-center transition-transform duration-500 ease-[cubic-bezier(0.19,1,0.22,1)] group-hover:-translate-y-full group-active:scale-90">
+                  {contact.label}
+                </div>
+                {/* 悬停时显示的 COPY */}
+                <div className="absolute inset-0 flex items-center justify-center translate-y-full transition-transform duration-500 ease-[cubic-bezier(0.19,1,0.22,1)] group-hover:translate-y-0 group-active:scale-90 text-white font-bold bg-white/10 rounded-lg backdrop-blur-sm">
+                  COPY
+                </div>
               </button>
             ))}
           </div>
-          <p className="mt-20 text-xs text-white/5 tracking-wider uppercase">
-            Designed for clarity &copy; 2024
-          </p>
+          <div className="mt-24 space-y-6">
+            <p className="text-xs text-white/20 tracking-wider uppercase font-medium">
+              Designed for clarity &copy; 2024
+            </p>
+            <div className="w-12 h-[1px] bg-white/10 mx-auto" />
+          </div>
         </div>
       </footer>
 
