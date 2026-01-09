@@ -102,16 +102,26 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-x-8 gap-y-12 md:gap-y-24">
-            {/* 整合：在 Bento 序列中插入格言卡片 */}
-            {[...bentoPosts.slice(0, 2), { isQuote: true }, ...bentoPosts.slice(2, 6)].map((item: any, i) => {
+            {/* 整合：在 Bento 序列中随机插入格言卡片 */}
+            {(() => {
+              // 创建一个随机位置来插入格言卡片
+              const quotePosition = Math.floor(Math.random() * Math.min(bentoPosts.length, 5)) + 1;
+              const items: any[] = [];
+              bentoPosts.slice(0, 7).forEach((post, idx) => {
+                if (idx === quotePosition) {
+                  items.push({ isQuote: true });
+                }
+                items.push(post);
+              });
+              return items;
+            })().map((item: any, i) => {
               if (item.isQuote) {
                 return (
                   <motion.div
                     key="quote-card"
                     {...fadeInReveal}
-                    className="md:col-span-2 lg:col-span-2 group relative h-[450px] glass rounded-[2.5rem] p-10 flex flex-col justify-center items-center text-center overflow-hidden transition-all duration-700"
+                    className="md:col-span-2 lg:col-span-2 group relative h-[450px] bg-white/[0.02] backdrop-blur-xl rounded-[2.5rem] p-10 flex flex-col justify-center items-center text-center overflow-hidden transition-all duration-700 hover:bg-white/[0.04]"
                   >
-                    <div className="absolute inset-0 bg-white/[0.01] pointer-events-none group-hover:bg-white/[0.03] transition-colors" />
                     <div className="relative z-10 space-y-8">
                       <div className="flex justify-center opacity-20 group-hover:opacity-40 transition-opacity">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-8 h-8">
@@ -119,7 +129,7 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
                         </svg>
                       </div>
                       <p className="text-xl md:text-2xl font-light italic text-white/80 leading-snug">
-                        “{randomQuote.text}”
+                        "{randomQuote.text}"
                       </p>
                       <div className="space-y-1">
                         <p className="text-[9px] uppercase tracking-[0.4em] font-black text-white/30">— {randomQuote.author}</p>
@@ -130,8 +140,8 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
               }
 
               const post = item as Post;
-              // 增强随机性：不仅内容随机，大型卡片的位置也根据索引动态计算
-              const isLarge = (i % 4 === 1) || (i === 5);
+              // 真正的随机大卡片：根据随机化后的索引决定
+              const isLarge = Math.random() > 0.6;
               return (
                 <motion.div
                   key={post.id}
