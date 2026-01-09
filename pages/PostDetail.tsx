@@ -18,11 +18,11 @@ const PostDetail: React.FC<PostDetailProps> = ({ posts, loading }) => {
     const post = posts.find(p => p.slug === slug);
     const [isExiting, setIsExiting] = useState(false);
 
-    // 舒缓的返回动画，无转圈加载
+    // 丝滑缓慢的返回动画
     const handleBackToList = () => {
         setIsExiting(true);
         
-        // 舒缓的渐出动画后导航
+        // 丝滑的渐出动画后导航
         setTimeout(() => {
             // 检查是否有 state 中的来源信息
             if (location.state?.from) {
@@ -36,7 +36,7 @@ const PostDetail: React.FC<PostDetailProps> = ({ posts, loading }) => {
                     navigate('/');
                 }
             }
-        }, 600); // 缩短到600ms，保持舒适的渐变
+        }, 1200); // 延长到1200ms，更加丝滑
     };
 
     useEffect(() => {
@@ -82,28 +82,28 @@ const PostDetail: React.FC<PostDetailProps> = ({ posts, loading }) => {
     }
 
     return (
-        <div className={`max-w-4xl mx-auto transition-all duration-600 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] ${
+        <div className={`max-w-4xl mx-auto transition-all duration-1200 ease-[cubic-bezier(0.16,1,0.3,1)] ${
             isExiting 
-                ? 'opacity-0 translate-y-8 scale-96' 
-                : 'opacity-100 translate-y-0 scale-100 animate-in fade-in slide-in-from-bottom-8 duration-700'
+                ? 'opacity-0 translate-y-4 scale-99' 
+                : 'opacity-100 translate-y-0 scale-100 animate-in fade-in slide-in-from-bottom-4 duration-1000'
         }`}>
-            {/* 舒缓渐出的返回按钮 */}
+            {/* 丝滑渐出的返回按钮 */}
             <button 
                 onClick={handleBackToList} 
-                className={`group flex items-center gap-3 text-white/40 hover:text-white transition-all duration-500 mb-12 px-6 py-3 rounded-full backdrop-blur-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] hover:border-white/10 active:scale-95 ${
-                    isExiting ? 'opacity-0 translate-x-8 scale-90' : 'opacity-100 translate-x-0 scale-100'
+                className={`group flex items-center gap-3 text-white/40 hover:text-white transition-all duration-700 mb-12 px-6 py-3 rounded-full backdrop-blur-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] hover:border-white/10 active:scale-95 ${
+                    isExiting ? 'opacity-0 translate-x-4 scale-95' : 'opacity-100 translate-x-0 scale-100'
                 }`}
                 disabled={isExiting}
             >
-                <div className="rotate-180 group-hover:-translate-x-2 transition-transform duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]">
+                <div className="rotate-180 group-hover:-translate-x-2 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]">
                     {ICONS.CHEVRON_RIGHT}
                 </div>
                 <span className="text-sm font-medium tracking-wide">返回列表</span>
             </button>
 
-            {/* 文章内容区域 - 舒缓的渐出效果 */}
-            <div className={`transition-all duration-600 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] ${
-                isExiting ? 'opacity-0 translate-y-6 scale-98' : 'opacity-100 translate-y-0 scale-100'
+            {/* 文章内容区域 - 丝滑的渐出效果 */}
+            <div className={`transition-all duration-1200 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                isExiting ? 'opacity-0 translate-y-2 scale-99' : 'opacity-100 translate-y-0 scale-100'
             }`}>
 
             <header className="mb-20">

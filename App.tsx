@@ -69,7 +69,7 @@ const AppInner: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // 页面切换时滚动到顶部并添加缓慢渐变效果（无转圈）
+  // 页面切换时滚动到顶部并添加丝滑渐变效果
   useEffect(() => {
     setPageTransitioning(true);
     
@@ -82,7 +82,7 @@ const AppInner: React.FC = () => {
     // 页面渐入动画完成后重置状态
     const timer = setTimeout(() => {
       setPageTransitioning(false);
-    }, 800); // 缩短到800ms，保持舒适的渐变
+    }, 1000); // 延长到1000ms，更加丝滑
     
     return () => clearTimeout(timer);
   }, [location.pathname]);
@@ -144,7 +144,7 @@ const AppInner: React.FC = () => {
       setTimeout(() => {
         setIsNavigating(false);
       }, 100);
-    }, 300); // 缩短延迟，保持流畅
+    }, 400); // 保持400ms延迟，配合丝滑效果
   };
 
   if (showIntro && location.pathname === '/') {
@@ -277,9 +277,9 @@ const AppInner: React.FC = () => {
         </div>
       </nav>
 
-      {/* 主内容区 - 舒适的渐变效果，无转圈加载 */}
-      <main className={`pt-44 pb-48 px-6 max-w-7xl mx-auto transition-all duration-800 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] ${
-        pageTransitioning ? 'opacity-0 transform translate-y-8 scale-98' : 'opacity-100 transform translate-y-0 scale-100'
+      {/* 主内容区 - 丝滑的渐变效果 */}
+      <main className={`pt-44 pb-48 px-6 max-w-7xl mx-auto transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+        pageTransitioning ? 'opacity-0 transform translate-y-4 scale-99' : 'opacity-100 transform translate-y-0 scale-100'
       }`}>
         <div className="view-transition">
           <Routes>
