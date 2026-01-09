@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { HelmetProvider, Helmet } from 'react-helmet-async';
+import { motion, AnimatePresence } from 'framer-motion';
 import Intro from './components/Intro';
 import Assistant from './components/Assistant';
 import { CONTACT_INFO } from './constants';
@@ -69,20 +70,20 @@ const AppInner: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // 苹果风格的页面切换 - 只有渐入效果
+  // Google 风格的页面切换动画
   useEffect(() => {
     setPageTransitioning(true);
     
     // 立即滚动到顶部
     window.scrollTo({ 
       top: 0, 
-      behavior: 'auto' // 改为立即滚动
+      behavior: 'auto'
     });
     
-    // 页面渐入动画
+    // Google Material Design 风格的渐入动画
     const timer = setTimeout(() => {
       setPageTransitioning(false);
-    }, 800); // 缩短到800ms，更像苹果的快速渐入
+    }, 600); // Google 标准的 600ms 动画时长
     
     return () => clearTimeout(timer);
   }, [location.pathname]);
@@ -117,7 +118,7 @@ const AppInner: React.FC = () => {
 
   const [isNavigating, setIsNavigating] = useState(false);
 
-  // 苹果风格的导航处理 - 立即切换
+  // Google Material Design 风格的导航处理
   const handleNavigate = (path: string) => {
     // 如果是当前页面，直接滚动到顶部
     if (location.pathname === path) {
@@ -148,39 +149,53 @@ const AppInner: React.FC = () => {
             scroll-behavior: smooth;
           }
           
-          /* 增强页面切换动画 */
+          /* Google Material Design 页面切换动画 */
           .view-transition {
-            animation: fadeInUp 0.6s ease-out;
+            animation: materialFadeInUp 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
           }
           
-          @keyframes fadeInUp {
+          @keyframes materialFadeInUp {
             from {
               opacity: 0;
-              transform: translateY(20px);
+              transform: translateY(16px) scale(0.98);
             }
             to {
               opacity: 1;
-              transform: translateY(0);
+              transform: translateY(0) scale(1);
             }
           }
           
-          /* 苹果风格滚动条 */
+          /* Google 风格滚动条 */
           ::-webkit-scrollbar {
-            width: 6px;
+            width: 8px;
           }
           
           ::-webkit-scrollbar-track {
-            background: transparent;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 4px;
           }
           
           ::-webkit-scrollbar-thumb {
             background: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
-            transition: background 0.3s ease;
+            border-radius: 4px;
+            transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
           }
           
           ::-webkit-scrollbar-thumb:hover {
             background: rgba(255, 255, 255, 0.2);
+          }
+          
+          /* Google Material Design 阴影 */
+          .material-shadow-1 {
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+          }
+          
+          .material-shadow-2 {
+            box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+          }
+          
+          .material-shadow-3 {
+            box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
           }
         `}</style>
       </Helmet>
@@ -201,34 +216,43 @@ const AppInner: React.FC = () => {
         </div>
       )}
 
-      {/* 苹果风格透明丝滑灵动岛导航 */}
+      {/* Google Material Design 风格透明导航栏 */}
       <nav className="fixed top-0 left-0 right-0 z-40 flex justify-center pt-6">
-        <div className={`relative transition-all duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] ${
-          scrolled 
-            ? 'bg-black/8 backdrop-blur-3xl rounded-full px-10 py-3 shadow-[0_8px_32px_rgba(0,0,0,0.12)] scale-100' 
-            : 'bg-white/[0.03] backdrop-blur-2xl rounded-full px-10 py-3 shadow-[0_4px_16px_rgba(0,0,0,0.06)] scale-95'
-        }`}
-        style={{ 
-          backdropFilter: 'blur(40px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(40px) saturate(180%)'
-        }}>
-          {/* 苹果风格内部光晕 */}
-          <div className={`absolute inset-0 rounded-full transition-all duration-500 ${
-            scrolled ? 'opacity-100' : 'opacity-60'
+        <motion.div 
+          className={`relative transition-all duration-300 ease-[cubic-bezier(0.4,0.0,0.2,1)] ${
+            scrolled 
+              ? 'bg-black/10 backdrop-blur-xl rounded-full px-10 py-3 material-shadow-2 scale-100' 
+              : 'bg-white/[0.04] backdrop-blur-lg rounded-full px-10 py-3 material-shadow-1 scale-95'
+          }`}
+          style={{ 
+            backdropFilter: 'blur(24px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(24px) saturate(180%)'
+          }}
+          whileHover={{ scale: scrolled ? 1.02 : 0.97 }}
+          transition={{ duration: 0.2, ease: [0.4, 0.0, 0.2, 1] }}
+        >
+          {/* Google Material Design 风格内部光效 */}
+          <div className={`absolute inset-0 rounded-full transition-all duration-300 ${
+            scrolled ? 'opacity-100' : 'opacity-70'
           }`}>
-            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-white/[0.02] via-white/[0.08] to-white/[0.02]" />
-            <div className="absolute inset-0 rounded-full bg-gradient-to-b from-white/[0.05] via-transparent to-white/[0.02]" />
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-white/[0.03] via-white/[0.06] to-white/[0.03]" />
+            <div className="absolute inset-0 rounded-full bg-gradient-to-b from-white/[0.04] via-transparent to-white/[0.01]" />
           </div>
           
           <div className="relative flex items-center gap-12">
-            <button 
+            <motion.button 
               onClick={() => navigate('/')}
-              className="text-lg font-bold tracking-tight text-white/90 hover:text-white transition-all duration-300 hover:scale-105 active:scale-95 relative group"
+              className="text-lg font-bold tracking-tight text-white/90 hover:text-white transition-all duration-200 relative group"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
               AURA
-              {/* 苹果风格品牌光晕 */}
-              <div className="absolute -inset-3 rounded-xl bg-white/[0.03] opacity-0 group-hover:opacity-100 transition-all duration-300 blur-sm scale-110" />
-            </button>
+              {/* Google 风格品牌光晕 */}
+              <motion.div 
+                className="absolute -inset-3 rounded-xl bg-white/[0.02] opacity-0 group-hover:opacity-100 transition-all duration-200 blur-sm" 
+                layoutId="brand-glow"
+              />
+            </motion.button>
             
             <div className="flex gap-6 text-sm font-medium">
               {[
@@ -236,30 +260,39 @@ const AppInner: React.FC = () => {
                 { path: '/archive', label: 'Archive' },
                 { path: '/about', label: 'About' }
               ].map((item) => (
-                <button 
+                <motion.button 
                   key={item.path}
                   onClick={() => handleNavigate(item.path)} 
-                  className={`relative px-3 py-1.5 rounded-full transition-all duration-300 hover:scale-105 active:scale-95 group ${
+                  className={`relative px-4 py-2 rounded-full transition-all duration-200 group ${
                     location.pathname === item.path 
-                      ? 'text-white bg-white/10 backdrop-blur-xl shadow-inner' 
-                      : 'text-white/60 hover:text-white/90 hover:bg-white/[0.05]'
+                      ? 'text-white bg-white/12 material-shadow-1' 
+                      : 'text-white/60 hover:text-white/90 hover:bg-white/[0.06]'
                   }`}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   style={{
-                    backdropFilter: location.pathname === item.path ? 'blur(20px) saturate(180%)' : 'none'
+                    backdropFilter: location.pathname === item.path ? 'blur(16px) saturate(180%)' : 'none'
                   }}
                 >
                   {item.label}
-                  {/* 苹果风格活跃指示器 */}
+                  {/* Google Material Design 活跃指示器 */}
                   {location.pathname === item.path && (
-                    <div className="absolute inset-0 rounded-full bg-gradient-to-b from-white/[0.08] to-white/[0.02]" />
+                    <motion.div 
+                      className="absolute inset-0 rounded-full bg-gradient-to-b from-white/[0.06] to-white/[0.02]" 
+                      layoutId="active-nav"
+                      transition={{ duration: 0.3, ease: [0.4, 0.0, 0.2, 1] }}
+                    />
                   )}
-                  {/* 苹果风格悬停效果 */}
-                  <div className="absolute -inset-1 rounded-full bg-white/[0.02] opacity-0 group-hover:opacity-100 transition-all duration-300 blur-sm" />
-                </button>
+                  {/* Google 风格悬停效果 */}
+                  <motion.div 
+                    className="absolute -inset-1 rounded-full bg-white/[0.03] opacity-0 group-hover:opacity-100 transition-all duration-200" 
+                    whileHover={{ scale: 1.1 }}
+                  />
+                </motion.button>
               ))}
             </div>
           </div>
-        </div>
+        </motion.div>
       </nav>
 
       {/* 主内容区 - 苹果风格丝滑渐入 */}
