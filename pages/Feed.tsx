@@ -72,60 +72,53 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
           {/* 背景装饰：微弱的光晕 */}
           <div className="absolute inset-0 bg-white/[0.02] blur-3xl rounded-full opacity-50" />
 
-          <div className="relative z-10 w-full max-w-lg p-10 md:p-14 bg-white/[0.02] backdrop-blur-xl border border-white/5 rounded-[2.5rem] flex flex-col items-center text-center space-y-8 group hover:bg-white/[0.04] transition-all duration-700">
+          <div className="relative z-10 w-full max-w-lg flex flex-col items-center text-center space-y-6">
+            {/* 上方装饰线 */}
+            <div className="w-[1px] h-12 bg-gradient-to-b from-transparent via-white/20 to-transparent" />
+
             {/* Note 标签 */}
-            <div className="flex items-center gap-3 opacity-60">
-              <span className="px-3 py-1 rounded-full bg-white/10 text-[10px] font-black tracking-[0.2em] text-white uppercase">
+            <div className="flex items-center gap-3 opacity-80">
+              <span className="px-3 py-1 rounded-full bg-white/5 border border-white/5 text-[10px] font-black tracking-[0.2em] text-white/50 uppercase backdrop-blur-md">
                 Daily Note
               </span>
               {randomNote.tags.map(tag => (
-                <span key={tag} className="text-[10px] uppercase tracking-widest text-white/50">#{tag}</span>
+                <span key={tag} className="text-[10px] uppercase tracking-widest text-white/30">#{tag}</span>
               ))}
             </div>
 
             {/* Note 内容 */}
-            <div className="space-y-4">
+            <div className="space-y-4 py-2">
               <h3 className="text-2xl md:text-3xl font-bold text-white tracking-tight leading-snug">{randomNote.title}</h3>
-              <div className="w-12 h-[1px] bg-white/10 mx-auto" />
-              <p className="text-base font-light text-white/70 leading-relaxed">
+              <p className="text-base font-light text-white/70 leading-relaxed max-w-md mx-auto">
                 {randomNote.content}
               </p>
             </div>
 
             {/* Note 日期 */}
-            <p className="text-[10px] font-mono text-white/20 pt-4">{randomNote.date}</p>
+            <p className="text-[10px] font-mono text-white/20">{randomNote.date}</p>
 
-            {/* 装饰性引号背景 */}
-            <div className="absolute top-6 left-6 opacity-5 pointer-events-none">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor"><path d="M14.017 21L14.017 18C14.017 16.068 14.017 15.442 14.017 14.017C14.017 9.388 16.49 7.632 19 6L20 8C18.332 8.632 17.5 10.632 17.5 12.017L21 12.017L21 21L14.017 21ZM5 21L5 18C5 16.068 5 15.442 5 14.017C5 9.388 7.49 7.632 10 6L11 8C9.332 8.632 8.5 10.632 8.5 12.017L12 12.017L12 21L5 21Z" /></svg>
-            </div>
+            {/* 下方装饰线 */}
+            <div className="w-[1px] h-12 bg-gradient-to-b from-transparent via-white/20 to-transparent" />
           </div>
         </div>
       </motion.section>
 
-      {/* 2. Bento 文章网格 */}
-      <motion.section
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 1 }}
-      >
-        <div className="flex items-end justify-between mb-24 reveal-text">
-          <div className="space-y-4">
-            <h2 className="text-4xl font-black tracking-tight uppercase">Latest Artifacts.</h2>
-            <div className="h-1 w-12 bg-white/10" />
-          </div>
-          <p className="text-white/20 text-[10px] uppercase tracking-[0.4em] font-bold hidden md:block">Curated Selection</p>
-        </div>
-
-        {loading ? (
+      {/* 2. Loading State Only */}
+      {loading && (
+        <motion.section
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1 }}
+          className="mb-24"
+        >
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[1, 2, 3].map(i => (
               <div key={i} className="h-[450px] rounded-[2.5rem] bg-white/[0.02] border border-white/5 animate-pulse" />
             ))}
           </div>
-        ) : null}
-      </motion.section>
+        </motion.section>
+      )}
 
       {/* 3. 画廊网格 (Pure Gallery) */}
       <motion.section
