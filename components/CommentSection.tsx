@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { commentsApi, noteCommentsApi } from '../services/supabaseService';
+import { supabase } from '../services/supabaseService';
 import LikeButton from './LikeButton';
 import type { Comment } from '../types';
 
@@ -29,10 +29,39 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
     const loadComments = async () => {
         try {
             setLoading(true);
-            const data = targetType === 'post'
-                ? await commentsApi.getByPostId(targetId)
-                : await noteCommentsApi.getByNoteId(targetId);
-            setComments(data);
+            console.log(`Loading ${targetType} comments for ID:`, targetId);
+            
+            let data, error;
+            
+            if (targetType === 'post') {
+                // 直接查询 comments 表
+                const result = await supabase
+                    .from('comments')
+                    .select('*')
+                    .eq('post_id', targetId)
+                    .eq('approved', true)
+                    .order('created_at', { ascending: true });
+                data = result.data;
+                error = result.error;
+            } else {
+                // 直接查询 note_comments 表
+                const result = await supabase
+                    .from('note_comments')
+                    .select('*')
+                    .eq('note_id', targetId)
+                    .eq('approved', true)
+                    .order('created_at', { ascending: true });
+                data = result.data;
+                error = result.error;
+            }
+
+            if (error) {
+                console.error('Supabase error:', error);
+                throw error;
+            }
+            
+            console.log('Comments loaded:', data);
+            setComments(data || []);
         } catch (error) {
             console.error('Failed to load comments:', error);
         } finally {
@@ -50,24 +79,50 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
 
         try {
             setLoading(true);
+            console.log('Submitting comment:', formData);
+
+            let data, error;
 
             if (targetType === 'post') {
-                await commentsApi.create({
-                    post_id: targetId,
-                    author: formData.author,
-                    email: formData.email,
-                    content: formData.content,
-                    parent_id: formData.parent_id || undefined
-                });
+                // 直接插入到 comments 表
+                const result = await supabase
+                    .from('comments')
+                    .insert([{
+                        post_id: targetId,
+                        author: formData.author,
+                        email: formData.email,
+                        content: formData.content,
+                        parent_id: formData.parent_id || null,
+                        approved: true
+                    }])
+                    .select()
+                    .single();
+                data = result.data;
+                error = result.error;
             } else {
-                await noteCommentsApi.create({
-                    note_id: targetId,
-                    author: formData.author,
-                    email: formData.email,
-                    content: formData.content,
-                    parent_id: formData.parent_id || undefined
-                });
+                // 直接插入到 note_comments 表
+                const result = await supabase
+                    .from('note_comments')
+                    .insert([{
+                        note_id: targetId,
+                        author: formData.author,
+                        email: formData.email,
+                        content: formData.content,
+                        parent_id: formData.parent_id || null,
+                        approved: true
+                    }])
+                    .select()
+                    .single();
+                data = result.data;
+                error = result.error;
             }
+
+            if (error) {
+                console.error('Supabase insert error:', error);
+                throw error;
+            }
+
+            console.log('Comment created successfully:', data);
 
             // 重置表单
             setFormData({ author: '', email: '', content: '', parent_id: '' });
@@ -79,7 +134,11 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
             alert('评论已提交！');
         } catch (error) {
             console.error('Failed to submit comment:', error);
-            alert('评论提交失败，请重试');
+            if (error instanceof Error) {
+                alert(`评论提交失败: ${error.message}`);
+            } else {
+                alert('评论提交失败，请检查网络连接或稍后重试');
+            }
         } finally {
             setLoading(false);
         }
