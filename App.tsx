@@ -11,6 +11,7 @@ import Feed from './pages/Feed';
 import PostDetail from './pages/PostDetail';
 import Notes from './pages/Notes';
 import About from './pages/About';
+import Archive from './pages/Archive';
 import Admin from './components/Admin';
 
 const AppInner: React.FC = () => {
@@ -121,53 +122,61 @@ const AppInner: React.FC = () => {
         </div>
       )}
 
-      {/* 透明灵动岛导航 */}
-      <nav className="fixed top-0 left-0 right-0 z-40 flex justify-center pt-8">
-        <div className={`relative transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+      {/* 苹果风格透明丝滑灵动岛导航 */}
+      <nav className="fixed top-0 left-0 right-0 z-40 flex justify-center pt-6">
+        <div className={`relative transition-all duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] ${
           scrolled 
-            ? 'bg-black/20 backdrop-blur-2xl border border-white/10 rounded-full px-8 py-4 shadow-[0_8px_32px_rgba(0,0,0,0.3)] scale-100' 
-            : 'bg-transparent px-8 py-4 scale-95'
-        }`}>
-          {/* 背景光晕效果 */}
-          <div className={`absolute inset-0 rounded-full transition-opacity duration-700 ${
-            scrolled ? 'opacity-100' : 'opacity-0'
+            ? 'bg-black/8 backdrop-blur-3xl border border-white/8 rounded-full px-10 py-3 shadow-[0_8px_32px_rgba(0,0,0,0.12)] scale-100' 
+            : 'bg-white/[0.03] backdrop-blur-2xl border border-white/[0.05] rounded-full px-10 py-3 shadow-[0_4px_16px_rgba(0,0,0,0.06)] scale-95'
+        }`}
+        style={{ 
+          backdropFilter: 'blur(40px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(40px) saturate(180%)'
+        }}>
+          {/* 苹果风格内部光晕 */}
+          <div className={`absolute inset-0 rounded-full transition-all duration-500 ${
+            scrolled ? 'opacity-100' : 'opacity-60'
           }`}>
-            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-white/5 via-white/10 to-white/5 blur-xl" />
-            <div className="absolute inset-0 rounded-full bg-gradient-to-b from-white/5 to-transparent" />
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-white/[0.02] via-white/[0.08] to-white/[0.02]" />
+            <div className="absolute inset-0 rounded-full bg-gradient-to-b from-white/[0.05] via-transparent to-white/[0.02]" />
           </div>
           
           <div className="relative flex items-center gap-12">
             <button 
               onClick={() => navigate('/')}
-              className="text-xl font-bold tracking-tighter text-white hover:opacity-70 transition-all duration-300 hover:scale-105 relative group"
+              className="text-lg font-bold tracking-tight text-white/90 hover:text-white transition-all duration-300 hover:scale-105 active:scale-95 relative group"
             >
               AURA
-              {/* 品牌光晕 */}
-              <div className="absolute -inset-2 rounded-lg bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-sm" />
+              {/* 苹果风格品牌光晕 */}
+              <div className="absolute -inset-3 rounded-xl bg-white/[0.03] opacity-0 group-hover:opacity-100 transition-all duration-300 blur-sm scale-110" />
             </button>
             
-            <div className="flex gap-8 text-sm font-medium">
+            <div className="flex gap-6 text-sm font-medium">
               {[
                 { path: '/', label: 'Feed' },
                 { path: '/notes', label: 'Notes' },
+                { path: '/archive', label: 'Archive' },
                 { path: '/about', label: 'About' }
               ].map((item) => (
                 <button 
                   key={item.path}
                   onClick={() => navigate(item.path)} 
-                  className={`relative transition-all duration-300 hover:scale-105 group ${
+                  className={`relative px-3 py-1.5 rounded-full transition-all duration-300 hover:scale-105 active:scale-95 group ${
                     location.pathname === item.path 
-                      ? 'text-white' 
-                      : 'text-white/60 hover:text-white'
+                      ? 'text-white bg-white/10 backdrop-blur-xl shadow-inner' 
+                      : 'text-white/60 hover:text-white/90 hover:bg-white/[0.05]'
                   }`}
+                  style={{
+                    backdropFilter: location.pathname === item.path ? 'blur(20px) saturate(180%)' : 'none'
+                  }}
                 >
                   {item.label}
-                  {/* 活跃状态指示器 */}
+                  {/* 苹果风格活跃指示器 */}
                   {location.pathname === item.path && (
-                    <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-white rounded-full animate-pulse" />
+                    <div className="absolute inset-0 rounded-full bg-gradient-to-b from-white/[0.08] to-white/[0.02] border border-white/10" />
                   )}
-                  {/* 悬停效果 */}
-                  <div className="absolute -inset-2 rounded-lg bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-sm" />
+                  {/* 苹果风格悬停效果 */}
+                  <div className="absolute -inset-1 rounded-full bg-white/[0.02] opacity-0 group-hover:opacity-100 transition-all duration-300 blur-sm" />
                 </button>
               ))}
             </div>
@@ -182,6 +191,7 @@ const AppInner: React.FC = () => {
             <Route path="/" element={<Feed posts={posts} loading={loading} onSelectPost={(p) => navigate(`/post/${p.slug}`)} />} />
             <Route path="/post/:slug" element={<PostDetail posts={posts} loading={loading} />} />
             <Route path="/notes" element={<Notes notes={notes} loading={loading} />} />
+            <Route path="/archive" element={<Archive posts={posts} loading={loading} onSelectPost={(p) => navigate(`/post/${p.slug}`)} />} />
             <Route path="/about" element={<About />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="*" element={<Navigate to="/" replace />} />
