@@ -34,9 +34,9 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
             let data, error;
             
             if (targetType === 'post') {
-                // 直接查询 comments 表
+                // 使用独立的 post_comments 表，post_id 现在是 UUID
                 const result = await supabase
-                    .from('comments')
+                    .from('post_comments')
                     .select('*')
                     .eq('post_id', targetId)
                     .eq('approved', true)
@@ -44,7 +44,7 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
                 data = result.data;
                 error = result.error;
             } else {
-                // 直接查询 note_comments 表
+                // 使用独立的 note_comments 表，note_id 现在是 UUID
                 const result = await supabase
                     .from('note_comments')
                     .select('*')
@@ -84,9 +84,9 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
             let data, error;
 
             if (targetType === 'post') {
-                // 直接插入到 comments 表
+                // 插入到独立的 post_comments 表
                 const result = await supabase
-                    .from('comments')
+                    .from('post_comments')
                     .insert([{
                         post_id: targetId,
                         author: formData.author,
@@ -100,7 +100,7 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
                 data = result.data;
                 error = result.error;
             } else {
-                // 直接插入到 note_comments 表
+                // 插入到独立的 note_comments 表
                 const result = await supabase
                     .from('note_comments')
                     .insert([{

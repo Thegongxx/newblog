@@ -24,11 +24,10 @@ export default function HomepageComments() {
             setLoading(true);
             console.log('Loading homepage comments...');
             
-            // 直接查询 comments 表中 post_id 为 'homepage-comments' 的记录
+            // 使用独立的 homepage_comments 表
             const { data, error } = await supabase
-                .from('comments')
+                .from('homepage_comments')
                 .select('*')
-                .eq('post_id', 'homepage-comments')
                 .eq('approved', true)
                 .order('created_at', { ascending: true });
 
@@ -37,7 +36,7 @@ export default function HomepageComments() {
                 throw error;
             }
             
-            console.log('Comments loaded:', data);
+            console.log('Homepage comments loaded:', data);
             setComments(data || []);
         } catch (error) {
             console.error('Failed to load homepage comments:', error);
@@ -55,17 +54,16 @@ export default function HomepageComments() {
 
         try {
             setLoading(true);
-            console.log('Submitting comment...');
+            console.log('Submitting homepage comment...');
 
-            // 直接插入到 comments 表
+            // 插入到独立的 homepage_comments 表
             const { data, error } = await supabase
-                .from('comments')
+                .from('homepage_comments')
                 .insert([{
-                    post_id: 'homepage-comments',
                     author: formData.author.trim(),
                     email: formData.email.trim() || 'anonymous@example.com',
                     content: formData.content.trim(),
-                    approved: true // 直接批准主页评论
+                    approved: true
                 }])
                 .select()
                 .single();
@@ -75,7 +73,7 @@ export default function HomepageComments() {
                 throw error;
             }
             
-            console.log('Comment created successfully:', data);
+            console.log('Homepage comment created successfully:', data);
             
             // 重置表单
             setFormData({ author: '', email: '', content: '' });
@@ -83,7 +81,7 @@ export default function HomepageComments() {
             await loadComments(); // 重新加载评论
             alert('评论已提交！');
         } catch (error) {
-            console.error('Failed to submit comment:', error);
+            console.error('Failed to submit homepage comment:', error);
             
             // 更详细的错误信息
             if (error instanceof Error) {
