@@ -25,6 +25,7 @@ const AppInner: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [toast, setToast] = useState({ show: false, msg: '', type: 'success' });
+  const [pageTransitioning, setPageTransitioning] = useState(false);
 
   // Load data
   useEffect(() => {
@@ -68,13 +69,22 @@ const AppInner: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // 页面切换时滚动到顶部
+  // 页面切换时滚动到顶部并添加缓慢渐变效果（无转圈）
   useEffect(() => {
-    // 直接滚动到顶部，不添加转圈动画
+    setPageTransitioning(true);
+    
+    // 缓慢滚动到顶部
     window.scrollTo({ 
       top: 0, 
       behavior: 'smooth' 
     });
+    
+    // 页面渐入动画完成后重置状态
+    const timer = setTimeout(() => {
+      setPageTransitioning(false);
+    }, 800); // 缩短到800ms，保持舒适的渐变
+    
+    return () => clearTimeout(timer);
   }, [location.pathname]);
 
   // Simple keyboard handler
@@ -105,7 +115,9 @@ const AppInner: React.FC = () => {
     }
   };
 
-  // 简化的导航处理
+  const [isNavigating, setIsNavigating] = useState(false);
+
+  // 舒适的导航处理，保留渐变效果
   const handleNavigate = (path: string) => {
     // 如果是当前页面，直接滚动到顶部
     if (location.pathname === path) {
@@ -116,8 +128,23 @@ const AppInner: React.FC = () => {
       return;
     }
 
-    // 直接导航，不添加复杂动画
-    navigate(path);
+    // 设置导航状态
+    setIsNavigating(true);
+    
+    // 先滚动到顶部
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+    
+    // 延迟导航以确保滚动动画完成
+    setTimeout(() => {
+      navigate(path);
+      // 导航完成后重置状态
+      setTimeout(() => {
+        setIsNavigating(false);
+      }, 100);
+    }, 300); // 缩短延迟，保持流畅
   };
 
   if (showIntro && location.pathname === '/') {
@@ -250,8 +277,10 @@ const AppInner: React.FC = () => {
         </div>
       </nav>
 
-      {/* 主内容区 - 简洁的页面切换 */}
-      <main className="pt-44 pb-48 px-6 max-w-7xl mx-auto">
+      {/* 主内容区 - 舒适的渐变效果，无转圈加载 */}
+      <main className={`pt-44 pb-48 px-6 max-w-7xl mx-auto transition-all duration-800 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] ${
+        pageTransitioning ? 'opacity-0 transform translate-y-8 scale-98' : 'opacity-100 transform translate-y-0 scale-100'
+      }`}>
         <div className="view-transition">
           <Routes>
             <Route path="/" element={<Feed posts={posts} loading={loading} onSelectPost={(p) => navigate(`/post/${p.slug}`, { state: { from: '/' } })} />} />

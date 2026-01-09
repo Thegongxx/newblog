@@ -18,11 +18,11 @@ const PostDetail: React.FC<PostDetailProps> = ({ posts, loading }) => {
     const post = posts.find(p => p.slug === slug);
     const [isExiting, setIsExiting] = useState(false);
 
-    // 缓慢渐出渐入的返回动画
+    // 舒缓的返回动画，无转圈加载
     const handleBackToList = () => {
         setIsExiting(true);
         
-        // 第一阶段：渐出动画
+        // 舒缓的渐出动画后导航
         setTimeout(() => {
             // 检查是否有 state 中的来源信息
             if (location.state?.from) {
@@ -36,7 +36,7 @@ const PostDetail: React.FC<PostDetailProps> = ({ posts, loading }) => {
                     navigate('/');
                 }
             }
-        }, 800); // 800ms 缓慢渐出动画时间
+        }, 600); // 缩短到600ms，保持舒适的渐变
     };
 
     useEffect(() => {
@@ -82,12 +82,12 @@ const PostDetail: React.FC<PostDetailProps> = ({ posts, loading }) => {
     }
 
     return (
-        <div className={`max-w-4xl mx-auto transition-all duration-800 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] ${
+        <div className={`max-w-4xl mx-auto transition-all duration-600 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] ${
             isExiting 
-                ? 'opacity-0 translate-y-12 scale-95 blur-sm' 
-                : 'opacity-100 translate-y-0 scale-100 blur-none animate-in fade-in slide-in-from-bottom-8 duration-700'
+                ? 'opacity-0 translate-y-8 scale-96' 
+                : 'opacity-100 translate-y-0 scale-100 animate-in fade-in slide-in-from-bottom-8 duration-700'
         }`}>
-            {/* 缓慢渐出的返回按钮 */}
+            {/* 舒缓渐出的返回按钮 */}
             <button 
                 onClick={handleBackToList} 
                 className={`group flex items-center gap-3 text-white/40 hover:text-white transition-all duration-500 mb-12 px-6 py-3 rounded-full backdrop-blur-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] hover:border-white/10 active:scale-95 ${
@@ -99,19 +99,11 @@ const PostDetail: React.FC<PostDetailProps> = ({ posts, loading }) => {
                     {ICONS.CHEVRON_RIGHT}
                 </div>
                 <span className="text-sm font-medium tracking-wide">返回列表</span>
-                
-                {/* 渐出加载指示器 */}
-                {isExiting && (
-                    <div className="flex items-center gap-2 ml-2">
-                        <div className="w-4 h-4 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
-                        <span className="text-xs text-white/40 animate-pulse">正在返回...</span>
-                    </div>
-                )}
             </button>
 
-            {/* 文章内容区域 - 添加渐出效果 */}
-            <div className={`transition-all duration-800 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] ${
-                isExiting ? 'opacity-0 translate-y-8 scale-98' : 'opacity-100 translate-y-0 scale-100'
+            {/* 文章内容区域 - 舒缓的渐出效果 */}
+            <div className={`transition-all duration-600 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] ${
+                isExiting ? 'opacity-0 translate-y-6 scale-98' : 'opacity-100 translate-y-0 scale-100'
             }`}>
 
             <header className="mb-20">
