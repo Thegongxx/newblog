@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import BlogCard from '../components/BlogCard';
 import HomepageComments from '../components/HomepageComments';
 import { Post } from '../types';
-import { getAllNotes } from '../utils/notes'; // Import from utils
+import { getAllNotes } from '../utils/notes';
 
 interface FeedProps {
   posts: Post[];
@@ -38,11 +38,36 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
     return notes[Math.floor(Math.random() * notes.length)];
   }, [notes]);
 
+  // Google Material Design 动画配置
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        duration: 0.6,
+        ease: [0.4, 0.0, 0.2, 1],
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 24 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: [0.4, 0.0, 0.2, 1]
+      }
+    }
+  };
+
   const fadeInReveal = {
-    initial: { opacity: 0, y: 30, filter: 'blur(10px)' },
-    whileInView: { opacity: 1, y: 0, filter: 'blur(0px)' },
-    viewport: { once: true, margin: "-100px" },
-    transition: { duration: 1.2, ease: [0.22, 1, 0.36, 1] as any }
+    initial: { opacity: 0, y: 20, scale: 0.98 },
+    whileInView: { opacity: 1, y: 0, scale: 1 },
+    viewport: { once: true, margin: "-50px" },
+    transition: { duration: 0.8, ease: [0.4, 0.0, 0.2, 1] }
   };
 
   return (

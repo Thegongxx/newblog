@@ -295,23 +295,36 @@ const AppInner: React.FC = () => {
         </motion.div>
       </nav>
 
-      {/* 主内容区 - 苹果风格丝滑渐入 */}
-      <main className={`pt-44 pb-48 px-6 max-w-7xl mx-auto transition-all duration-800 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-        pageTransitioning ? 'opacity-0 transform translate-y-6' : 'opacity-100 transform translate-y-0'
-      }`}>
-        <div className="view-transition">
-          <Routes>
-            <Route path="/" element={<Feed posts={posts} loading={loading} onSelectPost={(p) => navigate(`/post/${p.slug}`, { state: { from: '/' } })} />} />
-            <Route path="/post/:slug" element={<PostDetail posts={posts} loading={loading} />} />
-            <Route path="/notes" element={<Notes notes={notes} loading={loading} />} />
-            <Route path="/note/:id" element={<NoteDetail />} />
-            <Route path="/archive" element={<Archive posts={posts} loading={loading} onSelectPost={(p) => navigate(`/post/${p.slug}`, { state: { from: '/archive' } })} />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </div>
-      </main>
+      {/* 主内容区 - Google Material Design 风格页面切换 */}
+      <AnimatePresence mode="wait">
+        <motion.main 
+          key={location.pathname}
+          className="pt-44 pb-48 px-6 max-w-7xl mx-auto"
+          initial={{ opacity: 0, y: 16, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -8, scale: 1.02 }}
+          transition={{ 
+            duration: 0.6, 
+            ease: [0.4, 0.0, 0.2, 1],
+            opacity: { duration: 0.4 },
+            y: { duration: 0.6 },
+            scale: { duration: 0.6 }
+          }}
+        >
+          <div className="view-transition">
+            <Routes>
+              <Route path="/" element={<Feed posts={posts} loading={loading} onSelectPost={(p) => navigate(`/post/${p.slug}`, { state: { from: '/' } })} />} />
+              <Route path="/post/:slug" element={<PostDetail posts={posts} loading={loading} />} />
+              <Route path="/notes" element={<Notes notes={notes} loading={loading} />} />
+              <Route path="/note/:id" element={<NoteDetail />} />
+              <Route path="/archive" element={<Archive posts={posts} loading={loading} onSelectPost={(p) => navigate(`/post/${p.slug}`, { state: { from: '/archive' } })} />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/admin" element={<Admin />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </div>
+        </motion.main>
+      </AnimatePresence>
 
       {/* AI Assistant */}
       <Assistant />

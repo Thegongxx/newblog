@@ -11,10 +11,14 @@
             "id": "b3aecd1f8e0b1fd8",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
+              "type": "markdown",
+              "state": {
+                "file": "pages/about.md",
+                "mode": "source",
+                "source": false
+              },
               "icon": "lucide-file",
-              "title": "新标签页"
+              "title": "about"
             }
           }
         ]

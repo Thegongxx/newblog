@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import CommentSection from '../components/CommentSection';
 import LikeButton from '../components/LikeButton';
 import { ICONS } from '../constants';
@@ -17,7 +18,7 @@ const PostDetail: React.FC<PostDetailProps> = ({ posts, loading }) => {
     const location = useLocation();
     const post = posts.find(p => p.slug === slug);
 
-    // 苹果风格的即时切换
+    // Google Material Design 风格的返回动画
     const handleBackToList = () => {
         // 立即导航，不要退出动画
         if (location.state?.from) {
@@ -76,19 +77,41 @@ const PostDetail: React.FC<PostDetailProps> = ({ posts, loading }) => {
     }
 
     return (
-        <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)]">
-            {/* 苹果风格返回按钮 */}
-            <button 
+        <motion.div 
+            className="max-w-4xl mx-auto"
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ 
+                duration: 0.6, 
+                ease: [0.4, 0.0, 0.2, 1],
+                staggerChildren: 0.1
+            }}
+        >
+            {/* Google Material Design 风格返回按钮 */}
+            <motion.button 
                 onClick={handleBackToList} 
-                className="group flex items-center gap-3 text-white/40 hover:text-white transition-all duration-300 mb-12 px-6 py-3 rounded-full backdrop-blur-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] hover:border-white/10 active:scale-95"
+                className="group flex items-center gap-3 text-white/40 hover:text-white transition-all duration-200 mb-12 px-6 py-3 rounded-full backdrop-blur-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] hover:border-white/10 material-shadow-1 hover:material-shadow-2"
+                whileHover={{ scale: 1.02, x: -4 }}
+                whileTap={{ scale: 0.98 }}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.4, delay: 0.1 }}
             >
-                <div className="rotate-180 group-hover:-translate-x-2 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]">
+                <motion.div 
+                    className="rotate-180 group-hover:-translate-x-1 transition-transform duration-200"
+                    whileHover={{ x: -2 }}
+                >
                     {ICONS.CHEVRON_RIGHT}
-                </div>
+                </motion.div>
                 <span className="text-sm font-medium tracking-wide">返回列表</span>
-            </button>
+            </motion.button>
 
-            <header className="mb-20">
+            <motion.header 
+                className="mb-20"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+            >
                 <div className="flex items-center gap-3 text-white/30 text-[10px] font-bold uppercase tracking-[0.3em] mb-6">
                     <span>{post.date}</span>
                     <span className="w-1 h-1 rounded-full bg-white/20"></span>
@@ -108,18 +131,33 @@ const PostDetail: React.FC<PostDetailProps> = ({ posts, loading }) => {
                 <p className="text-xl md:text-2xl text-white/50 leading-relaxed font-light">{post.excerpt}</p>
             </header>
 
-            <div className="rounded-[3rem] overflow-hidden mb-24 aspect-[16/9] glass shadow-2xl">
+            <motion.div 
+                className="rounded-[3rem] overflow-hidden mb-24 aspect-[16/9] material-shadow-2"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, delay: 0.3 }}
+                whileHover={{ scale: 1.02 }}
+            >
                 <img src={post.image} className="w-full h-full object-cover" />
-            </div>
+            </motion.div>
 
-            <article
+            <motion.article
                 className="prose prose-invert max-w-none prose-p:text-white/60 prose-p:leading-[1.9] prose-p:text-xl prose-p:font-light prose-headings:font-bold prose-headings:tracking-tighter prose-blockquote:border-white/20 prose-blockquote:text-white/80"
                 dangerouslySetInnerHTML={{ __html: post.content }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
             />
 
             {/* 评论区 */}
-            <CommentSection targetId={post.id} targetType="post" />
-        </div>
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.5 }}
+            >
+                <CommentSection targetId={post.id} targetType="post" />
+            </motion.div>
+        </motion.div>
     );
 };
 
