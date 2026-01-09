@@ -3,12 +3,12 @@ title: 第一篇测试笔记
 author: Aura
 date: 2024-01-10
 category: 思考
-tags: test, note, admin
+tags:
 ---
 
 这是第一篇测试笔记的内容。
 
-用来测试Admin面板中的Notes管理功能是否正常工作。
+用来测试笔记功能是否正常工作。
 
 包含一些基本的Markdown格式：
 

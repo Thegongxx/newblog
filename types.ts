@@ -81,8 +81,7 @@ export enum ViewState {
   FEED = 'list',
   NOTEBOOK = 'notes',
   ARCHIVE = 'detail',
-  ABOUT = 'assistant',
-  ADMIN = 'aura-admin'
+  ABOUT = 'assistant'
 }
 
 export interface Message {

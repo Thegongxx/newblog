@@ -3,7 +3,7 @@ title: 关于极简主义的思考
 author: Aura
 date: 2024-01-09
 category: 哲学
-tags: minimalism, philosophy, life
+tags:
 ---
 
 极简主义不仅仅是一种设计风格，更是一种生活哲学。

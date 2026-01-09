@@ -14,7 +14,6 @@ import Notes from './pages/Notes';
 import NoteDetail from './pages/NoteDetail';
 import About from './pages/About';
 import Archive from './pages/Archive';
-import Admin from './components/Admin';
 
 const AppInner: React.FC = () => {
   const navigate = useNavigate();
@@ -48,13 +47,8 @@ const AppInner: React.FC = () => {
         
         // 使用文件系统读取notes，与Feed页面保持一致
         const { getAllNotes } = await import('./utils/notes');
-        const allNotes = getAllNotes();
-        
-        // 过滤掉隐藏的笔记
-        const hiddenNotes = JSON.parse(localStorage.getItem('hiddenNotes') || '[]');
-        const visibleNotes = allNotes.filter(note => !hiddenNotes.includes(note.id));
-        
-        setNotes(visibleNotes);
+        const notesData = getAllNotes();
+        setNotes(notesData);
       } catch (err: any) {
         setError(err.message || '数据加载失败');
       } finally {
@@ -80,18 +74,6 @@ const AppInner: React.FC = () => {
       behavior: 'auto'
     });
   }, [location.pathname]);
-
-  // Simple keyboard handler
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.key === ',') {
-        e.preventDefault();
-        navigate('/admin');
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [navigate]);
 
   // Simple toast function
   const showToast = (msg: string, type = 'success') => {
@@ -290,7 +272,6 @@ const AppInner: React.FC = () => {
           <Route path="/note/:id" element={<NoteDetail />} />
           <Route path="/archive" element={<Archive posts={posts} loading={loading} onSelectPost={(p) => navigate(`/post/${p.slug}`, { state: { from: '/archive' } })} />} />
           <Route path="/about" element={<About />} />
-          <Route path="/admin" element={<Admin />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </motion.main>

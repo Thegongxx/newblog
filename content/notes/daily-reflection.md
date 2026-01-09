@@ -3,7 +3,7 @@ title: 每日反思
 author: Aura
 date: 2024-01-08
 category: 日记
-tags: daily, reflection, growth
+tags:
 ---
 
 今天的一些思考和感悟。
