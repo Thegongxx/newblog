@@ -96,49 +96,64 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
               <div key={i} className="h-[450px] rounded-[2.5rem] bg-white/[0.02] border border-white/5 animate-pulse" />
             ))}
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-x-8 gap-y-12">
-            {/* 格言卡片 - 完全无边框，融入背景 */}
+        ) : null}
+      </motion.section>
+      {/* 2. 艺术感格言层 (Breathing Space) */}
+      <motion.section
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+        className="py-24 md:py-48 flex justify-center items-center relative"
+      >
+        <div className="absolute inset-0 flex justify-center items-center opacity-[0.03] select-none pointer-events-none">
+          <span className="text-[20vw] font-black tracking-tighter text-white blur-3xl">AURA</span>
+        </div>
+        <div className="text-center space-y-8 max-w-2xl px-6 relative z-10">
+          <div className="w-[1px] h-16 bg-gradient-to-b from-transparent via-white/20 to-transparent mx-auto" />
+          <p className="text-2xl md:text-4xl font-light italic text-white/80 leading-snug tracking-wide">
+            “{randomQuote.text}”
+          </p>
+          <p className="text-[10px] uppercase tracking-[0.4em] font-bold text-white/30">— {randomQuote.author}</p>
+          <div className="w-[1px] h-16 bg-gradient-to-b from-transparent via-white/20 to-transparent mx-auto" />
+        </div>
+      </motion.section>
+
+      {/* 3. 画廊网格 (Pure Gallery) */}
+      <motion.section
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 1.2 }}
+      >
+        <div className="flex items-end justify-between mb-16 px-4">
+          <h2 className="text-xl md:text-2xl font-light tracking-widest text-white/40 uppercase">Selected Works</h2>
+          <div className="text-[10px] font-mono text-white/20">01 — 0{bentoPosts.length}</div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-24">
+          {bentoPosts.map((post, i) => (
             <motion.div
-              key="quote-card"
-              {...fadeInReveal}
-              className="md:col-span-2 lg:col-span-2 group relative h-[450px] p-10 flex flex-col justify-center items-center text-center"
+              key={post.id}
+              initial={{ opacity: 0, y: 100 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{
+                duration: 1.2,
+                delay: i * 0.2,
+                ease: [0.22, 1, 0.36, 1] as any
+              }}
+              className="group"
             >
-              <div className="relative z-10 space-y-8">
-                <div className="flex justify-center opacity-20 group-hover:opacity-40 transition-opacity">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-8 h-8">
-                    <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
-                  </svg>
-                </div>
-                <p className="text-xl md:text-2xl font-light italic text-white/70 leading-snug">
-                  “{randomQuote.text}”
-                </p>
-                <p className="text-[9px] uppercase tracking-[0.4em] font-black text-white/25">— {randomQuote.author}</p>
+              <BlogCard post={post} onClick={() => onSelectPost(post)} />
+              {/* 纯净的底部描述，移出卡片内部以增加留白 */}
+              <div className="mt-6 flex justify-between items-center opacity-40 group-hover:opacity-100 transition-opacity duration-500 px-2">
+                <span className="text-[10px] uppercase tracking-widest">{post.date}</span>
+                <span className="text-[10px] uppercase tracking-widest">{post.readingTime}</span>
               </div>
             </motion.div>
-
-            {/* 最新文章卡片 */}
-            {bentoPosts.map((post, i) => {
-              const isLarge = i === 1; // 第二篇稍大一些
-              return (
-                <motion.div
-                  key={post.id}
-                  initial={{ opacity: 0, y: 50 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{
-                    duration: 1,
-                    delay: i * 0.1,
-                    ease: [0.22, 1, 0.36, 1] as any
-                  }}
-                  className={`${isLarge ? 'md:col-span-2 lg:col-span-2' : 'md:col-span-2 lg:col-span-2'}`}
-                >
-                  <BlogCard post={post} onClick={() => onSelectPost(post)} />
-                </motion.div>
-              );
-            })}
-          </div>
-        )}
+          ))}
+        </div>
       </motion.section>
 
 
