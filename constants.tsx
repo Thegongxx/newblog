@@ -87,6 +87,38 @@ export const QUOTES_DATA: Quote[] = [
   { text: "技术应该是隐形的，只有当它能连接人心时，它才具有生命力。", author: "Unknown", date: "2024.04.10" }
 ];
 
+export interface Note {
+  id: string;
+  title: string;
+  content: string;
+  date: string;
+  tags: string[];
+}
+
+export const NOTES_DATA: Note[] = [
+  {
+    id: '1',
+    title: '碎片化思考',
+    content: '在信息过载的时代，我们习惯了碎片的摄入，却遗忘了系统的思考。Notes 板块存在的意义，就是捕捉那些稍纵即逝的灵感火花，让它们有机会生长成参天大树。',
+    date: '2024.01.20',
+    tags: ['Thinking', 'Life']
+  },
+  {
+    id: '2',
+    title: '设计的边界',
+    content: '最近在思考“无界面”设计的可能性。当 AI 足够理解意图，传统的 GUI 是否会变得多余？也许未来的交互，是如同呼吸一般自然的潜意识行为。',
+    date: '2024.02.14',
+    tags: ['Design', 'AI']
+  },
+  {
+    id: '3',
+    title: '数字花园',
+    content: '将博客视为一个数字花园，而不是展示橱窗。允许未完成的想法存在，允许修剪和重构。这里的每一篇 Note，都是一颗正在发芽的种子。',
+    date: '2024.03.05',
+    tags: ['Metaphor', 'Growth']
+  }
+];
+
 export const ICONS = {
   SEARCH: (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">

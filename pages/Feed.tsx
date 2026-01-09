@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import BlogCard from '../components/BlogCard';
 import HomepageComments from '../components/HomepageComments';
 import { Post } from '../types';
-import { QUOTES_DATA, ICONS } from '../constants';
+import { NOTES_DATA, ICONS } from '../constants';
 
 interface FeedProps {
   posts: Post[];
@@ -22,8 +22,8 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
   const bentoPosts = sortedPosts.slice(1, 5); // 只取 4 篇，保持约两行
 
 
-  const randomQuote = useMemo(() => {
-    return QUOTES_DATA[Math.floor(Math.random() * QUOTES_DATA.length)];
+  const randomNote = useMemo(() => {
+    return NOTES_DATA[Math.floor(Math.random() * NOTES_DATA.length)];
   }, []);
 
   const fadeInReveal = {
@@ -98,24 +98,48 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
           </div>
         ) : null}
       </motion.section>
-      {/* 2. 艺术感格言层 (Breathing Space) */}
+      {/* 2. 随机 Note 推荐 (Breathing Space & Thoughts) */}
       <motion.section
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true, margin: "-100px" }}
         transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
-        className="py-24 md:py-48 flex justify-center items-center relative"
+        className="py-24 md:py-36 flex justify-center items-center relative"
       >
-        <div className="absolute inset-0 flex justify-center items-center opacity-[0.03] select-none pointer-events-none">
-          <span className="text-[20vw] font-black tracking-tighter text-white blur-3xl">AURA</span>
+        {/* 背景氛围字 */}
+        <div className="absolute inset-0 flex justify-center items-center opacity-[0.02] select-none pointer-events-none">
+          <span className="text-[15vw] font-black tracking-tighter text-white blur-3xl">NOTES</span>
         </div>
-        <div className="text-center space-y-8 max-w-2xl px-6 relative z-10">
-          <div className="w-[1px] h-16 bg-gradient-to-b from-transparent via-white/20 to-transparent mx-auto" />
-          <p className="text-2xl md:text-4xl font-light italic text-white/80 leading-snug tracking-wide">
-            “{randomQuote.text}”
-          </p>
-          <p className="text-[10px] uppercase tracking-[0.4em] font-bold text-white/30">— {randomQuote.author}</p>
-          <div className="w-[1px] h-16 bg-gradient-to-b from-transparent via-white/20 to-transparent mx-auto" />
+
+        {/* Note 内容容器 */}
+        <div className="relative z-10 max-w-3xl px-6 md:px-12 w-full">
+          <div className="flex flex-col items-center text-center space-y-6">
+            {/* 装饰线 */}
+            <div className="w-[1px] h-12 bg-gradient-to-b from-transparent via-white/20 to-transparent" />
+
+            {/* Note 标签 */}
+            <div className="flex items-center gap-3">
+              <span className="px-3 py-1 rounded-full bg-white/5 border border-white/5 text-[10px] font-black tracking-[0.2em] text-white/50 uppercase backdrop-blur-md">
+                Random Note
+              </span>
+              {randomNote.tags.map(tag => (
+                <span key={tag} className="text-[10px] uppercase tracking-widest text-white/30">#{tag}</span>
+              ))}
+            </div>
+
+            {/* Note 标题 & 内容 */}
+            <div className="space-y-4 py-4">
+              <h3 className="text-2xl md:text-3xl font-bold text-white tracking-tight">{randomNote.title}</h3>
+              <p className="text-base md:text-xl font-light text-white/70 leading-relaxed max-w-2xl mx-auto">
+                {randomNote.content}
+              </p>
+            </div>
+
+            {/* Note 日期 */}
+            <p className="text-[10px] font-mono text-white/20 mt-4">{randomNote.date}</p>
+
+            <div className="w-[1px] h-12 bg-gradient-to-b from-transparent via-white/20 to-transparent" />
+          </div>
         </div>
       </motion.section>
 
