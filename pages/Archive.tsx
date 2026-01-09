@@ -45,7 +45,7 @@ const Archive: React.FC<ArchiveProps> = ({ posts, loading, onSelectPost }) => {
   }
 
   return (
-    <div className="max-w-4xl py-12">
+    <div className="max-w-4xl py-12 animate-in fade-in slide-in-from-bottom-12 duration-1000 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]">
       <div className="mb-16">
         <h1 className="text-6xl font-bold tracking-tighter mb-6 text-white">
           Archive

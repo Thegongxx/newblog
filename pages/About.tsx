@@ -59,7 +59,7 @@ const About: React.FC = () => {
     }, []);
 
     return (
-        <div className="max-w-3xl py-12">
+        <div className="max-w-3xl py-12 animate-in fade-in slide-in-from-bottom-12 duration-1000 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]">
             <article 
                 className="prose prose-invert max-w-none"
                 dangerouslySetInnerHTML={{ __html: content }}

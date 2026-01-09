@@ -46,7 +46,7 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
   };
 
   return (
-    <div className="space-y-32 md:space-y-64 overflow-hidden">
+    <div className="space-y-32 md:space-y-64 overflow-hidden animate-in fade-in slide-in-from-bottom-12 duration-1000 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]">
       {/* 1. 全新分屏 Hero 区域 */}
       <motion.section
         {...fadeInReveal}

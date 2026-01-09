@@ -14,7 +14,7 @@ const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
     const [expandedCommentId, setExpandedCommentId] = useState<string | null>(null);
 
     return (
-        <div className="py-12">
+        <div className="py-12 animate-in fade-in slide-in-from-bottom-12 duration-1000 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]">
             <header className="mb-24">
                 <h2 className="text-6xl md:text-8xl font-bold tracking-tighter mb-8 italic">NOTES.</h2>
                 <p className="text-xl text-white/30 font-light max-w-lg">那些转瞬即逝的思想，在留白间沉淀。</p>

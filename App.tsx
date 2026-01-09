@@ -25,6 +25,7 @@ const AppInner: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [toast, setToast] = useState({ show: false, msg: '', type: 'success' });
+  const [pageTransitioning, setPageTransitioning] = useState(false);
 
   // Load data
   useEffect(() => {
@@ -68,9 +69,22 @@ const AppInner: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // 页面切换时滚动到顶部
+  // 页面切换时滚动到顶部并添加渐入渐出动画
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setPageTransitioning(true);
+    
+    // 缓慢滚动到顶部
+    window.scrollTo({ 
+      top: 0, 
+      behavior: 'smooth' 
+    });
+    
+    // 页面渐入动画完成后重置状态
+    const timer = setTimeout(() => {
+      setPageTransitioning(false);
+    }, 1000); // 延长到1000ms让渐入效果更明显
+    
+    return () => clearTimeout(timer);
   }, [location.pathname]);
 
   // Simple keyboard handler
@@ -263,10 +277,25 @@ const AppInner: React.FC = () => {
         </div>
       </nav>
 
-      {/* 主内容区 - 增加页面切换动画 */}
-      <main className={`pt-44 pb-48 px-6 max-w-7xl mx-auto transition-all duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] ${
-        isNavigating ? 'opacity-0 transform translate-y-4' : 'opacity-100 transform translate-y-0'
+      {/* 主内容区 - 缓慢渐入渐出的页面切换动画 */}
+      <main className={`pt-44 pb-48 px-6 max-w-7xl mx-auto transition-all duration-1000 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] ${
+        pageTransitioning ? 'opacity-0 transform translate-y-12 scale-95 blur-sm' : 'opacity-100 transform translate-y-0 scale-100 blur-none'
       }`}>
+        {/* 页面切换渐入加载指示器 */}
+        {pageTransitioning && (
+          <div className="fixed inset-0 z-30 flex items-center justify-center pointer-events-none">
+            <div className="flex flex-col items-center gap-6 animate-in fade-in duration-500">
+              <div className="relative">
+                <div className="w-12 h-12 border-2 border-white/10 border-t-white/40 rounded-full animate-spin" />
+                <div className="absolute inset-0 w-12 h-12 border-2 border-transparent border-b-white/20 rounded-full animate-spin animate-reverse" style={{animationDuration: '1.5s'}} />
+              </div>
+              <div className="text-white/30 text-sm font-medium tracking-wider uppercase animate-pulse">
+                页面切换中...
+              </div>
+            </div>
+          </div>
+        )}
+        
         <div className="view-transition">
           <Routes>
             <Route path="/" element={<Feed posts={posts} loading={loading} onSelectPost={(p) => navigate(`/post/${p.slug}`, { state: { from: '/' } })} />} />
