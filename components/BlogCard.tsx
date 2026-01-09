@@ -6,12 +6,13 @@ import LikeButton from './LikeButton';
 interface BlogCardProps {
   post: Post;
   onClick: () => void;
+  featured?: boolean;
 }
 
-const BlogCard: React.FC<BlogCardProps> = ({ post, onClick }) => {
+const BlogCard: React.FC<BlogCardProps> = ({ post, onClick, featured }) => {
   return (
     <div
-      className="group relative h-[450px] bg-white/[0.03] backdrop-blur-3xl border border-white/10 rounded-[2.5rem] transition-all duration-700 hover:border-white/20 cursor-pointer shadow-2xl overflow-visible"
+      className={`group relative ${featured ? 'h-[600px] md:h-full' : 'h-[450px]'} bg-white/[0.03] backdrop-blur-3xl border border-white/10 rounded-[2.5rem] transition-all duration-700 hover:border-white/20 cursor-pointer shadow-2xl overflow-visible`}
       onClick={onClick}
     >
       {/* 全幅封面图容器 - 现在是卡片的背景底层 */}
@@ -48,7 +49,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, onClick }) => {
           <span>{post.readingTime}</span>
         </div>
 
-        <h3 className="text-3xl font-black text-white mb-4 tracking-tighter leading-tight transition-all duration-700 group-hover:-translate-y-1">
+        <h3 className={`${featured ? 'text-4xl md:text-5xl' : 'text-3xl'} font-black text-white mb-4 tracking-tighter leading-tight transition-all duration-700 group-hover:-translate-y-1`}>
           {post.title}
         </h3>
 
