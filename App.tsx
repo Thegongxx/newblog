@@ -3,9 +3,6 @@ import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, Navig
 import { HelmetProvider, Helmet } from 'react-helmet-async';
 import Intro from './components/Intro';
 import Assistant from './components/Assistant';
-import ScrollIndicator from './components/ScrollIndicator';
-import SmartSearch from './components/SmartSearch';
-import SmartLoader from './components/SmartLoader';
 import { ICONS, CONTACT_INFO } from './constants';
 import { postsApi, notesApi } from './services/supabaseService';
 import { Post } from './types';
@@ -116,17 +113,15 @@ const AppInner: React.FC = () => {
     }, 2500);
   };
 
-  const handleSearchSelect = (result: any) => {
-    navigate(result.url);
-  };
-
   const Archive = () => (
     <div className="py-12">
       <Helmet>
         <title>Archive | Aura</title>
       </Helmet>
       <h2 className="text-6xl font-bold tracking-tighter mb-16">归档文章</h2>
-      <SmartLoader loading={loading}>
+      {loading ? (
+        <div className="text-center text-white/40 py-12">加载中...</div>
+      ) : (
         <div className="grid grid-cols-1 gap-4">
           {posts.map((post, i) => (
             <div key={post.id} className="glass p-8 rounded-[2.5rem] flex items-center justify-between group cursor-pointer hover:bg-white/[0.08] transition-all border border-white/5 animate-in fade-in slide-in-from-bottom-2" style={{ animationDelay: `${i * 50}ms` }} onClick={() => navigate(`/post/${post.slug}`)}>
@@ -140,7 +135,7 @@ const AppInner: React.FC = () => {
             </div>
           ))}
         </div>
-      </SmartLoader>
+      )}
     </div>
   );
 
@@ -195,9 +190,6 @@ const AppInner: React.FC = () => {
           </React.Suspense>
         </div>
       </main>
-
-      <ScrollIndicator />
-      <SmartSearch data={[...posts, ...notes]} onSelect={handleSearchSelect} />
 
       <Assistant />
 
