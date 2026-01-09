@@ -69,20 +69,20 @@ const AppInner: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // 页面切换时滚动到顶部并添加丝滑渐变效果
+  // 苹果风格的页面切换 - 只有渐入效果
   useEffect(() => {
     setPageTransitioning(true);
     
-    // 缓慢滚动到顶部
+    // 立即滚动到顶部
     window.scrollTo({ 
       top: 0, 
-      behavior: 'smooth' 
+      behavior: 'auto' // 改为立即滚动
     });
     
-    // 页面渐入动画完成后重置状态
+    // 页面渐入动画
     const timer = setTimeout(() => {
       setPageTransitioning(false);
-    }, 1000); // 延长到1000ms，更加丝滑
+    }, 800); // 缩短到800ms，更像苹果的快速渐入
     
     return () => clearTimeout(timer);
   }, [location.pathname]);
@@ -117,7 +117,7 @@ const AppInner: React.FC = () => {
 
   const [isNavigating, setIsNavigating] = useState(false);
 
-  // 舒适的导航处理，保留渐变效果
+  // 苹果风格的导航处理 - 立即切换
   const handleNavigate = (path: string) => {
     // 如果是当前页面，直接滚动到顶部
     if (location.pathname === path) {
@@ -128,23 +128,8 @@ const AppInner: React.FC = () => {
       return;
     }
 
-    // 设置导航状态
-    setIsNavigating(true);
-    
-    // 先滚动到顶部
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
-    
-    // 延迟导航以确保滚动动画完成
-    setTimeout(() => {
-      navigate(path);
-      // 导航完成后重置状态
-      setTimeout(() => {
-        setIsNavigating(false);
-      }, 100);
-    }, 400); // 保持400ms延迟，配合丝滑效果
+    // 立即导航，让页面切换效果处理渐入
+    navigate(path);
   };
 
   if (showIntro && location.pathname === '/') {
@@ -277,9 +262,9 @@ const AppInner: React.FC = () => {
         </div>
       </nav>
 
-      {/* 主内容区 - 丝滑的渐变效果 */}
-      <main className={`pt-44 pb-48 px-6 max-w-7xl mx-auto transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-        pageTransitioning ? 'opacity-0 transform translate-y-4 scale-99' : 'opacity-100 transform translate-y-0 scale-100'
+      {/* 主内容区 - 苹果风格丝滑渐入 */}
+      <main className={`pt-44 pb-48 px-6 max-w-7xl mx-auto transition-all duration-800 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+        pageTransitioning ? 'opacity-0 transform translate-y-6' : 'opacity-100 transform translate-y-0'
       }`}>
         <div className="view-transition">
           <Routes>

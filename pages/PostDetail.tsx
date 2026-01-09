@@ -16,27 +16,21 @@ const PostDetail: React.FC<PostDetailProps> = ({ posts, loading }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const post = posts.find(p => p.slug === slug);
-    const [isExiting, setIsExiting] = useState(false);
 
-    // 丝滑缓慢的返回动画
+    // 苹果风格的即时切换
     const handleBackToList = () => {
-        setIsExiting(true);
-        
-        // 丝滑的渐出动画后导航
-        setTimeout(() => {
-            // 检查是否有 state 中的来源信息
-            if (location.state?.from) {
-                navigate(location.state.from);
+        // 立即导航，不要退出动画
+        if (location.state?.from) {
+            navigate(location.state.from);
+        } else {
+            // 如果没有来源信息，使用浏览器历史记录
+            if (window.history.length > 1) {
+                navigate(-1);
             } else {
-                // 如果没有来源信息，使用浏览器历史记录
-                if (window.history.length > 1) {
-                    navigate(-1);
-                } else {
-                    // 最后的备选方案：返回主页
-                    navigate('/');
-                }
+                // 最后的备选方案：返回主页
+                navigate('/');
             }
-        }, 1200); // 延长到1200ms，更加丝滑
+        }
     };
 
     useEffect(() => {
@@ -82,29 +76,17 @@ const PostDetail: React.FC<PostDetailProps> = ({ posts, loading }) => {
     }
 
     return (
-        <div className={`max-w-4xl mx-auto transition-all duration-1200 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-            isExiting 
-                ? 'opacity-0 translate-y-4 scale-99' 
-                : 'opacity-100 translate-y-0 scale-100 animate-in fade-in slide-in-from-bottom-4 duration-1000'
-        }`}>
-            {/* 丝滑渐出的返回按钮 */}
+        <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)]">
+            {/* 苹果风格返回按钮 */}
             <button 
                 onClick={handleBackToList} 
-                className={`group flex items-center gap-3 text-white/40 hover:text-white transition-all duration-700 mb-12 px-6 py-3 rounded-full backdrop-blur-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] hover:border-white/10 active:scale-95 ${
-                    isExiting ? 'opacity-0 translate-x-4 scale-95' : 'opacity-100 translate-x-0 scale-100'
-                }`}
-                disabled={isExiting}
+                className="group flex items-center gap-3 text-white/40 hover:text-white transition-all duration-300 mb-12 px-6 py-3 rounded-full backdrop-blur-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.05] hover:border-white/10 active:scale-95"
             >
-                <div className="rotate-180 group-hover:-translate-x-2 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]">
+                <div className="rotate-180 group-hover:-translate-x-2 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]">
                     {ICONS.CHEVRON_RIGHT}
                 </div>
                 <span className="text-sm font-medium tracking-wide">返回列表</span>
             </button>
-
-            {/* 文章内容区域 - 丝滑的渐出效果 */}
-            <div className={`transition-all duration-1200 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                isExiting ? 'opacity-0 translate-y-2 scale-99' : 'opacity-100 translate-y-0 scale-100'
-            }`}>
 
             <header className="mb-20">
                 <div className="flex items-center gap-3 text-white/30 text-[10px] font-bold uppercase tracking-[0.3em] mb-6">
@@ -137,7 +119,6 @@ const PostDetail: React.FC<PostDetailProps> = ({ posts, loading }) => {
 
             {/* 评论区 */}
             <CommentSection targetId={post.id} targetType="post" />
-            </div>
         </div>
     );
 };
