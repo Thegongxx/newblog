@@ -32,36 +32,47 @@ const About: React.FC = () => {
                     
                     setFrontmatter(fm);
                     
-                    // 简单的 Markdown 转 HTML
+                    // 改进的 Markdown 转 HTML 解析
                     let htmlContent = markdownContent
-                        .replace(/^# (.*$)/gm, '<h1 class="text-7xl font-bold tracking-tighter mb-10">$1</h1>')
-                        .replace(/^## (.*$)/gm, '<h2 class="text-4xl font-bold tracking-tight mb-8 mt-16">$2</h2>')
-                        .replace(/^### (.*$)/gm, '<h3 class="text-2xl font-bold tracking-tight mb-6 mt-12">$3</h3>')
+                        // 处理标题
+                        .replace(/^### (.*$)/gm, '<h3 class="text-2xl font-bold tracking-tight mb-6 mt-12 text-white">$1</h3>')
+                        .replace(/^## (.*$)/gm, '<h2 class="text-4xl font-bold tracking-tight mb-8 mt-16 text-white">$1</h2>')
+                        .replace(/^# (.*$)/gm, '<h1 class="text-7xl font-bold tracking-tighter mb-10 text-white">$1</h1>')
+                        // 处理粗体和斜体
                         .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-white">$1</strong>')
-                        .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
+                        .replace(/\*(.*?)\*/g, '<em class="italic text-white/80">$1</em>')
+                        // 处理引用
                         .replace(/^> (.*$)/gm, '<blockquote class="border-l-2 border-white/20 pl-8 py-4 my-8 italic text-xl text-white/80 bg-white/[0.02] rounded-r-2xl">$1</blockquote>')
+                        // 处理段落
                         .split('\n\n')
                         .map(paragraph => {
-                            if (paragraph.trim() === '') return '';
-                            if (paragraph.startsWith('<h') || paragraph.startsWith('<blockquote')) {
-                                return paragraph;
+                            const trimmed = paragraph.trim();
+                            if (trimmed === '') return '';
+                            
+                            // 如果已经是HTML标签，直接返回
+                            if (trimmed.startsWith('<h') || trimmed.startsWith('<blockquote')) {
+                                return trimmed;
                             }
-                            return `<p class="text-white/60 leading-[1.9] text-xl font-light mb-6">${paragraph}</p>`;
+                            
+                            // 普通段落
+                            return `<p class="text-white/60 leading-[1.9] text-xl font-light mb-6">${trimmed}</p>`;
                         })
-                        .join('');
-                    
-                    // 清理多余的标签
-                    htmlContent = htmlContent
-                        .replace(/<p class="[^"]*"><\/p>/g, '')
-                        .replace(/<p class="[^"]*">(<h[1-6])/g, '$1')
-                        .replace(/(<\/h[1-6]>)<\/p>/g, '$1')
-                        .replace(/<p class="[^"]*">(<blockquote)/g, '$1')
-                        .replace(/(<\/blockquote>)<\/p>/g, '$1');
+                        .filter(p => p !== '') // 过滤空段落
+                        .join('\n');
                     
                     setContent(htmlContent);
                 } else {
                     // 如果没有 frontmatter，直接处理内容
-                    setContent(`<p class="text-white/60 leading-[1.9] text-xl font-light">${aboutMd}</p>`);
+                    const simpleHtml = aboutMd
+                        .replace(/^# (.*$)/gm, '<h1 class="text-7xl font-bold tracking-tighter mb-10 text-white">$1</h1>')
+                        .replace(/^## (.*$)/gm, '<h2 class="text-4xl font-bold tracking-tight mb-8 mt-16 text-white">$1</h2>')
+                        .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-white">$1</strong>')
+                        .split('\n\n')
+                        .map(p => p.trim() ? `<p class="text-white/60 leading-[1.9] text-xl font-light mb-6">${p.trim()}</p>` : '')
+                        .filter(p => p !== '')
+                        .join('\n');
+                    
+                    setContent(simpleHtml);
                 }
             } catch (error) {
                 console.error('Failed to parse about content:', error);
