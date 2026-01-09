@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Helmet } from 'react-helmet-async';
 import LikeButton from '../components/LikeButton';
 import CommentSection from '../components/CommentSection';
 import { ICONS } from '../constants';
@@ -14,11 +13,6 @@ const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
 
     return (
         <div className="py-12">
-            <Helmet>
-                <title>Notes | Aura</title>
-                <meta name="description" content="那些转瞬即逝的思想，在留白间沉淀。" />
-            </Helmet>
-
             <header className="mb-24">
                 <h2 className="text-6xl md:text-8xl font-bold tracking-tighter mb-8 italic">NOTES.</h2>
                 <p className="text-xl text-white/30 font-light max-w-lg">那些转瞬即逝的思想，在留白间沉淀。</p>

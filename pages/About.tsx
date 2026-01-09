@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { Helmet } from 'react-helmet-async';
 import aboutMd from '../content/pages/about.md?raw';
 
 const About: React.FC = () => {
@@ -61,11 +60,6 @@ const About: React.FC = () => {
 
     return (
         <div className="max-w-3xl py-12">
-            <Helmet>
-                <title>{frontmatter.title || 'About'} | Aura</title>
-                <meta name="description" content={frontmatter.excerpt || "About Aura"} />
-            </Helmet>
-            
             <article 
                 className="prose prose-invert max-w-none"
                 dangerouslySetInnerHTML={{ __html: content }}

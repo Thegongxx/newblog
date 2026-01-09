@@ -141,7 +141,7 @@ const AppInner: React.FC = () => {
       scrollBehavior: 'smooth'
     }}>
       <Helmet>
-        <title>Aura | Minimalist Personal Space</title>
+        <title>Aura - 极简主义个人空间</title>
         <meta name="description" content="A digital sanctuary for minimalist aesthetics and intelligence." />
         <style>{`
           html {

@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
 import CommentSection from '../components/CommentSection';
 import LikeButton from '../components/LikeButton';
 import { ICONS } from '../constants';
@@ -61,11 +60,6 @@ const PostDetail: React.FC<PostDetailProps> = ({ posts, loading }) => {
 
     return (
         <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-8 duration-700">
-            <Helmet>
-                <title>{post.title} | Aura</title>
-                <meta name="description" content={post.excerpt} />
-            </Helmet>
-
             <button onClick={() => navigate('/')} className="group flex items-center gap-2 text-white/40 hover:text-white transition-all mb-12 px-5 py-2 rounded-full glass active:scale-95">
                 <div className="rotate-180 group-hover:-translate-x-1 transition-transform">{ICONS.CHEVRON_RIGHT}</div>
                 <span className="text-sm font-medium">返回列表</span>

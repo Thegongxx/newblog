@@ -1,5 +1,4 @@
 import React from 'react';
-import { Helmet } from 'react-helmet-async';
 
 interface ArchiveProps {
   posts: any[];
@@ -42,11 +41,6 @@ const Archive: React.FC<ArchiveProps> = ({ posts, loading, onSelectPost }) => {
 
   return (
     <div className="max-w-4xl py-12">
-      <Helmet>
-        <title>Archive | Aura</title>
-        <meta name="description" content="文章归档 - 按时间浏览所有文章" />
-      </Helmet>
-
       <div className="mb-16">
         <h1 className="text-6xl font-bold tracking-tighter mb-6 text-white">
           Archive
