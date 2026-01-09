@@ -425,10 +425,10 @@ function NotesManager({ notes, onRefresh }: { notes: any[], onRefresh: () => voi
     const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(false);
 
-    const filteredNotes = notes.filter(n => n.title?.toLowerCase().includes(searchTerm.toLowerCase()) || n.content?.toLowerCase().includes(searchTerm.toLowerCase()));
+    const filteredNotes = notes.filter(n => n.author?.toLowerCase().includes(searchTerm.toLowerCase()) || n.text?.toLowerCase().includes(searchTerm.toLowerCase()));
 
-    const handleDelete = async (id: string, title: string) => {
-        if (!confirm(`Permanently delete note "${title}"? This will only remove the Database entry.`)) return;
+    const handleDelete = async (id: string, author: string) => {
+        if (!confirm(`Permanently delete note "${author}"? This will only remove the Database entry.`)) return;
         try {
             setLoading(true);
             await notesApi.delete(id);
@@ -467,23 +467,23 @@ function NotesManager({ notes, onRefresh }: { notes: any[], onRefresh: () => voi
                                 </svg>
                             </div>
                             <div>
-                                <h4 className="text-2xl font-black tracking-tight mb-2 text-white/90">{note.title || 'Untitled Note'}</h4>
+                                <h4 className="text-2xl font-black tracking-tight mb-2 text-white/90">{note.author || 'Untitled Note'}</h4>
                                 <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.2em] mb-3">
                                     <span className="text-amber-500">Note</span>
                                     <span className="text-white/10">/</span>
-                                    <span className="text-white/40">{note.category || 'Uncategorized'}</span>
+                                    <span className="text-white/40">{note.tags?.[0] || 'Uncategorized'}</span>
                                     <span className="text-white/10">/</span>
                                     <span className="text-white/20 font-mono lowercase tracking-normal">{new Date(note.created_at).toLocaleDateString()}</span>
                                 </div>
-                                {note.content && (
+                                {note.text && (
                                     <p className="text-white/40 text-sm leading-relaxed max-w-2xl line-clamp-2">
-                                        {note.content.substring(0, 150)}...
+                                        {note.text.substring(0, 150)}...
                                     </p>
                                 )}
                             </div>
                         </div>
                         <div className="flex items-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity translate-x-4 group-hover:translate-x-0 duration-500">
-                            <button onClick={() => handleDelete(note.id!, note.title || 'Untitled')} className="w-14 h-14 flex items-center justify-center rounded-2xl bg-white/5 hover:bg-rose-500/20 text-white/20 hover:text-rose-500 transition-all">
+                            <button onClick={() => handleDelete(note.id!, note.author || 'Untitled')} className="w-14 h-14 flex items-center justify-center rounded-2xl bg-white/5 hover:bg-rose-500/20 text-white/20 hover:text-rose-500 transition-all">
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
                             </button>
                         </div>
