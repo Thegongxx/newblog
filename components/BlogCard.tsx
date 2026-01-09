@@ -20,10 +20,10 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, onClick, featured }) => {
         <img
           src={post.image}
           alt={post.title}
-          className="w-full h-full object-cover transition-all duration-1000 group-hover:scale-110 group-hover:rotate-1 grayscale-[0.3] group-hover:grayscale-0 opacity-40 group-hover:opacity-60"
+          className="w-full h-full object-cover transition-all duration-1000 group-hover:scale-110 group-hover:rotate-1 grayscale-[0.1] group-hover:grayscale-0 opacity-50 group-hover:opacity-70"
         />
-        {/* 渐变遮罩 */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-90 group-hover:opacity-60 transition-opacity duration-700" />
+        {/* 渐变遮罩 - 增强底部对比度 */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-100 group-hover:opacity-80 transition-opacity duration-700" />
       </div>
 
       {/* 分类标签 - 放在外层以确保不被 overflow 裁剪 */}
@@ -49,7 +49,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, onClick, featured }) => {
           <span>{post.readingTime}</span>
         </div>
 
-        <h3 className={`${featured ? 'text-4xl md:text-5xl' : 'text-3xl'} font-black text-white mb-4 tracking-tighter leading-tight transition-all duration-700 group-hover:-translate-y-1`}>
+        <h3 className={`${featured ? 'text-4xl md:text-5xl' : 'text-3xl'} font-black text-white mb-4 tracking-tighter leading-tight transition-all duration-700 group-hover:-translate-y-1 drop-shadow-2xl`}>
           {post.title}
         </h3>
 

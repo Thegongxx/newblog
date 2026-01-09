@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { motion } from 'framer-motion';
 import BlogCard from '../components/BlogCard';
 import HomepageComments from '../components/HomepageComments';
 import { Post } from '../types';
@@ -11,15 +12,39 @@ interface FeedProps {
 }
 
 const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
+  // 1. 增强随机性：对文章进行加权随机处理
+  const { featuredPost, bentoPosts } = useMemo(() => {
+    if (posts.length === 0) return { featuredPost: null, bentoPosts: [] };
+
+    // 克隆并打乱数组（Fisher-Yates shuffle）
+    const shuffled = [...posts].sort(() => Math.random() - 0.5);
+
+    // 第一个作为 Featured，剩下的作为 Bento 网格
+    return {
+      featuredPost: shuffled[0],
+      bentoPosts: shuffled.slice(1, 10) // 取剩下的前 9 篇
+    };
+  }, [posts]);
+
   const randomQuote = useMemo(() => {
     return QUOTES_DATA[Math.floor(Math.random() * QUOTES_DATA.length)];
   }, []);
 
+  const fadeInReveal = {
+    initial: { opacity: 0, y: 30, filter: 'blur(10px)' },
+    whileInView: { opacity: 1, y: 0, filter: 'blur(0px)' },
+    viewport: { once: true, margin: "-100px" },
+    transition: { duration: 1.2, ease: [0.22, 1, 0.36, 1] as any }
+  };
+
   return (
-    <div className="space-y-32 md:space-y-64">
+    <div className="space-y-32 md:space-y-64 overflow-hidden">
       {/* 1. 全新分屏 Hero 区域 */}
-      <section className="min-h-[60vh] flex flex-col md:flex-row items-center gap-16 md:gap-24">
-        <div className="flex-1 space-y-10 animate-in fade-in slide-in-from-left-8 duration-1000">
+      <motion.section
+        {...fadeInReveal}
+        className="min-h-[60vh] flex flex-col md:flex-row items-center gap-16 md:gap-24"
+      >
+        <div className="flex-1 space-y-10">
           <div className="space-y-6">
             <h4 className="text-white/20 uppercase tracking-[0.6em] text-[10px] font-black flex items-center gap-4">
               <span className="w-8 h-[1px] bg-white/10" />
@@ -34,7 +59,10 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
             在这里，我们探索技术、建筑与人类情感之间那些无形的联系。一个致力于纯粹体验的数字空间。
           </p>
           <div className="flex items-center gap-8 pt-4">
-            <button className="group flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.3em] text-white/40 hover:text-white transition-colors">
+            <button
+              onClick={() => window.scrollTo({ top: window.innerHeight * 0.8, behavior: 'smooth' })}
+              className="group flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.3em] text-white/40 hover:text-white transition-colors"
+            >
               Scroll to Explore
               <div className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center group-hover:bg-white group-hover:text-black transition-all">
                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1V11M6 11L1 6M6 11L11 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
@@ -44,21 +72,26 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
         </div>
 
         {/* Hero 右侧精选展示 */}
-        {!loading && posts.length > 0 && (
-          <div className="flex-[1.2] w-full animate-in fade-in slide-in-from-right-8 duration-1000 delay-300">
-            <BlogCard post={posts[0]} onClick={() => onSelectPost(posts[0])} featured />
+        {!loading && featuredPost && (
+          <div className="flex-[1.2] w-full">
+            <BlogCard post={featuredPost} onClick={() => onSelectPost(featuredPost)} featured />
           </div>
         )}
-      </section>
+      </motion.section>
 
       {/* 2. Bento 文章网格 */}
-      <section>
-        <div className="flex items-end justify-between mb-20">
+      <motion.section
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 1 }}
+      >
+        <div className="flex items-end justify-between mb-24 reveal-text">
           <div className="space-y-4">
             <h2 className="text-4xl font-black tracking-tight uppercase">Latest Artifacts.</h2>
             <div className="h-1 w-12 bg-white/10" />
           </div>
-          <p className="text-white/20 text-[10px] uppercase tracking-[0.4em] font-bold hidden md:block">Sorted by Chronology</p>
+          <p className="text-white/20 text-[10px] uppercase tracking-[0.4em] font-bold hidden md:block">Curated Selection</p>
         </div>
 
         {loading ? (
@@ -68,41 +101,65 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-8">
-            {posts.slice(1, 7).map((post, i) => {
-              // 构建一个动态的 Bento 布局：某些卡片占据更多空间
-              const isLarge = i === 1 || i === 4;
+          <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-x-8 gap-y-12 md:gap-y-24">
+            {bentoPosts.map((post, i) => {
+              // 更加随机且动态的网格布局
+              const isLarge = (i % 5 === 1) || (i % 7 === 0 && i !== 0);
               return (
-                <div
+                <motion.div
                   key={post.id}
-                  className={`animate-in fade-in slide-in-from-bottom-12 duration-1000 ${isLarge ? 'md:col-span-2 lg:col-span-3' : 'md:col-span-2 lg:col-span-2'}`}
-                  style={{ animationDelay: `${(i + 1) * 150}ms` }}
+                  initial={{ opacity: 0, y: 50 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{
+                    duration: 1,
+                    delay: (i % 3) * 0.1,
+                    ease: [0.22, 1, 0.36, 1] as any
+                  }}
+                  className={`${isLarge ? 'md:col-span-2 lg:col-span-3' : 'md:col-span-2 lg:col-span-2'}`}
                 >
                   <BlogCard post={post} onClick={() => onSelectPost(post)} featured={isLarge} />
-                </div>
+                </motion.div>
               );
             })}
           </div>
         )}
-      </section>
+      </motion.section>
 
-      {/* 3. 格言模块 (静谧时刻) */}
-      <section className="relative py-32 border-y border-white/5 overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[300px] bg-white/[0.02] blur-[120px] rounded-full pointer-events-none" />
+      {/* 3. 格言模块 (静谧时刻) - 添加浮现动效 */}
+      <motion.section
+        {...fadeInReveal}
+        className="relative py-32 md:py-48 border-y border-white/5 overflow-hidden"
+      >
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[400px] bg-white/[0.03] blur-[150px] rounded-full pointer-events-none" />
         <div className="max-w-4xl mx-auto text-center space-y-12 relative z-10">
-          <div className="flex justify-center">{ICONS.QUOTES}</div>
-          <blockquote className="text-3xl md:text-5xl font-light tracking-tight text-white/80 leading-tight italic px-8">
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            whileInView={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 1.5, delay: 0.5 }}
+            className="flex justify-center"
+          >
+            {ICONS.QUOTES}
+          </motion.div>
+          <blockquote className="text-3xl md:text-6xl font-light tracking-tight text-white/90 leading-tight italic px-8">
             “{randomQuote.text}”
           </blockquote>
-          <div className="space-y-2">
-            <p className="text-[10px] uppercase tracking-[0.5em] font-black text-white/20">— {randomQuote.author}</p>
-            <p className="text-[8px] text-white/10 font-medium">{randomQuote.date}</p>
+          <div className="space-y-4">
+            <p className="text-[10px] md:text-xs uppercase tracking-[0.6em] font-black text-white/30">— {randomQuote.author}</p>
+            <p className="text-[9px] text-white/10 font-medium">{randomQuote.date}</p>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* 4. 主页留言板 */}
-      <HomepageComments />
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 1.2 }}
+      >
+        <HomepageComments />
+      </motion.div>
     </div>
   );
 };

@@ -196,17 +196,17 @@ const AppInner: React.FC = () => {
       <footer className="relative z-10 py-24 md:py-40 px-6 border-t border-white/5 bg-gradient-to-b from-transparent to-white/[0.01]">
         <div className="max-w-7xl mx-auto flex flex-col items-center text-center">
           <div className="text-4xl font-bold tracking-tighter mb-12 opacity-10 select-none grayscale contrast-200">AURA</div>
-          <div className="flex flex-row justify-center items-center gap-8 md:gap-20 text-[10px] uppercase tracking-[0.4em] font-bold text-white/20">
+          <div className="flex flex-row justify-center items-center gap-8 md:gap-20 text-[10px] uppercase tracking-[0.4em] font-bold text-white/40">
             {[{ id: 'qq', label: 'QQ', value: CONTACT_INFO.QQ }, { id: 'wx', label: 'WX', value: CONTACT_INFO.WX }, { id: 'mail', label: 'MAIL', value: CONTACT_INFO.MAIL }].map((contact) => (
               <button
                 key={contact.id}
                 onClick={() => handleCopy(contact.value, contact.label)}
-                className="group relative overflow-hidden h-8 w-[5em] md:w-[6em] focus:outline-none"
+                className="group relative overflow-hidden h-8 w-[5em] md:w-[6em] focus:outline-none hover:text-white transition-colors duration-500"
               >
                 <div className="absolute inset-0 flex items-center justify-center transition-transform duration-500 ease-[cubic-bezier(0.19,1,0.22,1)] group-hover:-translate-y-full group-active:scale-90">
                   {contact.label}
                 </div>
-                <div className="absolute inset-0 flex items-center justify-center translate-y-full transition-transform duration-500 ease-[cubic-bezier(0.19,1,0.22,1)] group-hover:translate-y-0 group-active:scale-90 text-white font-bold">
+                <div className="absolute inset-0 flex items-center justify-center translate-y-full transition-transform duration-500 ease-[cubic-bezier(0.19,1,0.22,1)] group-hover:translate-y-0 group-active:scale-90 text-white font-bold bg-white/5 rounded-lg">
                   COPY
                 </div>
               </button>
