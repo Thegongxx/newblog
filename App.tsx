@@ -67,6 +67,11 @@ const AppInner: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // 页面切换时滚动到顶部
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [location.pathname]);
+
   // Simple keyboard handler
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -95,15 +100,89 @@ const AppInner: React.FC = () => {
     }
   };
 
+  const [isNavigating, setIsNavigating] = useState(false);
+
+  // 增强版平滑滚动到顶部的导航处理
+  const handleNavigate = (path: string) => {
+    // 如果是当前页面，直接滚动到顶部
+    if (location.pathname === path) {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+      return;
+    }
+
+    // 设置导航状态
+    setIsNavigating(true);
+    
+    // 先滚动到顶部
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+    
+    // 延迟导航以确保滚动动画完成，并添加淡出效果
+    setTimeout(() => {
+      navigate(path);
+      // 导航完成后重置状态
+      setTimeout(() => {
+        setIsNavigating(false);
+      }, 100);
+    }, 400);
+  };
+
   if (showIntro && location.pathname === '/') {
     return <Intro onComplete={() => setShowIntro(false)} />;
   }
 
   return (
-    <div className="min-h-screen selection:bg-white/20 selection:text-white">
+    <div className="min-h-screen selection:bg-white/20 selection:text-white" style={{
+      scrollBehavior: 'smooth'
+    }}>
       <Helmet>
         <title>Aura | Minimalist Personal Space</title>
         <meta name="description" content="A digital sanctuary for minimalist aesthetics and intelligence." />
+        <style>{`
+          html {
+            scroll-behavior: smooth;
+          }
+          
+          /* 增强页面切换动画 */
+          .view-transition {
+            animation: fadeInUp 0.6s ease-out;
+          }
+          
+          @keyframes fadeInUp {
+            from {
+              opacity: 0;
+              transform: translateY(20px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+          
+          /* 苹果风格滚动条 */
+          ::-webkit-scrollbar {
+            width: 6px;
+          }
+          
+          ::-webkit-scrollbar-track {
+            background: transparent;
+          }
+          
+          ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            transition: background 0.3s ease;
+          }
+          
+          ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+          }
+        `}</style>
       </Helmet>
 
       {/* 增强版 Toast 通知 */}
@@ -160,7 +239,7 @@ const AppInner: React.FC = () => {
               ].map((item) => (
                 <button 
                   key={item.path}
-                  onClick={() => navigate(item.path)} 
+                  onClick={() => handleNavigate(item.path)} 
                   className={`relative px-3 py-1.5 rounded-full transition-all duration-300 hover:scale-105 active:scale-95 group ${
                     location.pathname === item.path 
                       ? 'text-white bg-white/10 backdrop-blur-xl shadow-inner' 
@@ -184,8 +263,10 @@ const AppInner: React.FC = () => {
         </div>
       </nav>
 
-      {/* 主内容区 */}
-      <main className="pt-44 pb-48 px-6 max-w-7xl mx-auto">
+      {/* 主内容区 - 增加页面切换动画 */}
+      <main className={`pt-44 pb-48 px-6 max-w-7xl mx-auto transition-all duration-500 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] ${
+        isNavigating ? 'opacity-0 transform translate-y-4' : 'opacity-100 transform translate-y-0'
+      }`}>
         <div className="view-transition">
           <Routes>
             <Route path="/" element={<Feed posts={posts} loading={loading} onSelectPost={(p) => navigate(`/post/${p.slug}`)} />} />
