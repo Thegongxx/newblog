@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "dea35b91774d2bc4",
+        "id": "65c3fd115b8a5d27",
         "type": "tabs",
         "children": [
           {
-            "id": "317d478ead886dec",
+            "id": "926c63e651e05c0b",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -53,7 +53,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "[\"title\"]",
+                "query": "[\"date\"]",
                 "matchingCase": true,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -74,8 +74,7 @@
               "title": "书签"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
@@ -194,7 +193,7 @@
       "bases:创建新数据库": false
     }
   },
-  "active": "317d478ead886dec",
+  "active": "926c63e651e05c0b",
   "lastOpenFiles": [
     "notes/daily-reflection.md",
     "notes/未命名.md",
