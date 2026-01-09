@@ -119,15 +119,19 @@ export const storageApi = {
 
 export const statsApi = {
     async getOverview() {
-        const [posts, comments] = await Promise.all([
+        const [posts, postComments, noteComments, homepageComments] = await Promise.all([
             supabase.from('posts').select('id', { count: 'exact', head: true }),
-            supabase.from('comments').select('id', { count: 'exact', head: true })
+            supabase.from('post_comments').select('id', { count: 'exact', head: true }),
+            supabase.from('note_comments').select('id', { count: 'exact', head: true }),
+            supabase.from('homepage_comments').select('id', { count: 'exact', head: true })
         ]);
+
+        const totalComments = (postComments.count || 0) + (noteComments.count || 0) + (homepageComments.count || 0);
 
         return {
             postsCount: posts.count || 0,
             likesCount: 0,
-            commentsCount: comments.count || 0
+            commentsCount: totalComments
         };
     }
 };

@@ -26,7 +26,6 @@ const AppInner: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [toast, setToast] = useState({ show: false, msg: '', type: 'success' });
-  const [pageTransitioning, setPageTransitioning] = useState(false);
 
   // Load data
   useEffect(() => {
@@ -70,22 +69,13 @@ const AppInner: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Google 风格的页面切换动画
+  // 简化的页面切换处理
   useEffect(() => {
-    setPageTransitioning(true);
-    
     // 立即滚动到顶部
     window.scrollTo({ 
       top: 0, 
       behavior: 'auto'
     });
-    
-    // Google Material Design 风格的渐入动画
-    const timer = setTimeout(() => {
-      setPageTransitioning(false);
-    }, 600); // Google 标准的 600ms 动画时长
-    
-    return () => clearTimeout(timer);
   }, [location.pathname]);
 
   // Simple keyboard handler
@@ -116,9 +106,7 @@ const AppInner: React.FC = () => {
     }
   };
 
-  const [isNavigating, setIsNavigating] = useState(false);
-
-  // Google Material Design 风格的导航处理
+  // 简化的导航处理
   const handleNavigate = (path: string) => {
     // 如果是当前页面，直接滚动到顶部
     if (location.pathname === path) {
@@ -129,7 +117,7 @@ const AppInner: React.FC = () => {
       return;
     }
 
-    // 立即导航，让页面切换效果处理渐入
+    // 直接导航，让页面切换效果处理渐入
     navigate(path);
   };
 
@@ -147,22 +135,6 @@ const AppInner: React.FC = () => {
         <style>{`
           html {
             scroll-behavior: smooth;
-          }
-          
-          /* Google Material Design 页面切换动画 */
-          .view-transition {
-            animation: materialFadeInUp 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
-          }
-          
-          @keyframes materialFadeInUp {
-            from {
-              opacity: 0;
-              transform: translateY(16px) scale(0.98);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0) scale(1);
-            }
           }
           
           /* Google 风格滚动条 */
@@ -295,36 +267,30 @@ const AppInner: React.FC = () => {
         </motion.div>
       </nav>
 
-      {/* 主内容区 - Google Material Design 风格页面切换 */}
-      <AnimatePresence mode="wait">
-        <motion.main 
-          key={location.pathname}
-          className="pt-44 pb-48 px-6 max-w-7xl mx-auto"
-          initial={{ opacity: 0, y: 16, scale: 0.98 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: -8, scale: 1.02 }}
-          transition={{ 
-            duration: 0.6, 
-            ease: [0.4, 0.0, 0.2, 1],
-            opacity: { duration: 0.4 },
-            y: { duration: 0.6 },
-            scale: { duration: 0.6 }
-          }}
-        >
-          <div className="view-transition">
-            <Routes>
-              <Route path="/" element={<Feed posts={posts} loading={loading} onSelectPost={(p) => navigate(`/post/${p.slug}`, { state: { from: '/' } })} />} />
-              <Route path="/post/:slug" element={<PostDetail posts={posts} loading={loading} />} />
-              <Route path="/notes" element={<Notes notes={notes} loading={loading} />} />
-              <Route path="/note/:id" element={<NoteDetail />} />
-              <Route path="/archive" element={<Archive posts={posts} loading={loading} onSelectPost={(p) => navigate(`/post/${p.slug}`, { state: { from: '/archive' } })} />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/admin" element={<Admin />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </div>
-        </motion.main>
-      </AnimatePresence>
+      {/* 主内容区 - 直接缓慢渐入，无退出动画 */}
+      <motion.main 
+        key={location.pathname}
+        className="pt-44 pb-48 px-6 max-w-7xl mx-auto"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ 
+          duration: 0.8, 
+          ease: [0.25, 0.46, 0.45, 0.94],
+          opacity: { duration: 0.6 },
+          y: { duration: 0.8 }
+        }}
+      >
+        <Routes>
+          <Route path="/" element={<Feed posts={posts} loading={loading} onSelectPost={(p) => navigate(`/post/${p.slug}`, { state: { from: '/' } })} />} />
+          <Route path="/post/:slug" element={<PostDetail posts={posts} loading={loading} />} />
+          <Route path="/notes" element={<Notes notes={notes} loading={loading} />} />
+          <Route path="/note/:id" element={<NoteDetail />} />
+          <Route path="/archive" element={<Archive posts={posts} loading={loading} onSelectPost={(p) => navigate(`/post/${p.slug}`, { state: { from: '/archive' } })} />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </motion.main>
 
       {/* AI Assistant */}
       <Assistant />

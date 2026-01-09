@@ -308,14 +308,31 @@ function CommentModeration() {
     const loadComments = async () => {
         setLoading(true);
         try {
-            const [postComments, guestbook] = await Promise.all([
-                supabase.from('comments').select('*, posts(title)').order('created_at', { ascending: false }),
+            const [postComments, noteComments, homepageComments] = await Promise.all([
+                supabase.from('post_comments').select('*, posts(title)').order('created_at', { ascending: false }),
+                supabase.from('note_comments').select('*, notes(title)').order('created_at', { ascending: false }),
                 supabase.from('homepage_comments').select('*').order('created_at', { ascending: false })
             ]);
 
             const combined = [
-                ...(postComments.data || []).map(c => ({ ...c, type: 'post', source: c.posts?.title || 'Unknown Post' })),
-                ...(guestbook.data || []).map(c => ({ ...c, type: 'guestbook', source: 'Homepage Guestbook' }))
+                ...(postComments.data || []).map(c => ({ 
+                    ...c, 
+                    type: 'post', 
+                    source: c.posts?.title || 'Unknown Post',
+                    user_name: c.author // 统一字段名
+                })),
+                ...(noteComments.data || []).map(c => ({ 
+                    ...c, 
+                    type: 'note', 
+                    source: c.notes?.title || 'Unknown Note',
+                    user_name: c.author // 统一字段名
+                })),
+                ...(homepageComments.data || []).map(c => ({ 
+                    ...c, 
+                    type: 'homepage', 
+                    source: 'Homepage Guestbook',
+                    user_name: c.author // 统一字段名
+                }))
             ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
             setAllComments(combined);
@@ -326,13 +343,28 @@ function CommentModeration() {
         }
     };
 
-    const handleDelete = async (id: string, type: 'post' | 'guestbook') => {
+    const handleDelete = async (id: string, type: 'post' | 'note' | 'homepage') => {
         if (!confirm('Permanently purge this discussion branch?')) return;
         try {
-            const table = type === 'post' ? 'comments' : 'homepage_comments';
+            let table;
+            switch (type) {
+                case 'post':
+                    table = 'post_comments';
+                    break;
+                case 'note':
+                    table = 'note_comments';
+                    break;
+                case 'homepage':
+                    table = 'homepage_comments';
+                    break;
+                default:
+                    throw new Error('Unknown comment type');
+            }
+            
             await supabase.from(table).delete().eq('id', id);
             setAllComments(prev => prev.filter(c => c.id !== id));
         } catch (err) {
+            console.error('Delete failed:', err);
             alert('Purge failed');
         }
     };
@@ -370,7 +402,7 @@ function CommentModeration() {
                                     </div>
                                 </div>
                             </div>
-                            <button onClick={() => handleDelete(comment.id, comment.type as 'post' | 'guestbook')} className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 opacity-0 group-hover:opacity-100 transition-all text-white/20 hover:text-rose-500 hover:bg-rose-500/10 duration-500">
+                            <button onClick={() => handleDelete(comment.id, comment.type as 'post' | 'note' | 'homepage')} className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 opacity-0 group-hover:opacity-100 transition-all text-white/20 hover:text-rose-500 hover:bg-rose-500/10 duration-500">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
                             </button>
                         </div>
