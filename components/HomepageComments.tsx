@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { commentsApi } from '../services/supabaseService';
+import { supabase } from '../services/supabaseService';
 import LikeButton from './LikeButton';
 import type { Comment } from '../types';
 
@@ -14,10 +14,7 @@ export default function HomepageComments() {
         content: ''
     });
 
-    // 使用特殊的 post_id 来标识主页评论
-    const HOMEPAGE_POST_ID = 'homepage-comments';
-
-    // 加载主页评论
+    // 加载主页评论 - 直接查询 comments 表
     useEffect(() => {
         loadComments();
     }, []);
@@ -25,8 +22,23 @@ export default function HomepageComments() {
     const loadComments = async () => {
         try {
             setLoading(true);
-            const data = await commentsApi.getByPostId(HOMEPAGE_POST_ID);
-            setComments(data);
+            console.log('Loading homepage comments...');
+            
+            // 直接查询 comments 表中 post_id 为 'homepage-comments' 的记录
+            const { data, error } = await supabase
+                .from('comments')
+                .select('*')
+                .eq('post_id', 'homepage-comments')
+                .eq('approved', true)
+                .order('created_at', { ascending: true });
+
+            if (error) {
+                console.error('Supabase error:', error);
+                throw error;
+            }
+            
+            console.log('Comments loaded:', data);
+            setComments(data || []);
         } catch (error) {
             console.error('Failed to load homepage comments:', error);
         } finally {
@@ -43,12 +55,27 @@ export default function HomepageComments() {
 
         try {
             setLoading(true);
-            await commentsApi.create({
-                post_id: HOMEPAGE_POST_ID,
-                author: formData.author.trim(),
-                email: formData.email.trim() || 'anonymous@example.com',
-                content: formData.content.trim()
-            });
+            console.log('Submitting comment...');
+
+            // 直接插入到 comments 表
+            const { data, error } = await supabase
+                .from('comments')
+                .insert([{
+                    post_id: 'homepage-comments',
+                    author: formData.author.trim(),
+                    email: formData.email.trim() || 'anonymous@example.com',
+                    content: formData.content.trim(),
+                    approved: true // 直接批准主页评论
+                }])
+                .select()
+                .single();
+
+            if (error) {
+                console.error('Supabase insert error:', error);
+                throw error;
+            }
+            
+            console.log('Comment created successfully:', data);
             
             // 重置表单
             setFormData({ author: '', email: '', content: '' });
@@ -57,7 +84,13 @@ export default function HomepageComments() {
             alert('评论已提交！');
         } catch (error) {
             console.error('Failed to submit comment:', error);
-            alert('评论提交失败，请重试');
+            
+            // 更详细的错误信息
+            if (error instanceof Error) {
+                alert(`评论提交失败: ${error.message}`);
+            } else {
+                alert('评论提交失败，请检查网络连接或稍后重试');
+            }
         } finally {
             setLoading(false);
         }
