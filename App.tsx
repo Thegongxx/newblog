@@ -269,11 +269,11 @@ const AppInner: React.FC = () => {
       }`}>
         <div className="view-transition">
           <Routes>
-            <Route path="/" element={<Feed posts={posts} loading={loading} onSelectPost={(p) => navigate(`/post/${p.slug}`)} />} />
+            <Route path="/" element={<Feed posts={posts} loading={loading} onSelectPost={(p) => navigate(`/post/${p.slug}`, { state: { from: '/' } })} />} />
             <Route path="/post/:slug" element={<PostDetail posts={posts} loading={loading} />} />
             <Route path="/notes" element={<Notes notes={notes} loading={loading} />} />
             <Route path="/note/:id" element={<NoteDetail />} />
-            <Route path="/archive" element={<Archive posts={posts} loading={loading} onSelectPost={(p) => navigate(`/post/${p.slug}`)} />} />
+            <Route path="/archive" element={<Archive posts={posts} loading={loading} onSelectPost={(p) => navigate(`/post/${p.slug}`, { state: { from: '/archive' } })} />} />
             <Route path="/about" element={<About />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="*" element={<Navigate to="/" replace />} />

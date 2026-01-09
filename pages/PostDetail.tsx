@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import CommentSection from '../components/CommentSection';
 import LikeButton from '../components/LikeButton';
 import { ICONS } from '../constants';
@@ -14,7 +14,24 @@ interface PostDetailProps {
 const PostDetail: React.FC<PostDetailProps> = ({ posts, loading }) => {
     const { slug } = useParams<{ slug: string }>();
     const navigate = useNavigate();
+    const location = useLocation();
     const post = posts.find(p => p.slug === slug);
+
+    // 智能返回逻辑
+    const handleBackToList = () => {
+        // 检查是否有 state 中的来源信息
+        if (location.state?.from) {
+            navigate(location.state.from);
+        } else {
+            // 如果没有来源信息，使用浏览器历史记录
+            if (window.history.length > 1) {
+                navigate(-1);
+            } else {
+                // 最后的备选方案：返回主页
+                navigate('/');
+            }
+        }
+    };
 
     useEffect(() => {
         if (post) {
@@ -60,7 +77,7 @@ const PostDetail: React.FC<PostDetailProps> = ({ posts, loading }) => {
 
     return (
         <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-8 duration-700">
-            <button onClick={() => navigate('/')} className="group flex items-center gap-2 text-white/40 hover:text-white transition-all mb-12 px-5 py-2 rounded-full glass active:scale-95">
+            <button onClick={handleBackToList} className="group flex items-center gap-2 text-white/40 hover:text-white transition-all mb-12 px-5 py-2 rounded-full glass active:scale-95">
                 <div className="rotate-180 group-hover:-translate-x-1 transition-transform">{ICONS.CHEVRON_RIGHT}</div>
                 <span className="text-sm font-medium">返回列表</span>
             </button>
