@@ -1,4 +1,4 @@
-import { Note } from '../constants';
+import { Note } from '../types';
 
 // 简单的 Markdown Frontmatter 解析器 (避免引入 heavy libs)
 function parseNote(fileName: string, rawContent: string): Note {

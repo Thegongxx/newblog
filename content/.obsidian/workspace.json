@@ -4,21 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "8ed1a431e8413461",
+        "id": "1d0e5a04ea5749ba",
         "type": "tabs",
         "children": [
           {
-            "id": "cd3a77ceb175262a",
+            "id": "7e10470c96e8d527",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "notes/freedom.md",
+                "file": "notes/哼哈篇.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "freedom"
+              "title": "哼哈篇"
             }
           }
         ]
@@ -181,11 +181,18 @@
       "bases:创建新数据库": false
     }
   },
-  "active": "cd3a77ceb175262a",
+  "active": "7e10470c96e8d527",
   "lastOpenFiles": [
-    "notes/heroism.md",
+    "pages/about.md",
+    "notes/数字时代的思考.md",
+    "notes/设计的本质.md",
+    "posts/极简主义的美学.md",
+    "未命名.base",
+    "notes/哼哈篇.md",
+    "posts/你好.md",
     "notes/freedom.md",
     "posts/hello-aura.md",
+    "notes/heroism.md",
     "2024-03-12.md",
     "未命名.canvas",
     "posts/test-automation.md"
