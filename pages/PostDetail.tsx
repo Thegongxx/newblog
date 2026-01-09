@@ -145,6 +145,7 @@ const PostDetail: React.FC<PostDetailProps> = ({ posts, loading }) => {
 
             {/* 评论区 */}
             <CommentSection targetId={post.id} targetType="post" />
+            </div>
         </div>
     );
 };

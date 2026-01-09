@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import BlogCard from '../components/BlogCard';
-import HomepageComments from '../components/HomepageComments';
 import { Post } from '../types';
 import { getAllNotes } from '../utils/notes'; // Import from utils
 
@@ -169,17 +168,6 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
           ))}
         </div>
       </motion.section>
-
-
-      {/* 4. 主页留言板 */}
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 1.2 }}
-      >
-        <HomepageComments />
-      </motion.div>
     </div>
   );
 };

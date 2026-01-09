@@ -21,6 +21,15 @@ export const pagesApi = {
 };
 
 export const engagementApi = {
+    async incrementView(targetId: string) {
+        const { error } = await supabase
+            .from('posts')
+            .update({ views: supabase.raw('views + 1') })
+            .eq('id', targetId);
+        
+        if (error) throw error;
+    },
+
     async toggleLike(targetType: string, targetId: string, fingerprint: string) {
         const today = new Date().toISOString().split('T')[0];
         
