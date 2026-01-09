@@ -1,7 +1,7 @@
-import { Note } from '../types';
+import { FileNote } from '../types';
 
 // 简单的 Markdown Frontmatter 解析器 (避免引入 heavy libs)
-function parseNote(fileName: string, rawContent: string): Note {
+function parseNote(fileName: string, rawContent: string): FileNote {
     const frontmatterRegex = /^---\n([\s\S]*?)\n---\n+/;
     const match = rawContent.match(frontmatterRegex);
 
@@ -29,8 +29,8 @@ function parseNote(fileName: string, rawContent: string): Note {
     if (metadata.slug) tags.push(metadata.slug);
 
     return {
-        id: metadata.slug || fileName,
-        title: metadata.author || title, // 使用作者作为标题展示 (Hero 样式需求) - 或者根据需求调整
+        id: metadata.slug || fileName.split('/').pop()?.replace('.md', '') || 'untitled',
+        title: metadata.title || title,
         content: content,
         date: metadata.date || new Date().toLocaleDateString(),
         tags: tags
@@ -44,7 +44,7 @@ const notesModules = import.meta.glob('/content/notes/*.md', {
     eager: true
 }) as Record<string, string>;
 
-export const getAllNotes = (): Note[] => {
+export const getAllNotes = (): FileNote[] => {
     return Object.entries(notesModules).map(([path, content]) => {
         return parseNote(path, content);
     });

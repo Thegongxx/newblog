@@ -62,6 +62,14 @@ export interface Note {
   created_at: string;
 }
 
+export interface FileNote {
+  id: string;
+  title: string;
+  content: string;
+  date: string;
+  tags: string[];
+}
+
 export interface Quote {
   text: string;
   author: string;

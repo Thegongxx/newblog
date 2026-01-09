@@ -5,12 +5,12 @@ import LikeButton from '../components/LikeButton';
 import CommentSection from '../components/CommentSection';
 import { notesApi } from '../services/supabaseService';
 import { ICONS } from '../constants';
-import type { Note } from '../types';
+import type { FileNote } from '../types';
 
 const NoteDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [note, setNote] = useState<Note | null>(null);
+  const [note, setNote] = useState<FileNote | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,11 +25,19 @@ const NoteDetail: React.FC = () => {
   const loadNote = async () => {
     try {
       setLoading(true);
-      const noteData = await notesApi.getById(id!);
+      
+      // 从文件系统读取notes
+      const { getAllNotes } = await import('../utils/notes');
+      const allNotes = getAllNotes();
+      
+      // 根据id查找对应的note
+      const noteData = allNotes.find(note => note.id === id);
+      
       if (!noteData) {
         setError('笔记不存在');
         return;
       }
+      
       setNote(noteData);
     } catch (err: any) {
       setError(err.message || '加载失败');
@@ -114,30 +122,39 @@ const NoteDetail: React.FC = () => {
           {/* 引号图标 */}
           <div className="mb-8">{ICONS.QUOTES}</div>
           
-          {/* 笔记文本 */}
-          <blockquote className="text-2xl md:text-3xl font-light leading-relaxed text-white/90 mb-12">
-            "{note.text}"
-          </blockquote>
+          {/* 笔记标题 */}
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-white/95 mb-8">
+            {note.title}
+          </h1>
+          
+          {/* 笔记内容 */}
+          <div className="prose prose-invert prose-lg max-w-none">
+            <div className="text-lg font-light leading-relaxed text-white/80 whitespace-pre-wrap">
+              {note.content}
+            </div>
+          </div>
 
           {/* 底部信息 */}
-          <div className="flex items-center justify-between border-t border-white/5 pt-8">
+          <div className="flex items-center justify-between border-t border-white/5 pt-8 mt-12">
             <div className="flex flex-col gap-2">
-              <span className="text-sm font-bold tracking-[0.3em] text-white/40 uppercase">
-                — {note.author}
-              </span>
-              <time className="text-xs text-white/30">
-                {new Date(note.created_at).toLocaleDateString('zh-CN', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                })}
+              <time className="text-sm font-bold tracking-[0.3em] text-white/40 uppercase">
+                {note.date}
               </time>
+              {note.tags && note.tags.length > 0 && (
+                <div className="flex gap-2 mt-2">
+                  {note.tags.map((tag, idx) => (
+                    <span key={idx} className="text-xs px-3 py-1 bg-white/10 rounded-full text-white/50">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
             
             <LikeButton 
               targetType="note" 
               targetId={note.id} 
-              initialCount={note.likes_count}
+              initialCount={0}
               className="scale-110"
             />
           </div>
