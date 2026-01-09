@@ -114,27 +114,46 @@ const AppInner: React.FC = () => {
         </div>
       )}
 
-      {/* Simple Navigation */}
-      <nav className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
-        scrolled ? 'bg-black/80 backdrop-blur-md' : 'bg-transparent'
-      }`}>
-        <div className="max-w-7xl mx-auto px-6 py-6 flex justify-between items-center">
-          <button 
-            onClick={() => navigate('/')}
-            className="text-2xl font-bold tracking-tighter text-white hover:opacity-70 transition-opacity"
-          >
-            AURA
-          </button>
-          <div className="flex gap-8 text-sm font-medium">
-            <button onClick={() => navigate('/')} className="text-white/60 hover:text-white transition-colors">
-              Feed
+      {/* 透明灵动岛导航 */}
+      <nav className="fixed top-0 left-0 right-0 z-40 flex justify-center pt-8">
+        <div className={`transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+          scrolled 
+            ? 'bg-black/20 backdrop-blur-2xl border border-white/10 rounded-full px-8 py-4 shadow-[0_8px_32px_rgba(0,0,0,0.3)]' 
+            : 'bg-transparent px-8 py-4'
+        }`}>
+          <div className="flex items-center gap-12">
+            <button 
+              onClick={() => navigate('/')}
+              className="text-xl font-bold tracking-tighter text-white hover:opacity-70 transition-all duration-300 hover:scale-105"
+            >
+              AURA
             </button>
-            <button onClick={() => navigate('/notes')} className="text-white/60 hover:text-white transition-colors">
-              Notes
-            </button>
-            <button onClick={() => navigate('/about')} className="text-white/60 hover:text-white transition-colors">
-              About
-            </button>
+            <div className="flex gap-8 text-sm font-medium">
+              <button 
+                onClick={() => navigate('/')} 
+                className={`text-white/60 hover:text-white transition-all duration-300 hover:scale-105 ${
+                  location.pathname === '/' ? 'text-white' : ''
+                }`}
+              >
+                Feed
+              </button>
+              <button 
+                onClick={() => navigate('/notes')} 
+                className={`text-white/60 hover:text-white transition-all duration-300 hover:scale-105 ${
+                  location.pathname === '/notes' ? 'text-white' : ''
+                }`}
+              >
+                Notes
+              </button>
+              <button 
+                onClick={() => navigate('/about')} 
+                className={`text-white/60 hover:text-white transition-all duration-300 hover:scale-105 ${
+                  location.pathname === '/about' ? 'text-white' : ''
+                }`}
+              >
+                About
+              </button>
+            </div>
           </div>
         </div>
       </nav>
