@@ -14,9 +14,7 @@ interface FeedProps {
 const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
   // 按时间排序，最新的文章在前面
   const sortedPosts = useMemo(() => {
-    return [...posts]
-      .filter(p => p.category !== 'System')
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    return [...posts].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [posts]);
 
   // 第一篇作为 Hero 展示，其余作为 Bento 网格
