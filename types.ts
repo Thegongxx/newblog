@@ -20,6 +20,16 @@ export interface Post {
   readingTime?: string;
 }
 
+export interface Page {
+  id: string;
+  slug: string;
+  title: string;
+  content: string; // Markdown
+  html_content?: string; // HTML
+  excerpt?: string;
+  updated_at: string;
+}
+
 export interface Comment {
   id: string;
   post_id: string;

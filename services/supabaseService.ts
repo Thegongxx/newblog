@@ -60,6 +60,21 @@ export const postsApi = {
     }
 };
 
+// 静态页面相关 API
+export const pagesApi = {
+    // 根据 slug 获取单篇页面
+    async getBySlug(slug: string) {
+        const { data, error } = await supabase
+            .from('pages')
+            .select('*')
+            .eq('slug', slug)
+            .single();
+
+        if (error) throw error;
+        return data;
+    }
+};
+
 // 评论相关 API
 export const commentsApi = {
     // 获取文章的所有评论

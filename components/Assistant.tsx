@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { ICONS, BLOG_POSTS } from '../constants';
+import { ICONS } from '../constants';
 import { askNvidiaStream } from '../services/nvidiaService';
 import { Message } from '../types';
 
@@ -31,7 +31,8 @@ const Assistant: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const context = `文章标题列表: ${BLOG_POSTS.map(p => p.title).join(', ')}`;
+      // 修复：从实际的文章数据获取上下文，而不是硬编码
+      const context = `这是一个名为 Aura 的极简主义个人博客，专注于设计、技术和生活思考。`;
       const stream = askNvidiaStream(currentInput, context);
 
       let fullContent = '';
