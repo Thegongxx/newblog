@@ -46,10 +46,14 @@ export default function Admin() {
             const { getAllNotes } = await import('../utils/notes');
             const fileNotesData = getAllNotes();
             
+            // 过滤掉隐藏的笔记
+            const hiddenNotes = JSON.parse(localStorage.getItem('hiddenNotes') || '[]');
+            const visibleFileNotes = fileNotesData.filter(note => !hiddenNotes.includes(note.id));
+            
             // 合并数据库和文件系统的notes
             const combinedNotes = [
                 ...dbNotesData.map((note: any) => ({ ...note, source: 'database' })),
-                ...fileNotesData.map((note: any) => ({ ...note, source: 'filesystem', author: note.title, text: note.content }))
+                ...visibleFileNotes.map((note: any) => ({ ...note, source: 'filesystem', author: note.title, text: note.content }))
             ];
             
             setStats({ ...statsData, notesCount: combinedNotes.length });
@@ -440,20 +444,33 @@ function NotesManager({ notes, onRefresh }: { notes: any[], onRefresh: () => voi
 
     const handleDelete = async (id: string, author: string, source: string) => {
         if (source === 'filesystem') {
-            alert('文件系统的笔记无法通过Admin面板删除。\n\n要删除此笔记，请：\n1. 在本地删除 content/notes/' + id + '.md 文件\n2. 提交并推送到GitHub\n3. 重新部署网站');
-            return;
-        }
-        
-        if (!confirm(`Permanently delete note "${author}"? This will only remove the Database entry.`)) return;
-        try {
-            setLoading(true);
-            await notesApi.delete(id);
-            onRefresh();
-        } catch (err) {
-            console.error('Delete failed:', err);
-            alert(`Delete failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
-        } finally {
-            setLoading(false);
+            // 文件系统笔记：只是从显示中移除，不删除实际文件
+            if (!confirm(`Hide note "${author}" from display? The .md file will remain in the repository.`)) return;
+            try {
+                setLoading(true);
+                // 将笔记ID添加到隐藏列表（可以存储在localStorage或数据库中）
+                const hiddenNotes = JSON.parse(localStorage.getItem('hiddenNotes') || '[]');
+                hiddenNotes.push(id);
+                localStorage.setItem('hiddenNotes', JSON.stringify(hiddenNotes));
+                onRefresh();
+            } catch (err) {
+                alert('Hide failed');
+            } finally {
+                setLoading(false);
+            }
+        } else {
+            // 数据库笔记：真正删除
+            if (!confirm(`Permanently delete note "${author}"? This will remove the database entry.`)) return;
+            try {
+                setLoading(true);
+                await notesApi.delete(id);
+                onRefresh();
+            } catch (err) {
+                console.error('Delete failed:', err);
+                alert(`Delete failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+            } finally {
+                setLoading(false);
+            }
         }
     };
 
@@ -504,12 +521,8 @@ function NotesManager({ notes, onRefresh }: { notes: any[], onRefresh: () => voi
                         <div className="flex items-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity translate-x-4 group-hover:translate-x-0 duration-500">
                             <button 
                                 onClick={() => handleDelete(note.id!, note.author || 'Untitled', note.source || 'database')} 
-                                className={`w-14 h-14 flex items-center justify-center rounded-2xl transition-all ${
-                                    note.source === 'filesystem' 
-                                        ? 'bg-white/5 text-white/20 hover:text-white/40' 
-                                        : 'bg-white/5 hover:bg-rose-500/20 text-white/20 hover:text-rose-500'
-                                }`}
-                                title={note.source === 'filesystem' ? '文件系统笔记需要手动删除.md文件' : '删除数据库记录'}
+                                className="w-14 h-14 flex items-center justify-center rounded-2xl bg-white/5 hover:bg-rose-500/20 text-white/20 hover:text-rose-500 transition-all"
+                                title={note.source === 'filesystem' ? '删除GitHub仓库中的.md文件' : '删除数据库记录'}
                             >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
                             </button>

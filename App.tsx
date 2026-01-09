@@ -48,8 +48,13 @@ const AppInner: React.FC = () => {
         
         // 使用文件系统读取notes，与Feed页面保持一致
         const { getAllNotes } = await import('./utils/notes');
-        const notesData = getAllNotes();
-        setNotes(notesData);
+        const allNotes = getAllNotes();
+        
+        // 过滤掉隐藏的笔记
+        const hiddenNotes = JSON.parse(localStorage.getItem('hiddenNotes') || '[]');
+        const visibleNotes = allNotes.filter(note => !hiddenNotes.includes(note.id));
+        
+        setNotes(visibleNotes);
       } catch (err: any) {
         setError(err.message || '数据加载失败');
       } finally {
