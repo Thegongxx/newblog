@@ -41,6 +41,27 @@ export interface Comment {
   created_at: string;
 }
 
+export interface NoteComment {
+  id: string;
+  note_id: string;
+  author: string;
+  email: string;
+  content: string;
+  parent_id?: string;
+  approved: boolean;
+  created_at: string;
+}
+
+export interface Note {
+  id: string;
+  text: string;
+  author: string;
+  slug?: string;
+  likes_count: number;
+  comments_count?: number;
+  created_at: string;
+}
+
 export interface Quote {
   text: string;
   author: string;

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import LikeButton from '../components/LikeButton';
 import CommentSection from '../components/CommentSection';
 import { ICONS } from '../constants';
@@ -9,6 +10,7 @@ interface NotesProps {
 }
 
 const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
+    const navigate = useNavigate();
     const [expandedCommentId, setExpandedCommentId] = useState<string | null>(null);
 
     return (
@@ -47,19 +49,47 @@ const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
                             style={{ animationDelay: `${i * 100}ms` }}
                         >
                             <div className="absolute top-8 left-8">{ICONS.QUOTES}</div>
-                            <p className="text-xl md:text-2xl font-light leading-relaxed text-white/80 mb-10 pt-10">“{quote.text}”</p>
+                            
+                            {/* 可点击的内容区域 */}
+                            <div 
+                                className="cursor-pointer"
+                                onClick={() => navigate(`/note/${quote.id}`)}
+                            >
+                                <p className="text-xl md:text-2xl font-light leading-relaxed text-white/80 mb-10 pt-10 hover:text-white transition-colors">
+                                    "{quote.text}"
+                                </p>
+                            </div>
 
                             <div className="flex items-center justify-between border-t border-white/5 pt-8">
                                 <span className="text-xs font-bold tracking-[0.3em] text-white/40 uppercase">— {quote.author}</span>
-                                <div className="flex items-center gap-6">
+                                <div className="flex items-center gap-4">
+                                    {/* 查看详情按钮 */}
                                     <button
-                                        onClick={() => setExpandedCommentId(expandedCommentId === quote.id ? null : quote.id)}
+                                        onClick={() => navigate(`/note/${quote.id}`)}
                                         className="text-xs font-bold text-white/30 hover:text-white uppercase tracking-widest transition-colors flex items-center gap-2"
                                     >
-                                        <span>COMMENTS</span>
+                                        <span>详情</span>
+                                        <span>→</span>
+                                    </button>
+                                    
+                                    {/* 评论按钮 */}
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setExpandedCommentId(expandedCommentId === quote.id ? null : quote.id);
+                                        }}
+                                        className="text-xs font-bold text-white/30 hover:text-white uppercase tracking-widest transition-colors flex items-center gap-2"
+                                    >
+                                        <span>评论</span>
                                         <div className={`transition-transform duration-300 ${expandedCommentId === quote.id ? 'rotate-180' : ''}`}>↓</div>
                                     </button>
-                                    <LikeButton targetType="note" targetId={quote.id} initialCount={quote.likes_count} className="scale-75 origin-right !bg-transparent !border-none !px-0" />
+                                    
+                                    <LikeButton 
+                                        targetType="note" 
+                                        targetId={quote.id} 
+                                        initialCount={quote.likes_count} 
+                                        className="scale-75 origin-right !bg-transparent !border-none !px-0" 
+                                    />
                                 </div>
                             </div>
 

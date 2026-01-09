@@ -10,6 +10,16 @@ export const notesApi = {
         return data;
     },
 
+    async getById(id: string) {
+        const { data, error } = await supabase
+            .from('notes')
+            .select('*')
+            .eq('id', id)
+            .single();
+        if (error) throw error;
+        return data;
+    },
+
     async delete(id: string) {
         const { error } = await supabase.from('notes').delete().eq('id', id);
         if (error) throw error;

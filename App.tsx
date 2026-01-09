@@ -10,6 +10,7 @@ import { postsApi, notesApi } from './services/supabaseService';
 import Feed from './pages/Feed';
 import PostDetail from './pages/PostDetail';
 import Notes from './pages/Notes';
+import NoteDetail from './pages/NoteDetail';
 import About from './pages/About';
 import Archive from './pages/Archive';
 import Admin from './components/Admin';
@@ -271,6 +272,7 @@ const AppInner: React.FC = () => {
             <Route path="/" element={<Feed posts={posts} loading={loading} onSelectPost={(p) => navigate(`/post/${p.slug}`)} />} />
             <Route path="/post/:slug" element={<PostDetail posts={posts} loading={loading} />} />
             <Route path="/notes" element={<Notes notes={notes} loading={loading} />} />
+            <Route path="/note/:id" element={<NoteDetail />} />
             <Route path="/archive" element={<Archive posts={posts} loading={loading} onSelectPost={(p) => navigate(`/post/${p.slug}`)} />} />
             <Route path="/about" element={<About />} />
             <Route path="/admin" element={<Admin />} />
