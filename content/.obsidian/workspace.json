@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "notes/test-note-2.md",
+                "file": "notes/未命名.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "test-note-2"
+              "title": "未命名"
             }
           }
         ]
@@ -53,7 +53,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "[\"title\"]",
                 "matchingCase": true,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -74,7 +74,8 @@
               "title": "书签"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -195,12 +196,13 @@
   },
   "active": "317d478ead886dec",
   "lastOpenFiles": [
+    "notes/daily-reflection.md",
+    "notes/未命名.md",
     "notes/test-note-1.md",
     "notes/test-note-2.md",
     "notes/reading-notes.md",
     "notes/productivity-tips.md",
     "notes/design-inspiration.md",
-    "notes/daily-reflection.md",
     "pages/about.md",
     "111.md",
     "notes/哼哈篇.md",
