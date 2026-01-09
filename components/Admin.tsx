@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { supabase, postsApi, storageApi, statsApi } from '../services/supabaseService';
+import { supabase, postsApi, notesApi, storageApi, statsApi } from '../services/supabaseService';
 import { ICONS } from '../constants';
 import type { Post } from '../types';
 
 // --- Types ---
-type AdminTab = 'overview' | 'posts' | 'media' | 'comments';
+type AdminTab = 'overview' | 'posts' | 'notes' | 'media' | 'comments';
 
 export default function Admin() {
     const [session, setSession] = useState<any>(null);
@@ -15,8 +15,9 @@ export default function Admin() {
     const [view, setView] = useState<AdminTab>('overview');
 
     // Data State
-    const [stats, setStats] = useState({ postsCount: 0, likesCount: 0, commentsCount: 0 });
+    const [stats, setStats] = useState({ postsCount: 0, notesCount: 0, likesCount: 0, commentsCount: 0 });
     const [posts, setPosts] = useState<Post[]>([]);
+    const [notes, setNotes] = useState<any[]>([]);
 
     useEffect(() => {
         supabase.auth.getSession().then(({ data: { session } }) => {
@@ -35,12 +36,14 @@ export default function Admin() {
     const loadAdminData = async () => {
         setAdminLoading(true);
         try {
-            const [statsData, postsData] = await Promise.all([
+            const [statsData, postsData, notesData] = await Promise.all([
                 statsApi.getOverview(),
-                postsApi.getAll()
+                postsApi.getAll(),
+                notesApi.getAll()
             ]);
-            setStats(statsData);
+            setStats({ ...statsData, notesCount: notesData.length });
             setPosts(postsData);
+            setNotes(notesData);
         } catch (error) {
             console.error('Admin data sync failed:', error);
         } finally {
@@ -95,6 +98,7 @@ export default function Admin() {
                     {[
                         { id: 'overview', label: 'Monitor', icon: 'M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z' },
                         { id: 'posts', label: 'Vault Status', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
+                        { id: 'notes', label: 'Notes Archive', icon: 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z' },
                         { id: 'media', label: 'Media Assets', icon: 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z' },
                         { id: 'comments', label: 'Governance', icon: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z' }
                     ].map(tab => (
@@ -142,9 +146,10 @@ export default function Admin() {
                                         </p>
                                     </header>
 
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                                         {[
-                                            { label: 'Cloud Objects', value: stats.postsCount, unit: 'Synced' },
+                                            { label: 'Cloud Objects', value: stats.postsCount, unit: 'Posts' },
+                                            { label: 'Note Archive', value: stats.notesCount, unit: 'Notes' },
                                             { label: 'Engagement', value: stats.likesCount, unit: 'Hearts' },
                                             { label: 'Exchanges', value: stats.commentsCount, unit: 'Units' }
                                         ].map((stat, i) => (
@@ -178,6 +183,10 @@ export default function Admin() {
 
                             {view === 'posts' && (
                                 <PostManager posts={posts} onRefresh={loadAdminData} />
+                            )}
+
+                            {view === 'notes' && (
+                                <NotesManager notes={notes} onRefresh={loadAdminData} />
                             )}
 
                             {view === 'media' && <MediaCenter />}
@@ -409,6 +418,91 @@ function CommentModeration() {
                     ))}
                 </div>
             )}
+        </div>
+    );
+}
+function NotesManager({ notes, onRefresh }: { notes: any[], onRefresh: () => void }) {
+    const [searchTerm, setSearchTerm] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    const filteredNotes = notes.filter(n => n.title?.toLowerCase().includes(searchTerm.toLowerCase()) || n.content?.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    const handleDelete = async (id: string, title: string) => {
+        if (!confirm(`Permanently delete note "${title}"? This will only remove the Database entry.`)) return;
+        try {
+            setLoading(true);
+            await notesApi.delete(id);
+            onRefresh();
+        } catch (err) {
+            alert('Delete failed');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="space-y-12 animate-in fade-in duration-700">
+            <header className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+                <div>
+                    <h2 className="text-5xl font-black tracking-tighter">Notes Archive.</h2>
+                    <p className="text-white/30 mt-2 font-medium uppercase text-[10px] tracking-[0.3em]">Thought Fragments</p>
+                </div>
+                <div className="flex items-center gap-4">
+                    <input
+                        placeholder="Search notes..."
+                        className="bg-white/5 border border-white/10 h-14 px-8 rounded-full outline-none focus:border-white/30 transition-all text-sm min-w-[300px] font-mono"
+                        value={searchTerm}
+                        onChange={e => setSearchTerm(e.target.value)}
+                    />
+                </div>
+            </header>
+
+            <div className="grid grid-cols-1 gap-6">
+                {filteredNotes.map((note, i) => (
+                    <div key={note.id} className="group flex items-center justify-between p-8 bg-white/[0.01] border border-white/5 rounded-[2.5rem] hover:bg-white/[0.03] transition-all duration-500 hover:border-white/10 animate-in fade-in slide-in-from-bottom-4" style={{ animationDelay: `${i * 50}ms` }}>
+                        <div className="flex items-center gap-10">
+                            <div className="w-24 h-24 rounded-3xl overflow-hidden bg-white/5 border border-white/5 hidden md:flex items-center justify-center">
+                                <svg className="w-8 h-8 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 className="text-2xl font-black tracking-tight mb-2 text-white/90">{note.title || 'Untitled Note'}</h4>
+                                <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.2em] mb-3">
+                                    <span className="text-amber-500">Note</span>
+                                    <span className="text-white/10">/</span>
+                                    <span className="text-white/40">{note.category || 'Uncategorized'}</span>
+                                    <span className="text-white/10">/</span>
+                                    <span className="text-white/20 font-mono lowercase tracking-normal">{new Date(note.created_at).toLocaleDateString()}</span>
+                                </div>
+                                {note.content && (
+                                    <p className="text-white/40 text-sm leading-relaxed max-w-2xl line-clamp-2">
+                                        {note.content.substring(0, 150)}...
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity translate-x-4 group-hover:translate-x-0 duration-500">
+                            <button onClick={() => handleDelete(note.id!, note.title || 'Untitled')} className="w-14 h-14 flex items-center justify-center rounded-2xl bg-white/5 hover:bg-rose-500/20 text-white/20 hover:text-rose-500 transition-all">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                            </button>
+                        </div>
+                    </div>
+                ))}
+                
+                {filteredNotes.length === 0 && (
+                    <div className="text-center py-20">
+                        <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-6">
+                            <svg className="w-8 h-8 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                        </div>
+                        <p className="text-white/20 text-sm font-medium">
+                            {searchTerm ? 'No notes match your search' : 'No notes found in archive'}
+                        </p>
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
