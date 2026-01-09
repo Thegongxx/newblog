@@ -29,4 +29,114 @@
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     @apply bg-white/20;
   }
+
+  /* 增强动画效果 */
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite alternate;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  
+  .animate-scale-in {
+    animation: scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  
+  .animate-fade-in-up {
+    animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+}
+
+/* 关键帧动画 */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes glow {
+  from { box-shadow: 0 0 20px rgba(255, 255, 255, 0.1); }
+  to { box-shadow: 0 0 30px rgba(255, 255, 255, 0.2); }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0; 
+    transform: translateY(30px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+@keyframes scaleIn {
+  from { 
+    opacity: 0; 
+    transform: scale(0.9); 
+  }
+  to { 
+    opacity: 1; 
+    transform: scale(1); 
+  }
+}
+
+@keyframes fadeInUp {
+  from { 
+    opacity: 0; 
+    transform: translateY(20px) scale(0.98); 
+    filter: blur(4px);
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0) scale(1); 
+    filter: blur(0);
+  }
+}
+
+/* 交互增强 */
+.interactive-hover {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.interactive-hover:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.interactive-press:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease-out;
+}
+
+/* 文本选择优化 */
+::selection {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+/* 焦点状态优化 */
+.focus-ring:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+}
+
+/* 响应式动画 */
+@media (prefers-reduced-motion: reduce) {
+  .view-transition,
+  .animate-float,
+  .animate-glow,
+  .animate-slide-up,
+  .animate-scale-in,
+  .animate-fade-in-up {
+    animation: none;
+  }
+  
+  .interactive-hover {
+    transition: none;
+  }
 }
