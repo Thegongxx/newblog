@@ -102,9 +102,35 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-x-8 gap-y-12 md:gap-y-24">
-            {bentoPosts.map((post, i) => {
-              // 更加随机且动态的网格布局
-              const isLarge = (i % 5 === 1) || (i % 7 === 0 && i !== 0);
+            {/* 整合：在 Bento 序列中插入格言卡片 */}
+            {[...bentoPosts.slice(0, 2), { isQuote: true }, ...bentoPosts.slice(2, 6)].map((item: any, i) => {
+              if (item.isQuote) {
+                return (
+                  <motion.div
+                    key="quote-card"
+                    {...fadeInReveal}
+                    className="md:col-span-2 lg:col-span-2 group relative h-[450px] glass rounded-[2.5rem] p-10 flex flex-col justify-center items-center text-center overflow-hidden border border-white/5 hover:border-white/20 transition-all duration-700"
+                  >
+                    <div className="absolute inset-0 bg-white/[0.01] pointer-events-none group-hover:bg-white/[0.03] transition-colors" />
+                    <div className="relative z-10 space-y-8">
+                      <div className="flex justify-center opacity-20 group-hover:opacity-40 transition-opacity">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-8 h-8">
+                          <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+                        </svg>
+                      </div>
+                      <p className="text-xl md:text-2xl font-light italic text-white/80 leading-snug">
+                        “{randomQuote.text}”
+                      </p>
+                      <div className="space-y-1">
+                        <p className="text-[9px] uppercase tracking-[0.4em] font-black text-white/30">— {randomQuote.author}</p>
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              }
+
+              const post = item as Post;
+              const isLarge = (i % 5 === 1);
               return (
                 <motion.div
                   key={post.id}
@@ -126,30 +152,6 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
         )}
       </motion.section>
 
-      {/* 3. 格言模块 (静谧时刻) - 添加浮现动效 */}
-      <motion.section
-        {...fadeInReveal}
-        className="relative py-32 md:py-48 border-y border-white/5 overflow-hidden"
-      >
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[400px] bg-white/[0.03] blur-[150px] rounded-full pointer-events-none" />
-        <div className="max-w-4xl mx-auto text-center space-y-12 relative z-10">
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            whileInView={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 1.5, delay: 0.5 }}
-            className="flex justify-center"
-          >
-            {ICONS.QUOTES}
-          </motion.div>
-          <blockquote className="text-3xl md:text-6xl font-light tracking-tight text-white/90 leading-tight italic px-8">
-            “{randomQuote.text}”
-          </blockquote>
-          <div className="space-y-4">
-            <p className="text-[10px] md:text-xs uppercase tracking-[0.6em] font-black text-white/30">— {randomQuote.author}</p>
-            <p className="text-[9px] text-white/10 font-medium">{randomQuote.date}</p>
-          </div>
-        </div>
-      </motion.section>
 
       {/* 4. 主页留言板 */}
       <motion.div
