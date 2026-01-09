@@ -1,14 +1,15 @@
 
 import React, { useState } from 'react';
-import { commentsApi } from '../services/supabaseService';
+import { commentsApi, noteCommentsApi } from '../services/supabaseService';
 import LikeButton from './LikeButton';
 import type { Comment } from '../types';
 
 interface CommentSectionProps {
-    postId: string;
+    targetId: string;
+    targetType: 'post' | 'note';
 }
 
-export default function CommentSection({ postId }: CommentSectionProps) {
+export default function CommentSection({ targetId, targetType = 'post' }: CommentSectionProps) {
     const [comments, setComments] = useState<Comment[]>([]);
     const [loading, setLoading] = useState(false);
     const [showForm, setShowForm] = useState(false);
@@ -23,12 +24,14 @@ export default function CommentSection({ postId }: CommentSectionProps) {
     // 加载评论
     React.useEffect(() => {
         loadComments();
-    }, [postId]);
+    }, [targetId, targetType]);
 
     const loadComments = async () => {
         try {
             setLoading(true);
-            const data = await commentsApi.getByPostId(postId);
+            const data = targetType === 'post'
+                ? await commentsApi.getByPostId(targetId)
+                : await noteCommentsApi.getByNoteId(targetId);
             setComments(data);
         } catch (error) {
             console.error('Failed to load comments:', error);
@@ -47,13 +50,24 @@ export default function CommentSection({ postId }: CommentSectionProps) {
 
         try {
             setLoading(true);
-            await commentsApi.create({
-                post_id: postId,
-                author: formData.author,
-                email: formData.email,
-                content: formData.content,
-                parent_id: formData.parent_id || undefined
-            });
+
+            if (targetType === 'post') {
+                await commentsApi.create({
+                    post_id: targetId,
+                    author: formData.author,
+                    email: formData.email,
+                    content: formData.content,
+                    parent_id: formData.parent_id || undefined
+                });
+            } else {
+                await noteCommentsApi.create({
+                    note_id: targetId,
+                    author: formData.author,
+                    email: formData.email,
+                    content: formData.content,
+                    parent_id: formData.parent_id || undefined
+                });
+            }
 
             // 重置表单
             setFormData({ author: '', email: '', content: '', parent_id: '' });

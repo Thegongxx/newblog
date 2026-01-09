@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import LikeButton from '../components/LikeButton';
+import CommentSection from '../components/CommentSection';
 import { ICONS } from '../constants';
 
 interface NotesProps {
@@ -9,6 +10,8 @@ interface NotesProps {
 }
 
 const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
+    const [expandedCommentId, setExpandedCommentId] = useState<string | null>(null);
+
     return (
         <div className="py-12">
             <Helmet>
@@ -51,10 +54,26 @@ const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
                         >
                             <div className="absolute top-8 left-8">{ICONS.QUOTES}</div>
                             <p className="text-xl md:text-2xl font-light leading-relaxed text-white/80 mb-10 pt-10">“{quote.text}”</p>
+
                             <div className="flex items-center justify-between border-t border-white/5 pt-8">
                                 <span className="text-xs font-bold tracking-[0.3em] text-white/40 uppercase">— {quote.author}</span>
-                                <LikeButton targetType="note" targetId={quote.id} initialCount={quote.likes_count} className="scale-75 origin-right !bg-transparent !border-none !px-0" />
+                                <div className="flex items-center gap-6">
+                                    <button
+                                        onClick={() => setExpandedCommentId(expandedCommentId === quote.id ? null : quote.id)}
+                                        className="text-xs font-bold text-white/30 hover:text-white uppercase tracking-widest transition-colors flex items-center gap-2"
+                                    >
+                                        <span>COMMENTS</span>
+                                        <div className={`transition-transform duration-300 ${expandedCommentId === quote.id ? 'rotate-180' : ''}`}>↓</div>
+                                    </button>
+                                    <LikeButton targetType="note" targetId={quote.id} initialCount={quote.likes_count} className="scale-75 origin-right !bg-transparent !border-none !px-0" />
+                                </div>
                             </div>
+
+                            {expandedCommentId === quote.id && (
+                                <div className="mt-8 pt-8 border-t border-white/5 animate-in fade-in slide-in-from-top-4">
+                                    <CommentSection targetId={quote.id} targetType="note" />
+                                </div>
+                            )}
                         </div>
                     ))
                 )}

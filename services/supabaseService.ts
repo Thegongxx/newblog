@@ -123,6 +123,41 @@ export const notesApi = {
     }
 };
 
+// 笔记评论相关 API
+export const noteCommentsApi = {
+    async getByNoteId(noteId: string) {
+        const { data, error } = await supabase
+            .from('note_comments')
+            .select('*')
+            .eq('note_id', noteId)
+            .eq('approved', true)
+            .order('created_at', { ascending: true });
+        if (error) throw error;
+        return data;
+    },
+
+    async create(comment: {
+        note_id: string;
+        author: string;
+        email: string;
+        content: string;
+        parent_id?: string;
+    }) {
+        const { data, error } = await supabase
+            .from('note_comments')
+            .insert([comment])
+            .select()
+            .single();
+        if (error) throw error;
+        return data;
+    },
+
+    async delete(id: string) {
+        const { error } = await supabase.from('note_comments').delete().eq('id', id);
+        if (error) throw error;
+    }
+};
+
 // 后增：互动相关 API (Likes, Views, Homepage Comments)
 export const engagementApi = {
     // 点赞相关
