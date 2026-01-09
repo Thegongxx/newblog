@@ -439,29 +439,15 @@ function NotesManager({ notes, onRefresh }: { notes: any[], onRefresh: () => voi
     const filteredNotes = notes.filter(n => n.author?.toLowerCase().includes(searchTerm.toLowerCase()) || n.text?.toLowerCase().includes(searchTerm.toLowerCase()));
 
     const handleDelete = async (id: string, author: string, source: string) => {
-        if (!confirm(`Permanently delete note "${author}"? ${source === 'filesystem' ? 'This will delete the .md file from content/notes/' : 'This will only remove the Database entry'}.`)) return;
+        if (source === 'filesystem') {
+            alert('文件系统的笔记无法通过Admin面板删除。\n\n要删除此笔记，请：\n1. 在本地删除 content/notes/' + id + '.md 文件\n2. 提交并推送到GitHub\n3. 重新部署网站');
+            return;
+        }
         
+        if (!confirm(`Permanently delete note "${author}"? This will only remove the Database entry.`)) return;
         try {
             setLoading(true);
-            
-            if (source === 'filesystem') {
-                // 删除文件系统中的.md文件
-                const response = await fetch('/api/delete-note', {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ noteId: id })
-                });
-                
-                if (!response.ok) {
-                    throw new Error('Failed to delete file');
-                }
-            } else {
-                // 删除数据库中的记录
-                await notesApi.delete(id);
-            }
-            
+            await notesApi.delete(id);
             onRefresh();
         } catch (err) {
             console.error('Delete failed:', err);
@@ -518,7 +504,12 @@ function NotesManager({ notes, onRefresh }: { notes: any[], onRefresh: () => voi
                         <div className="flex items-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity translate-x-4 group-hover:translate-x-0 duration-500">
                             <button 
                                 onClick={() => handleDelete(note.id!, note.author || 'Untitled', note.source || 'database')} 
-                                className="w-14 h-14 flex items-center justify-center rounded-2xl bg-white/5 hover:bg-rose-500/20 text-white/20 hover:text-rose-500 transition-all"
+                                className={`w-14 h-14 flex items-center justify-center rounded-2xl transition-all ${
+                                    note.source === 'filesystem' 
+                                        ? 'bg-white/5 text-white/20 hover:text-white/40' 
+                                        : 'bg-white/5 hover:bg-rose-500/20 text-white/20 hover:text-rose-500'
+                                }`}
+                                title={note.source === 'filesystem' ? '文件系统笔记需要手动删除.md文件' : '删除数据库记录'}
                             >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
                             </button>
