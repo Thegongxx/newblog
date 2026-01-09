@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import BlogCard from '../components/BlogCard';
 import HomepageComments from '../components/HomepageComments';
 import { Post } from '../types';
-import { NOTES_DATA, ICONS } from '../constants';
+import { getAllNotes } from '../utils/notes'; // Import from utils
 
 interface FeedProps {
   posts: Post[];
@@ -21,9 +21,22 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
   const featuredPost = sortedPosts[0] || null;
   const bentoPosts = sortedPosts.slice(1, 5); // 只取 4 篇，保持约两行
 
+  // 使用真实 Markdown 笔记数据
+  const notes = useMemo(() => getAllNotes(), []);
+
   const randomNote = useMemo(() => {
-    return NOTES_DATA[Math.floor(Math.random() * NOTES_DATA.length)];
-  }, []);
+    // 假如没有笔记，提供一个 fallback，或者 just return null (UI handle it)
+    if (notes.length === 0) {
+      return {
+        id: 'default',
+        title: 'Welcome',
+        content: 'Digital Sanctuary awaits your thoughts.',
+        date: new Date().toLocaleDateString(),
+        tags: ['AURA']
+      };
+    }
+    return notes[Math.floor(Math.random() * notes.length)];
+  }, [notes]);
 
   const fadeInReveal = {
     initial: { opacity: 0, y: 30, filter: 'blur(10px)' },
@@ -66,7 +79,7 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
           </div>
         </div>
 
-        {/* Hero 右侧：随机 Note 推荐 (Inspiration) - Asymmetric Layout */}
+        {/* Hero 右侧：真实 Note 推荐 (Real File Content) - Asymmetric Layout */}
         <div className="flex-[1.2] w-full flex justify-center items-center relative min-h-[400px]">
           {/* 背景装饰：微弱的光晕 */}
           <div className="absolute inset-0 bg-white/[0.02] blur-3xl rounded-full opacity-50" />
@@ -88,7 +101,7 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
               <h3 className="text-3xl md:text-4xl font-bold text-white tracking-tight leading-tight text-left">
                 {randomNote.title}
               </h3>
-              <p className="text-lg md:text-xl font-light text-white/70 leading-relaxed max-w-md text-left">
+              <p className="text-lg md:text-xl font-light text-white/70 leading-relaxed max-w-md text-left whitespace-pre-line">
                 {randomNote.content}
               </p>
             </div>
