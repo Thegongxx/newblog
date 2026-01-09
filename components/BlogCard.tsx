@@ -12,7 +12,7 @@ interface BlogCardProps {
 const BlogCard: React.FC<BlogCardProps> = ({ post, onClick, featured }) => {
   return (
     <div
-      className={`group relative ${featured ? 'h-[600px] md:h-full' : 'h-[450px]'} bg-white/[0.03] backdrop-blur-3xl border border-white/10 rounded-[2.5rem] transition-all duration-700 hover:border-white/20 cursor-pointer shadow-2xl overflow-visible`}
+      className={`group relative ${featured ? 'h-[600px] md:h-full' : 'h-[450px]'} bg-white/[0.03] backdrop-blur-3xl rounded-[2.5rem] transition-all duration-700 hover:bg-white/[0.05] cursor-pointer shadow-2xl overflow-visible`}
       onClick={onClick}
     >
       {/* 全幅封面图容器 - 现在是卡片的背景底层 */}
@@ -27,7 +27,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, onClick, featured }) => {
       </div>
 
       {/* 分类标签 - 放在外层以确保不被 overflow 裁剪 */}
-      <div className="absolute top-8 left-8 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-[10px] font-black text-white uppercase tracking-[0.2em] z-20">
+      <div className="absolute top-8 left-8 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md text-[10px] font-black text-white uppercase tracking-[0.2em] z-20">
         {post.category}
       </div>
 
@@ -70,9 +70,6 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, onClick, featured }) => {
 
       {/* 扫光装饰层 */}
       <div className="absolute inset-0 rounded-[2.5rem] opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-1000 bg-gradient-to-tr from-white/10 via-transparent to-transparent z-10" />
-
-      {/* 交互装饰边框 */}
-      <div className="absolute inset-0 border-[0.5px] border-white/5 rounded-[2.5rem] group-hover:border-white/30 pointer-events-none transition-all duration-700 z-40" />
     </div>
   );
 };

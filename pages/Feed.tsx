@@ -109,7 +109,7 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
                   <motion.div
                     key="quote-card"
                     {...fadeInReveal}
-                    className="md:col-span-2 lg:col-span-2 group relative h-[450px] glass rounded-[2.5rem] p-10 flex flex-col justify-center items-center text-center overflow-hidden border border-white/5 hover:border-white/20 transition-all duration-700"
+                    className="md:col-span-2 lg:col-span-2 group relative h-[450px] glass rounded-[2.5rem] p-10 flex flex-col justify-center items-center text-center overflow-hidden transition-all duration-700"
                   >
                     <div className="absolute inset-0 bg-white/[0.01] pointer-events-none group-hover:bg-white/[0.03] transition-colors" />
                     <div className="relative z-10 space-y-8">
@@ -130,7 +130,8 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
               }
 
               const post = item as Post;
-              const isLarge = (i % 5 === 1);
+              // 增强随机性：不仅内容随机，大型卡片的位置也根据索引动态计算
+              const isLarge = (i % 4 === 1) || (i === 5);
               return (
                 <motion.div
                   key={post.id}
