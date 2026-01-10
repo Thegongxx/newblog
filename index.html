@@ -11,9 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
-            --apple-blue: #0071e3;
-            --mouse-x: 50%;
-            --mouse-y: 50%;
+            /* 移除未使用的 CSS 变量 */
         }
         
         /* High-performance Custom Cursor */
@@ -32,49 +30,56 @@
             cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Ccircle cx='5' cy='5' r='4' fill='white' /%3E%3C/svg%3E") 5 5, pointer !important;
         }
 
-        /* Interactive Ambient Background */
+        /* Interactive Ambient Background - GPU 加速，避免页面切换闪烁 */
         .aura-bg {
             position: fixed;
             inset: 0;
             z-index: -1;
             background: #020202;
             overflow: hidden;
+            /* 强制 GPU 合成层，避免重绘 */
+            transform: translateZ(0);
+            will-change: auto;
+            contain: strict;
         }
         
-        /* The Moving Spotlight - Now more "smoky" */
+        /* The Moving Spotlight - 静态柔和光晕 */
         .aura-bg::after {
             content: '';
             position: absolute;
-            inset: -100%;
+            inset: 0;
             background: radial-gradient(
-                circle at var(--mouse-x) var(--mouse-y), 
-                rgba(255, 255, 255, 0.05) 0%, 
-                rgba(255, 255, 255, 0.02) 20%,
-                transparent 50%
+                ellipse 80% 60% at 50% 40%, 
+                rgba(255, 255, 255, 0.03) 0%, 
+                rgba(255, 255, 255, 0.01) 40%,
+                transparent 70%
             );
             z-index: 1;
             pointer-events: none;
-            filter: blur(60px);
-            transition: opacity 0.8s ease;
+            /* 使用 GPU 加速的属性 */
+            transform: translateZ(0);
+            backface-visibility: hidden;
         }
 
-        /* The Subtle Mesh & Rotating Orbs */
+        /* The Subtle Mesh - 简化动画，使用 GPU 友好的属性 */
         .aura-bg::before {
             content: '';
             position: absolute;
-            top: -50%; left: -50%; width: 200%; height: 200%;
+            inset: -20%;
             background: 
-                radial-gradient(circle at 30% 30%, rgba(255,255,255,0.02) 0%, transparent 40%),
-                radial-gradient(circle at 70% 70%, rgba(255,255,255,0.01) 0%, transparent 40%),
-                radial-gradient(circle at 50% 50%, rgba(255,255,255,0.02) 0%, transparent 60%);
-            animation: rotate 80s linear infinite;
+                radial-gradient(circle at 25% 25%, rgba(255,255,255,0.015) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(255,255,255,0.01) 0%, transparent 50%);
+            animation: ambient-drift 120s ease-in-out infinite;
             z-index: 0;
-            filter: blur(40px);
+            /* GPU 加速 */
+            transform: translateZ(0);
+            backface-visibility: hidden;
+            will-change: transform;
         }
         
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+        @keyframes ambient-drift {
+            0%, 100% { transform: translateZ(0) scale(1); }
+            50% { transform: translateZ(0) scale(1.05); }
         }
 
         ::selection {

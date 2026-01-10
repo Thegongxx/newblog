@@ -79,7 +79,7 @@ const AppInner = () => {
   const navShadow = scrollProgress * 0.3;
 
   return (
-    <div className="min-h-screen selection:bg-white/20 selection:text-white">
+    <div className="min-h-screen selection:bg-white/20 selection:text-white isolate">
       <Helmet>
         <title>Aura - 极简主义个人空间</title>
         <meta name="description" content="A digital sanctuary for minimalist aesthetics and intelligence." />
@@ -164,7 +164,7 @@ const AppInner = () => {
       </motion.nav>
 
       {/* Main Content - 即时切换，无闪烁 */}
-      <main className="pt-32 md:pt-44 pb-24 md:pb-48 px-4 md:px-6 max-w-7xl mx-auto">
+      <main className="pt-32 md:pt-44 pb-24 md:pb-48 px-4 md:px-6 max-w-7xl mx-auto will-change-auto">
         <ErrorBoundary>
           <Routes location={location}>
             <Route path="/" element={<Feed posts={posts} loading={loading} onSelectPost={(p) => navigate(`/post/${p.slug}`)} />} />
