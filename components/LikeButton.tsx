@@ -170,61 +170,61 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
 
     return (
         <div className="relative inline-block">
-            {/* 透明灵动岛提示 - 在点赞按钮上方出现 */}
+            {/* 透明灵动岛提示 - 在点赞按钮上方出现，移动端优化 */}
             <AnimatePresence>
                 {toast.visible && (
                     <motion.div
                         initial={{ 
                             opacity: 0, 
                             scale: 0.8, 
-                            y: 10
+                            y: isMobile ? 8 : 10
                         }}
                         animate={{ 
                             opacity: 1, 
                             scale: 1, 
-                            y: -10
+                            y: isMobile ? -8 : -10
                         }}
                         exit={{ 
                             opacity: 0, 
                             scale: 0.8, 
-                            y: 5
+                            y: isMobile ? 4 : 5
                         }}
                         transition={{
                             type: "spring",
-                            stiffness: 300,
-                            damping: 30,
+                            stiffness: isMobile ? 250 : 300,
+                            damping: isMobile ? 25 : 30,
                             mass: 0.8,
-                            duration: 0.6
+                            duration: isMobile ? 0.5 : 0.6
                         }}
-                        className="absolute -top-12 left-1/2 -translate-x-1/2 z-50 pointer-events-none"
+                        className={`absolute ${isMobile ? '-top-10' : '-top-12'} left-1/2 -translate-x-1/2 z-50 pointer-events-none`}
                     >
                         <motion.div 
                             className={`relative overflow-hidden ${
-                                isMobile ? 'px-3 py-2 text-xs' : 'px-4 py-2.5 text-sm'
+                                isMobile ? 'px-2.5 py-1.5 text-xs' : 'px-4 py-2.5 text-sm'
                             } font-medium whitespace-nowrap text-white/90`}
                             style={{
-                                borderRadius: isMobile ? '16px' : '20px',
+                                borderRadius: isMobile ? '12px' : '20px',
                                 background: 'rgba(0, 0, 0, 0.6)',
-                                backdropFilter: 'blur(20px) saturate(150%)',
-                                WebkitBackdropFilter: 'blur(20px) saturate(150%)',
+                                backdropFilter: isMobile ? 'blur(16px) saturate(140%)' : 'blur(20px) saturate(150%)',
+                                WebkitBackdropFilter: isMobile ? 'blur(16px) saturate(140%)' : 'blur(20px) saturate(150%)',
                                 boxShadow: isMobile 
-                                    ? '0 4px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
+                                    ? '0 3px 15px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.08)'
                                     : '0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
-                                border: '1px solid rgba(255, 255, 255, 0.1)'
+                                border: isMobile ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(255, 255, 255, 0.1)'
                             }}
                             animate={{
-                                // 微妙的浮动效果
-                                y: [0, -2, 0],
+                                // 移动端减少浮动效果
+                                y: isMobile ? [0, -1, 0] : [0, -2, 0],
                             }}
                             transition={{
-                                duration: 3,
+                                duration: isMobile ? 2.5 : 3,
                                 repeat: Infinity,
                                 ease: "easeInOut"
                             }}
                         >
-                            {/* 透明背景光晕 */}
+                            {/* 透明背景光晕 - 移动端简化 */}
                             <div 
-                                className="absolute inset-0 opacity-10"
+                                className={`absolute inset-0 ${isMobile ? 'opacity-5' : 'opacity-10'}`}
                                 style={{
                                     background: toast.type === 'success' 
                                         ? 'radial-gradient(circle at center, rgba(255, 255, 255, 0.3) 0%, transparent 70%)'
@@ -234,19 +234,19 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                                 }}
                             />
                             
-                            <div className="relative flex items-center gap-2">
-                                {/* 状态指示器 - 透明风格 */}
+                            <div className="relative flex items-center gap-1.5">
+                                {/* 状态指示器 - 移动端简化 */}
                                 <motion.div
-                                    className={`${isMobile ? 'w-1.5 h-1.5' : 'w-2 h-2'} rounded-full ${
+                                    className={`${isMobile ? 'w-1 h-1' : 'w-2 h-2'} rounded-full ${
                                         toast.type === 'success' ? 'bg-white/70' : 
                                         toast.type === 'warning' ? 'bg-white/50' : 'bg-white/60'
                                     }`}
                                     animate={{ 
-                                        scale: [1, 1.2, 1],
+                                        scale: isMobile ? [1, 1.1, 1] : [1, 1.2, 1],
                                         opacity: [0.7, 1, 0.7]
                                     }}
                                     transition={{ 
-                                        duration: 2, 
+                                        duration: isMobile ? 1.5 : 2, 
                                         repeat: Infinity,
                                         ease: "easeInOut"
                                     }}
@@ -254,30 +254,30 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                                 
                                 {/* 消息文本 */}
                                 <motion.span
-                                    initial={{ opacity: 0, x: -5 }}
+                                    initial={{ opacity: 0, x: -3 }}
                                     animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: 0.1, duration: 0.4 }}
+                                    transition={{ delay: 0.1, duration: 0.3 }}
                                     className="font-medium text-white/90"
                                 >
                                     {toast.message}
                                 </motion.span>
                                 
-                                {/* 成功时的微妙装饰 */}
-                                {toast.type === 'success' && (
+                                {/* 成功时的微妙装饰 - 移动端简化 */}
+                                {toast.type === 'success' && !isMobile && (
                                     <motion.div
                                         initial={{ scale: 0, rotate: -90 }}
                                         animate={{ scale: 1, rotate: 0 }}
                                         transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-                                        className={`${isMobile ? 'text-xs' : 'text-sm'} opacity-70`}
+                                        className="text-xs opacity-70"
                                     >
                                         ✨
                                     </motion.div>
                                 )}
                             </div>
                             
-                            {/* 底部透明进度条 */}
+                            {/* 底部透明进度条 - 移动端简化 */}
                             <motion.div
-                                className="absolute bottom-0 left-0 h-0.5 bg-white/20 rounded-full"
+                                className={`absolute bottom-0 left-0 ${isMobile ? 'h-0.5' : 'h-0.5'} bg-white/20 rounded-full`}
                                 initial={{ width: '100%' }}
                                 animate={{ width: '0%' }}
                                 transition={{ duration: isMobile ? 2 : 2.5, ease: "linear" }}
