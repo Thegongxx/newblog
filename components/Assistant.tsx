@@ -42,19 +42,21 @@ const Assistant = () => {
     return () => window.removeEventListener('resize', checkTouchDevice);
   }, []);
 
-  // 优化的状态切换处理 - 添加动画预处理和防抖
+  // 优化的状态切换处理 - 完全重写，模仿Google的交互
+  const [isAnimating, setIsAnimating] = useState(false);
+  
   const handleToggle = useCallback(() => {
-    // 防抖处理，避免快速点击造成的动画问题
-    if (document.body.style.pointerEvents === 'none') return;
+    // 防止动画期间的重复点击
+    if (isAnimating) return;
     
-    // 临时禁用点击，防止动画期间的重复触发
-    document.body.style.pointerEvents = 'none';
-    setTimeout(() => {
-      document.body.style.pointerEvents = 'auto';
-    }, 300);
-    
+    setIsAnimating(true);
     setIsOpen(prev => !prev);
-  }, []);
+    
+    // 动画完成后重置状态
+    setTimeout(() => {
+      setIsAnimating(false);
+    }, 400);
+  }, [isAnimating]);
 
   // 键盘导航支持
   useEffect(() => {
@@ -176,142 +178,115 @@ const Assistant = () => {
 
   return (
     <>
-      {/* 浮动按钮 - 恢复白色主题 */}
+      {/* Google Material Design风格的FAB按钮 */}
       <motion.button
         onClick={handleToggle}
-        className="fixed bottom-8 right-8 z-50 flex items-center justify-center bg-white/95 backdrop-blur-xl text-black shadow-2xl border border-white/20 focus:outline-none focus:ring-2 focus:ring-black/20 focus:ring-offset-2
-                   max-sm:bottom-6 max-sm:right-6 max-sm:scale-90"
+        disabled={isAnimating}
+        className={`fixed bottom-8 right-8 z-50 flex items-center justify-center bg-white shadow-lg border-0 focus:outline-none focus:ring-0 overflow-hidden
+                   max-sm:bottom-6 max-sm:right-6 max-sm:scale-90 ${isAnimating ? 'pointer-events-none' : ''}`}
         style={{
           height: '56px',
           borderRadius: '28px',
-          willChange: isOpen ? 'auto' : 'transform, width, padding',
+          willChange: 'transform, width',
           backfaceVisibility: 'hidden',
-          perspective: '1000px',
-          transformStyle: 'preserve-3d',
         }}
+        initial={false}
         animate={{
-          width: isOpen ? 56 : 'auto',
-          paddingLeft: isOpen ? 0 : 24,
-          paddingRight: isOpen ? 0 : 24,
+          width: isOpen ? 56 : 120,
+          paddingLeft: isOpen ? 0 : 16,
+          paddingRight: isOpen ? 0 : 16,
         }}
         transition={{
-          type: "spring",
-          stiffness: 350,
-          damping: 25,
-          mass: 0.4,
-          velocity: 1
+          type: "tween",
+          duration: 0.3,
+          ease: [0.4, 0.0, 0.2, 1], // Google's standard easing
         }}
-        whileHover={{ 
-          scale: isTouchDevice ? 1 : 1.02,
-          boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
-          backgroundColor: "rgba(255,255,255,0.98)",
-          transition: { 
-            duration: 0.15,
+        whileHover={!isAnimating ? {
+          scale: 1.05,
+          boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
+          transition: {
+            duration: 0.2,
             ease: [0.4, 0.0, 0.2, 1]
           }
-        }}
-        whileTap={{ 
-          scale: isTouchDevice ? 0.96 : 0.98,
-          transition: { 
+        } : {}}
+        whileTap={!isAnimating ? {
+          scale: 0.95,
+          transition: {
             duration: 0.1,
             ease: [0.4, 0.0, 0.2, 1]
           }
-        }}
+        } : {}}
         aria-label={isOpen ? "关闭AI助手" : "打开AI助手"}
         aria-expanded={isOpen}
       >
+        {/* Ripple效果背景 */}
+        <motion.div
+          className="absolute inset-0 bg-black/5 rounded-full"
+          initial={{ scale: 0, opacity: 0 }}
+          whileTap={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.2 }}
+        />
+        
         <AnimatePresence mode="wait">
           {isOpen ? (
             <motion.div
-              key="close"
-              initial={{ opacity: 0, rotate: -90, scale: 0.8 }}
+              key="close-icon"
+              initial={{ opacity: 0, rotate: -180, scale: 0.5 }}
               animate={{ opacity: 1, rotate: 0, scale: 1 }}
-              exit={{ opacity: 0, rotate: 90, scale: 0.8 }}
+              exit={{ opacity: 0, rotate: 180, scale: 0.5 }}
               transition={{
-                type: "spring",
-                stiffness: 400,
-                damping: 25,
-                mass: 0.3
+                duration: 0.3,
+                ease: [0.4, 0.0, 0.2, 1]
               }}
-              className="relative w-6 h-6 flex items-center justify-center group"
-              style={{ willChange: 'transform, opacity' }}
+              className="relative flex items-center justify-center w-6 h-6"
             >
-              {/* Google风格的X按钮 - 带圆形背景hover效果 */}
-              <motion.div
-                className="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/8"
-                initial={false}
-                whileHover={{ 
-                  scale: 1.2,
-                  backgroundColor: "rgba(0,0,0,0.08)"
-                }}
-                transition={{ 
-                  duration: 0.15,
-                  ease: [0.4, 0.0, 0.2, 1]
-                }}
-              />
-              <motion.div
-                className="absolute w-3.5 h-0.5 bg-black/60 rounded-full"
-                style={{ 
-                  transformOrigin: 'center',
-                  transform: 'rotate(45deg)'
-                }}
-                whileHover={{ 
-                  backgroundColor: 'rgb(0 0 0 / 0.8)',
-                  scale: 1.05
-                }}
-                transition={{ 
-                  duration: 0.1,
-                  ease: [0.4, 0.0, 0.2, 1]
-                }}
-              />
-              <motion.div
-                className="absolute w-3.5 h-0.5 bg-black/60 rounded-full"
-                style={{ 
-                  transformOrigin: 'center',
-                  transform: 'rotate(-45deg)'
-                }}
-                whileHover={{ 
-                  backgroundColor: 'rgb(0 0 0 / 0.8)',
-                  scale: 1.05
-                }}
-                transition={{ 
-                  duration: 0.1,
-                  ease: [0.4, 0.0, 0.2, 1]
-                }}
-              />
+              {/* Material Design Close Icon */}
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                className="text-gray-700"
+              >
+                <motion.path
+                  d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+                  fill="currentColor"
+                  initial={{ pathLength: 0 }}
+                  animate={{ pathLength: 1 }}
+                  transition={{ duration: 0.3, ease: [0.4, 0.0, 0.2, 1] }}
+                />
+              </svg>
             </motion.div>
           ) : (
             <motion.div
-              key="open"
-              initial={{ opacity: 0, x: -6, scale: 0.9 }}
+              key="open-content"
+              initial={{ opacity: 0, x: -10, scale: 0.9 }}
               animate={{ opacity: 1, x: 0, scale: 1 }}
-              exit={{ opacity: 0, x: 6, scale: 0.9 }}
+              exit={{ opacity: 0, x: 10, scale: 0.9 }}
               transition={{
-                type: "spring",
-                stiffness: 400,
-                damping: 20,
-                mass: 0.3
+                duration: 0.3,
+                ease: [0.4, 0.0, 0.2, 1]
               }}
               className="flex items-center gap-3"
-              style={{ willChange: 'transform, opacity' }}
             >
-              <motion.span 
-                className="text-black/70 text-lg"
-                animate={prefersReducedMotion ? {} : { 
-                  rotate: [0, 6, -6, 0],
-                  scale: [1, 1.02, 1]
+              <motion.div
+                className="text-gray-700 text-lg"
+                animate={prefersReducedMotion ? {} : {
+                  rotate: [0, 5, -5, 0],
+                  scale: [1, 1.05, 1]
                 }}
-                transition={prefersReducedMotion ? {} : { 
-                  duration: 2.5, 
-                  repeat: Infinity, 
-                  repeatDelay: 4,
-                  ease: "easeInOut"
+                transition={prefersReducedMotion ? {} : {
+                  duration: 3,
+                  repeat: Infinity,
+                  repeatDelay: 3,
+                  ease: [0.4, 0.0, 0.2, 1]
                 }}
-                style={{ willChange: prefersReducedMotion ? 'auto' : 'transform' }}
               >
                 {ICONS.AI}
-              </motion.span>
-              <span className="font-bold text-sm text-black/80 tracking-tight">Aura</span>
+              </motion.div>
+              <span className="font-medium text-sm text-gray-800 tracking-normal">
+                Aura
+              </span>
             </motion.div>
           )}
         </AnimatePresence>
@@ -321,77 +296,67 @@ const Assistant = () => {
       <AnimatePresence>
         {isOpen && (
           <>
-            {/* 背景遮罩 - 黑色主题 */}
+            {/* 背景遮罩 - Material Design风格 */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{
-                duration: 0.2,
-                ease: [0.25, 0.46, 0.45, 0.94]
+                duration: 0.25,
+                ease: [0.4, 0.0, 0.2, 1]
               }}
-              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-30"
+              className="fixed inset-0 bg-black/40 z-30"
               style={{ 
                 willChange: 'opacity',
-                backfaceVisibility: 'hidden',
-                transform: 'translateZ(0)'
+                backfaceVisibility: 'hidden'
               }}
               onClick={handleToggle}
               aria-label="点击关闭AI助手"
             />
             
-            {/* 聊天面板 - 黑色主题 */}
+            {/* 聊天面板 - Material Design风格 */}
             <motion.div
               initial={{ 
                 opacity: 0, 
-                y: 30, 
-                scale: 0.92,
-                rotateX: -8
+                y: 40, 
+                scale: 0.9
               }}
               animate={{ 
                 opacity: 1, 
                 y: 0, 
-                scale: 1,
-                rotateX: 0
+                scale: 1
               }}
               exit={{ 
                 opacity: 0, 
-                y: 30, 
-                scale: 0.92,
-                rotateX: -8
+                y: 40, 
+                scale: 0.9
               }}
               transition={{
-                type: "spring",
-                stiffness: 280,
-                damping: 22,
-                mass: 0.7,
-                opacity: { duration: 0.2 }
+                duration: 0.3,
+                ease: [0.4, 0.0, 0.2, 1]
               }}
               className="fixed bottom-28 right-8 z-40 w-96 max-w-[calc(100vw-2rem)] max-h-[32rem] bg-gray-900/95 backdrop-blur-xl border border-gray-700/50 rounded-3xl flex flex-col overflow-hidden shadow-2xl
                          sm:w-96 sm:bottom-28 sm:right-8
                          max-sm:w-[calc(100vw-1rem)] max-sm:bottom-24 max-sm:right-2 max-sm:left-2 max-sm:mx-auto max-sm:max-h-[70vh]"
               style={{
-                boxShadow: '0 25px 50px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05)',
+                boxShadow: '0 24px 38px rgba(0,0,0,0.4), 0 9px 46px rgba(0,0,0,0.24)',
                 willChange: 'transform, opacity',
-                transformStyle: 'preserve-3d',
-                backfaceVisibility: 'hidden',
-                perspective: '1000px'
+                backfaceVisibility: 'hidden'
               }}
               role="dialog"
               aria-label="AI助手聊天面板"
               aria-modal="true"
             >
-              {/* Header - 黑色主题 */}
+              {/* Header - Material Design风格 */}
               <motion.div 
                 className="px-6 py-5 border-b border-gray-700/50 flex items-center justify-between bg-gradient-to-r from-gray-800/50 to-gray-900/30"
-                initial={{ opacity: 0, y: -10 }}
+                initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ 
                   delay: 0.1, 
-                  duration: 0.2,
-                  ease: "easeOut"
+                  duration: 0.25,
+                  ease: [0.4, 0.0, 0.2, 1]
                 }}
-                style={{ willChange: 'transform, opacity' }}
               >
                 <div className="flex items-center gap-3">
                   <motion.div 
@@ -402,11 +367,11 @@ const Assistant = () => {
                     }}
                     transition={prefersReducedMotion ? {} : { 
                       duration: 2, 
-                      repeat: Infinity 
+                      repeat: Infinity,
+                      ease: [0.4, 0.0, 0.2, 1]
                     }}
-                    style={{ willChange: prefersReducedMotion ? 'auto' : 'transform, opacity' }}
                   />
-                  <h3 className="text-gray-300 text-xs font-bold uppercase tracking-wider">Assistant Aura</h3>
+                  <h3 className="text-gray-300 text-xs font-medium uppercase tracking-wider">Assistant Aura</h3>
                 </div>
                 {rateLimited && (
                   <motion.span 
@@ -415,50 +380,47 @@ const Assistant = () => {
                     animate={{ scale: 1, opacity: 1 }}
                     exit={{ scale: 0, opacity: 0 }}
                     transition={{ 
-                      duration: 0.15,
-                      ease: "easeOut"
+                      duration: 0.2,
+                      ease: [0.4, 0.0, 0.2, 1]
                     }}
-                    style={{ willChange: 'transform, opacity' }}
                   >
                     冷却中 {rateLimited}s
                   </motion.span>
                 )}
               </motion.div>
 
-              {/* Messages - 黑色主题 */}
+              {/* Messages - Material Design风格 */}
               <div 
                 ref={scrollRef} 
                 className="flex-1 overflow-y-auto px-6 py-4 space-y-4 bg-gradient-to-b from-gray-800/20 to-gray-900/10"
                 style={{ 
                   willChange: 'scroll-position',
-                  transform: 'translateZ(0)',
                   backfaceVisibility: 'hidden'
                 }}
               >
                 {messages.length === 0 ? (
                   <motion.div 
                     className="text-center py-12"
-                    initial={{ opacity: 0, y: 10 }}
+                    initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ 
                       delay: 0.2, 
-                      duration: 0.2,
-                      ease: "easeOut"
+                      duration: 0.3,
+                      ease: [0.4, 0.0, 0.2, 1]
                     }}
-                    style={{ willChange: 'transform, opacity' }}
                   >
                     <motion.div 
                       className="text-gray-500 mb-4 text-2xl"
                       animate={prefersReducedMotion ? {} : { 
-                        rotate: [0, 4, -4, 0],
-                        scale: [1, 1.05, 1]
+                        rotate: [0, 3, -3, 0],
+                        scale: [1, 1.02, 1]
                       }}
                       transition={prefersReducedMotion ? {} : { 
-                        duration: 3, 
+                        duration: 4, 
                         repeat: Infinity,
-                        repeatDelay: 2
+                        repeatDelay: 2,
+                        ease: [0.4, 0.0, 0.2, 1]
                       }}
-                      style={{ willChange: prefersReducedMotion ? 'auto' : 'transform' }}
                     >
                       {ICONS.AI}
                     </motion.div>
@@ -470,16 +432,12 @@ const Assistant = () => {
                     <motion.div 
                       key={i} 
                       className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                      initial={{ opacity: 0, y: 6, scale: 0.98 }}
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       transition={{ 
-                        delay: prefersReducedMotion ? 0 : Math.min(i * 0.02, 0.1),
-                        duration: 0.15,
-                        ease: "easeOut"
-                      }}
-                      style={{ 
-                        willChange: 'transform, opacity',
-                        backfaceVisibility: 'hidden'
+                        delay: Math.min(i * 0.05, 0.2),
+                        duration: 0.25,
+                        ease: [0.4, 0.0, 0.2, 1]
                       }}
                     >
                       <div className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm shadow-sm ${
@@ -520,17 +478,16 @@ const Assistant = () => {
                 </motion.div>
               )}
 
-              {/* Input - 黑色主题 */}
+              {/* Input - Material Design风格 */}
               <motion.div 
                 className="px-6 pb-6 bg-gradient-to-t from-gray-800/50 to-transparent"
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ 
                   delay: 0.15, 
-                  duration: 0.2,
-                  ease: "easeOut"
+                  duration: 0.25,
+                  ease: [0.4, 0.0, 0.2, 1]
                 }}
-                style={{ willChange: 'transform, opacity' }}
               >
                 <div className="relative">
                   <input
@@ -539,26 +496,25 @@ const Assistant = () => {
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && sendMessage(input)}
                     placeholder={rateLimited ? `请等待 ${rateLimited} 秒...` : '有什么想聊的吗？'}
-                    className="w-full bg-gray-800/80 border border-gray-700/50 rounded-2xl px-4 py-3 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-gray-600/50 focus:bg-gray-800 transition-all duration-150 disabled:opacity-50 shadow-sm focus:ring-2 focus:ring-gray-600/30"
+                    className="w-full bg-gray-800/80 border border-gray-700/50 rounded-2xl px-4 py-3 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-gray-600/50 focus:bg-gray-800 transition-all duration-200 disabled:opacity-50 shadow-sm focus:ring-2 focus:ring-blue-500/30"
                     disabled={isLoading || !!rateLimited}
                     aria-label="输入消息"
                   />
                   <motion.button
                     onClick={() => sendMessage(input)}
                     disabled={!input.trim() || isLoading || !!rateLimited}
-                    className={`absolute right-2 top-2 w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center transition-all duration-150 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 ${
+                    className={`absolute right-2 top-2 w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center transition-all duration-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 ${
                       input.trim() && !rateLimited ? 'opacity-100 hover:bg-blue-500' : 'opacity-30'
                     }`}
                     whileHover={input.trim() && !rateLimited ? { 
                       scale: 1.05,
-                      transition: { duration: 0.1 }
+                      transition: { duration: 0.15, ease: [0.4, 0.0, 0.2, 1] }
                     } : {}}
                     whileTap={input.trim() && !rateLimited ? { 
                       scale: 0.95,
-                      transition: { duration: 0.05 }
+                      transition: { duration: 0.1, ease: [0.4, 0.0, 0.2, 1] }
                     } : {}}
                     aria-label="发送消息"
-                    style={{ willChange: input.trim() && !rateLimited ? 'transform' : 'auto' }}
                   >
                     {ICONS.CHEVRON_RIGHT}
                   </motion.button>
