@@ -22,8 +22,21 @@ export const pagesApi = {
 
 export const engagementApi = {
     async incrementView(targetId: string) {
-        const { error } = await supabase.rpc('increment_views', { target_id: targetId });
-        if (error) throw error;
+        // 使用简单的 SELECT + UPDATE 方式，避免 RPC 依赖
+        const { data: post, error: selectError } = await supabase
+            .from('posts')
+            .select('views')
+            .eq('id', targetId)
+            .single();
+            
+        if (selectError) throw selectError;
+        
+        const { error: updateError } = await supabase
+            .from('posts')
+            .update({ views: (post?.views || 0) + 1 })
+            .eq('id', targetId);
+            
+        if (updateError) throw updateError;
     },
 
     async toggleLike(targetType: string, targetId: string, fingerprint: string) {

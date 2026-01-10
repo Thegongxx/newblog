@@ -34,6 +34,10 @@ export default defineConfig(({ mode }) => {
       },
       cssCodeSplit: true,
       chunkSizeWarningLimit: 500,
+      // 优化构建性能
+      minify: 'esbuild',
+      target: 'es2020',
+      sourcemap: false, // 生产环境不生成 sourcemap
     },
   };
 });
