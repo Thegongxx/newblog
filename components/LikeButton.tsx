@@ -155,17 +155,20 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                         initial={{ 
                             opacity: 0, 
                             scale: 0.8, 
-                            y: isMobile ? 8 : 10
+                            x: -10,
+                            y: 5
                         }}
                         animate={{ 
                             opacity: 1, 
                             scale: 1, 
+                            x: 0,
                             y: 0
                         }}
                         exit={{ 
                             opacity: 0, 
                             scale: 0.8, 
-                            y: isMobile ? 4 : 5
+                            x: -5,
+                            y: 2
                         }}
                         transition={{
                             type: "spring",
@@ -174,12 +177,12 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                             mass: 0.8,
                             duration: isMobile ? 0.5 : 0.6
                         }}
-                        className="fixed z-[9999] pointer-events-none"
+                        className="absolute z-[9999] pointer-events-none"
                         style={{
-                            // 智能定位：在屏幕中央偏上显示，避免被遮挡
-                            top: isMobile ? '50%' : '50%',
-                            left: '70%',
-                            transform: 'translateX(-50%)',
+                            // 定位在点赞按钮的左上方
+                            top: isMobile ? '-40px' : '-45px',
+                            left: isMobile ? '-60px' : '-80px',
+                            minWidth: 'max-content', // 防止文字换行
                         }}
                     >
                         <motion.div 
@@ -188,13 +191,13 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                             } font-medium whitespace-nowrap text-white/90`}
                             style={{
                                 borderRadius: isMobile ? '14px' : '20px',
-                                background: 'rgba(0, 0, 0, 0.75)',
-                                backdropFilter: isMobile ? 'blur(16px) saturate(140%)' : 'blur(20px) saturate(150%)',
-                                WebkitBackdropFilter: isMobile ? 'blur(16px) saturate(140%)' : 'blur(20px) saturate(150%)',
+                                background: 'rgba(0, 0, 0, 0.9)', // 增强背景不透明度
+                                backdropFilter: isMobile ? 'blur(20px) saturate(150%)' : 'blur(24px) saturate(160%)',
+                                WebkitBackdropFilter: isMobile ? 'blur(20px) saturate(150%)' : 'blur(24px) saturate(160%)',
                                 boxShadow: isMobile 
-                                    ? '0 4px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
-                                    : '0 8px 32px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
-                                border: isMobile ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(255, 255, 255, 0.15)'
+                                    ? '0 6px 25px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.1)'
+                                    : '0 10px 40px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.15)',
+                                border: isMobile ? '1px solid rgba(255, 255, 255, 0.2)' : '1px solid rgba(255, 255, 255, 0.25)'
                             }}
                             animate={{
                                 // 微妙的浮动效果
@@ -249,10 +252,24 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                             
                             {/* 底部透明进度条 */}
                             <motion.div
-                                className="absolute bottom-0 left-0 h-0.5 bg-white/25 rounded-full"
+                                className="absolute bottom-0 left-0 h-0.5 bg-white/30 rounded-full"
                                 initial={{ width: '100%' }}
                                 animate={{ width: '0%' }}
                                 transition={{ duration: isMobile ? 1.5 : 2, ease: "linear" }}
+                            />
+
+                            {/* 指向点赞按钮的小箭头 */}
+                            <div 
+                                className="absolute"
+                                style={{
+                                    right: isMobile ? '-4px' : '-6px',
+                                    bottom: isMobile ? '8px' : '10px',
+                                    width: 0,
+                                    height: 0,
+                                    borderLeft: isMobile ? '4px solid rgba(0, 0, 0, 0.9)' : '6px solid rgba(0, 0, 0, 0.9)',
+                                    borderTop: isMobile ? '4px solid transparent' : '6px solid transparent',
+                                    borderBottom: isMobile ? '4px solid transparent' : '6px solid transparent',
+                                }}
                             />
                         </motion.div>
                     </motion.div>

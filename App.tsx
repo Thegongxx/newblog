@@ -55,10 +55,9 @@ const AppInner = () => {
   useEffect(() => {
     // 添加延迟，让页面切换动画先开始
     const timer = setTimeout(() => {
-      // 移动端使用smooth，桌面端使用auto
-      const behavior = isMobile ? 'smooth' : 'auto';
-      window.scrollTo({ top: 0, behavior: behavior as ScrollBehavior });
-    }, isMobile ? 100 : 50);
+      // 移动端和桌面端都使用smooth滚动
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, isMobile ? 150 : 100);
     
     return () => clearTimeout(timer);
   }, [location.pathname, isMobile]);
@@ -305,11 +304,11 @@ const AppInner = () => {
             <Routes location={location} key={location.pathname}>
               <Route path="/" element={
                 <motion.div
-                  initial={{ opacity: 0, y: isMobile ? 10 : 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: isMobile ? -10 : -20 }}
+                  initial={{ opacity: 0, y: isMobile ? 15 : 20, scale: isMobile ? 0.98 : 0.99 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: isMobile ? -15 : -20, scale: isMobile ? 0.98 : 0.99 }}
                   transition={{ 
-                    duration: isMobile ? 0.4 : 0.6, 
+                    duration: isMobile ? 0.5 : 0.6, 
                     ease: [0.4, 0.0, 0.2, 1] 
                   }}
                 >
@@ -318,11 +317,11 @@ const AppInner = () => {
               } />
               <Route path="/post/:slug" element={
                 <motion.div
-                  initial={{ opacity: 0, y: isMobile ? 10 : 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: isMobile ? -10 : -20 }}
+                  initial={{ opacity: 0, y: isMobile ? 15 : 20, scale: isMobile ? 0.98 : 0.99 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: isMobile ? -15 : -20, scale: isMobile ? 0.98 : 0.99 }}
                   transition={{ 
-                    duration: isMobile ? 0.4 : 0.6, 
+                    duration: isMobile ? 0.5 : 0.6, 
                     ease: [0.4, 0.0, 0.2, 1] 
                   }}
                 >
@@ -331,11 +330,11 @@ const AppInner = () => {
               } />
               <Route path="/notes" element={
                 <motion.div
-                  initial={{ opacity: 0, y: isMobile ? 10 : 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: isMobile ? -10 : -20 }}
+                  initial={{ opacity: 0, y: isMobile ? 15 : 20, scale: isMobile ? 0.98 : 0.99 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: isMobile ? -15 : -20, scale: isMobile ? 0.98 : 0.99 }}
                   transition={{ 
-                    duration: isMobile ? 0.4 : 0.6, 
+                    duration: isMobile ? 0.5 : 0.6, 
                     ease: [0.4, 0.0, 0.2, 1] 
                   }}
                 >
@@ -344,11 +343,11 @@ const AppInner = () => {
               } />
               <Route path="/note/:id" element={
                 <motion.div
-                  initial={{ opacity: 0, y: isMobile ? 10 : 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: isMobile ? -10 : -20 }}
+                  initial={{ opacity: 0, y: isMobile ? 15 : 20, scale: isMobile ? 0.98 : 0.99 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: isMobile ? -15 : -20, scale: isMobile ? 0.98 : 0.99 }}
                   transition={{ 
-                    duration: isMobile ? 0.4 : 0.6, 
+                    duration: isMobile ? 0.5 : 0.6, 
                     ease: [0.4, 0.0, 0.2, 1] 
                   }}
                 >
@@ -357,11 +356,11 @@ const AppInner = () => {
               } />
               <Route path="/archive" element={
                 <motion.div
-                  initial={{ opacity: 0, y: isMobile ? 10 : 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: isMobile ? -10 : -20 }}
+                  initial={{ opacity: 0, y: isMobile ? 15 : 20, scale: isMobile ? 0.98 : 0.99 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: isMobile ? -15 : -20, scale: isMobile ? 0.98 : 0.99 }}
                   transition={{ 
-                    duration: isMobile ? 0.4 : 0.6, 
+                    duration: isMobile ? 0.5 : 0.6, 
                     ease: [0.4, 0.0, 0.2, 1] 
                   }}
                 >
@@ -370,11 +369,11 @@ const AppInner = () => {
               } />
               <Route path="/about" element={
                 <motion.div
-                  initial={{ opacity: 0, y: isMobile ? 10 : 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: isMobile ? -10 : -20 }}
+                  initial={{ opacity: 0, y: isMobile ? 15 : 20, scale: isMobile ? 0.98 : 0.99 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: isMobile ? -15 : -20, scale: isMobile ? 0.98 : 0.99 }}
                   transition={{ 
-                    duration: isMobile ? 0.4 : 0.6, 
+                    duration: isMobile ? 0.5 : 0.6, 
                     ease: [0.4, 0.0, 0.2, 1] 
                   }}
                 >

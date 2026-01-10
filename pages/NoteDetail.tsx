@@ -107,32 +107,60 @@ const NoteDetail: React.FC = () => {
           className="mb-6 md:mb-8 flex items-center gap-2 text-white/60 hover:text-white transition-colors group"
           whileHover={{ x: -4 }}
           transition={{ type: "spring", stiffness: 400, damping: 25 }}
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.1, duration: 0.4 }}
         >
           <span className="transform group-hover:-translate-x-1 transition-transform">←</span>
           <span className="text-xs md:text-sm font-medium tracking-wider uppercase">返回</span>
         </motion.button>
 
         {/* 笔记内容 - 移动端简化 */}
-        <article 
+        <motion.article 
           className="glass p-6 md:p-12 rounded-2xl md:rounded-[3rem] border border-white/5 mb-8 md:mb-12"
+          initial={{ opacity: 0, y: 20, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ delay: 0.2, duration: 0.5, ease: [0.4, 0.0, 0.2, 1] }}
         >
           {/* 引号图标 */}
-          <div className="mb-4 md:mb-8 scale-75 md:scale-100 origin-top-left">{ICONS.QUOTES}</div>
+          <motion.div 
+            className="mb-4 md:mb-8 scale-75 md:scale-100 origin-top-left"
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 0.75 }}
+            transition={{ delay: 0.3, duration: 0.4 }}
+          >
+            {ICONS.QUOTES}
+          </motion.div>
           
           {/* 笔记标题 */}
-          <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-white/95 mb-4 md:mb-8">
+          <motion.h1 
+            className="text-2xl md:text-4xl font-bold tracking-tight text-white/95 mb-4 md:mb-8"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.4 }}
+          >
             {note.title}
-          </h1>
+          </motion.h1>
           
           {/* 笔记内容 */}
-          <div className="prose prose-invert prose-sm md:prose-lg max-w-none">
+          <motion.div 
+            className="prose prose-invert prose-sm md:prose-lg max-w-none"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5, duration: 0.4 }}
+          >
             <div className="text-sm md:text-lg font-light leading-relaxed text-white/80 whitespace-pre-wrap">
               {note.content}
             </div>
-          </div>
+          </motion.div>
 
           {/* 底部信息 - 移动端简化 */}
-          <div className="flex items-center justify-between border-t border-white/5 pt-4 md:pt-8 mt-8 md:mt-12">
+          <motion.div 
+            className="flex items-center justify-between border-t border-white/5 pt-4 md:pt-8 mt-8 md:mt-12"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6, duration: 0.4 }}
+          >
             <div className="flex flex-col gap-1 md:gap-2">
               <time className="text-[10px] md:text-sm font-bold tracking-widest text-white/40 uppercase">
                 {note.date}
@@ -154,13 +182,17 @@ const NoteDetail: React.FC = () => {
               initialCount={note.likes_count || 0}
               className="scale-90 md:scale-110"
             />
-          </div>
-        </article>
+          </motion.div>
+        </motion.article>
 
         {/* 评论区域 */}
-        <div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7, duration: 0.4 }}
+        >
           <CommentSection targetId={note.id} targetType="note" />
-        </div>
+        </motion.div>
       </div>
     </div>
   );
