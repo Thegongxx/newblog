@@ -9,7 +9,7 @@ const TypingIndicator = () => (
     {[0, 1, 2].map((i) => (
       <motion.div
         key={i}
-        className="w-2 h-2 bg-black/40 rounded-full"
+        className="w-2 h-2 bg-gray-400 rounded-full"
         animate={{ opacity: [0.4, 1, 0.4], scale: [1, 1.2, 1] }}
         transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.15 }}
       />
@@ -42,17 +42,17 @@ const Assistant = () => {
     return () => window.removeEventListener('resize', checkTouchDevice);
   }, []);
 
-  // 优化的状态切换处理 - 添加动画预处理
+  // 优化的状态切换处理 - 添加动画预处理和防抖
   const handleToggle = useCallback(() => {
-    // 预先设置will-change以优化动画性能
-    const button = document.querySelector('[aria-label*="AI助手"]') as HTMLElement;
-    if (button) {
-      button.style.willChange = 'transform, width, padding';
-      // 动画完成后清理will-change
-      setTimeout(() => {
-        button.style.willChange = 'auto';
-      }, 400);
-    }
+    // 防抖处理，避免快速点击造成的动画问题
+    if (document.body.style.pointerEvents === 'none') return;
+    
+    // 临时禁用点击，防止动画期间的重复触发
+    document.body.style.pointerEvents = 'none';
+    setTimeout(() => {
+      document.body.style.pointerEvents = 'auto';
+    }, 300);
+    
     setIsOpen(prev => !prev);
   }, []);
 
@@ -176,10 +176,10 @@ const Assistant = () => {
 
   return (
     <>
-      {/* 优化的浮动按钮 - 更丝滑的动画和性能优化 */}
+      {/* 优化的浮动按钮 - 黑色主题 */}
       <motion.button
         onClick={handleToggle}
-        className="fixed bottom-8 right-8 z-50 flex items-center justify-center bg-white/95 backdrop-blur-xl text-black shadow-2xl border border-white/20 focus:outline-none focus:ring-2 focus:ring-black/20 focus:ring-offset-2
+        className="fixed bottom-8 right-8 z-50 flex items-center justify-center bg-black/90 backdrop-blur-xl text-white shadow-2xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-white/20 focus:ring-offset-2 focus:ring-offset-black
                    max-sm:bottom-6 max-sm:right-6 max-sm:scale-90"
         style={{
           height: '56px',
@@ -196,14 +196,14 @@ const Assistant = () => {
         }}
         transition={{
           type: "spring",
-          stiffness: 320,
-          damping: 22,
-          mass: 0.5,
-          velocity: 2
+          stiffness: 350,
+          damping: 25,
+          mass: 0.4,
+          velocity: 1
         }}
         whileHover={{ 
           scale: isTouchDevice ? 1 : 1.02,
-          boxShadow: "0 12px 30px rgba(0,0,0,0.12)",
+          boxShadow: "0 12px 30px rgba(0,0,0,0.3)",
           transition: { 
             duration: 0.12,
             ease: "easeOut"
@@ -232,7 +232,7 @@ const Assistant = () => {
                 damping: 20,
                 mass: 0.3
               }}
-              className="text-2xl font-light text-black/80"
+              className="text-2xl font-light text-white/90"
               style={{ willChange: 'transform, opacity' }}
             >
               ×
@@ -253,7 +253,7 @@ const Assistant = () => {
               style={{ willChange: 'transform, opacity' }}
             >
               <motion.span 
-                className="text-black/70 text-lg"
+                className="text-white/80 text-lg"
                 animate={prefersReducedMotion ? {} : { 
                   rotate: [0, 6, -6, 0],
                   scale: [1, 1.02, 1]
@@ -268,7 +268,7 @@ const Assistant = () => {
               >
                 {ICONS.AI}
               </motion.span>
-              <span className="font-bold text-sm text-black/80 tracking-tight">Aura</span>
+              <span className="font-bold text-sm text-white/90 tracking-tight">Aura</span>
             </motion.div>
           )}
         </AnimatePresence>
@@ -278,16 +278,16 @@ const Assistant = () => {
       <AnimatePresence>
         {isOpen && (
           <>
-            {/* 背景遮罩 - 更快速的淡入淡出和GPU加速 */}
+            {/* 背景遮罩 - 黑色主题 */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{
-                duration: 0.15,
+                duration: 0.2,
                 ease: [0.25, 0.46, 0.45, 0.94]
               }}
-              className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30"
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-30"
               style={{ 
                 willChange: 'opacity',
                 backfaceVisibility: 'hidden',
@@ -297,13 +297,13 @@ const Assistant = () => {
               aria-label="点击关闭AI助手"
             />
             
-            {/* 聊天面板 - 优化的3D效果和性能 */}
+            {/* 聊天面板 - 黑色主题 */}
             <motion.div
               initial={{ 
                 opacity: 0, 
-                y: 20, 
-                scale: 0.95,
-                rotateX: -6
+                y: 30, 
+                scale: 0.92,
+                rotateX: -8
               }}
               animate={{ 
                 opacity: 1, 
@@ -313,22 +313,22 @@ const Assistant = () => {
               }}
               exit={{ 
                 opacity: 0, 
-                y: 20, 
-                scale: 0.95,
-                rotateX: -6
+                y: 30, 
+                scale: 0.92,
+                rotateX: -8
               }}
               transition={{
                 type: "spring",
-                stiffness: 300,
-                damping: 20,
-                mass: 0.6,
-                opacity: { duration: 0.15 }
+                stiffness: 280,
+                damping: 22,
+                mass: 0.7,
+                opacity: { duration: 0.2 }
               }}
-              className="fixed bottom-28 right-8 z-40 w-96 max-w-[calc(100vw-2rem)] max-h-[32rem] bg-white/95 backdrop-blur-xl border border-white/30 rounded-3xl flex flex-col overflow-hidden shadow-2xl
+              className="fixed bottom-28 right-8 z-40 w-96 max-w-[calc(100vw-2rem)] max-h-[32rem] bg-gray-900/95 backdrop-blur-xl border border-gray-700/50 rounded-3xl flex flex-col overflow-hidden shadow-2xl
                          sm:w-96 sm:bottom-28 sm:right-8
                          max-sm:w-[calc(100vw-1rem)] max-sm:bottom-24 max-sm:right-2 max-sm:left-2 max-sm:mx-auto max-sm:max-h-[70vh]"
               style={{
-                boxShadow: '0 25px 50px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.1)',
+                boxShadow: '0 25px 50px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05)',
                 willChange: 'transform, opacity',
                 transformStyle: 'preserve-3d',
                 backfaceVisibility: 'hidden',
@@ -338,21 +338,21 @@ const Assistant = () => {
               aria-label="AI助手聊天面板"
               aria-modal="true"
             >
-              {/* Header */}
+              {/* Header - 黑色主题 */}
               <motion.div 
-                className="px-6 py-5 border-b border-black/10 flex items-center justify-between bg-gradient-to-r from-white/50 to-white/30"
+                className="px-6 py-5 border-b border-gray-700/50 flex items-center justify-between bg-gradient-to-r from-gray-800/50 to-gray-900/30"
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ 
-                  delay: 0.08, 
-                  duration: 0.15,
+                  delay: 0.1, 
+                  duration: 0.2,
                   ease: "easeOut"
                 }}
                 style={{ willChange: 'transform, opacity' }}
               >
                 <div className="flex items-center gap-3">
                   <motion.div 
-                    className="w-2 h-2 bg-green-500 rounded-full"
+                    className="w-2 h-2 bg-green-400 rounded-full"
                     animate={prefersReducedMotion ? {} : { 
                       scale: [1, 1.2, 1],
                       opacity: [0.7, 1, 0.7]
@@ -363,11 +363,11 @@ const Assistant = () => {
                     }}
                     style={{ willChange: prefersReducedMotion ? 'auto' : 'transform, opacity' }}
                   />
-                  <h3 className="text-black/70 text-xs font-bold uppercase tracking-wider">Assistant Aura</h3>
+                  <h3 className="text-gray-300 text-xs font-bold uppercase tracking-wider">Assistant Aura</h3>
                 </div>
                 {rateLimited && (
                   <motion.span 
-                    className="text-xs text-amber-600 bg-amber-100 px-2 py-1 rounded-full"
+                    className="text-xs text-amber-400 bg-amber-900/30 px-2 py-1 rounded-full border border-amber-700/30"
                     initial={{ scale: 0, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     exit={{ scale: 0, opacity: 0 }}
@@ -382,10 +382,10 @@ const Assistant = () => {
                 )}
               </motion.div>
 
-              {/* Messages */}
+              {/* Messages - 黑色主题 */}
               <div 
                 ref={scrollRef} 
-                className="flex-1 overflow-y-auto px-6 py-4 space-y-4 bg-gradient-to-b from-white/20 to-white/10"
+                className="flex-1 overflow-y-auto px-6 py-4 space-y-4 bg-gradient-to-b from-gray-800/20 to-gray-900/10"
                 style={{ 
                   willChange: 'scroll-position',
                   transform: 'translateZ(0)',
@@ -398,14 +398,14 @@ const Assistant = () => {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ 
-                      delay: 0.15, 
-                      duration: 0.15,
+                      delay: 0.2, 
+                      duration: 0.2,
                       ease: "easeOut"
                     }}
                     style={{ willChange: 'transform, opacity' }}
                   >
                     <motion.div 
-                      className="text-black/30 mb-4 text-2xl"
+                      className="text-gray-500 mb-4 text-2xl"
                       animate={prefersReducedMotion ? {} : { 
                         rotate: [0, 4, -4, 0],
                         scale: [1, 1.05, 1]
@@ -419,8 +419,8 @@ const Assistant = () => {
                     >
                       {ICONS.AI}
                     </motion.div>
-                    <p className="text-black/60 text-sm font-medium">我是你的 AI 助手 Aura</p>
-                    <p className="text-black/40 text-xs mt-2">有什么可以帮助你的吗？</p>
+                    <p className="text-gray-300 text-sm font-medium">我是你的 AI 助手 Aura</p>
+                    <p className="text-gray-500 text-xs mt-2">有什么可以帮助你的吗？</p>
                   </motion.div>
                 ) : (
                   messages.map((m, i) => (
@@ -441,8 +441,8 @@ const Assistant = () => {
                     >
                       <div className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm shadow-sm ${
                         m.role === 'user' 
-                          ? 'bg-black text-white shadow-lg' 
-                          : 'bg-white/80 text-black/80 border border-black/10'
+                          ? 'bg-blue-600 text-white shadow-lg' 
+                          : 'bg-gray-800/80 text-gray-200 border border-gray-700/50'
                       }`}>
                         {m.content || <TypingIndicator />}
                       </div>
@@ -451,7 +451,7 @@ const Assistant = () => {
                 )}
               </div>
 
-              {/* Retry Button */}
+              {/* Retry Button - 黑色主题 */}
               {retryInfo.show && !isLoading && (
                 <motion.div 
                   className="px-6 pb-2"
@@ -469,7 +469,7 @@ const Assistant = () => {
                 >
                   <button
                     onClick={handleRetry}
-                    className="w-full py-2 text-sm text-black/60 hover:text-black bg-black/5 hover:bg-black/10 rounded-xl transition-all duration-150 border border-black/10 hover:border-black/20 focus:outline-none focus:ring-2 focus:ring-black/20"
+                    className="w-full py-2 text-sm text-gray-400 hover:text-gray-200 bg-gray-800/50 hover:bg-gray-700/50 rounded-xl transition-all duration-150 border border-gray-700/50 hover:border-gray-600/50 focus:outline-none focus:ring-2 focus:ring-gray-500/50"
                     aria-label="重试发送消息"
                   >
                     🔄 重试
@@ -477,14 +477,14 @@ const Assistant = () => {
                 </motion.div>
               )}
 
-              {/* Input */}
+              {/* Input - 黑色主题 */}
               <motion.div 
-                className="px-6 pb-6 bg-gradient-to-t from-white/50 to-transparent"
+                className="px-6 pb-6 bg-gradient-to-t from-gray-800/50 to-transparent"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ 
-                  delay: 0.12, 
-                  duration: 0.15,
+                  delay: 0.15, 
+                  duration: 0.2,
                   ease: "easeOut"
                 }}
                 style={{ willChange: 'transform, opacity' }}
@@ -496,15 +496,15 @@ const Assistant = () => {
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && sendMessage(input)}
                     placeholder={rateLimited ? `请等待 ${rateLimited} 秒...` : '有什么想聊的吗？'}
-                    className="w-full bg-white/80 border border-black/20 rounded-2xl px-4 py-3 text-sm text-black placeholder-black/40 focus:outline-none focus:border-black/40 focus:bg-white transition-all duration-150 disabled:opacity-50 shadow-sm focus:ring-2 focus:ring-black/10"
+                    className="w-full bg-gray-800/80 border border-gray-700/50 rounded-2xl px-4 py-3 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-gray-600/50 focus:bg-gray-800 transition-all duration-150 disabled:opacity-50 shadow-sm focus:ring-2 focus:ring-gray-600/30"
                     disabled={isLoading || !!rateLimited}
                     aria-label="输入消息"
                   />
                   <motion.button
                     onClick={() => sendMessage(input)}
                     disabled={!input.trim() || isLoading || !!rateLimited}
-                    className={`absolute right-2 top-2 w-8 h-8 rounded-xl bg-black text-white flex items-center justify-center transition-all duration-150 shadow-sm focus:outline-none focus:ring-2 focus:ring-black/20 ${
-                      input.trim() && !rateLimited ? 'opacity-100 hover:bg-black/80' : 'opacity-30'
+                    className={`absolute right-2 top-2 w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center transition-all duration-150 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 ${
+                      input.trim() && !rateLimited ? 'opacity-100 hover:bg-blue-500' : 'opacity-30'
                     }`}
                     whileHover={input.trim() && !rateLimited ? { 
                       scale: 1.05,
