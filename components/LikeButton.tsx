@@ -164,69 +164,104 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                     {count}
                 </span>
 
-                {/* 惊喜粒子爆炸效果 */}
+                {/* 惊喜粒子爆炸效果 - 升级版 */}
                 {!locked && animating && (
                     <div className="absolute inset-0 pointer-events-none">
-                        {/* 主要爆炸粒子 */}
-                        {[...Array(16)].map((_, i) => (
+                        {/* 主要爆炸粒子 - 增加数量和变化 */}
+                        {[...Array(20)].map((_, i) => (
                             <div
                                 key={`main-${i}`}
                                 className="absolute left-1/2 top-1/2 animate-heart-explosion"
                                 style={{
-                                    '--angle': `${(360 / 16) * i}deg`,
-                                    '--distance': `${Math.random() * 40 + 60}px`,
-                                    '--size': `${Math.random() * 3 + 3}px`,
-                                    '--delay': `${Math.random() * 0.1}s`,
-                                    '--duration': `${0.8 + Math.random() * 0.4}s`,
+                                    '--angle': `${(360 / 20) * i}deg`,
+                                    '--distance': `${Math.random() * 50 + 70}px`,
+                                    '--size': `${Math.random() * 4 + 2}px`,
+                                    '--delay': `${Math.random() * 0.15}s`,
+                                    '--duration': `${0.8 + Math.random() * 0.6}s`,
                                     width: 'var(--size)',
                                     height: 'var(--size)',
                                 } as React.CSSProperties}
                             >
-                                <div className="w-full h-full bg-gradient-to-r from-rose-400 to-pink-500 rounded-full shadow-lg" />
+                                <div className={`w-full h-full rounded-full shadow-lg ${
+                                    i % 3 === 0 ? 'bg-gradient-to-r from-rose-400 to-pink-500' :
+                                    i % 3 === 1 ? 'bg-gradient-to-r from-purple-400 to-pink-400' :
+                                    'bg-gradient-to-r from-yellow-400 to-orange-500'
+                                }`} />
                             </div>
                         ))}
                         
-                        {/* 小星星粒子 */}
-                        {[...Array(8)].map((_, i) => (
+                        {/* 小星星粒子 - 增加闪烁效果 */}
+                        {[...Array(12)].map((_, i) => (
                             <div
                                 key={`star-${i}`}
                                 className="absolute left-1/2 top-1/2 animate-star-twinkle"
                                 style={{
-                                    '--angle': `${45 * i}deg`,
-                                    '--distance': `${Math.random() * 30 + 80}px`,
-                                    '--delay': `${0.2 + Math.random() * 0.3}s`,
-                                    '--duration': `${1.2 + Math.random() * 0.6}s`,
+                                    '--angle': `${30 * i}deg`,
+                                    '--distance': `${Math.random() * 40 + 90}px`,
+                                    '--delay': `${0.2 + Math.random() * 0.4}s`,
+                                    '--duration': `${1.2 + Math.random() * 0.8}s`,
                                 } as React.CSSProperties}
                             >
-                                <div className="w-2 h-2 text-yellow-300">
-                                    ✨
+                                <div className={`text-xs ${
+                                    i % 4 === 0 ? 'text-yellow-300' :
+                                    i % 4 === 1 ? 'text-blue-300' :
+                                    i % 4 === 2 ? 'text-green-300' :
+                                    'text-purple-300'
+                                }`}>
+                                    {i % 3 === 0 ? '✨' : i % 3 === 1 ? '⭐' : '💫'}
                                 </div>
                             </div>
                         ))}
                         
-                        {/* 心形粒子 */}
-                        {[...Array(6)].map((_, i) => (
+                        {/* 心形粒子 - 增加种类 */}
+                        {[...Array(8)].map((_, i) => (
                             <div
                                 key={`heart-${i}`}
                                 className="absolute left-1/2 top-1/2 animate-heart-float"
                                 style={{
-                                    '--angle': `${60 * i}deg`,
-                                    '--distance': `${Math.random() * 50 + 70}px`,
-                                    '--delay': `${0.1 + Math.random() * 0.2}s`,
-                                    '--duration': `${1.5 + Math.random() * 0.5}s`,
+                                    '--angle': `${45 * i}deg`,
+                                    '--distance': `${Math.random() * 60 + 80}px`,
+                                    '--delay': `${0.1 + Math.random() * 0.3}s`,
+                                    '--duration': `${1.5 + Math.random() * 0.7}s`,
                                 } as React.CSSProperties}
                             >
-                                <div className="text-rose-400 text-xs">💖</div>
+                                <div className={`text-xs ${
+                                    i % 4 === 0 ? 'text-rose-400' :
+                                    i % 4 === 1 ? 'text-pink-400' :
+                                    i % 4 === 2 ? 'text-red-400' :
+                                    'text-purple-400'
+                                }`}>
+                                    {i % 4 === 0 ? '💖' : i % 4 === 1 ? '💕' : i % 4 === 2 ? '❤️' : '💜'}
+                                </div>
                             </div>
                         ))}
                         
-                        {/* 光环效果 */}
+                        {/* 彩虹光环效果 - 多层 */}
                         <div className="absolute left-1/2 top-1/2 animate-ring-expand">
-                            <div className="w-16 h-16 border-2 border-rose-400/30 rounded-full -translate-x-1/2 -translate-y-1/2" />
+                            <div className="w-16 h-16 border-2 border-rose-400/40 rounded-full -translate-x-1/2 -translate-y-1/2" />
                         </div>
                         <div className="absolute left-1/2 top-1/2 animate-ring-expand-delayed">
-                            <div className="w-20 h-20 border border-pink-300/20 rounded-full -translate-x-1/2 -translate-y-1/2" />
+                            <div className="w-20 h-20 border border-pink-300/30 rounded-full -translate-x-1/2 -translate-y-1/2" />
                         </div>
+                        <div className="absolute left-1/2 top-1/2 animate-ring-expand-slow">
+                            <div className="w-24 h-24 border border-purple-300/20 rounded-full -translate-x-1/2 -translate-y-1/2" />
+                        </div>
+                        
+                        {/* 魔法闪光效果 */}
+                        {[...Array(6)].map((_, i) => (
+                            <div
+                                key={`sparkle-${i}`}
+                                className="absolute left-1/2 top-1/2 animate-sparkle-burst"
+                                style={{
+                                    '--angle': `${60 * i}deg`,
+                                    '--distance': `${Math.random() * 35 + 50}px`,
+                                    '--delay': `${0.3 + Math.random() * 0.2}s`,
+                                    '--duration': `${0.6 + Math.random() * 0.4}s`,
+                                } as React.CSSProperties}
+                            >
+                                <div className="w-1 h-4 bg-gradient-to-t from-transparent via-white to-transparent opacity-80 rounded-full" />
+                            </div>
+                        ))}
                     </div>
                 )}
             </button>
@@ -256,6 +291,10 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                         opacity: 1;
                         transform: translate(-50%, -50%) rotate(var(--angle)) translateY(-10px) scale(1.2);
                     }
+                    50% {
+                        opacity: 0.8;
+                        transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(-0.5 * var(--distance))) scale(1.5);
+                    }
                     100% {
                         transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(-1 * var(--distance))) scale(0.5) rotate(180deg);
                         opacity: 0;
@@ -270,6 +309,10 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                     25% {
                         opacity: 1;
                         transform: translate(-50%, -50%) scale(1.3) rotate(var(--angle));
+                    }
+                    75% {
+                        opacity: 0.6;
+                        transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(-0.7 * var(--distance))) scale(1.1) rotate(180deg);
                     }
                     100% {
                         transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(-1 * var(--distance))) scale(0.8) rotate(360deg);
@@ -299,6 +342,32 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                     }
                 }
                 
+                @keyframes ring-expand-slow {
+                    0% {
+                        transform: translate(-50%, -50%) scale(0);
+                        opacity: 0.4;
+                    }
+                    100% {
+                        transform: translate(-50%, -50%) scale(3);
+                        opacity: 0;
+                    }
+                }
+                
+                @keyframes sparkle-burst {
+                    0% {
+                        transform: translate(-50%, -50%) rotate(var(--angle)) scale(0);
+                        opacity: 0;
+                    }
+                    30% {
+                        opacity: 1;
+                        transform: translate(-50%, -50%) rotate(var(--angle)) scale(1);
+                    }
+                    100% {
+                        transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(-1 * var(--distance))) scale(0.3);
+                        opacity: 0;
+                    }
+                }
+                
                 .animate-heart-explosion {
                     animation: heart-explosion var(--duration) cubic-bezier(0.16, 1, 0.3, 1) forwards;
                     animation-delay: var(--delay);
@@ -321,6 +390,16 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                 .animate-ring-expand-delayed {
                     animation: ring-expand-delayed 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
                     animation-delay: 0.2s;
+                }
+                
+                .animate-ring-expand-slow {
+                    animation: ring-expand-slow 1.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                    animation-delay: 0.4s;
+                }
+                
+                .animate-sparkle-burst {
+                    animation: sparkle-burst var(--duration) cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+                    animation-delay: var(--delay);
                 }
             `}</style>
         </div>

@@ -22,11 +22,7 @@ export const pagesApi = {
 
 export const engagementApi = {
     async incrementView(targetId: string) {
-        const { error } = await supabase
-            .from('posts')
-            .update({ views: supabase.raw('views + 1') })
-            .eq('id', targetId);
-        
+        const { error } = await supabase.rpc('increment_views', { target_id: targetId });
         if (error) throw error;
     },
 

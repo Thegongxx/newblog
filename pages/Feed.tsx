@@ -177,7 +177,7 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-          {latestPosts.map((post, i) => (
+          {latestPosts.map((post, index) => (
             <motion.div
               key={post.id}
               className="group"
