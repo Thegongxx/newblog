@@ -30,56 +30,46 @@
             cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Ccircle cx='5' cy='5' r='4' fill='white' /%3E%3C/svg%3E") 5 5, pointer !important;
         }
 
-        /* Interactive Ambient Background - GPU 加速，避免页面切换闪烁 */
+        /* Interactive Ambient Background - 丝滑交互背景 */
         .aura-bg {
             position: fixed;
             inset: 0;
             z-index: -1;
             background: #020202;
-            overflow: hidden;
-            /* 强制 GPU 合成层，避免重绘 */
             transform: translateZ(0);
-            will-change: auto;
-            contain: strict;
+            contain: layout;
+            --mx: 50%;
+            --my: 50%;
         }
         
-        /* The Moving Spotlight - 静态柔和光晕 */
+        /* 鼠标跟随光晕 - GPU 加速 */
         .aura-bg::after {
             content: '';
             position: absolute;
             inset: 0;
             background: radial-gradient(
-                ellipse 80% 60% at 50% 40%, 
-                rgba(255, 255, 255, 0.03) 0%, 
+                600px circle at var(--mx) var(--my),
+                rgba(255, 255, 255, 0.03) 0%,
                 rgba(255, 255, 255, 0.01) 40%,
                 transparent 70%
             );
-            z-index: 1;
             pointer-events: none;
-            /* 使用 GPU 加速的属性 */
             transform: translateZ(0);
-            backface-visibility: hidden;
+            transition: background 0.3s ease-out;
         }
-
-        /* The Subtle Mesh - 简化动画，使用 GPU 友好的属性 */
+        
+        /* 静态氛围光 */
         .aura-bg::before {
             content: '';
             position: absolute;
-            inset: -20%;
-            background: 
-                radial-gradient(circle at 25% 25%, rgba(255,255,255,0.015) 0%, transparent 50%),
-                radial-gradient(circle at 75% 75%, rgba(255,255,255,0.01) 0%, transparent 50%);
-            animation: ambient-drift 120s ease-in-out infinite;
-            z-index: 0;
-            /* GPU 加速 */
+            inset: 0;
+            background: radial-gradient(
+                ellipse 120% 60% at 50% 0%,
+                rgba(255, 255, 255, 0.015) 0%,
+                transparent 50%
+            );
+            pointer-events: none;
             transform: translateZ(0);
-            backface-visibility: hidden;
-            will-change: transform;
-        }
-        
-        @keyframes ambient-drift {
-            0%, 100% { transform: translateZ(0) scale(1); }
-            50% { transform: translateZ(0) scale(1.05); }
         }
 
         ::selection {
@@ -122,6 +112,50 @@
             0% { transform: translate(-50%, -50%) scale(0); opacity: 0.8; }
             100% { transform: translate(-50%, -50%) scale(3); opacity: 0; }
         }
+
+        /* 点击涟漪效果 */
+        .click-ripple {
+            position: fixed;
+            pointer-events: none;
+            width: 10px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            z-index: 9998;
+            animation: ripple-expand 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes ripple-expand {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0.6; }
+            100% { transform: translate(-50%, -50%) scale(8); opacity: 0; }
+        }
+
+        /* 彩蛋：双击显示隐藏消息 */
+        .easter-egg-msg {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            padding: 16px 32px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .easter-egg-msg.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
     </style>
 <script type="importmap">
 {
@@ -136,7 +170,67 @@
 </head>
 <body>
     <div class="aura-bg"></div>
+    <div class="easter-egg-msg">✨ You found a secret!</div>
     <div id="root"></div>
+    <script>
+        // 丝滑鼠标跟随光晕 - 使用 requestAnimationFrame 节流
+        const bg = document.querySelector('.aura-bg');
+        let targetX = 50, targetY = 50, currentX = 50, currentY = 50;
+        let rafId = null;
+        
+        function updateGlow() {
+            currentX += (targetX - currentX) * 0.08;
+            currentY += (targetY - currentY) * 0.08;
+            bg.style.setProperty('--mx', currentX + '%');
+            bg.style.setProperty('--my', currentY + '%');
+            
+            if (Math.abs(targetX - currentX) > 0.1 || Math.abs(targetY - currentY) > 0.1) {
+                rafId = requestAnimationFrame(updateGlow);
+            } else {
+                rafId = null;
+            }
+        }
+        
+        document.addEventListener('mousemove', (e) => {
+            targetX = (e.clientX / window.innerWidth) * 100;
+            targetY = (e.clientY / window.innerHeight) * 100;
+            if (!rafId) rafId = requestAnimationFrame(updateGlow);
+        }, { passive: true });
+
+        // 点击涟漪效果
+        document.addEventListener('click', (e) => {
+            const ripple = document.createElement('div');
+            ripple.className = 'click-ripple';
+            ripple.style.left = e.clientX + 'px';
+            ripple.style.top = e.clientY + 'px';
+            document.body.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 600);
+        });
+
+        // 彩蛋：快速点击 5 次显示隐藏消息
+        let clickCount = 0, clickTimer = null;
+        const easterEgg = document.querySelector('.easter-egg-msg');
+        const messages = [
+            '✨ You found a secret!',
+            '🌙 The night is young...',
+            '💫 Keep exploring!',
+            '🎯 Nice clicks!',
+            '🔮 Magic happens here'
+        ];
+        
+        document.addEventListener('click', () => {
+            clickCount++;
+            clearTimeout(clickTimer);
+            clickTimer = setTimeout(() => clickCount = 0, 800);
+            
+            if (clickCount >= 5) {
+                clickCount = 0;
+                easterEgg.textContent = messages[Math.floor(Math.random() * messages.length)];
+                easterEgg.classList.add('show');
+                setTimeout(() => easterEgg.classList.remove('show'), 2000);
+            }
+        });
+    </script>
     <script type="module" src="./index.tsx"></script>
 </body>
 </html>
