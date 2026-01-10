@@ -25,7 +25,7 @@ const NoteDetail: React.FC = () => {
   const loadNote = async () => {
     try {
       setLoading(true);
-      setError(null); // 清除之前的错误
+      setError(null);
       
       // 从数据库读取note
       const noteData = await notesApi.getById(id!);
@@ -44,10 +44,11 @@ const NoteDetail: React.FC = () => {
     } catch (err: any) {
       setError(err.message || '加载失败');
     } finally {
-      // 添加小延迟，让页面切换动画完成后再显示内容
+      // 移动端需要更长的延迟来避免闪烁
+      const delay = window.innerWidth < 768 ? 300 : 150;
       setTimeout(() => {
         setLoading(false);
-      }, 100);
+      }, delay);
     }
   };
 
@@ -55,20 +56,24 @@ const NoteDetail: React.FC = () => {
     return (
       <div className="py-12">
         <div className="max-w-4xl mx-auto">
-          {/* 返回按钮骨架 */}
-          <div className="mb-8">
+          {/* 返回按钮骨架 - 保持布局稳定 */}
+          <div className="mb-6 md:mb-8">
             <div className="w-20 h-8 bg-white/5 rounded animate-pulse" />
           </div>
           
-          {/* 内容骨架 */}
-          <div className="glass p-12 rounded-[3rem] border border-white/5 animate-pulse">
-            <div className="w-8 h-8 bg-white/5 rounded mb-8" />
-            <div className="space-y-4 mb-12">
-              <div className="h-6 w-full bg-white/5 rounded" />
-              <div className="h-6 w-full bg-white/5 rounded" />
-              <div className="h-6 w-3/4 bg-white/5 rounded" />
+          {/* 内容骨架 - 与实际内容布局完全一致 */}
+          <div className="glass p-6 md:p-12 rounded-2xl md:rounded-[3rem] border border-white/5 animate-pulse">
+            <div className="w-8 h-8 bg-white/5 rounded mb-4 md:mb-8" />
+            <div className="space-y-4 mb-4 md:mb-8">
+              <div className="h-8 md:h-12 w-full bg-white/5 rounded" />
+              <div className="h-8 md:h-12 w-3/4 bg-white/5 rounded" />
             </div>
-            <div className="flex justify-between border-t border-white/5 pt-8">
+            <div className="space-y-3 mb-8 md:mb-12">
+              <div className="h-4 w-full bg-white/5 rounded" />
+              <div className="h-4 w-full bg-white/5 rounded" />
+              <div className="h-4 w-2/3 bg-white/5 rounded" />
+            </div>
+            <div className="flex justify-between border-t border-white/5 pt-4 md:pt-8">
               <div className="h-4 w-32 bg-white/5 rounded" />
               <div className="h-8 w-16 bg-white/5 rounded-full" />
             </div>
@@ -101,66 +106,36 @@ const NoteDetail: React.FC = () => {
   return (
     <div className="py-8 md:py-12">
       <div className="max-w-4xl mx-auto">
-        {/* 返回按钮 - 移动端简化 */}
-        <motion.button
+        {/* 返回按钮 - 简化，无动画 */}
+        <button
           onClick={() => navigate('/notes')}
           className="mb-6 md:mb-8 flex items-center gap-2 text-white/60 hover:text-white transition-colors group"
-          whileHover={{ x: -4 }}
-          transition={{ type: "spring", stiffness: 400, damping: 25 }}
-          initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.1, duration: 0.4 }}
         >
           <span className="transform group-hover:-translate-x-1 transition-transform">←</span>
           <span className="text-xs md:text-sm font-medium tracking-wider uppercase">返回</span>
-        </motion.button>
+        </button>
 
-        {/* 笔记内容 - 移动端简化 */}
-        <motion.article 
-          className="glass p-6 md:p-12 rounded-2xl md:rounded-[3rem] border border-white/5 mb-8 md:mb-12"
-          initial={{ opacity: 0, y: 20, scale: 0.98 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ delay: 0.2, duration: 0.5, ease: [0.4, 0.0, 0.2, 1] }}
-        >
+        {/* 笔记内容 - 简化，无动画 */}
+        <article className="glass p-6 md:p-12 rounded-2xl md:rounded-[3rem] border border-white/5 mb-8 md:mb-12">
           {/* 引号图标 */}
-          <motion.div 
-            className="mb-4 md:mb-8 scale-75 md:scale-100 origin-top-left"
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 0.75 }}
-            transition={{ delay: 0.3, duration: 0.4 }}
-          >
+          <div className="mb-4 md:mb-8 scale-75 md:scale-100 origin-top-left">
             {ICONS.QUOTES}
-          </motion.div>
+          </div>
           
           {/* 笔记标题 */}
-          <motion.h1 
-            className="text-2xl md:text-4xl font-bold tracking-tight text-white/95 mb-4 md:mb-8"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.4 }}
-          >
+          <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-white/95 mb-4 md:mb-8">
             {note.title}
-          </motion.h1>
+          </h1>
           
           {/* 笔记内容 */}
-          <motion.div 
-            className="prose prose-invert prose-sm md:prose-lg max-w-none"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.4 }}
-          >
+          <div className="prose prose-invert prose-sm md:prose-lg max-w-none">
             <div className="text-sm md:text-lg font-light leading-relaxed text-white/80 whitespace-pre-wrap">
               {note.content}
             </div>
-          </motion.div>
+          </div>
 
-          {/* 底部信息 - 移动端简化 */}
-          <motion.div 
-            className="flex items-center justify-between border-t border-white/5 pt-4 md:pt-8 mt-8 md:mt-12"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, duration: 0.4 }}
-          >
+          {/* 底部信息 */}
+          <div className="flex items-center justify-between border-t border-white/5 pt-4 md:pt-8 mt-8 md:mt-12">
             <div className="flex flex-col gap-1 md:gap-2">
               <time className="text-[10px] md:text-sm font-bold tracking-widest text-white/40 uppercase">
                 {note.date}
@@ -182,17 +157,13 @@ const NoteDetail: React.FC = () => {
               initialCount={note.likes_count || 0}
               className="scale-90 md:scale-110"
             />
-          </motion.div>
-        </motion.article>
+          </div>
+        </article>
 
-        {/* 评论区域 */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7, duration: 0.4 }}
-        >
+        {/* 评论区域 - 简化，无动画 */}
+        <div>
           <CommentSection targetId={note.id} targetType="note" />
-        </motion.div>
+        </div>
       </div>
     </div>
   );

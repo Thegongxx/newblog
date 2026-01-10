@@ -51,13 +51,15 @@ const AppInner = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // 页面切换时滚动到顶部 - 移动端优化丝滑切换
+  // 页面切换时滚动到顶部 - 移动端防闪烁优化
   useEffect(() => {
-    // 添加延迟，让页面切换动画先开始
+    // 移动端需要更长的延迟来避免闪烁
+    const delay = isMobile ? 200 : 100;
     const timer = setTimeout(() => {
-      // 移动端和桌面端都使用smooth滚动
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, isMobile ? 150 : 100);
+      // 移动端使用instant避免滚动动画与页面切换冲突
+      const behavior = isMobile ? 'instant' : 'smooth';
+      window.scrollTo({ top: 0, behavior: behavior as ScrollBehavior });
+    }, delay);
     
     return () => clearTimeout(timer);
   }, [location.pathname, isMobile]);
@@ -343,11 +345,11 @@ const AppInner = () => {
               } />
               <Route path="/note/:id" element={
                 <motion.div
-                  initial={{ opacity: 0, y: isMobile ? 15 : 20, scale: isMobile ? 0.98 : 0.99 }}
+                  initial={{ opacity: 0, y: isMobile ? 20 : 20, scale: isMobile ? 0.95 : 0.99 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: isMobile ? -15 : -20, scale: isMobile ? 0.98 : 0.99 }}
+                  exit={{ opacity: 0, y: isMobile ? -20 : -20, scale: isMobile ? 0.95 : 0.99 }}
                   transition={{ 
-                    duration: isMobile ? 0.5 : 0.6, 
+                    duration: isMobile ? 0.6 : 0.6, 
                     ease: [0.4, 0.0, 0.2, 1] 
                   }}
                 >

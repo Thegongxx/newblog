@@ -73,14 +73,11 @@ const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
                     </div>
                 ) : (
                     notes.map((note, i) => (
-                        <motion.div
+                        <div
                             key={note.id || i}
-                            className={`glass p-6 md:p-10 rounded-2xl md:rounded-[2.5rem] relative group border border-white/5 transition-all duration-500 ${
-                                !isMobile ? 'hover:border-white/20' : ''
+                            className={`glass p-6 md:p-10 rounded-2xl md:rounded-[2.5rem] relative group border border-white/5 transition-all duration-300 ${
+                                !isMobile ? 'hover:border-white/20 hover:-translate-y-1' : 'active:bg-white/[0.02]'
                             }`}
-                            variants={itemVariants}
-                            whileHover={!isMobile ? { y: -4, transition: { duration: 0.2 } } : {}}
-                            whileTap={isMobile ? { scale: 0.98, transition: { duration: 0.1 } } : {}}
                         >
                             <div className="absolute top-4 left-4 md:top-8 md:left-8 scale-75 md:scale-100 origin-top-left">{ICONS.QUOTES}</div>
                             
@@ -127,7 +124,7 @@ const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
                                     </div>
                                 </div>
                             </div>
-                        </motion.div>
+                        </div>
                     ))
                 )}
             </motion.div>
