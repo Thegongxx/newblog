@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "posts/obsidian-workflow.md",
+                "file": "notes/reading-notes.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "obsidian-workflow"
+              "title": "reading-notes"
             }
           }
         ]
@@ -195,16 +195,16 @@
   },
   "active": "b48af9c770638b12",
   "lastOpenFiles": [
-    "posts/web-development-trends-2024.md",
-    "posts/obsidian-workflow.md",
-    "pages/about.md",
-    "posts/hello-world.md",
-    "posts/minimalist-design-philosophy.md",
-    "notes/reading-notes.md",
     "notes/productivity-tips.md",
-    "notes/daily-reflection.md",
-    "notes/测试.md",
     "notes/design-inspiration.md",
+    "posts/obsidian-workflow.md",
+    "posts/minimalist-design-philosophy.md",
+    "posts/hello-world.md",
+    "notes/daily-reflection.md",
+    "posts/web-development-trends-2024.md",
+    "pages/about.md",
+    "notes/reading-notes.md",
+    "notes/测试.md",
     "notes/test-note-1.md",
     "notes/test-note-2.md",
     "111.md",
