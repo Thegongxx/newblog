@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { HelmetProvider, Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -10,41 +10,13 @@ import { CONTACT_INFO } from './constants';
 import { usePostsCache, useNotesCache } from './services/cacheService';
 import { useIsMobile } from './hooks/useResponsive';
 
-// 预加载所有页面组件 - Google 风格即时切换
-const Feed = lazy(() => import('./pages/Feed'));
-const PostDetail = lazy(() => import('./pages/PostDetail'));
-const Notes = lazy(() => import('./pages/Notes'));
-const NoteDetail = lazy(() => import('./pages/NoteDetail'));
-const About = lazy(() => import('./pages/About'));
-const Archive = lazy(() => import('./pages/Archive'));
-
-// 预加载函数 - 在空闲时预加载所有路由
-const preloadRoutes = () => {
-  import('./pages/Feed');
-  import('./pages/PostDetail');
-  import('./pages/Notes');
-  import('./pages/NoteDetail');
-  import('./pages/About');
-  import('./pages/Archive');
-};
-
-// 页面切换动画配置 - 统一丝滑效果
-const pageVariants = {
-  initial: { opacity: 0, y: 20 },
-  animate: { 
-    opacity: 1, 
-    y: 0,
-    transition: {
-      duration: 0.5,
-      ease: [0.25, 0.46, 0.45, 0.94],
-      staggerChildren: 0.08
-    }
-  },
-  exit: { 
-    opacity: 0,
-    transition: { duration: 0.2, ease: 'easeOut' }
-  }
-};
+// 直接导入所有页面组件 - 避免懒加载导致的首次切换延迟
+import Feed from './pages/Feed';
+import PostDetail from './pages/PostDetail';
+import Notes from './pages/Notes';
+import NoteDetail from './pages/NoteDetail';
+import About from './pages/About';
+import Archive from './pages/Archive';
 
 const AppInner = () => {
   const navigate = useNavigate();
@@ -60,15 +32,6 @@ const AppInner = () => {
   
   const loading = postsLoading || notesLoading;
   const error = postsError?.message || notesError?.message || null;
-
-  // 预加载所有路由 - 应用启动后立即执行
-  useEffect(() => {
-    if ('requestIdleCallback' in window) {
-      requestIdleCallback(preloadRoutes);
-    } else {
-      setTimeout(preloadRoutes, 100);
-    }
-  }, []);
 
   // 滚动追踪 - 用于导航栏渐变
   useEffect(() => {
@@ -108,7 +71,7 @@ const AppInner = () => {
     return <Intro onComplete={() => setShowIntro(false)} />;
   }
 
-  // 导航栏渐变计算 - 更明显的效果
+  // 导航栏渐变计算
   const scrollProgress = Math.min(scrollY / 80, 1);
   const navOpacity = 0.02 + scrollProgress * 0.4;
   const navBlur = isMobile ? 12 + scrollProgress * 12 : 20 + scrollProgress * 20;
@@ -200,31 +163,26 @@ const AppInner = () => {
         </motion.div>
       </motion.nav>
 
-      {/* Main Content - 统一丝滑切换动画 */}
-      <AnimatePresence mode="wait">
-        <motion.main 
-          key={location.pathname}
-          className="pt-32 md:pt-44 pb-24 md:pb-48 px-4 md:px-6 max-w-7xl mx-auto"
-          variants={pageVariants}
-          initial="initial"
-          animate="animate"
-          exit="exit"
-        >
-          <ErrorBoundary>
-            <Suspense fallback={null}>
-              <Routes location={location}>
-                <Route path="/" element={<Feed posts={posts} loading={loading} onSelectPost={(p) => navigate(`/post/${p.slug}`)} />} />
-                <Route path="/post/:slug" element={<PostDetail posts={posts} loading={loading} />} />
-                <Route path="/notes" element={<Notes notes={notes} loading={loading} />} />
-                <Route path="/note/:id" element={<NoteDetail />} />
-                <Route path="/archive" element={<Archive posts={posts} loading={loading} onSelectPost={(p) => navigate(`/post/${p.slug}`)} />} />
-                <Route path="/about" element={<About />} />
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </Suspense>
-          </ErrorBoundary>
-        </motion.main>
-      </AnimatePresence>
+      {/* Main Content - 即时切换，无等待 */}
+      <motion.main 
+        key={location.pathname}
+        className="pt-32 md:pt-44 pb-24 md:pb-48 px-4 md:px-6 max-w-7xl mx-auto"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+      >
+        <ErrorBoundary>
+          <Routes location={location}>
+            <Route path="/" element={<Feed posts={posts} loading={loading} onSelectPost={(p) => navigate(`/post/${p.slug}`)} />} />
+            <Route path="/post/:slug" element={<PostDetail posts={posts} loading={loading} />} />
+            <Route path="/notes" element={<Notes notes={notes} loading={loading} />} />
+            <Route path="/note/:id" element={<NoteDetail />} />
+            <Route path="/archive" element={<Archive posts={posts} loading={loading} onSelectPost={(p) => navigate(`/post/${p.slug}`)} />} />
+            <Route path="/about" element={<About />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </ErrorBoundary>
+      </motion.main>
 
       <Assistant />
 
