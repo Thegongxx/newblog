@@ -155,7 +155,7 @@ const NoteDetail: React.FC = () => {
             <LikeButton 
               targetType="note" 
               targetId={note.id} 
-              initialCount={0}
+              initialCount={note.likes_count || 0}
               className="scale-90 md:scale-110"
             />
           </div>

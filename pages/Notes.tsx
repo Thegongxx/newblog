@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import LikeButton from '../components/LikeButton';
-import CommentSection from '../components/CommentSection';
 import { ICONS } from '../constants';
 
 interface NotesProps {
@@ -26,7 +25,6 @@ const itemVariants = {
 
 const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
     const navigate = useNavigate();
-    const [expandedCommentId, setExpandedCommentId] = useState<string | null>(null);
 
     return (
         <motion.div 
@@ -86,7 +84,7 @@ const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
                             <div className="flex items-center justify-between border-t border-white/5 pt-4 md:pt-8">
                                 <span className="text-[10px] md:text-xs font-bold tracking-widest text-white/40 uppercase">{note.date}</span>
                                 <div className="flex items-center gap-2 md:gap-4">
-                                    {/* 移动端只显示详情按钮 */}
+                                    {/* 详情按钮 */}
                                     <button
                                         onClick={() => navigate(`/note/${note.id}`)}
                                         className="text-[10px] md:text-xs font-bold text-white/30 hover:text-white uppercase tracking-widest transition-colors"
@@ -94,33 +92,15 @@ const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
                                         详情 →
                                     </button>
                                     
-                                    {/* 评论按钮 - 移动端隐藏 */}
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setExpandedCommentId(expandedCommentId === note.id ? null : note.id);
-                                        }}
-                                        className="hidden md:flex text-xs font-bold text-white/30 hover:text-white uppercase tracking-widest transition-colors items-center gap-2"
-                                    >
-                                        <span>评论</span>
-                                        <div className={`transition-transform duration-300 ${expandedCommentId === note.id ? 'rotate-180' : ''}`}>↓</div>
-                                    </button>
-                                    
+                                    {/* 点赞按钮 - 带计数 */}
                                     <LikeButton 
                                         targetType="note" 
                                         targetId={note.id} 
-                                        initialCount={0}
-                                        className="scale-75 md:scale-75 origin-right !bg-transparent !border-none !px-0" 
+                                        initialCount={note.likes_count || 0}
+                                        className="!bg-transparent !border-none" 
                                     />
                                 </div>
                             </div>
-
-                            {/* 评论区 - 仅桌面端展开 */}
-                            {expandedCommentId === note.id && (
-                                <div className="hidden md:block mt-8 pt-8 border-t border-white/5 animate-in fade-in slide-in-from-top-4">
-                                    <CommentSection targetId={note.id} targetType="note" />
-                                </div>
-                            )}
                         </motion.div>
                     ))
                 )}
