@@ -32,12 +32,13 @@ const AppInner: React.FC = () => {
       try {
         setLoading(true);
         
-        // 从Supabase数据库读取文章
-        const { postsApi } = await import('./services/supabaseService');
-        const { getAllNotes } = await import('./utils/notes');
+        // 从Supabase数据库读取文章和笔记
+        const { postsApi, notesApi } = await import('./services/supabaseService');
         
-        const postsData = await postsApi.getAll();
-        const notesData = getAllNotes();
+        const [postsData, notesData] = await Promise.all([
+          postsApi.getAll(),
+          notesApi.getAll()
+        ]);
         
         const formattedPosts = postsData.map((post: any) => ({
           ...post,
@@ -47,29 +48,17 @@ const AppInner: React.FC = () => {
           content: post.html_content || post.content
         }));
         
+        const formattedNotes = notesData.map((note: any) => ({
+          ...note,
+          date: new Date(note.created_at).toLocaleDateString('zh-CN'),
+          content: note.text || note.content
+        }));
+        
         setPosts(formattedPosts);
-        setNotes(notesData);
+        setNotes(formattedNotes);
       } catch (err: any) {
         console.error('数据加载错误:', err);
-        // 如果数据库读取失败，使用预构建数据作为备选
-        try {
-          const { postsData } = await import('./utils/postsData');
-          const { getAllNotes } = await import('./utils/notes');
-          
-          const formattedPosts = postsData.map((post: any) => ({
-            ...post,
-            image: post.cover_image,
-            date: new Date(post.created_at).toLocaleDateString('zh-CN'),
-            readingTime: `${post.reading_time} 分钟`,
-            content: post.html_content || post.content
-          }));
-          
-          setPosts(formattedPosts);
-          setNotes(getAllNotes());
-          setError('使用本地数据，请检查数据库连接');
-        } catch (fallbackErr: any) {
-          setError(fallbackErr.message || '数据加载失败');
-        }
+        setError(err.message || '数据加载失败');
       } finally {
         setLoading(false);
       }

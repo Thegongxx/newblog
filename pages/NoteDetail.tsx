@@ -26,19 +26,20 @@ const NoteDetail: React.FC = () => {
     try {
       setLoading(true);
       
-      // 从文件系统读取notes
-      const { getAllNotes } = await import('../utils/notes');
-      const allNotes = getAllNotes();
-      
-      // 根据id查找对应的note
-      const noteData = allNotes.find(note => note.id === id);
+      // 从数据库读取note
+      const noteData = await notesApi.getById(id!);
       
       if (!noteData) {
         setError('笔记不存在');
         return;
       }
       
-      setNote(noteData);
+      // 格式化数据
+      setNote({
+        ...noteData,
+        date: new Date(noteData.created_at).toLocaleDateString('zh-CN'),
+        content: noteData.text || noteData.content
+      });
     } catch (err: any) {
       setError(err.message || '加载失败');
     } finally {
