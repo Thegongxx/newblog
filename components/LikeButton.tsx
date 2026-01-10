@@ -69,30 +69,9 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
     }, [targetType, targetId]);
 
     const showToast = (message: string, type: 'success' | 'warning' | 'info' = 'success') => {
-        // 苹果风格的简洁消息
-        let appleStyleMessage = message;
-        if (isMobile) {
-            // 移动端更简洁
-            if (message.includes('点赞成功')) {
-                appleStyleMessage = '❤️ Liked';
-            } else if (message.includes('已达上限')) {
-                appleStyleMessage = '❤️ 不许这么喜欢我';
-            } else if (message.includes('已点赞')) {
-                appleStyleMessage = '❤️ Daily limit';
-            }
-        } else {
-            // 桌面端稍微详细一些
-            if (message.includes('点赞成功')) {
-                appleStyleMessage = '❤️ Liked';
-            } else if (message.includes('已达上限')) {
-                appleStyleMessage = '❤️ Daily limit reached';
-            } else if (message.includes('已点赞')) {
-                appleStyleMessage = '❤️ Daily limit';
-            }
-        }
-        
-        setToast({ message: appleStyleMessage, visible: true, type });
-        setTimeout(() => setToast(prev => ({ ...prev, visible: false })), isMobile ? 2000 : 2500);
+        // 只显示上限提示，使用简洁的消息
+        setToast({ message, visible: true, type });
+        setTimeout(() => setToast(prev => ({ ...prev, visible: false })), isMobile ? 1500 : 2000);
     };
 
     const handleLike = async (e: React.MouseEvent) => {
@@ -102,7 +81,7 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
         if (isAnimating) return;
 
         if (locked) {
-            showToast(`今日已点赞 ${dailyCount}/5 次`, 'warning');
+            showToast(`❤️ 不许这么喜欢我 `, 'warning');
             return;
         }
 
@@ -110,7 +89,7 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
         const currentLocal = parseInt(localStorage.getItem(getStorageKey()) || '0');
         if (currentLocal >= 5) {
             setLocked(true);
-            showToast(`今日已点赞 ${currentLocal}/5 次`, 'warning');
+            showToast(`❤️ 不许这么喜欢我`, 'warning');
             return;
         }
 
@@ -125,10 +104,9 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
 
         if (nextLocal >= 5) {
             setLocked(true);
-            showToast(`今日点赞已达上限`, 'info');
-        } else {
-            showToast(`点赞成功！还可点赞 ${5 - nextLocal} 次`, 'success');
+            showToast(`❤️ 不许这么喜欢我`, 'warning');
         }
+        // 移除点赞成功提示，只保留上限提示
 
         // 触发物理反馈
         if (window.navigator && window.navigator.vibrate) {
@@ -157,7 +135,7 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                 setLocked(true);
                 setDailyCount(5);
                 localStorage.setItem(getStorageKey(), '5');
-                showToast('今日点赞已达上限', 'warning');
+                showToast('❤️ Daily limit', 'warning');
             } else {
                 console.error('Failed to toggle like:', err);
                 setCount(prev => prev - 1);
@@ -196,7 +174,7 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                             mass: 0.8,
                             duration: isMobile ? 0.5 : 0.6
                         }}
-                        className={`absolute ${isMobile ? '-top-10' : '-top-12'} left-1/2 -translate-x-1/2 z-50 pointer-events-none`}
+                        className={`absolute ${isMobile ? '-top-16' : '-top-14'} left-1/2 -translate-x-1/2 z-50 pointer-events-none`}
                     >
                         <motion.div 
                             className={`relative overflow-hidden ${
