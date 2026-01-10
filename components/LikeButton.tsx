@@ -177,8 +177,8 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                         className="fixed z-[9999] pointer-events-none"
                         style={{
                             // 智能定位：在屏幕中央偏上显示，避免被遮挡
-                            top: isMobile ? '30%' : '35%',
-                            left: '50%',
+                            top: isMobile ? '20%' : '20%',
+                            left: '45%',
                             transform: 'translateX(-50%)',
                         }}
                     >
