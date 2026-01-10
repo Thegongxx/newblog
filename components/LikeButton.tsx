@@ -170,95 +170,83 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
 
     return (
         <div className="relative inline-block">
-            {/* 苹果风格的 Dynamic Island 提示 */}
+            {/* 透明灵动岛提示 - 在点赞按钮上方出现 */}
             <AnimatePresence>
                 {toast.visible && (
                     <motion.div
                         initial={{ 
                             opacity: 0, 
-                            scale: 0.3, 
-                            y: isMobile ? -20 : -30,
-                            borderRadius: isMobile ? '20px' : '25px'
+                            scale: 0.8, 
+                            y: 10
                         }}
                         animate={{ 
                             opacity: 1, 
                             scale: 1, 
-                            y: 0,
-                            borderRadius: isMobile ? '20px' : '25px'
+                            y: -10
                         }}
                         exit={{ 
                             opacity: 0, 
-                            scale: 0.3, 
-                            y: isMobile ? -20 : -30,
-                            borderRadius: isMobile ? '20px' : '25px'
+                            scale: 0.8, 
+                            y: 5
                         }}
                         transition={{
                             type: "spring",
-                            stiffness: 400,
-                            damping: 25,
-                            mass: 0.6
+                            stiffness: 300,
+                            damping: 30,
+                            mass: 0.8,
+                            duration: 0.6
                         }}
-                        className="fixed z-[9999] pointer-events-none"
-                        style={{
-                            position: 'fixed',
-                            top: isMobile ? '4rem' : '5rem', // 更舒适的位置，避开导航栏
-                            left: '50%',
-                            transform: 'translateX(-50%)',
-                            zIndex: 9999
-                        }}
+                        className="absolute -top-12 left-1/2 -translate-x-1/2 z-50 pointer-events-none"
                     >
                         <motion.div 
                             className={`relative overflow-hidden ${
-                                isMobile ? 'px-4 py-2.5 text-xs' : 'px-6 py-3 text-sm'
-                            } font-medium whitespace-nowrap ${
-                                toast.type === 'success' ? 'bg-black/85 text-white' :
-                                toast.type === 'warning' ? 'bg-amber-600/90 text-white' :
-                                'bg-blue-600/90 text-white'
-                            }`}
+                                isMobile ? 'px-3 py-2 text-xs' : 'px-4 py-2.5 text-sm'
+                            } font-medium whitespace-nowrap text-white/90`}
                             style={{
-                                borderRadius: isMobile ? '20px' : '25px',
-                                backdropFilter: 'blur(20px) saturate(180%)',
-                                WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                                borderRadius: isMobile ? '16px' : '20px',
+                                background: 'rgba(0, 0, 0, 0.6)',
+                                backdropFilter: 'blur(20px) saturate(150%)',
+                                WebkitBackdropFilter: 'blur(20px) saturate(150%)',
                                 boxShadow: isMobile 
-                                    ? '0 4px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15)'
-                                    : '0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15)',
+                                    ? '0 4px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
+                                    : '0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
                                 border: '1px solid rgba(255, 255, 255, 0.1)'
                             }}
                             animate={{
-                                // 苹果风格的微妙呼吸效果
-                                scale: [1, 1.02, 1],
+                                // 微妙的浮动效果
+                                y: [0, -2, 0],
                             }}
                             transition={{
-                                duration: 2,
+                                duration: 3,
                                 repeat: Infinity,
                                 ease: "easeInOut"
                             }}
                         >
-                            {/* 背景光晕效果 */}
+                            {/* 透明背景光晕 */}
                             <div 
-                                className="absolute inset-0 opacity-20"
+                                className="absolute inset-0 opacity-10"
                                 style={{
                                     background: toast.type === 'success' 
-                                        ? 'radial-gradient(circle at center, rgba(34, 197, 94, 0.3) 0%, transparent 70%)'
+                                        ? 'radial-gradient(circle at center, rgba(255, 255, 255, 0.3) 0%, transparent 70%)'
                                         : toast.type === 'warning'
-                                        ? 'radial-gradient(circle at center, rgba(245, 158, 11, 0.3) 0%, transparent 70%)'
-                                        : 'radial-gradient(circle at center, rgba(59, 130, 246, 0.3) 0%, transparent 70%)'
+                                        ? 'radial-gradient(circle at center, rgba(255, 255, 255, 0.2) 0%, transparent 70%)'
+                                        : 'radial-gradient(circle at center, rgba(255, 255, 255, 0.25) 0%, transparent 70%)'
                                 }}
                             />
                             
                             <div className="relative flex items-center gap-2">
-                                {/* 状态指示器 - 苹果风格 */}
+                                {/* 状态指示器 - 透明风格 */}
                                 <motion.div
                                     className={`${isMobile ? 'w-1.5 h-1.5' : 'w-2 h-2'} rounded-full ${
-                                        toast.type === 'success' ? 'bg-green-400' : 
-                                        toast.type === 'warning' ? 'bg-amber-300' : 'bg-blue-300'
+                                        toast.type === 'success' ? 'bg-white/70' : 
+                                        toast.type === 'warning' ? 'bg-white/50' : 'bg-white/60'
                                     }`}
                                     animate={{ 
-                                        scale: [1, 1.3, 1],
-                                        opacity: [0.8, 1, 0.8]
+                                        scale: [1, 1.2, 1],
+                                        opacity: [0.7, 1, 0.7]
                                     }}
                                     transition={{ 
-                                        duration: 1.5, 
+                                        duration: 2, 
                                         repeat: Infinity,
                                         ease: "easeInOut"
                                     }}
@@ -266,33 +254,33 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                                 
                                 {/* 消息文本 */}
                                 <motion.span
-                                    initial={{ opacity: 0, x: -10 }}
+                                    initial={{ opacity: 0, x: -5 }}
                                     animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: 0.1, duration: 0.3 }}
-                                    className="font-medium"
+                                    transition={{ delay: 0.1, duration: 0.4 }}
+                                    className="font-medium text-white/90"
                                 >
                                     {toast.message}
                                 </motion.span>
                                 
-                                {/* 苹果风格的微妙装饰 */}
+                                {/* 成功时的微妙装饰 */}
                                 {toast.type === 'success' && (
                                     <motion.div
-                                        initial={{ scale: 0, rotate: -180 }}
+                                        initial={{ scale: 0, rotate: -90 }}
                                         animate={{ scale: 1, rotate: 0 }}
-                                        transition={{ delay: 0.2, type: "spring", stiffness: 300 }}
-                                        className={`${isMobile ? 'text-xs' : 'text-sm'} opacity-80`}
+                                        transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                                        className={`${isMobile ? 'text-xs' : 'text-sm'} opacity-70`}
                                     >
                                         ✨
                                     </motion.div>
                                 )}
                             </div>
                             
-                            {/* 底部进度条 - 苹果风格 */}
+                            {/* 底部透明进度条 */}
                             <motion.div
-                                className="absolute bottom-0 left-0 h-0.5 bg-white/30 rounded-full"
+                                className="absolute bottom-0 left-0 h-0.5 bg-white/20 rounded-full"
                                 initial={{ width: '100%' }}
                                 animate={{ width: '0%' }}
-                                transition={{ duration: 2.5, ease: "linear" }}
+                                transition={{ duration: isMobile ? 2 : 2.5, ease: "linear" }}
                             />
                         </motion.div>
                     </motion.div>
