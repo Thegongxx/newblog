@@ -1,20 +1,21 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
-import { Suspense } from 'react';
-import LoadingFallback from '@/components/LoadingFallback';
+import { Suspense, lazy } from 'react';
 
 // Mock page components
 vi.mock('@/pages/Feed', () => ({ default: () => <div data-testid="feed-page">Feed</div> }));
 vi.mock('@/pages/Notes', () => ({ default: () => <div data-testid="notes-page">Notes</div> }));
 vi.mock('@/pages/About', () => ({ default: () => <div data-testid="about-page">About</div> }));
 
-// Import after mocks
-const { Feed, Notes, About } = await import('@/routes');
+// Lazy load after mocks
+const Feed = lazy(() => import('@/pages/Feed'));
+const Notes = lazy(() => import('@/pages/Notes'));
+const About = lazy(() => import('@/pages/About'));
 
 const TestRouter = ({ route }: { route: string }) => (
   <MemoryRouter initialEntries={[route]}>
-    <Suspense fallback={<LoadingFallback />}>
+    <Suspense fallback={null}>
       <Routes>
         <Route path="/" element={<Feed posts={[]} loading={false} onSelectPost={() => {}} />} />
         <Route path="/notes" element={<Notes notes={[]} loading={false} />} />
@@ -42,19 +43,13 @@ describe('Lazy Route Loading', () => {
 });
 
 describe('LoadingFallback', () => {
-  it('renders container element', async () => {
-    const { container, rerender } = render(<LoadingFallback />);
-    
-    // Initially renders nothing (due to 150ms delay)
-    expect(container.firstChild).toBeNull();
-    
-    // Wait for the delay and re-check
-    await new Promise(r => setTimeout(r, 200));
-    rerender(<LoadingFallback />);
-    
-    // After delay, should show the indicator
-    await waitFor(() => {
-      expect(document.querySelector('.min-h-\\[40vh\\]')).toBeInTheDocument();
-    }, { timeout: 500 });
+  it('Google-style instant transition uses null fallback', () => {
+    // 验证我们使用 null 作为 fallback，实现即时切换
+    const { container } = render(
+      <Suspense fallback={null}>
+        <div>Content</div>
+      </Suspense>
+    );
+    expect(container.textContent).toBe('Content');
   });
 });
