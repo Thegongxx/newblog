@@ -13,8 +13,22 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const supabaseUrl = process.env.VITE_SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+// 读取.env文件
+function loadEnv() {
+  const envPath = path.join(__dirname, '../.env');
+  if (!fs.existsSync(envPath)) return {};
+  const content = fs.readFileSync(envPath, 'utf-8');
+  const vars = {};
+  content.split('\n').forEach(line => {
+    const [key, val] = line.split('=');
+    if (key && val) vars[key.trim()] = val.trim();
+  });
+  return vars;
+}
+
+const env = loadEnv();
+const supabaseUrl = env.VITE_SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+const supabaseServiceKey = env.SUPABASE_SERVICE_ROLE_KEY || env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !supabaseServiceKey) {
   console.error('❌ 请设置 VITE_SUPABASE_URL 和 SUPABASE_SERVICE_ROLE_KEY 环境变量');

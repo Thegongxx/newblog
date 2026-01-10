@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "sync:push": "node scripts/sync-local.js",
+    "sync:push": "node scripts/sync-posts.js",
     "sync:pull": "node scripts/pull-from-db.js",
     "sync:posts": "node scripts/sync-local.js",
     "sync:posts:prod": "node scripts/sync-posts.js",
