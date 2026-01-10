@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, lazy, Suspense } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { HelmetProvider, Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -9,7 +9,6 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { CONTACT_INFO } from './constants';
 import { usePostsCache, useNotesCache } from './services/cacheService';
 import { useIsMobile } from './hooks/useResponsive';
-import { useShouldAnimate } from './hooks/useReducedMotion';
 
 // 预加载所有页面组件 - Google 风格即时切换
 const Feed = lazy(() => import('./pages/Feed'));
@@ -29,17 +28,32 @@ const preloadRoutes = () => {
   import('./pages/Archive');
 };
 
+// 页面切换动画配置 - 统一丝滑效果
+const pageVariants = {
+  initial: { opacity: 0, y: 20 },
+  animate: { 
+    opacity: 1, 
+    y: 0,
+    transition: {
+      duration: 0.5,
+      ease: [0.25, 0.46, 0.45, 0.94],
+      staggerChildren: 0.08
+    }
+  },
+  exit: { 
+    opacity: 0,
+    transition: { duration: 0.2, ease: 'easeOut' }
+  }
+};
+
 const AppInner = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [showIntro, setShowIntro] = useState(true);
-  const [scrollProgress, setScrollProgress] = useState(0);
+  const [scrollY, setScrollY] = useState(0);
   const [toast, setToast] = useState({ show: false, msg: '', type: 'success' });
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const prevPathRef = useRef(location.pathname);
   
   const isMobile = useIsMobile();
-  const shouldAnimate = useShouldAnimate();
 
   const { data: posts = [], isLoading: postsLoading, error: postsError } = usePostsCache();
   const { data: notes = [], isLoading: notesLoading, error: notesError } = useNotesCache();
@@ -56,26 +70,16 @@ const AppInner = () => {
     }
   }, []);
 
-  // 滚动进度追踪 - 用于导航栏渐变
+  // 滚动追踪 - 用于导航栏渐变
   useEffect(() => {
-    const handleScroll = () => {
-      const progress = Math.min(window.scrollY / 100, 1);
-      setScrollProgress(progress);
-    };
+    const handleScroll = () => setScrollY(window.scrollY);
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // 页面切换时的处理
+  // 页面切换时滚动到顶部
   useEffect(() => {
-    if (prevPathRef.current !== location.pathname) {
-      setIsTransitioning(true);
-      window.scrollTo({ top: 0, behavior: 'auto' });
-      // 短暂延迟后结束过渡状态
-      const timer = setTimeout(() => setIsTransitioning(false), 50);
-      prevPathRef.current = location.pathname;
-      return () => clearTimeout(timer);
-    }
+    window.scrollTo({ top: 0, behavior: 'auto' });
   }, [location.pathname]);
 
   const showToast = (msg: string, type = 'success') => {
@@ -104,16 +108,12 @@ const AppInner = () => {
     return <Intro onComplete={() => setShowIntro(false)} />;
   }
 
-  // 导航栏样式 - 基于滚动进度的渐变
-  const navBg = scrollProgress > 0 
-    ? `rgba(0, 0, 0, ${0.1 + scrollProgress * 0.3})` 
-    : 'rgba(255, 255, 255, 0.04)';
-  const navBlur = isMobile 
-    ? `blur(${12 + scrollProgress * 8}px)` 
-    : `blur(${24 + scrollProgress * 12}px) saturate(${180 - scrollProgress * 30}%)`;
-  const navShadow = scrollProgress > 0.3 
-    ? `0 4px 30px rgba(0, 0, 0, ${scrollProgress * 0.2})` 
-    : 'none';
+  // 导航栏渐变计算 - 更明显的效果
+  const scrollProgress = Math.min(scrollY / 80, 1);
+  const navOpacity = 0.02 + scrollProgress * 0.4;
+  const navBlur = isMobile ? 12 + scrollProgress * 12 : 20 + scrollProgress * 20;
+  const navBorder = scrollProgress * 0.15;
+  const navShadow = scrollProgress * 0.3;
 
   return (
     <div className="min-h-screen selection:bg-white/20 selection:text-white">
@@ -126,9 +126,10 @@ const AppInner = () => {
       <AnimatePresence>
         {toast.show && (
           <motion.div 
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
             className={`fixed top-8 right-8 z-50 px-6 py-4 rounded-2xl text-sm font-medium border shadow-2xl backdrop-blur-xl ${
               toast.type === 'error' 
                 ? 'bg-red-500/20 text-red-200 border-red-500/30' 
@@ -144,22 +145,32 @@ const AppInner = () => {
       </AnimatePresence>
 
       {/* Navigation - 滚动渐变效果 */}
-      <nav className="fixed top-0 left-0 right-0 z-40 flex justify-center pt-4 md:pt-6 px-4">
+      <motion.nav 
+        className="fixed top-0 left-0 right-0 z-40 flex justify-center pt-4 md:pt-6 px-4"
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
+      >
         <motion.div 
-          className="relative rounded-full px-6 md:px-10 py-3 transition-shadow duration-300"
+          className="relative rounded-full px-6 md:px-10 py-3"
           style={{ 
-            backgroundColor: navBg,
-            backdropFilter: navBlur,
-            boxShadow: navShadow,
+            backgroundColor: `rgba(0, 0, 0, ${navOpacity})`,
+            backdropFilter: `blur(${navBlur}px) saturate(${150 + scrollProgress * 30}%)`,
+            boxShadow: scrollProgress > 0.2 ? `0 8px 32px rgba(0, 0, 0, ${navShadow})` : 'none',
+            borderWidth: '1px',
+            borderStyle: 'solid',
+            borderColor: `rgba(255, 255, 255, ${navBorder})`,
+            transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
           }}
-          whileHover={shouldAnimate ? { scale: scrollProgress > 0.3 ? 1.02 : 0.97 } : undefined}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
         >
           <div className="relative flex items-center gap-6 md:gap-12">
             <motion.button 
               onClick={() => navigate('/')}
               className="text-base md:text-lg font-bold tracking-tight text-white/90 hover:text-white transition-colors"
-              whileHover={shouldAnimate ? { scale: 1.05 } : undefined}
-              whileTap={shouldAnimate ? { scale: 0.95 } : undefined}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
               AURA
             </motion.button>
@@ -175,11 +186,11 @@ const AppInner = () => {
                   onClick={() => handleNavigate(item.path)} 
                   className={`px-3 md:px-4 py-2 rounded-full transition-all duration-200 ${
                     location.pathname === item.path 
-                      ? 'text-white bg-white/12' 
-                      : 'text-white/60 hover:text-white/90 hover:bg-white/[0.06]'
+                      ? 'text-white bg-white/15' 
+                      : 'text-white/60 hover:text-white hover:bg-white/10'
                   }`}
-                  whileHover={shouldAnimate ? { scale: 1.05 } : undefined}
-                  whileTap={shouldAnimate ? { scale: 0.95 } : undefined}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
                   {item.label}
                 </motion.button>
@@ -187,20 +198,19 @@ const AppInner = () => {
             </div>
           </div>
         </motion.div>
-      </nav>
+      </motion.nav>
 
-      {/* Main Content - Google 风格即时切换，无 loading 状态 */}
+      {/* Main Content - 统一丝滑切换动画 */}
       <AnimatePresence mode="wait">
         <motion.main 
           key={location.pathname}
           className="pt-32 md:pt-44 pb-24 md:pb-48 px-4 md:px-6 max-w-7xl mx-auto"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.15, ease: 'easeOut' }}
+          variants={pageVariants}
+          initial="initial"
+          animate="animate"
+          exit="exit"
         >
           <ErrorBoundary>
-            {/* 空的 fallback - 不显示任何加载状态，实现即时切换 */}
             <Suspense fallback={null}>
               <Routes location={location}>
                 <Route path="/" element={<Feed posts={posts} loading={loading} onSelectPost={(p) => navigate(`/post/${p.slug}`)} />} />

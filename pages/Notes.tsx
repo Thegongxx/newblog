@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import LikeButton from '../components/LikeButton';
 import CommentSection from '../components/CommentSection';
 import { ICONS } from '../constants';
@@ -9,18 +10,37 @@ interface NotesProps {
     loading?: boolean;
 }
 
+// 统一动画配置
+const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94], staggerChildren: 0.08 }
+    }
+};
+
+const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] } }
+};
+
 const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
     const navigate = useNavigate();
     const [expandedCommentId, setExpandedCommentId] = useState<string | null>(null);
 
     return (
-        <div className="py-12 animate-in fade-in slide-in-from-bottom-12 duration-1000 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]">
-            <header className="mb-24">
+        <motion.div 
+            className="py-12"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+        >
+            <motion.header className="mb-24" variants={itemVariants}>
                 <h2 className="text-6xl md:text-8xl font-bold tracking-tighter mb-8 italic">NOTES.</h2>
                 <p className="text-xl text-white/30 font-light max-w-lg">那些转瞬即逝的思想，在留白间沉淀。</p>
-            </header>
+            </motion.header>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <motion.div className="grid grid-cols-1 md:grid-cols-2 gap-8" variants={itemVariants}>
                 {loading ? (
                     // 加载状态下的骨架屏 (Loading Skeleton)
                     Array.from({ length: 4 }).map((_, i) => (
@@ -43,10 +63,11 @@ const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
                     </div>
                 ) : (
                     notes.map((note, i) => (
-                        <div
+                        <motion.div
                             key={note.id || i}
-                            className="glass p-10 rounded-[2.5rem] relative group border border-white/5 hover:border-white/20 transition-all duration-700 hover:-translate-y-1 animate-in fade-in slide-in-from-bottom-4"
-                            style={{ animationDelay: `${i * 100}ms` }}
+                            className="glass p-10 rounded-[2.5rem] relative group border border-white/5 hover:border-white/20 transition-all duration-500 hover:-translate-y-1"
+                            variants={itemVariants}
+                            whileHover={{ y: -4, transition: { duration: 0.2 } }}
                         >
                             <div className="absolute top-8 left-8">{ICONS.QUOTES}</div>
                             
@@ -115,11 +136,11 @@ const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
                                     <CommentSection targetId={note.id} targetType="note" />
                                 </div>
                             )}
-                        </div>
+                        </motion.div>
                     ))
                 )}
-            </div>
-        </div>
+            </motion.div>
+        </motion.div>
     );
 };
 

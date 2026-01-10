@@ -1,10 +1,25 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 
 interface ArchiveProps {
   posts: any[];
   loading: boolean;
   onSelectPost?: (post: any) => void;
 }
+
+// 统一动画配置
+const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94], staggerChildren: 0.08 }
+    }
+};
+
+const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] } }
+};
 
 const Archive: React.FC<ArchiveProps> = ({ posts, loading, onSelectPost }) => {
   // 按年月分组文章
@@ -45,24 +60,29 @@ const Archive: React.FC<ArchiveProps> = ({ posts, loading, onSelectPost }) => {
   }
 
   return (
-    <div className="max-w-4xl py-12 animate-in fade-in slide-in-from-bottom-12 duration-1000 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]">
-      <div className="mb-16">
+    <motion.div 
+      className="max-w-4xl py-12"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      <motion.div className="mb-16" variants={itemVariants}>
         <h1 className="text-6xl font-bold tracking-tighter mb-6 text-white">
           Archive
         </h1>
         <p className="text-white/40 text-lg">
           {posts.length} 篇文章，按时间归档
         </p>
-      </div>
+      </motion.div>
 
-      <div className="space-y-20">
+      <motion.div className="space-y-20" variants={itemVariants}>
         {years.map(year => {
           const yearData = postsByYearMonth[Number(year)];
           const yearMonths = Object.keys(yearData).sort((a, b) => b.localeCompare(a));
           const totalPostsInYear = Object.values(yearData).flat().length;
           
           return (
-            <div key={year} className="group">
+            <motion.div key={year} className="group" variants={itemVariants}>
               <div className="flex items-center gap-6 mb-12">
                 <h2 className="text-4xl font-bold text-white/80 group-hover:text-white transition-colors">
                   {year}
@@ -147,19 +167,19 @@ const Archive: React.FC<ArchiveProps> = ({ posts, loading, onSelectPost }) => {
                   );
                 })}
               </div>
-            </div>
+            </motion.div>
           );
         })}
-      </div>
+      </motion.div>
 
       {posts.length === 0 && !loading && (
-        <div className="text-center py-24">
+        <motion.div className="text-center py-24" variants={itemVariants}>
           <div className="text-white/20 text-6xl mb-6">📝</div>
           <h3 className="text-2xl font-bold text-white/40 mb-4">暂无文章</h3>
           <p className="text-white/30">还没有发布任何文章</p>
-        </div>
+        </motion.div>
       )}
-    </div>
+    </motion.div>
   );
 };
 

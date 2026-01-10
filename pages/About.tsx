@@ -1,5 +1,15 @@
 import React, { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import aboutMd from '../content/pages/about.md?raw';
+
+// 统一动画配置
+const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }
+    }
+};
 
 const About: React.FC = () => {
     const [content, setContent] = useState<string>('');
@@ -59,12 +69,17 @@ const About: React.FC = () => {
     }, []);
 
     return (
-        <div className="max-w-3xl py-12 animate-in fade-in slide-in-from-bottom-12 duration-1000 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]">
+        <motion.div 
+            className="max-w-3xl py-12"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+        >
             <article 
                 className="prose prose-invert max-w-none"
                 dangerouslySetInnerHTML={{ __html: content }}
             />
-        </div>
+        </motion.div>
     );
 };
 
