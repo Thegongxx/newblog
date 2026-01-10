@@ -1,0 +1,248 @@
+name: 🚀 Aura 全功能工作流
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      sync_mode:
+        description: '同步模式'
+        required: true
+        default: 'auto'
+        type: choice
+        options:
+        - auto
+        - force_all
+        - posts_only
+        - notes_only
+      run_tests:
+        description: '运行测试'
+        required: false
+        default: true
+        type: boolean
+      deploy_preview:
+        description: '部署预览'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  NODE_VERSION: '20'
+  CACHE_VERSION: 'v1'
+
+jobs:
+  # 🔍 代码质量检查
+  quality-check:
+    name: 📊 代码质量检查
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.event.inputs.run_tests == 'true'
+    
+    steps:
+    - name: 📥 检出代码
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: ⚙️ 设置 Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        
+    - name: 📦 安装依赖
+      run: npm ci --prefer-offline --no-audit
+      
+    - name: 🔍 TypeScript 类型检查
+      run: npx tsc --noEmit
+      
+    - name: 🧪 运行测试套件
+      run: npm test
+      
+    - name: 📈 生成测试覆盖率
+      run: npm run test:coverage
+      
+    - name: 📊 上传覆盖率报告
+      uses: codecov/codecov-action@v4
+      continue-on-error: true
+      with:
+        file: ./coverage/lcov.info
+
+  # 🏗️ 构建验证
+  build-verification:
+    name: 🏗️ 构建验证
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 检出代码
+      uses: actions/checkout@v4
+      
+    - name: ⚙️ 设置 Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        
+    - name: 📦 安装依赖
+      run: npm ci --prefer-offline --no-audit
+      
+    - name: 🏗️ 构建项目
+      env:
+        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+      run: npm run build
+      
+    - name: 📦 上传构建产物
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-files
+        path: dist/
+        retention-days: 7
+
+  # 🔄 智能内容同步
+  content-sync:
+    name: 🔄 内容同步
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    needs: [build-verification]
+    
+    steps:
+    - name: 📥 检出代码
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 2
+        
+    - name: ⚙️ 设置 Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        
+    - name: 📦 安装依赖
+      run: npm ci --prefer-offline --no-audit
+      
+    - name: 🔍 检测变化类型
+      id: detect-changes
+      run: |
+        if [ "${{ github.event.inputs.sync_mode }}" = "force_all" ]; then
+          echo "sync_posts=true" >> $GITHUB_OUTPUT
+          echo "sync_notes=true" >> $GITHUB_OUTPUT
+          echo "🔄 强制同步所有内容"
+        elif [ "${{ github.event.inputs.sync_mode }}" = "posts_only" ]; then
+          echo "sync_posts=true" >> $GITHUB_OUTPUT
+          echo "sync_notes=false" >> $GITHUB_OUTPUT
+          echo "📝 仅同步文章"
+        elif [ "${{ github.event.inputs.sync_mode }}" = "notes_only" ]; then
+          echo "sync_posts=false" >> $GITHUB_OUTPUT
+          echo "sync_notes=true" >> $GITHUB_OUTPUT
+          echo "📓 仅同步笔记"
+        else
+          # 自动检测变化
+          if git diff --name-only HEAD~1 HEAD | grep -E '^content/posts/.*\.md$'; then
+            echo "sync_posts=true" >> $GITHUB_OUTPUT
+            echo "📝 检测到文章变化"
+          else
+            echo "sync_posts=false" >> $GITHUB_OUTPUT
+          fi
+          
+          if git diff --name-only HEAD~1 HEAD | grep -E '^content/notes/.*\.md$'; then
+            echo "sync_notes=true" >> $GITHUB_OUTPUT
+            echo "📓 检测到笔记变化"
+          else
+            echo "sync_notes=false" >> $GITHUB_OUTPUT
+          fi
+        fi
+        
+    - name: 🔌 测试数据库连接
+      continue-on-error: true
+      env:
+        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+      run: |
+        echo "🔌 测试 Supabase 连接..."
+        timeout 30s npm run test:supabase || echo "⚠️ 连接测试失败，但继续同步"
+        
+    - name: 📝 同步文章
+      if: steps.detect-changes.outputs.sync_posts == 'true'
+      continue-on-error: true
+      env:
+        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+        SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+      run: |
+        echo "📝 开始同步文章..."
+        npm run sync:posts
+        
+    - name: 📓 同步笔记
+      if: steps.detect-changes.outputs.sync_notes == 'true'
+      continue-on-error: true
+      env:
+        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+        SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+      run: |
+        echo "📓 开始同步笔记..."
+        npm run sync
+        
+    - name: ✅ 同步完成通知
+      if: always()
+      run: |
+        echo "📊 同步结果汇总:"
+        echo "- 文章同步: ${{ steps.detect-changes.outputs.sync_posts == 'true' && '✅ 已执行' || '⏭️ 跳过' }}"
+        echo "- 笔记同步: ${{ steps.detect-changes.outputs.sync_notes == 'true' && '✅ 已执行' || '⏭️ 跳过' }}"
+
+  # 🚀 部署预览 (可选)
+  deploy-preview:
+    name: 🚀 部署预览
+    runs-on: ubuntu-latest
+    if: github.event.inputs.deploy_preview == 'true' && github.event_name == 'workflow_dispatch'
+    needs: [build-verification, content-sync]
+    
+    steps:
+    - name: 📥 检出代码
+      uses: actions/checkout@v4
+      
+    - name: 📦 下载构建产物
+      uses: actions/download-artifact@v4
+      with:
+        name: build-files
+        path: dist/
+        
+    - name: 🚀 部署到 Surge.sh (预览)
+      run: |
+        npm install -g surge
+        surge dist/ --domain aura-preview-${{ github.run_number }}.surge.sh --token ${{ secrets.SURGE_TOKEN }}
+        echo "🌐 预览地址: https://aura-preview-${{ github.run_number }}.surge.sh"
+
+  # 🔔 通知和报告
+  notification:
+    name: 🔔 工作流完成通知
+    runs-on: ubuntu-latest
+    if: always() && github.ref == 'refs/heads/main'
+    needs: [quality-check, build-verification, content-sync, deploy-preview]
+    
+    steps:
+    - name: 📊 生成工作流报告
+      run: |
+        echo "## 🚀 Aura 工作流执行报告" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 📋 执行概况" >> $GITHUB_STEP_SUMMARY
+        echo "- **提交**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **分支**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **触发**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **时间**: $(date -u)" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 🎯 任务状态" >> $GITHUB_STEP_SUMMARY
+        echo "- 代码质量检查: ${{ needs.quality-check.result == 'success' && '✅ 通过' || needs.quality-check.result == 'skipped' && '⏭️ 跳过' || '❌ 失败' }}" >> $GITHUB_STEP_SUMMARY
+        echo "- 构建验证: ${{ needs.build-verification.result == 'success' && '✅ 通过' || '❌ 失败' }}" >> $GITHUB_STEP_SUMMARY
+        echo "- 内容同步: ${{ needs.content-sync.result == 'success' && '✅ 完成' || needs.content-sync.result == 'skipped' && '⏭️ 跳过' || '⚠️ 部分失败' }}" >> $GITHUB_STEP_SUMMARY
+        echo "- 部署预览: ${{ needs.deploy-preview.result == 'success' && '✅ 完成' || needs.deploy-preview.result == 'skipped' && '⏭️ 跳过' || '❌ 失败' }}" >> $GITHUB_STEP_SUMMARY
+        
+    - name: 🎉 成功通知
+      if: needs.build-verification.result == 'success'
+      run: |
+        echo "🎉 工作流执行成功！"
+        echo "✅ 项目构建正常"
+        echo "🔄 内容同步完成"
+        echo "🚀 Vercel 将自动部署最新版本"

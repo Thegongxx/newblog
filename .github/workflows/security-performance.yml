@@ -1,0 +1,191 @@
+name: 🛡️ 安全与性能监控
+
+on:
+  schedule:
+    - cron: '0 2 * * 1'  # 每周一凌晨2点运行
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - 'package*.json'
+      - '.github/workflows/**'
+
+jobs:
+  # 🔒 安全审计
+  security-audit:
+    name: 🔒 安全审计
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 检出代码
+      uses: actions/checkout@v4
+      
+    - name: ⚙️ 设置 Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: 🔍 NPM 安全审计
+      run: |
+        echo "🔍 检查依赖安全漏洞..."
+        npm audit --audit-level=moderate
+        
+    - name: 📊 生成安全报告
+      continue-on-error: true
+      run: |
+        npm audit --json > security-audit.json
+        echo "📊 安全审计完成"
+        
+    - name: 📤 上传安全报告
+      uses: actions/upload-artifact@v4
+      with:
+        name: security-audit-report
+        path: security-audit.json
+
+  # ⚡ 性能分析
+  performance-analysis:
+    name: ⚡ 性能分析
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 检出代码
+      uses: actions/checkout@v4
+      
+    - name: ⚙️ 设置 Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: 📦 安装依赖
+      run: npm ci
+      
+    - name: 🏗️ 构建项目
+      env:
+        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+      run: npm run build
+      
+    - name: 📊 分析构建产物大小
+      run: |
+        echo "📊 构建产物分析:" >> $GITHUB_STEP_SUMMARY
+        echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+        du -sh dist/* | sort -hr >> $GITHUB_STEP_SUMMARY
+        echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+        
+        # 检查是否有过大的文件
+        find dist -name "*.js" -size +500k -exec echo "⚠️ 发现大文件: {}" \;
+        find dist -name "*.css" -size +100k -exec echo "⚠️ 发现大CSS文件: {}" \;
+        
+    - name: 🔍 依赖分析
+      run: |
+        echo "📦 依赖分析:" >> $GITHUB_STEP_SUMMARY
+        echo "- 生产依赖: $(npm list --prod --depth=0 2>/dev/null | grep -c '├──\|└──' || echo '0')" >> $GITHUB_STEP_SUMMARY
+        echo "- 开发依赖: $(npm list --dev --depth=0 2>/dev/null | grep -c '├──\|└──' || echo '0')" >> $GITHUB_STEP_SUMMARY
+        
+        # 检查过时的依赖
+        echo "🔄 检查过时依赖..."
+        npm outdated || echo "✅ 所有依赖都是最新的"
+
+  # 🌐 可访问性检查
+  accessibility-check:
+    name: 🌐 可访问性检查
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    
+    steps:
+    - name: 📥 检出代码
+      uses: actions/checkout@v4
+      
+    - name: ⚙️ 设置 Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: 📦 安装依赖
+      run: npm ci
+      
+    - name: 🏗️ 构建项目
+      env:
+        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+      run: npm run build
+      
+    - name: 🌐 启动本地服务器
+      run: |
+        npm run preview &
+        sleep 10
+        
+    - name: 🔍 运行可访问性测试
+      run: |
+        npx @axe-core/cli http://localhost:4173 --exit
+        
+  # 📈 代码质量监控
+  code-quality:
+    name: 📈 代码质量监控
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 检出代码
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: ⚙️ 设置 Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: 📦 安装依赖
+      run: npm ci
+      
+    - name: 📊 代码复杂度分析
+      continue-on-error: true
+      run: |
+        echo "📊 代码统计:" >> $GITHUB_STEP_SUMMARY
+        echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+        find src -name "*.ts" -o -name "*.tsx" | xargs wc -l | tail -1 >> $GITHUB_STEP_SUMMARY
+        echo "TypeScript 文件数: $(find src -name "*.ts" -o -name "*.tsx" | wc -l)" >> $GITHUB_STEP_SUMMARY
+        echo "组件文件数: $(find src -name "*.tsx" | wc -l)" >> $GITHUB_STEP_SUMMARY
+        echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+        
+    - name: 🔍 检查代码风格
+      continue-on-error: true
+      run: |
+        # 检查是否有 TODO 或 FIXME
+        echo "🔍 代码标记检查:"
+        grep -r "TODO\|FIXME\|XXX" src/ || echo "✅ 无待办事项"
+        
+        # 检查是否有 console.log
+        echo "🔍 调试代码检查:"
+        grep -r "console\." src/ || echo "✅ 无调试代码"
+
+  # 📋 生成综合报告
+  generate-report:
+    name: 📋 生成综合报告
+    runs-on: ubuntu-latest
+    needs: [security-audit, performance-analysis, code-quality]
+    if: always()
+    
+    steps:
+    - name: 📊 生成综合报告
+      run: |
+        echo "# 🛡️ Aura 安全与性能监控报告" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## 📅 报告信息" >> $GITHUB_STEP_SUMMARY
+        echo "- **生成时间**: $(date -u)" >> $GITHUB_STEP_SUMMARY
+        echo "- **提交哈希**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **分支**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## 🎯 检查结果" >> $GITHUB_STEP_SUMMARY
+        echo "- 🔒 安全审计: ${{ needs.security-audit.result == 'success' && '✅ 通过' || '❌ 发现问题' }}" >> $GITHUB_STEP_SUMMARY
+        echo "- ⚡ 性能分析: ${{ needs.performance-analysis.result == 'success' && '✅ 正常' || '⚠️ 需要关注' }}" >> $GITHUB_STEP_SUMMARY
+        echo "- 📈 代码质量: ${{ needs.code-quality.result == 'success' && '✅ 良好' || '⚠️ 需要改进' }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## 🔗 相关链接" >> $GITHUB_STEP_SUMMARY
+        echo "- [🌐 生产环境](https://aura.vercel.app)" >> $GITHUB_STEP_SUMMARY
+        echo "- [📊 Vercel Analytics](https://vercel.com/dashboard)" >> $GITHUB_STEP_SUMMARY
+        echo "- [🗄️ Supabase Dashboard](https://supabase.com/dashboard)" >> $GITHUB_STEP_SUMMARY

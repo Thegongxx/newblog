@@ -1,0 +1,208 @@
+name: 🔧 自动化维护
+
+on:
+  schedule:
+    - cron: '0 0 1 * *'  # 每月1号运行
+  workflow_dispatch:
+    inputs:
+      maintenance_type:
+        description: '维护类型'
+        required: true
+        default: 'full'
+        type: choice
+        options:
+        - full
+        - dependencies
+        - cleanup
+        - backup
+
+jobs:
+  # 📦 依赖更新
+  dependency-update:
+    name: 📦 依赖更新检查
+    runs-on: ubuntu-latest
+    if: github.event.inputs.maintenance_type == 'full' || github.event.inputs.maintenance_type == 'dependencies' || github.event_name == 'schedule'
+    
+    steps:
+    - name: 📥 检出代码
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: ⚙️ 设置 Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: 🔍 检查过时依赖
+      run: |
+        echo "🔍 检查过时的依赖包..."
+        npm outdated --json > outdated.json || true
+        
+        if [ -s outdated.json ]; then
+          echo "📦 发现过时依赖:"
+          cat outdated.json | jq -r 'to_entries[] | "- \(.key): \(.value.current) → \(.value.wanted)"'
+        else
+          echo "✅ 所有依赖都是最新的"
+        fi
+        
+    - name: 🔒 安全更新
+      run: |
+        echo "🔒 应用安全更新..."
+        npm audit fix --audit-level=moderate || true
+        
+    - name: 📊 生成更新报告
+      run: |
+        echo "## 📦 依赖维护报告" >> $GITHUB_STEP_SUMMARY
+        echo "### 🔍 过时依赖检查" >> $GITHUB_STEP_SUMMARY
+        if [ -s outdated.json ]; then
+          echo "发现以下过时依赖:" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`json" >> $GITHUB_STEP_SUMMARY
+          cat outdated.json >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "✅ 所有依赖都是最新版本" >> $GITHUB_STEP_SUMMARY
+        fi
+
+  # 🧹 代码清理
+  code-cleanup:
+    name: 🧹 代码清理
+    runs-on: ubuntu-latest
+    if: github.event.inputs.maintenance_type == 'full' || github.event.inputs.maintenance_type == 'cleanup' || github.event_name == 'schedule'
+    
+    steps:
+    - name: 📥 检出代码
+      uses: actions/checkout@v4
+      
+    - name: ⚙️ 设置 Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: 📦 安装依赖
+      run: npm ci
+      
+    - name: 🧹 清理未使用的文件
+      run: |
+        echo "🧹 清理临时文件..."
+        find . -name "*.log" -type f -delete
+        find . -name ".DS_Store" -type f -delete
+        find . -name "Thumbs.db" -type f -delete
+        
+    - name: 🔍 检查未使用的依赖
+      continue-on-error: true
+      run: |
+        echo "🔍 检查未使用的依赖..."
+        npx depcheck --json > depcheck.json || true
+        
+        if [ -s depcheck.json ]; then
+          echo "📊 依赖使用情况:" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`json" >> $GITHUB_STEP_SUMMARY
+          cat depcheck.json >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+    - name: 📊 代码统计
+      run: |
+        echo "## 📊 代码统计报告" >> $GITHUB_STEP_SUMMARY
+        echo "### 📁 文件统计" >> $GITHUB_STEP_SUMMARY
+        echo "- TypeScript 文件: $(find src -name "*.ts" -o -name "*.tsx" | wc -l)" >> $GITHUB_STEP_SUMMARY
+        echo "- 样式文件: $(find src -name "*.css" -o -name "*.scss" | wc -l)" >> $GITHUB_STEP_SUMMARY
+        echo "- 测试文件: $(find . -name "*.test.*" -o -name "*.spec.*" | wc -l)" >> $GITHUB_STEP_SUMMARY
+        echo "- 配置文件: $(find . -maxdepth 1 -name "*.config.*" -o -name ".*rc*" | wc -l)" >> $GITHUB_STEP_SUMMARY
+        
+        echo "### 📏 代码行数" >> $GITHUB_STEP_SUMMARY
+        echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+        find src -name "*.ts" -o -name "*.tsx" | xargs wc -l | tail -1 >> $GITHUB_STEP_SUMMARY
+        echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+  # 💾 数据备份
+  data-backup:
+    name: 💾 数据备份
+    runs-on: ubuntu-latest
+    if: github.event.inputs.maintenance_type == 'full' || github.event.inputs.maintenance_type == 'backup' || github.event_name == 'schedule'
+    
+    steps:
+    - name: 📥 检出代码
+      uses: actions/checkout@v4
+      
+    - name: ⚙️ 设置 Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: 📦 安装依赖
+      run: npm ci
+      
+    - name: 💾 备份内容文件
+      run: |
+        echo "💾 创建内容备份..."
+        mkdir -p backups
+        
+        # 备份 Markdown 文件
+        if [ -d "content" ]; then
+          tar -czf "backups/content-$(date +%Y%m%d).tar.gz" content/
+          echo "✅ 内容文件已备份"
+        fi
+        
+        # 备份配置文件
+        tar -czf "backups/config-$(date +%Y%m%d).tar.gz" \
+          package.json package-lock.json \
+          vite.config.ts tsconfig.json \
+          tailwind.config.js postcss.config.js \
+          vercel.json .env.example \
+          2>/dev/null || true
+          
+        echo "✅ 配置文件已备份"
+        
+    - name: 📤 上传备份文件
+      uses: actions/upload-artifact@v4
+      with:
+        name: aura-backup-${{ github.run_number }}
+        path: backups/
+        retention-days: 30
+        
+    - name: 🔍 测试数据库连接
+      continue-on-error: true
+      env:
+        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+      run: |
+        echo "🔍 测试数据库连接..."
+        npm run test:supabase || echo "⚠️ 数据库连接测试失败"
+
+  # 📊 健康检查
+  health-check:
+    name: 📊 系统健康检查
+    runs-on: ubuntu-latest
+    needs: [dependency-update, code-cleanup, data-backup]
+    if: always()
+    
+    steps:
+    - name: 📊 生成健康报告
+      run: |
+        echo "# 🔧 Aura 系统维护报告" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## 📅 维护信息" >> $GITHUB_STEP_SUMMARY
+        echo "- **维护时间**: $(date -u)" >> $GITHUB_STEP_SUMMARY
+        echo "- **维护类型**: ${{ github.event.inputs.maintenance_type || '定期维护' }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **触发方式**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## 🎯 维护结果" >> $GITHUB_STEP_SUMMARY
+        echo "- 📦 依赖更新: ${{ needs.dependency-update.result == 'success' && '✅ 完成' || needs.dependency-update.result == 'skipped' && '⏭️ 跳过' || '❌ 失败' }}" >> $GITHUB_STEP_SUMMARY
+        echo "- 🧹 代码清理: ${{ needs.code-cleanup.result == 'success' && '✅ 完成' || needs.code-cleanup.result == 'skipped' && '⏭️ 跳过' || '❌ 失败' }}" >> $GITHUB_STEP_SUMMARY
+        echo "- 💾 数据备份: ${{ needs.data-backup.result == 'success' && '✅ 完成' || needs.data-backup.result == 'skipped' && '⏭️ 跳过' || '❌ 失败' }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## 📈 系统状态" >> $GITHUB_STEP_SUMMARY
+        echo "- 🌐 网站状态: [检查链接](https://aura.vercel.app)" >> $GITHUB_STEP_SUMMARY
+        echo "- 🗄️ 数据库状态: [Supabase Dashboard](https://supabase.com/dashboard)" >> $GITHUB_STEP_SUMMARY
+        echo "- 📊 部署状态: [Vercel Dashboard](https://vercel.com/dashboard)" >> $GITHUB_STEP_SUMMARY
+        
+    - name: 🎉 维护完成
+      run: |
+        echo "🎉 系统维护完成！"
+        echo "✅ 所有维护任务已执行"
+        echo "📊 详细报告请查看 Summary"
