@@ -163,14 +163,8 @@ const AppInner = () => {
         </motion.div>
       </motion.nav>
 
-      {/* Main Content - 即时切换，无等待 */}
-      <motion.main 
-        key={location.pathname}
-        className="pt-32 md:pt-44 pb-24 md:pb-48 px-4 md:px-6 max-w-7xl mx-auto"
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
-      >
+      {/* Main Content - 即时切换，无闪烁 */}
+      <main className="pt-32 md:pt-44 pb-24 md:pb-48 px-4 md:px-6 max-w-7xl mx-auto">
         <ErrorBoundary>
           <Routes location={location}>
             <Route path="/" element={<Feed posts={posts} loading={loading} onSelectPost={(p) => navigate(`/post/${p.slug}`)} />} />
@@ -182,7 +176,7 @@ const AppInner = () => {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </ErrorBoundary>
-      </motion.main>
+      </main>
 
       <Assistant />
 
