@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import LikeButton from '../components/LikeButton';
 import { ICONS } from '../constants';
+import { useIsMobile } from '../hooks/useResponsive';
 
 interface NotesProps {
     notes: any[];
@@ -14,17 +15,18 @@ const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
         opacity: 1,
-        transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94], staggerChildren: 0.08 }
+        transition: { duration: 0.5, ease: "easeOut" as const, staggerChildren: 0.08 }
     }
 };
 
 const itemVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] } }
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" as const } }
 };
 
 const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
     const navigate = useNavigate();
+    const isMobile = useIsMobile();
 
     return (
         <motion.div 
@@ -61,9 +63,12 @@ const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
                     notes.map((note, i) => (
                         <motion.div
                             key={note.id || i}
-                            className="glass p-6 md:p-10 rounded-2xl md:rounded-[2.5rem] relative group border border-white/5 hover:border-white/20 transition-all duration-500"
+                            className={`glass p-6 md:p-10 rounded-2xl md:rounded-[2.5rem] relative group border border-white/5 transition-all duration-500 ${
+                                !isMobile ? 'hover:border-white/20' : ''
+                            }`}
                             variants={itemVariants}
-                            whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                            whileHover={!isMobile ? { y: -4, transition: { duration: 0.2 } } : {}}
+                            whileTap={isMobile ? { scale: 0.98, transition: { duration: 0.1 } } : {}}
                         >
                             <div className="absolute top-4 left-4 md:top-8 md:left-8 scale-75 md:scale-100 origin-top-left">{ICONS.QUOTES}</div>
                             
@@ -72,7 +77,9 @@ const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
                                 className="cursor-pointer"
                                 onClick={() => navigate(`/note/${note.id}`)}
                             >
-                                <h3 className="text-xl md:text-3xl font-bold tracking-tight text-white/90 mb-3 md:mb-4 pt-8 md:pt-10 hover:text-white transition-colors line-clamp-2">
+                                <h3 className={`text-xl md:text-3xl font-bold tracking-tight text-white/90 mb-3 md:mb-4 pt-8 md:pt-10 transition-colors line-clamp-2 ${
+                                    !isMobile ? 'hover:text-white' : ''
+                                }`}>
                                     {note.title}
                                 </h3>
                                 <p className="text-sm md:text-lg font-light leading-relaxed text-white/60 mb-6 md:mb-10 line-clamp-2 md:line-clamp-3">
@@ -86,19 +93,26 @@ const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
                                 <div className="flex items-center gap-2 md:gap-4">
                                     {/* 详情按钮 */}
                                     <button
-                                        onClick={() => navigate(`/note/${note.id}`)}
-                                        className="text-[10px] md:text-xs font-bold text-white/30 hover:text-white uppercase tracking-widest transition-colors"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            navigate(`/note/${note.id}`);
+                                        }}
+                                        className={`text-[10px] md:text-xs font-bold text-white/30 uppercase tracking-widest transition-colors ${
+                                            !isMobile ? 'hover:text-white' : ''
+                                        }`}
                                     >
                                         详情 →
                                     </button>
                                     
                                     {/* 点赞按钮 - 带计数 */}
-                                    <LikeButton 
-                                        targetType="note" 
-                                        targetId={note.id} 
-                                        initialCount={note.likes_count || 0}
-                                        className="!bg-transparent !border-none" 
-                                    />
+                                    <div onClick={(e) => e.stopPropagation()}>
+                                        <LikeButton 
+                                            targetType="note" 
+                                            targetId={note.id} 
+                                            initialCount={note.likes_count || 0}
+                                            className="!bg-transparent !border-none" 
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         </motion.div>

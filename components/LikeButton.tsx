@@ -148,7 +148,7 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
 
     return (
         <div className="relative inline-block">
-            {/* 透明灵动岛提示 - 在点赞按钮上方出现，移动端优化 */}
+            {/* 智能定位的透明灵动岛提示 */}
             <AnimatePresence>
                 {toast.visible && (
                     <motion.div
@@ -160,7 +160,7 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                         animate={{ 
                             opacity: 1, 
                             scale: 1, 
-                            y: isMobile ? -8 : -10
+                            y: 0
                         }}
                         exit={{ 
                             opacity: 0, 
@@ -174,24 +174,30 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                             mass: 0.8,
                             duration: isMobile ? 0.5 : 0.6
                         }}
-                        className={`absolute ${isMobile ? '-top-16' : '-top-14'} left-1/2 -translate-x-1/2 z-50 pointer-events-none`}
+                        className="fixed z-[9999] pointer-events-none"
+                        style={{
+                            // 智能定位：在屏幕中央偏上显示，避免被遮挡
+                            top: isMobile ? '30%' : '35%',
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                        }}
                     >
                         <motion.div 
                             className={`relative overflow-hidden ${
-                                isMobile ? 'px-2.5 py-1.5 text-xs' : 'px-4 py-2.5 text-sm'
+                                isMobile ? 'px-3 py-2 text-xs' : 'px-4 py-2.5 text-sm'
                             } font-medium whitespace-nowrap text-white/90`}
                             style={{
-                                borderRadius: isMobile ? '12px' : '20px',
-                                background: 'rgba(0, 0, 0, 0.6)',
+                                borderRadius: isMobile ? '14px' : '20px',
+                                background: 'rgba(0, 0, 0, 0.75)',
                                 backdropFilter: isMobile ? 'blur(16px) saturate(140%)' : 'blur(20px) saturate(150%)',
                                 WebkitBackdropFilter: isMobile ? 'blur(16px) saturate(140%)' : 'blur(20px) saturate(150%)',
                                 boxShadow: isMobile 
-                                    ? '0 3px 15px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.08)'
-                                    : '0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
-                                border: isMobile ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(255, 255, 255, 0.1)'
+                                    ? '0 4px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
+                                    : '0 8px 32px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+                                border: isMobile ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(255, 255, 255, 0.15)'
                             }}
                             animate={{
-                                // 移动端减少浮动效果
+                                // 微妙的浮动效果
                                 y: isMobile ? [0, -1, 0] : [0, -2, 0],
                             }}
                             transition={{
@@ -200,28 +206,28 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                                 ease: "easeInOut"
                             }}
                         >
-                            {/* 透明背景光晕 - 移动端简化 */}
+                            {/* 透明背景光晕 */}
                             <div 
-                                className={`absolute inset-0 ${isMobile ? 'opacity-5' : 'opacity-10'}`}
+                                className={`absolute inset-0 ${isMobile ? 'opacity-8' : 'opacity-12'}`}
                                 style={{
                                     background: toast.type === 'success' 
-                                        ? 'radial-gradient(circle at center, rgba(255, 255, 255, 0.3) 0%, transparent 70%)'
-                                        : toast.type === 'warning'
                                         ? 'radial-gradient(circle at center, rgba(255, 255, 255, 0.2) 0%, transparent 70%)'
-                                        : 'radial-gradient(circle at center, rgba(255, 255, 255, 0.25) 0%, transparent 70%)'
+                                        : toast.type === 'warning'
+                                        ? 'radial-gradient(circle at center, rgba(255, 255, 255, 0.15) 0%, transparent 70%)'
+                                        : 'radial-gradient(circle at center, rgba(255, 255, 255, 0.18) 0%, transparent 70%)'
                                 }}
                             />
                             
-                            <div className="relative flex items-center gap-1.5">
-                                {/* 状态指示器 - 移动端简化 */}
+                            <div className="relative flex items-center gap-2">
+                                {/* 状态指示器 */}
                                 <motion.div
-                                    className={`${isMobile ? 'w-1 h-1' : 'w-2 h-2'} rounded-full ${
-                                        toast.type === 'success' ? 'bg-white/70' : 
-                                        toast.type === 'warning' ? 'bg-white/50' : 'bg-white/60'
+                                    className={`${isMobile ? 'w-1.5 h-1.5' : 'w-2 h-2'} rounded-full ${
+                                        toast.type === 'success' ? 'bg-white/80' : 
+                                        toast.type === 'warning' ? 'bg-white/60' : 'bg-white/70'
                                     }`}
                                     animate={{ 
                                         scale: isMobile ? [1, 1.1, 1] : [1, 1.2, 1],
-                                        opacity: [0.7, 1, 0.7]
+                                        opacity: [0.8, 1, 0.8]
                                     }}
                                     transition={{ 
                                         duration: isMobile ? 1.5 : 2, 
@@ -235,30 +241,18 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                                     initial={{ opacity: 0, x: -3 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ delay: 0.1, duration: 0.3 }}
-                                    className="font-medium text-white/90"
+                                    className="font-medium text-white/95"
                                 >
                                     {toast.message}
                                 </motion.span>
-                                
-                                {/* 成功时的微妙装饰 - 移动端简化 */}
-                                {toast.type === 'success' && !isMobile && (
-                                    <motion.div
-                                        initial={{ scale: 0, rotate: -90 }}
-                                        animate={{ scale: 1, rotate: 0 }}
-                                        transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-                                        className="text-xs opacity-70"
-                                    >
-                                        ✨
-                                    </motion.div>
-                                )}
                             </div>
                             
-                            {/* 底部透明进度条 - 移动端简化 */}
+                            {/* 底部透明进度条 */}
                             <motion.div
-                                className={`absolute bottom-0 left-0 ${isMobile ? 'h-0.5' : 'h-0.5'} bg-white/20 rounded-full`}
+                                className="absolute bottom-0 left-0 h-0.5 bg-white/25 rounded-full"
                                 initial={{ width: '100%' }}
                                 animate={{ width: '0%' }}
-                                transition={{ duration: isMobile ? 2 : 2.5, ease: "linear" }}
+                                transition={{ duration: isMobile ? 1.5 : 2, ease: "linear" }}
                             />
                         </motion.div>
                     </motion.div>

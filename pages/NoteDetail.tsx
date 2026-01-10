@@ -25,6 +25,7 @@ const NoteDetail: React.FC = () => {
   const loadNote = async () => {
     try {
       setLoading(true);
+      setError(null); // 清除之前的错误
       
       // 从数据库读取note
       const noteData = await notesApi.getById(id!);
@@ -43,7 +44,10 @@ const NoteDetail: React.FC = () => {
     } catch (err: any) {
       setError(err.message || '加载失败');
     } finally {
-      setLoading(false);
+      // 添加小延迟，让页面切换动画完成后再显示内容
+      setTimeout(() => {
+        setLoading(false);
+      }, 100);
     }
   };
 
@@ -95,12 +99,7 @@ const NoteDetail: React.FC = () => {
   }
 
   return (
-    <motion.div 
-      className="py-8 md:py-12"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-    >
+    <div className="py-8 md:py-12">
       <div className="max-w-4xl mx-auto">
         {/* 返回按钮 - 移动端简化 */}
         <motion.button
@@ -114,11 +113,8 @@ const NoteDetail: React.FC = () => {
         </motion.button>
 
         {/* 笔记内容 - 移动端简化 */}
-        <motion.article 
+        <article 
           className="glass p-6 md:p-12 rounded-2xl md:rounded-[3rem] border border-white/5 mb-8 md:mb-12"
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
         >
           {/* 引号图标 */}
           <div className="mb-4 md:mb-8 scale-75 md:scale-100 origin-top-left">{ICONS.QUOTES}</div>
@@ -159,18 +155,14 @@ const NoteDetail: React.FC = () => {
               className="scale-90 md:scale-110"
             />
           </div>
-        </motion.article>
+        </article>
 
         {/* 评论区域 */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-        >
+        <div>
           <CommentSection targetId={note.id} targetType="note" />
-        </motion.div>
+        </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 
