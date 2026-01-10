@@ -1,6 +1,24 @@
 import fs from 'fs';
 import path from 'path';
+import { marked } from 'marked';
+import hljs from 'highlight.js';
 import { Post } from '../types';
+
+// 配置marked
+marked.setOptions({
+    highlight: function(code, lang) {
+        if (lang && hljs.getLanguage(lang)) {
+            try {
+                return hljs.highlight(code, { language: lang }).value;
+            } catch (err) {
+                console.error('Highlight error:', err);
+            }
+        }
+        return hljs.highlightAuto(code).value;
+    },
+    breaks: true,
+    gfm: true
+});
 
 // 简单的 Markdown Frontmatter 解析器
 function parsePost(fileName: string, rawContent: string): Post {
@@ -32,12 +50,15 @@ function parsePost(fileName: string, rawContent: string): Post {
     
     const slug = fileName.replace('.md', '');
     
+    // 转换markdown为HTML
+    const htmlContent = marked(content);
+    
     return {
         id: slug,
         slug,
         title: metadata.title || slug,
         content,
-        html_content: content, // 简单处理，实际应该转换为HTML
+        html_content: htmlContent,
         excerpt: metadata.excerpt || '',
         category: metadata.category || 'uncategorized',
         cover_image: metadata.cover_image || '',
@@ -51,6 +72,12 @@ function parsePost(fileName: string, rawContent: string): Post {
 }
 
 export function getAllPosts(): Post[] {
+    // 在客户端环境下返回空数组，避免文件系统访问错误
+    if (typeof window !== 'undefined') {
+        console.warn('getAllPosts called on client side, returning empty array');
+        return [];
+    }
+    
     try {
         const postsDir = path.join(process.cwd(), 'content', 'posts');
         
@@ -77,6 +104,12 @@ export function getAllPosts(): Post[] {
 }
 
 export function getPostBySlug(slug: string): Post | null {
+    // 在客户端环境下返回null
+    if (typeof window !== 'undefined') {
+        console.warn('getPostBySlug called on client side, returning null');
+        return null;
+    }
+    
     try {
         const postsDir = path.join(process.cwd(), 'content', 'posts');
         const filePath = path.join(postsDir, `${slug}.md`);

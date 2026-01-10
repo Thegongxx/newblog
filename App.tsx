@@ -117,6 +117,7 @@ const AppInner: React.FC = () => {
       <Helmet>
         <title>Aura - 极简主义个人空间</title>
         <meta name="description" content="A digital sanctuary for minimalist aesthetics and intelligence." />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
         <style>{`
           html {
             scroll-behavior: smooth;
