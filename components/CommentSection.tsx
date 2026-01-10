@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../services/supabaseService';
 import LikeButton from './LikeButton';
 import type { Comment } from '../types';
@@ -266,9 +267,27 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="px-8 py-2 bg-white text-black text-[10px] font-black uppercase tracking-widest rounded-full hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
+                                className="relative px-8 py-2 bg-white text-black text-[10px] font-black uppercase tracking-widest rounded-full hover:scale-105 active:scale-95 transition-all disabled:opacity-70 overflow-hidden"
                             >
-                                {loading ? 'Sending...' : 'Post Comment'}
+                                <span className={loading ? 'opacity-0' : 'opacity-100'}>Post Comment</span>
+                                {loading && (
+                                    <motion.div 
+                                        className="absolute inset-0 flex items-center justify-center"
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                    >
+                                        <div className="flex gap-1">
+                                            {[0, 1, 2].map((i) => (
+                                                <motion.div
+                                                    key={i}
+                                                    className="w-1.5 h-1.5 bg-black rounded-full"
+                                                    animate={{ opacity: [0.3, 1, 0.3], scale: [1, 1.2, 1] }}
+                                                    transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.1 }}
+                                                />
+                                            ))}
+                                        </div>
+                                    </motion.div>
+                                )}
                             </button>
                         </div>
                     </form>
