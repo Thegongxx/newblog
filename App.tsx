@@ -32,11 +32,10 @@ const AppInner: React.FC = () => {
       try {
         setLoading(true);
         
-        // 使用文件系统读取posts和notes，保持一致
-        const { getAllPosts } = await import('./utils/posts');
+        // 使用预构建的文章数据和文件系统读取的笔记
+        const { postsData } = await import('./utils/postsData');
         const { getAllNotes } = await import('./utils/notes');
         
-        const postsData = getAllPosts();
         const notesData = getAllNotes();
         
         const formattedPosts = postsData.map((post: any) => ({
