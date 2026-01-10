@@ -81,7 +81,7 @@ const BlogCard: React.FC<BlogCardProps> = memo(({ post, onClick, featured }) => 
           targetType="post"
           targetId={post.id}
           initialCount={post.likes_count}
-          className="!bg-white/10 !backdrop-blur-xl !border-white/10 scale-75"
+          className="!bg-white/10 !backdrop-blur-xl"
         />
       </div>
 

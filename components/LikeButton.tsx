@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { engagementApi, supabase } from '../services/supabaseService';
 import { getBrowserFingerprint, checkIfLikedLocal, setLikedLocal } from '../utils/engagement';
+import { useIsMobile } from '../hooks/useResponsive';
 
 interface LikeButtonProps {
     targetType: 'post' | 'quote' | 'homepage' | 'comment' | 'homepage_comment' | 'note';
@@ -12,7 +13,6 @@ interface LikeButtonProps {
 
 export default function LikeButton({ targetType, targetId, initialCount = 0, className = "" }: LikeButtonProps) {
     const [liked, setLiked] = useState(false);
-    const [count, setCount] = useState(initialCount);
     const [isAnimating, setIsAnimating] = useState(false);
     const [locked, setLocked] = useState(false);
     const [dailyCount, setDailyCount] = useState(0);
@@ -21,6 +21,8 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
         visible: false, 
         type: 'success' 
     });
+    
+    const isMobile = useIsMobile();
 
     // 持久化存储 Key
     const getStorageKey = () => `aura_like_limit_${targetType}_${targetId}_${new Date().toISOString().split('T')[0]}`;
@@ -28,20 +30,17 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
     useEffect(() => {
         const fetchInitial = async () => {
             try {
-                // 1. 获取总数
-                const total = await engagementApi.getLikeCount(targetType, targetId);
-                setCount(total);
                 const isLiked = checkIfLikedLocal(targetType, targetId);
                 setLiked(isLiked);
 
-                // 2. 检查本地持久化锁定
+                // 检查本地持久化锁定
                 const localCount = parseInt(localStorage.getItem(getStorageKey()) || '0');
                 setDailyCount(localCount);
                 if (localCount >= 5) {
                     setLocked(true);
                 }
 
-                // 3. 后端双重校验（防止清除缓存后刷票）
+                // 后端双重校验
                 const fingerprint = getBrowserFingerprint();
                 const today = new Date().toISOString().split('T')[0];
                 const { data } = await supabase
@@ -92,8 +91,6 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
         // 开始动画
         setIsAnimating(true);
         
-        // UI 立即增加反馈
-        setCount(prev => prev + 1);
         const nextLocal = currentLocal + 1;
         setDailyCount(nextLocal);
         localStorage.setItem(getStorageKey(), nextLocal.toString());
@@ -122,7 +119,6 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
             setLiked(true);
             setLikedLocal(targetType, targetId, true);
 
-            // 如果后端确认已达上限，强制同步锁定
             if (result.count >= 5) {
                 setLocked(true);
                 setDailyCount(5);
@@ -136,8 +132,6 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                 showToast('今日点赞已达上限 🌿', 'warning');
             } else {
                 console.error('Failed to toggle like:', err);
-                // Rollback UI count and local storage if other errors occur
-                setCount(prev => prev - 1);
                 setDailyCount(currentLocal);
                 localStorage.setItem(getStorageKey(), currentLocal.toString());
                 showToast('点赞失败，请稍后重试 😅', 'warning');
@@ -178,23 +172,23 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                 )}
             </AnimatePresence>
 
-            {/* Material Design风格的点赞按钮 */}
+            {/* Google风格的极简点赞按钮 - 全平台统一 */}
             <motion.button
                 onClick={handleLike}
                 disabled={isAnimating}
-                className={`group relative flex items-center gap-2 px-3 py-2 rounded-full transition-all duration-200 overflow-hidden ${
+                className={`group relative flex items-center justify-center w-8 h-8 rounded-full transition-all duration-200 overflow-hidden ${
                     locked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
                 } ${
                     liked
-                        ? 'bg-rose-50/10 text-rose-400 border-rose-400/30'
-                        : 'bg-white/5 text-white/50 hover:text-white/70 hover:bg-white/10 border-white/10'
-                } border ${className}`}
+                        ? 'bg-rose-50/10 text-rose-400'
+                        : 'bg-white/5 text-white/50 hover:text-white/70 hover:bg-white/10'
+                } ${className}`}
                 whileHover={!locked && !isAnimating ? {
-                    scale: 1.02,
+                    scale: 1.1,
                     transition: { duration: 0.15, ease: [0.4, 0.0, 0.2, 1] }
                 } : {}}
                 whileTap={!locked && !isAnimating ? {
-                    scale: 0.98,
+                    scale: 0.9,
                     transition: { duration: 0.1, ease: [0.4, 0.0, 0.2, 1] }
                 } : {}}
                 aria-label={locked ? `今日已点赞 ${dailyCount}/5 次` : `点赞 (今日 ${dailyCount}/5)`}
@@ -210,64 +204,43 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                 )}
 
                 {/* 爱心图标 */}
-                <div className="relative">
-                    <motion.svg
-                        className={`w-4 h-4 transition-all duration-200 ${
-                            liked ? 'fill-current scale-110' : 'fill-none scale-100'
-                        }`}
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        animate={isAnimating ? {
-                            scale: [1, 1.3, 1],
-                            rotate: [0, -10, 10, 0]
-                        } : {}}
-                        transition={{
-                            duration: 0.6,
-                            ease: [0.4, 0.0, 0.2, 1]
-                        }}
-                    >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="1.5"
-                            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                        />
-                    </motion.svg>
-
-                    {/* 点击时的脉冲效果 */}
-                    {isAnimating && (
-                        <motion.div
-                            className="absolute inset-0 border-2 border-rose-400/50 rounded-full"
-                            initial={{ scale: 1, opacity: 0.8 }}
-                            animate={{ scale: 2.5, opacity: 0 }}
-                            transition={{ duration: 0.6, ease: [0.4, 0.0, 0.2, 1] }}
-                        />
-                    )}
-                </div>
-
-                {/* 计数显示 */}
-                <motion.span 
-                    className="text-xs font-medium tabular-nums"
-                    animate={isAnimating ? { scale: [1, 1.2, 1] } : {}}
-                    transition={{ duration: 0.3, ease: [0.4, 0.0, 0.2, 1] }}
+                <motion.svg
+                    className={`w-4 h-4 transition-all duration-200 ${
+                        liked ? 'fill-current scale-110' : 'fill-none scale-100'
+                    }`}
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    animate={isAnimating ? {
+                        scale: [1, 1.3, 1],
+                        rotate: [0, -10, 10, 0]
+                    } : {}}
+                    transition={{
+                        duration: 0.6,
+                        ease: [0.4, 0.0, 0.2, 1]
+                    }}
                 >
-                    {count}
-                </motion.span>
+                    <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="1.5"
+                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                    />
+                </motion.svg>
 
-                {/* Google风格的粒子爆炸效果 */}
+                {/* Google风格的微妙粒子效果 - 全平台统一 */}
                 {!locked && isAnimating && (
                     <div className="absolute inset-0 pointer-events-none">
-                        {/* 主要粒子 */}
-                        {[...Array(12)].map((_, i) => (
+                        {/* 微妙的圆形粒子 */}
+                        {[...Array(8)].map((_, i) => (
                             <motion.div
                                 key={`particle-${i}`}
-                                className="absolute left-1/2 top-1/2 w-1 h-1 bg-rose-400 rounded-full"
+                                className="absolute left-1/2 top-1/2 w-1 h-1 bg-rose-400/60 rounded-full"
                                 initial={{ scale: 0, opacity: 0 }}
                                 animate={{
                                     scale: [0, 1, 0],
-                                    opacity: [0, 1, 0],
-                                    x: Math.cos((i * 30) * Math.PI / 180) * (20 + Math.random() * 15),
-                                    y: Math.sin((i * 30) * Math.PI / 180) * (20 + Math.random() * 15),
+                                    opacity: [0, 0.8, 0],
+                                    x: Math.cos((i * 45) * Math.PI / 180) * (12 + Math.random() * 8),
+                                    y: Math.sin((i * 45) * Math.PI / 180) * (12 + Math.random() * 8),
                                 }}
                                 transition={{
                                     duration: 0.6,
@@ -277,65 +250,56 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                             />
                         ))}
 
-                        {/* 心形emoji粒子 */}
-                        {[...Array(6)].map((_, i) => (
-                            <motion.div
-                                key={`heart-${i}`}
-                                className="absolute left-1/2 top-1/2 text-xs"
-                                initial={{ scale: 0, opacity: 0 }}
-                                animate={{
-                                    scale: [0, 1.2, 0],
-                                    opacity: [0, 1, 0],
-                                    x: Math.cos((i * 60) * Math.PI / 180) * (25 + Math.random() * 10),
-                                    y: Math.sin((i * 60) * Math.PI / 180) * (25 + Math.random() * 10),
-                                    rotate: [0, 360]
-                                }}
-                                transition={{
-                                    duration: 0.8,
-                                    ease: [0.4, 0.0, 0.2, 1],
-                                    delay: 0.1 + Math.random() * 0.2
-                                }}
-                            >
-                                {['💖', '💕', '❤️', '💜', '🧡', '💛'][i]}
-                            </motion.div>
-                        ))}
-
-                        {/* 闪光效果 */}
+                        {/* 更微妙的光点 */}
                         {[...Array(4)].map((_, i) => (
                             <motion.div
-                                key={`sparkle-${i}`}
-                                className="absolute left-1/2 top-1/2 w-0.5 h-3 bg-gradient-to-t from-transparent via-white to-transparent rounded-full"
-                                initial={{ scale: 0, opacity: 0, rotate: i * 45 }}
+                                key={`glow-${i}`}
+                                className="absolute left-1/2 top-1/2 w-0.5 h-0.5 bg-white/80 rounded-full"
+                                initial={{ scale: 0, opacity: 0 }}
                                 animate={{
-                                    scale: [0, 1, 0],
-                                    opacity: [0, 0.8, 0],
-                                    x: Math.cos((i * 90) * Math.PI / 180) * 15,
-                                    y: Math.sin((i * 90) * Math.PI / 180) * 15,
+                                    scale: [0, 1.5, 0],
+                                    opacity: [0, 1, 0],
+                                    x: Math.cos((i * 90) * Math.PI / 180) * 8,
+                                    y: Math.sin((i * 90) * Math.PI / 180) * 8,
                                 }}
                                 transition={{
                                     duration: 0.4,
                                     ease: [0.4, 0.0, 0.2, 1],
-                                    delay: 0.2
+                                    delay: 0.1
                                 }}
                             />
                         ))}
+
+                        {/* 中心扩散圆环 */}
+                        <motion.div
+                            className="absolute left-1/2 top-1/2 border border-rose-400/30 rounded-full"
+                            initial={{ scale: 0, opacity: 0.8 }}
+                            animate={{ scale: 3, opacity: 0 }}
+                            transition={{ duration: 0.5, ease: [0.4, 0.0, 0.2, 1] }}
+                            style={{
+                                width: '8px',
+                                height: '8px',
+                                marginLeft: '-4px',
+                                marginTop: '-4px'
+                            }}
+                        />
                     </div>
                 )}
             </motion.button>
 
-            {/* 点赞进度指示器 (仅在有点赞时显示) */}
+            {/* 点赞进度指示器 - 全平台统一，更简洁 */}
             {dailyCount > 0 && (
                 <motion.div
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="absolute -bottom-8 left-1/2 -translate-x-1/2 pointer-events-none"
+                    className="absolute -bottom-6 left-1/2 -translate-x-1/2 pointer-events-none"
                 >
-                    <div className="flex items-center gap-1 px-2 py-1 bg-black/20 backdrop-blur-sm rounded-full border border-white/10">
+                    <div className="flex items-center gap-0.5">
                         {[...Array(5)].map((_, i) => (
                             <div
                                 key={i}
-                                className={`w-1 h-1 rounded-full transition-all duration-200 ${
-                                    i < dailyCount ? 'bg-rose-400' : 'bg-white/20'
+                                className={`w-0.5 h-0.5 rounded-full transition-all duration-200 ${
+                                    i < dailyCount ? 'bg-rose-400/60' : 'bg-white/10'
                                 }`}
                             />
                         ))}

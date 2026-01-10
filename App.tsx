@@ -311,22 +311,44 @@ const AppInner = () => {
           </div>
           
           {isMobile ? (
-            // 移动端简化版联系方式
-            <div className="space-y-4 w-full max-w-xs">
-              {[
-                { label: 'QQ', value: CONTACT_INFO.QQ },
-                { label: 'WeChat', value: CONTACT_INFO.WX },
-                { label: 'Email', value: CONTACT_INFO.MAIL }
-              ].map((contact) => (
-                <button
-                  key={contact.label}
-                  onClick={() => handleCopy(contact.value, contact.label)}
-                  className="w-full flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-lg text-white/70 active:bg-white/10 transition-colors"
-                >
-                  <span className="text-sm font-medium">{contact.label}</span>
-                  <span className="text-xs text-white/40 uppercase tracking-wide">Copy</span>
-                </button>
-              ))}
+            // 移动端简化版 - 长按显示联系方式
+            <div className="space-y-3">
+              <p className="text-xs text-white/40 mb-4">长按下方按钮查看联系方式</p>
+              <div className="flex gap-4 justify-center">
+                {[
+                  { label: 'QQ', value: CONTACT_INFO.QQ, icon: '💬' },
+                  { label: 'WeChat', value: CONTACT_INFO.WX, icon: '💚' },
+                  { label: 'Email', value: CONTACT_INFO.MAIL, icon: '📧' }
+                ].map((contact) => (
+                  <button
+                    key={contact.label}
+                    onTouchStart={(e) => {
+                      e.preventDefault();
+                      const button = e.currentTarget;
+                      const timeout = setTimeout(() => {
+                        showToast(`${contact.label}: ${contact.value}`, 'info');
+                      }, 500);
+                      
+                      const cleanup = () => {
+                        clearTimeout(timeout);
+                        button.removeEventListener('touchend', cleanup);
+                        button.removeEventListener('touchcancel', cleanup);
+                      };
+                      
+                      button.addEventListener('touchend', cleanup);
+                      button.addEventListener('touchcancel', cleanup);
+                    }}
+                    onClick={() => {
+                      // 短按尝试复制
+                      handleCopy(contact.value, contact.label);
+                    }}
+                    className="flex flex-col items-center gap-2 p-3 bg-white/5 border border-white/10 rounded-xl text-white/70 active:bg-white/10 transition-colors min-w-[60px]"
+                  >
+                    <span className="text-lg">{contact.icon}</span>
+                    <span className="text-[10px] font-medium uppercase tracking-wide">{contact.label}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           ) : (
             // 桌面端完整版联系方式
