@@ -1,9 +1,10 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, memo } from 'react';
 import { motion } from 'framer-motion';
 import BlogCard from '../components/BlogCard';
 import HomepageComments from '../components/HomepageComments';
 import { Post } from '../types';
 import { getAllNotes } from '../utils/notes';
+import { useIsMobile } from '../hooks/useResponsive';
 
 interface FeedProps {
   posts: Post[];
@@ -11,14 +12,16 @@ interface FeedProps {
   onSelectPost: (post: Post) => void;
 }
 
-const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
+const Feed: React.FC<FeedProps> = memo(({ posts, loading, onSelectPost }) => {
+  const isMobile = useIsMobile();
+
   // 按时间排序，最新的文章在前面
   const sortedPosts = useMemo(() => {
     return [...posts].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [posts]);
 
   // 固定显示最新的 4 篇文章
-  const latestPosts = sortedPosts.slice(0, 4);
+  const latestPosts = useMemo(() => sortedPosts.slice(0, 4), [sortedPosts]);
 
   // 使用真实 Markdown 笔记数据 - 优化性能
   const notes = useMemo(() => {
@@ -45,37 +48,37 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
     return notes[index];
   }, [notes]); // 每天更换一次
 
-  // 简化动画配置 - 减少移动端卡顿
-  const containerVariants = {
+  // 移动端简化动画配置 - 减少卡顿
+  const containerVariants = useMemo(() => ({
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        duration: 0.4, // 缩短动画时间
+        duration: isMobile ? 0.3 : 0.4,
         ease: "easeOut" as const,
-        staggerChildren: 0.05 // 减少交错延迟
+        staggerChildren: isMobile ? 0.03 : 0.05
       }
     }
-  };
+  }), [isMobile]);
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 12 }, // 减少移动距离
+  const itemVariants = useMemo(() => ({
+    hidden: { opacity: 0, y: isMobile ? 8 : 12 },
     visible: {
       opacity: 1,
       y: 0,
       transition: {
-        duration: 0.4, // 缩短动画时间
+        duration: isMobile ? 0.3 : 0.4,
         ease: "easeOut" as const
       }
     }
-  };
+  }), [isMobile]);
 
-  const fadeInReveal = {
-    initial: { opacity: 0, y: 10 }, // 减少移动距离
+  const fadeInReveal = useMemo(() => ({
+    initial: { opacity: 0, y: isMobile ? 6 : 10 },
     whileInView: { opacity: 1, y: 0 },
-    viewport: { once: true, margin: "-30px" }, // 减少触发距离
-    transition: { duration: 0.5, ease: "easeOut" as const } // 缩短动画时间
-  };
+    viewport: { once: true, margin: isMobile ? "-20px" : "-30px" },
+    transition: { duration: isMobile ? 0.4 : 0.5, ease: "easeOut" as const }
+  }), [isMobile]);
 
   return (
     <motion.div 
@@ -83,8 +86,12 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
+      style={{
+        willChange: 'transform',
+        backfaceVisibility: 'hidden'
+      }}
     >
-      {/* 1. Hero 区域 - 移动端简化 */}
+      {/* 1. Hero 区域 - 移动端优化 */}
       <motion.section
         {...fadeInReveal}
         className="min-h-[50vh] md:min-h-[60vh] flex flex-col md:flex-row items-center gap-8 md:gap-24"
@@ -105,17 +112,19 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
             探索技术与情感之间的无形联系。
           </p>
           {/* 移动端隐藏滚动按钮 */}
-          <div className="hidden md:flex items-center gap-8 pt-4">
-            <button
-              onClick={() => window.scrollTo({ top: window.innerHeight * 0.8, behavior: 'smooth' })}
-              className="group flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.3em] text-white/40 hover:text-white transition-colors"
-            >
-              Scroll to Explore
-              <div className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center group-hover:bg-white group-hover:text-black transition-all">
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1V11M6 11L1 6M6 11L11 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-              </div>
-            </button>
-          </div>
+          {!isMobile && (
+            <div className="flex items-center gap-8 pt-4">
+              <button
+                onClick={() => window.scrollTo({ top: window.innerHeight * 0.8, behavior: 'smooth' })}
+                className="group flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.3em] text-white/40 hover:text-white transition-colors"
+              >
+                Scroll to Explore
+                <div className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center group-hover:bg-white group-hover:text-black transition-all">
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1V11M6 11L1 6M6 11L11 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                </div>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Hero 右侧 - 移动端简化 */}
@@ -169,7 +178,7 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
-        transition={{ duration: 1.2 }}
+        transition={{ duration: isMobile ? 0.8 : 1.2 }}
       >
         <div className="flex items-end justify-between mb-6 md:mb-12 px-1 md:px-2">
           <h2 className="text-base md:text-xl font-light tracking-widest text-white/40 uppercase">Latest Posts</h2>
@@ -182,14 +191,18 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
               key={post.id}
               className="group"
               variants={itemVariants}
-              whileHover={{ 
-                y: -2, // 减少悬浮距离
+              whileHover={!isMobile ? { 
+                y: -2,
                 transition: { duration: 0.2, ease: [0.4, 0.0, 0.2, 1] }
-              }}
+              } : {}}
             >
               <motion.div
                 className="rounded-xl md:rounded-2xl transition-all duration-300 overflow-hidden"
-                whileHover={{ scale: 1.01 }}
+                whileHover={!isMobile ? { scale: 1.01 } : {}}
+                style={{
+                  willChange: 'transform',
+                  backfaceVisibility: 'hidden'
+                }}
               >
                 <BlogCard post={post} onClick={() => onSelectPost(post)} />
               </motion.div>
@@ -209,6 +222,8 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
       </motion.div>
     </motion.div>
   );
-};
+});
+
+Feed.displayName = 'Feed';
 
 export default Feed;

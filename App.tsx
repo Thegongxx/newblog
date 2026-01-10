@@ -33,17 +33,30 @@ const AppInner = () => {
   const loading = postsLoading || notesLoading;
   const error = postsError?.message || notesError?.message || null;
 
-  // 滚动追踪 - 用于导航栏渐变
+  // 滚动追踪 - 用于导航栏渐变，移动端优化
   useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY);
+    let ticking = false;
+    
+    const handleScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          setScrollY(window.scrollY);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+    
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // 页面切换时滚动到顶部
+  // 页面切换时滚动到顶部 - 移动端优化
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'auto' });
-  }, [location.pathname]);
+    // 移动端使用instant，桌面端使用auto
+    const behavior = isMobile ? 'instant' : 'auto';
+    window.scrollTo({ top: 0, behavior: behavior as ScrollBehavior });
+  }, [location.pathname, isMobile]);
 
   const showToast = (msg: string, type = 'success') => {
     setToast({ show: true, msg, type });
@@ -94,12 +107,12 @@ const AppInner = () => {
     return <Intro onComplete={() => setShowIntro(false)} />;
   }
 
-  // 导航栏渐变计算
-  const scrollProgress = Math.min(scrollY / 80, 1);
-  const navOpacity = 0.02 + scrollProgress * 0.4;
-  const navBlur = isMobile ? 12 + scrollProgress * 12 : 20 + scrollProgress * 20;
-  const navBorder = scrollProgress * 0.15;
-  const navShadow = scrollProgress * 0.3;
+  // 导航栏渐变计算 - 移动端优化
+  const scrollProgress = Math.min(scrollY / (isMobile ? 60 : 80), 1);
+  const navOpacity = 0.02 + scrollProgress * (isMobile ? 0.3 : 0.4);
+  const navBlur = isMobile ? 8 + scrollProgress * 8 : 20 + scrollProgress * 20;
+  const navBorder = scrollProgress * (isMobile ? 0.1 : 0.15);
+  const navShadow = scrollProgress * (isMobile ? 0.2 : 0.3);
 
   return (
     <div className="min-h-screen selection:bg-white/20 selection:text-white isolate">
@@ -186,8 +199,15 @@ const AppInner = () => {
         </motion.div>
       </motion.nav>
 
-      {/* Main Content - 即时切换，无闪烁 */}
-      <main className="pt-32 md:pt-44 pb-24 md:pb-48 px-4 md:px-6 max-w-7xl mx-auto will-change-auto">
+      {/* Main Content - 移动端优化，减少重绘 */}
+      <main 
+        className="pt-32 md:pt-44 pb-24 md:pb-48 px-4 md:px-6 max-w-7xl mx-auto"
+        style={{
+          willChange: 'auto',
+          backfaceVisibility: 'hidden',
+          transform: 'translateZ(0)'
+        }}
+      >
         <ErrorBoundary>
           <Routes location={location}>
             <Route path="/" element={<Feed posts={posts} loading={loading} onSelectPost={(p) => navigate(`/post/${p.slug}`)} />} />

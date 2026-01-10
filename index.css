@@ -56,6 +56,16 @@
     contain: layout style paint;
     isolation: isolate;
   }
+
+  /* 移动端性能优化 */
+  .mobile-optimized {
+    -webkit-transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    -webkit-perspective: 1000px;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
 }
 
 /* 动画关键帧优化 */
@@ -79,9 +89,53 @@
   }
 }
 
+/* 移动端优化 */
+@media (max-width: 768px) {
+  /* 减少移动端的模糊效果 */
+  .backdrop-blur-xl {
+    backdrop-filter: blur(8px) !important;
+  }
+  
+  .backdrop-blur-3xl {
+    backdrop-filter: blur(12px) !important;
+  }
+  
+  /* 移动端减少阴影 */
+  .shadow-2xl {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+  }
+  
+  /* 移动端优化transform */
+  .group:hover .group-hover\:scale-103 {
+    transform: scale(1.01) !important;
+  }
+  
+  /* 移动端禁用某些hover效果 */
+  .group:hover .group-hover\:opacity-100 {
+    opacity: 1 !important;
+  }
+}
+
 /* 触摸设备优化 */
 @media (hover: none) and (pointer: coarse) {
-  .assistant-button:hover {
+  .hover\:scale-105:hover {
     transform: none !important;
+  }
+  
+  .hover\:bg-white\/10:hover {
+    background-color: transparent !important;
+  }
+  
+  /* 移动端点击反馈 */
+  .group:active .group-hover\:scale-103 {
+    transform: scale(0.98) !important;
+    transition: transform 0.1s ease-out !important;
+  }
+}
+
+/* 高DPI屏幕优化 */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .text-shadow {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
 }

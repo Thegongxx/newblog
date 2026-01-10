@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { engagementApi, supabase } from '../services/supabaseService';
 import { getBrowserFingerprint, checkIfLikedLocal, setLikedLocal } from '../utils/engagement';
 
@@ -12,9 +13,14 @@ interface LikeButtonProps {
 export default function LikeButton({ targetType, targetId, initialCount = 0, className = "" }: LikeButtonProps) {
     const [liked, setLiked] = useState(false);
     const [count, setCount] = useState(initialCount);
-    const [animating, setAnimating] = useState(false);
+    const [isAnimating, setIsAnimating] = useState(false);
     const [locked, setLocked] = useState(false);
-    const [toast, setToast] = useState<{ message: string; visible: boolean }>({ message: '', visible: false });
+    const [dailyCount, setDailyCount] = useState(0);
+    const [toast, setToast] = useState<{ message: string; visible: boolean; type: 'success' | 'warning' | 'info' }>({ 
+        message: '', 
+        visible: false, 
+        type: 'success' 
+    });
 
     // 持久化存储 Key
     const getStorageKey = () => `aura_like_limit_${targetType}_${targetId}_${new Date().toISOString().split('T')[0]}`;
@@ -30,6 +36,7 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
 
                 // 2. 检查本地持久化锁定
                 const localCount = parseInt(localStorage.getItem(getStorageKey()) || '0');
+                setDailyCount(localCount);
                 if (localCount >= 5) {
                     setLocked(true);
                 }
@@ -48,6 +55,7 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                 const dbCount = data?.reduce((acc, curr) => acc + (curr.count || 0), 0) || 0;
                 if (dbCount >= 5) {
                     setLocked(true);
+                    setDailyCount(dbCount);
                     localStorage.setItem(getStorageKey(), dbCount.toString());
                 }
             } catch (err) {
@@ -57,16 +65,19 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
         fetchInitial();
     }, [targetType, targetId]);
 
-    const showToast = (message: string) => {
-        setToast({ message, visible: true });
-        setTimeout(() => setToast(prev => ({ ...prev, visible: false })), 2000);
+    const showToast = (message: string, type: 'success' | 'warning' | 'info' = 'success') => {
+        setToast({ message, visible: true, type });
+        setTimeout(() => setToast(prev => ({ ...prev, visible: false })), 3000);
     };
 
     const handleLike = async (e: React.MouseEvent) => {
         e.stopPropagation();
 
+        // 防止动画期间重复点击
+        if (isAnimating) return;
+
         if (locked) {
-            showToast('今日已达上限 🌿');
+            showToast(`今日已点赞 ${dailyCount}/5 次 🌿`, 'warning');
             return;
         }
 
@@ -74,23 +85,35 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
         const currentLocal = parseInt(localStorage.getItem(getStorageKey()) || '0');
         if (currentLocal >= 5) {
             setLocked(true);
-            showToast('今日已达上限 🌿');
+            showToast(`今日已点赞 ${currentLocal}/5 次 🌿`, 'warning');
             return;
         }
 
+        // 开始动画
+        setIsAnimating(true);
+        
         // UI 立即增加反馈
         setCount(prev => prev + 1);
         const nextLocal = currentLocal + 1;
+        setDailyCount(nextLocal);
         localStorage.setItem(getStorageKey(), nextLocal.toString());
 
         if (nextLocal >= 5) {
             setLocked(true);
+            showToast(`今日点赞已达上限 (${nextLocal}/5) 🎉`, 'info');
+        } else {
+            showToast(`点赞成功！今日还可点赞 ${5 - nextLocal} 次 ✨`, 'success');
         }
 
-        // 触发物理动效
-        setAnimating(true);
-        setTimeout(() => setAnimating(false), 600);
-        if (window.navigator && window.navigator.vibrate) window.navigator.vibrate(10);
+        // 触发物理反馈
+        if (window.navigator && window.navigator.vibrate) {
+            window.navigator.vibrate([10, 50, 10]);
+        }
+
+        // 动画完成后重置状态
+        setTimeout(() => {
+            setIsAnimating(false);
+        }, 800);
 
         // 后端同步
         try {
@@ -102,46 +125,99 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
             // 如果后端确认已达上限，强制同步锁定
             if (result.count >= 5) {
                 setLocked(true);
+                setDailyCount(5);
                 localStorage.setItem(getStorageKey(), '5');
             }
         } catch (err: any) {
             if (err.message === 'DAILY_LIMIT_REACHED') {
                 setLocked(true);
+                setDailyCount(5);
                 localStorage.setItem(getStorageKey(), '5');
-                showToast('今日已达上限 🌿');
+                showToast('今日点赞已达上限 🌿', 'warning');
             } else {
                 console.error('Failed to toggle like:', err);
                 // Rollback UI count and local storage if other errors occur
                 setCount(prev => prev - 1);
+                setDailyCount(currentLocal);
                 localStorage.setItem(getStorageKey(), currentLocal.toString());
+                showToast('点赞失败，请稍后重试 😅', 'warning');
             }
         }
     };
 
     return (
         <div className="relative inline-block">
-            {/* Apple 风格 Toast */}
-            {toast.visible && (
-                <div className="absolute -top-16 left-1/2 -translate-x-1/2 z-50 animate-in fade-in zoom-in slide-in-from-bottom-2 duration-300">
-                    <div className="bg-white/10 backdrop-blur-2xl border border-white/20 px-4 py-2 rounded-2xl shadow-2xl">
-                        <span className="text-xs font-bold text-white tracking-widest whitespace-nowrap uppercase">{toast.message}</span>
-                    </div>
-                </div>
-            )}
+            {/* Material Design风格的Toast */}
+            <AnimatePresence>
+                {toast.visible && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 10, scale: 0.9 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -10, scale: 0.9 }}
+                        transition={{
+                            duration: 0.2,
+                            ease: [0.4, 0.0, 0.2, 1]
+                        }}
+                        className="absolute -top-16 left-1/2 -translate-x-1/2 z-50 pointer-events-none"
+                    >
+                        <div className={`px-4 py-2 rounded-2xl shadow-lg backdrop-blur-xl border text-xs font-medium whitespace-nowrap ${
+                            toast.type === 'success' ? 'bg-green-500/90 border-green-400/50 text-white' :
+                            toast.type === 'warning' ? 'bg-amber-500/90 border-amber-400/50 text-white' :
+                            'bg-blue-500/90 border-blue-400/50 text-white'
+                        }`}>
+                            {toast.message}
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
-            <button
+            {/* Material Design风格的点赞按钮 */}
+            <motion.button
                 onClick={handleLike}
-                disabled={false} // 改为不禁用，以便展示 Toast 提示
-                className={`group flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-500 ${locked ? 'opacity-40 grayscale-[0.5]' : 'active:scale-95'} ${liked
-                    ? 'bg-rose-500/10 text-rose-500 border-rose-500/20'
-                    : 'bg-white/5 text-white/40 hover:text-white/60 hover:bg-white/10 border-white/5'
-                    } border ${className}`}
+                disabled={isAnimating}
+                className={`group relative flex items-center gap-2 px-3 py-2 rounded-full transition-all duration-200 overflow-hidden ${
+                    locked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                } ${
+                    liked
+                        ? 'bg-rose-50/10 text-rose-400 border-rose-400/30'
+                        : 'bg-white/5 text-white/50 hover:text-white/70 hover:bg-white/10 border-white/10'
+                } border ${className}`}
+                whileHover={!locked && !isAnimating ? {
+                    scale: 1.02,
+                    transition: { duration: 0.15, ease: [0.4, 0.0, 0.2, 1] }
+                } : {}}
+                whileTap={!locked && !isAnimating ? {
+                    scale: 0.98,
+                    transition: { duration: 0.1, ease: [0.4, 0.0, 0.2, 1] }
+                } : {}}
+                aria-label={locked ? `今日已点赞 ${dailyCount}/5 次` : `点赞 (今日 ${dailyCount}/5)`}
             >
+                {/* Ripple效果 */}
+                {!locked && (
+                    <motion.div
+                        className="absolute inset-0 bg-white/10 rounded-full"
+                        initial={{ scale: 0, opacity: 0 }}
+                        whileTap={{ scale: 1, opacity: 1 }}
+                        transition={{ duration: 0.2 }}
+                    />
+                )}
+
+                {/* 爱心图标 */}
                 <div className="relative">
-                    <svg
-                        className={`w-5 h-5 transition-all duration-500 ${liked ? 'fill-current scale-110' : 'fill-none scale-100'}`}
+                    <motion.svg
+                        className={`w-4 h-4 transition-all duration-200 ${
+                            liked ? 'fill-current scale-110' : 'fill-none scale-100'
+                        }`}
                         stroke="currentColor"
                         viewBox="0 0 24 24"
+                        animate={isAnimating ? {
+                            scale: [1, 1.3, 1],
+                            rotate: [0, -10, 10, 0]
+                        } : {}}
+                        transition={{
+                            duration: 0.6,
+                            ease: [0.4, 0.0, 0.2, 1]
+                        }}
                     >
                         <path
                             strokeLinecap="round"
@@ -149,259 +225,116 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                             strokeWidth="1.5"
                             d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
                         />
-                    </svg>
+                    </motion.svg>
 
-                    {animating && (
-                        <div className="absolute inset-0 animate-ping">
-                            <svg className="w-5 h-5 fill-current text-rose-500 opacity-50" viewBox="0 0 24 24">
-                                <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                            </svg>
-                        </div>
+                    {/* 点击时的脉冲效果 */}
+                    {isAnimating && (
+                        <motion.div
+                            className="absolute inset-0 border-2 border-rose-400/50 rounded-full"
+                            initial={{ scale: 1, opacity: 0.8 }}
+                            animate={{ scale: 2.5, opacity: 0 }}
+                            transition={{ duration: 0.6, ease: [0.4, 0.0, 0.2, 1] }}
+                        />
                     )}
                 </div>
 
-                <span className="text-sm font-bold tracking-tight tabular-nums transition-all">
+                {/* 计数显示 */}
+                <motion.span 
+                    className="text-xs font-medium tabular-nums"
+                    animate={isAnimating ? { scale: [1, 1.2, 1] } : {}}
+                    transition={{ duration: 0.3, ease: [0.4, 0.0, 0.2, 1] }}
+                >
                     {count}
-                </span>
+                </motion.span>
 
-                {/* 惊喜粒子爆炸效果 - 升级版 */}
-                {!locked && animating && (
+                {/* Google风格的粒子爆炸效果 */}
+                {!locked && isAnimating && (
                     <div className="absolute inset-0 pointer-events-none">
-                        {/* 主要爆炸粒子 - 增加数量和变化 */}
-                        {[...Array(20)].map((_, i) => (
-                            <div
-                                key={`main-${i}`}
-                                className="absolute left-1/2 top-1/2 animate-heart-explosion"
-                                style={{
-                                    '--angle': `${(360 / 20) * i}deg`,
-                                    '--distance': `${Math.random() * 50 + 70}px`,
-                                    '--size': `${Math.random() * 4 + 2}px`,
-                                    '--delay': `${Math.random() * 0.15}s`,
-                                    '--duration': `${0.8 + Math.random() * 0.6}s`,
-                                    width: 'var(--size)',
-                                    height: 'var(--size)',
-                                } as React.CSSProperties}
-                            >
-                                <div className={`w-full h-full rounded-full shadow-lg ${
-                                    i % 3 === 0 ? 'bg-gradient-to-r from-rose-400 to-pink-500' :
-                                    i % 3 === 1 ? 'bg-gradient-to-r from-purple-400 to-pink-400' :
-                                    'bg-gradient-to-r from-yellow-400 to-orange-500'
-                                }`} />
-                            </div>
-                        ))}
-                        
-                        {/* 小星星粒子 - 增加闪烁效果 */}
+                        {/* 主要粒子 */}
                         {[...Array(12)].map((_, i) => (
-                            <div
-                                key={`star-${i}`}
-                                className="absolute left-1/2 top-1/2 animate-star-twinkle"
-                                style={{
-                                    '--angle': `${30 * i}deg`,
-                                    '--distance': `${Math.random() * 40 + 90}px`,
-                                    '--delay': `${0.2 + Math.random() * 0.4}s`,
-                                    '--duration': `${1.2 + Math.random() * 0.8}s`,
-                                } as React.CSSProperties}
-                            >
-                                <div className={`text-xs ${
-                                    i % 4 === 0 ? 'text-yellow-300' :
-                                    i % 4 === 1 ? 'text-blue-300' :
-                                    i % 4 === 2 ? 'text-green-300' :
-                                    'text-purple-300'
-                                }`}>
-                                    {i % 3 === 0 ? '✨' : i % 3 === 1 ? '⭐' : '💫'}
-                                </div>
-                            </div>
+                            <motion.div
+                                key={`particle-${i}`}
+                                className="absolute left-1/2 top-1/2 w-1 h-1 bg-rose-400 rounded-full"
+                                initial={{ scale: 0, opacity: 0 }}
+                                animate={{
+                                    scale: [0, 1, 0],
+                                    opacity: [0, 1, 0],
+                                    x: Math.cos((i * 30) * Math.PI / 180) * (20 + Math.random() * 15),
+                                    y: Math.sin((i * 30) * Math.PI / 180) * (20 + Math.random() * 15),
+                                }}
+                                transition={{
+                                    duration: 0.6,
+                                    ease: [0.4, 0.0, 0.2, 1],
+                                    delay: Math.random() * 0.1
+                                }}
+                            />
                         ))}
-                        
-                        {/* 心形粒子 - 增加种类 */}
-                        {[...Array(8)].map((_, i) => (
-                            <div
-                                key={`heart-${i}`}
-                                className="absolute left-1/2 top-1/2 animate-heart-float"
-                                style={{
-                                    '--angle': `${45 * i}deg`,
-                                    '--distance': `${Math.random() * 60 + 80}px`,
-                                    '--delay': `${0.1 + Math.random() * 0.3}s`,
-                                    '--duration': `${1.5 + Math.random() * 0.7}s`,
-                                } as React.CSSProperties}
-                            >
-                                <div className={`text-xs ${
-                                    i % 4 === 0 ? 'text-rose-400' :
-                                    i % 4 === 1 ? 'text-pink-400' :
-                                    i % 4 === 2 ? 'text-red-400' :
-                                    'text-purple-400'
-                                }`}>
-                                    {i % 4 === 0 ? '💖' : i % 4 === 1 ? '💕' : i % 4 === 2 ? '❤️' : '💜'}
-                                </div>
-                            </div>
-                        ))}
-                        
-                        {/* 彩虹光环效果 - 多层 */}
-                        <div className="absolute left-1/2 top-1/2 animate-ring-expand">
-                            <div className="w-16 h-16 border-2 border-rose-400/40 rounded-full -translate-x-1/2 -translate-y-1/2" />
-                        </div>
-                        <div className="absolute left-1/2 top-1/2 animate-ring-expand-delayed">
-                            <div className="w-20 h-20 border border-pink-300/30 rounded-full -translate-x-1/2 -translate-y-1/2" />
-                        </div>
-                        <div className="absolute left-1/2 top-1/2 animate-ring-expand-slow">
-                            <div className="w-24 h-24 border border-purple-300/20 rounded-full -translate-x-1/2 -translate-y-1/2" />
-                        </div>
-                        
-                        {/* 魔法闪光效果 */}
+
+                        {/* 心形emoji粒子 */}
                         {[...Array(6)].map((_, i) => (
-                            <div
-                                key={`sparkle-${i}`}
-                                className="absolute left-1/2 top-1/2 animate-sparkle-burst"
-                                style={{
-                                    '--angle': `${60 * i}deg`,
-                                    '--distance': `${Math.random() * 35 + 50}px`,
-                                    '--delay': `${0.3 + Math.random() * 0.2}s`,
-                                    '--duration': `${0.6 + Math.random() * 0.4}s`,
-                                } as React.CSSProperties}
+                            <motion.div
+                                key={`heart-${i}`}
+                                className="absolute left-1/2 top-1/2 text-xs"
+                                initial={{ scale: 0, opacity: 0 }}
+                                animate={{
+                                    scale: [0, 1.2, 0],
+                                    opacity: [0, 1, 0],
+                                    x: Math.cos((i * 60) * Math.PI / 180) * (25 + Math.random() * 10),
+                                    y: Math.sin((i * 60) * Math.PI / 180) * (25 + Math.random() * 10),
+                                    rotate: [0, 360]
+                                }}
+                                transition={{
+                                    duration: 0.8,
+                                    ease: [0.4, 0.0, 0.2, 1],
+                                    delay: 0.1 + Math.random() * 0.2
+                                }}
                             >
-                                <div className="w-1 h-4 bg-gradient-to-t from-transparent via-white to-transparent opacity-80 rounded-full" />
-                            </div>
+                                {['💖', '💕', '❤️', '💜', '🧡', '💛'][i]}
+                            </motion.div>
+                        ))}
+
+                        {/* 闪光效果 */}
+                        {[...Array(4)].map((_, i) => (
+                            <motion.div
+                                key={`sparkle-${i}`}
+                                className="absolute left-1/2 top-1/2 w-0.5 h-3 bg-gradient-to-t from-transparent via-white to-transparent rounded-full"
+                                initial={{ scale: 0, opacity: 0, rotate: i * 45 }}
+                                animate={{
+                                    scale: [0, 1, 0],
+                                    opacity: [0, 0.8, 0],
+                                    x: Math.cos((i * 90) * Math.PI / 180) * 15,
+                                    y: Math.sin((i * 90) * Math.PI / 180) * 15,
+                                }}
+                                transition={{
+                                    duration: 0.4,
+                                    ease: [0.4, 0.0, 0.2, 1],
+                                    delay: 0.2
+                                }}
+                            />
                         ))}
                     </div>
                 )}
-            </button>
+            </motion.button>
 
-            <style>{`
-                @keyframes heart-explosion {
-                    0% {
-                        transform: translate(-50%, -50%) rotate(0deg) scale(0);
-                        opacity: 0;
-                    }
-                    15% {
-                        opacity: 1;
-                        transform: translate(-50%, -50%) rotate(var(--angle)) translateY(0) scale(1.5);
-                    }
-                    100% {
-                        transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(-1 * var(--distance))) scale(0);
-                        opacity: 0;
-                    }
-                }
-                
-                @keyframes star-twinkle {
-                    0% {
-                        transform: translate(-50%, -50%) rotate(0deg) scale(0);
-                        opacity: 0;
-                    }
-                    20% {
-                        opacity: 1;
-                        transform: translate(-50%, -50%) rotate(var(--angle)) translateY(-10px) scale(1.2);
-                    }
-                    50% {
-                        opacity: 0.8;
-                        transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(-0.5 * var(--distance))) scale(1.5);
-                    }
-                    100% {
-                        transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(-1 * var(--distance))) scale(0.5) rotate(180deg);
-                        opacity: 0;
-                    }
-                }
-                
-                @keyframes heart-float {
-                    0% {
-                        transform: translate(-50%, -50%) scale(0) rotate(0deg);
-                        opacity: 0;
-                    }
-                    25% {
-                        opacity: 1;
-                        transform: translate(-50%, -50%) scale(1.3) rotate(var(--angle));
-                    }
-                    75% {
-                        opacity: 0.6;
-                        transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(-0.7 * var(--distance))) scale(1.1) rotate(180deg);
-                    }
-                    100% {
-                        transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(-1 * var(--distance))) scale(0.8) rotate(360deg);
-                        opacity: 0;
-                    }
-                }
-                
-                @keyframes ring-expand {
-                    0% {
-                        transform: translate(-50%, -50%) scale(0);
-                        opacity: 0.8;
-                    }
-                    100% {
-                        transform: translate(-50%, -50%) scale(2);
-                        opacity: 0;
-                    }
-                }
-                
-                @keyframes ring-expand-delayed {
-                    0% {
-                        transform: translate(-50%, -50%) scale(0);
-                        opacity: 0.6;
-                    }
-                    100% {
-                        transform: translate(-50%, -50%) scale(2.5);
-                        opacity: 0;
-                    }
-                }
-                
-                @keyframes ring-expand-slow {
-                    0% {
-                        transform: translate(-50%, -50%) scale(0);
-                        opacity: 0.4;
-                    }
-                    100% {
-                        transform: translate(-50%, -50%) scale(3);
-                        opacity: 0;
-                    }
-                }
-                
-                @keyframes sparkle-burst {
-                    0% {
-                        transform: translate(-50%, -50%) rotate(var(--angle)) scale(0);
-                        opacity: 0;
-                    }
-                    30% {
-                        opacity: 1;
-                        transform: translate(-50%, -50%) rotate(var(--angle)) scale(1);
-                    }
-                    100% {
-                        transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(-1 * var(--distance))) scale(0.3);
-                        opacity: 0;
-                    }
-                }
-                
-                .animate-heart-explosion {
-                    animation: heart-explosion var(--duration) cubic-bezier(0.16, 1, 0.3, 1) forwards;
-                    animation-delay: var(--delay);
-                }
-                
-                .animate-star-twinkle {
-                    animation: star-twinkle var(--duration) cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-                    animation-delay: var(--delay);
-                }
-                
-                .animate-heart-float {
-                    animation: heart-float var(--duration) cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-                    animation-delay: var(--delay);
-                }
-                
-                .animate-ring-expand {
-                    animation: ring-expand 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-                }
-                
-                .animate-ring-expand-delayed {
-                    animation: ring-expand-delayed 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-                    animation-delay: 0.2s;
-                }
-                
-                .animate-ring-expand-slow {
-                    animation: ring-expand-slow 1.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-                    animation-delay: 0.4s;
-                }
-                
-                .animate-sparkle-burst {
-                    animation: sparkle-burst var(--duration) cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-                    animation-delay: var(--delay);
-                }
-            `}</style>
+            {/* 点赞进度指示器 (仅在有点赞时显示) */}
+            {dailyCount > 0 && (
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="absolute -bottom-8 left-1/2 -translate-x-1/2 pointer-events-none"
+                >
+                    <div className="flex items-center gap-1 px-2 py-1 bg-black/20 backdrop-blur-sm rounded-full border border-white/10">
+                        {[...Array(5)].map((_, i) => (
+                            <div
+                                key={i}
+                                className={`w-1 h-1 rounded-full transition-all duration-200 ${
+                                    i < dailyCount ? 'bg-rose-400' : 'bg-white/20'
+                                }`}
+                            />
+                        ))}
+                    </div>
+                </motion.div>
+            )}
         </div>
     );
 }

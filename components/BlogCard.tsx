@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Post } from '../types';
 import LikeButton from './LikeButton';
 
@@ -8,18 +8,29 @@ interface BlogCardProps {
   featured?: boolean;
 }
 
-const BlogCard: React.FC<BlogCardProps> = ({ post, onClick, featured }) => {
+const BlogCard: React.FC<BlogCardProps> = memo(({ post, onClick, featured }) => {
   return (
     <div
-      className={`group relative ${featured ? 'h-[280px] md:h-[380px]' : 'h-[240px] md:h-[320px]'} bg-white/[0.03] backdrop-blur-3xl rounded-xl md:rounded-2xl transition-all duration-300 hover:bg-white/[0.05] cursor-pointer overflow-hidden will-change-transform`}
+      className={`group relative ${featured ? 'h-[280px] md:h-[380px]' : 'h-[240px] md:h-[320px]'} bg-white/[0.03] backdrop-blur-3xl rounded-xl md:rounded-2xl transition-all duration-300 hover:bg-white/[0.05] cursor-pointer overflow-hidden`}
       onClick={onClick}
+      style={{ 
+        willChange: 'transform',
+        backfaceVisibility: 'hidden',
+        transform: 'translateZ(0)'
+      }}
     >
-      {/* 全幅封面图容器 */}
+      {/* 全幅封面图容器 - 优化图片加载 */}
       <div className="absolute inset-0 overflow-hidden rounded-xl md:rounded-2xl">
         <img
           src={post.image}
           alt={post.title}
-          className="w-full h-full object-cover transition-all duration-500 group-hover:scale-103 grayscale-[0.1] group-hover:grayscale-0 opacity-60 group-hover:opacity-80"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02] grayscale-[0.1] group-hover:grayscale-0 opacity-60 group-hover:opacity-80"
+          loading="lazy"
+          decoding="async"
+          style={{
+            willChange: 'transform',
+            backfaceVisibility: 'hidden'
+          }}
         />
         {/* 渐变遮罩 */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
@@ -59,6 +70,8 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, onClick, featured }) => {
       </div>
     </div>
   );
-};
+});
+
+BlogCard.displayName = 'BlogCard';
 
 export default BlogCard;
