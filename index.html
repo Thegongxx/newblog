@@ -130,32 +130,6 @@
             0% { transform: translate(-50%, -50%) scale(0); opacity: 0.6; }
             100% { transform: translate(-50%, -50%) scale(8); opacity: 0; }
         }
-
-        /* 彩蛋：双击显示隐藏消息 */
-        .easter-egg-msg {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0.9);
-            padding: 16px 32px;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 14px;
-            font-weight: 500;
-            letter-spacing: 0.05em;
-            z-index: 9999;
-            opacity: 0;
-            pointer-events: none;
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .easter-egg-msg.show {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-        }
     </style>
 <script type="importmap">
 {
@@ -170,7 +144,6 @@
 </head>
 <body>
     <div class="aura-bg"></div>
-    <div class="easter-egg-msg">✨ You found a secret!</div>
     <div id="root"></div>
     <script>
         // 丝滑鼠标跟随光晕 - 使用 requestAnimationFrame 节流
@@ -205,30 +178,6 @@
             ripple.style.top = e.clientY + 'px';
             document.body.appendChild(ripple);
             setTimeout(() => ripple.remove(), 600);
-        });
-
-        // 彩蛋：快速点击 5 次显示隐藏消息
-        let clickCount = 0, clickTimer = null;
-        const easterEgg = document.querySelector('.easter-egg-msg');
-        const messages = [
-            '✨ You found a secret!',
-            '🌙 The night is young...',
-            '💫 Keep exploring!',
-            '🎯 Nice clicks!',
-            '🔮 Magic happens here'
-        ];
-        
-        document.addEventListener('click', () => {
-            clickCount++;
-            clearTimeout(clickTimer);
-            clickTimer = setTimeout(() => clickCount = 0, 800);
-            
-            if (clickCount >= 5) {
-                clickCount = 0;
-                easterEgg.textContent = messages[Math.floor(Math.random() * messages.length)];
-                easterEgg.classList.add('show');
-                setTimeout(() => easterEgg.classList.remove('show'), 2000);
-            }
         });
     </script>
     <script type="module" src="./index.tsx"></script>
