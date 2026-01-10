@@ -2,6 +2,7 @@ import React, { useMemo, memo } from 'react';
 import { motion } from 'framer-motion';
 import BlogCard from '../components/BlogCard';
 import HomepageComments from '../components/HomepageComments';
+import LikeButton from '../components/LikeButton';
 import { Post } from '../types';
 import { getAllNotes } from '../utils/notes';
 import { useIsMobile } from '../hooks/useResponsive';
@@ -107,9 +108,13 @@ const Feed: React.FC<FeedProps> = memo(({ posts, loading, onSelectPost }) => {
                     <span className="text-[10px] text-white/30 uppercase tracking-wide">
                       {post.readingTime}
                     </span>
-                    <div className="text-xs text-white/40">
-                      {post.likes_count || 0} ♡
-                    </div>
+                    {/* 使用统一的点赞按钮 */}
+                    <LikeButton 
+                      targetType="post" 
+                      targetId={post.id} 
+                      initialCount={post.likes_count || 0}
+                      className="!bg-transparent !border-none !px-1 !py-0" 
+                    />
                   </div>
                 </div>
               </div>

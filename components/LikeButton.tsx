@@ -13,6 +13,7 @@ interface LikeButtonProps {
 
 export default function LikeButton({ targetType, targetId, initialCount = 0, className = "" }: LikeButtonProps) {
     const [liked, setLiked] = useState(false);
+    const [count, setCount] = useState(initialCount);
     const [isAnimating, setIsAnimating] = useState(false);
     const [locked, setLocked] = useState(false);
     const [dailyCount, setDailyCount] = useState(0);
@@ -30,6 +31,9 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
     useEffect(() => {
         const fetchInitial = async () => {
             try {
+                // 获取总数
+                const total = await engagementApi.getLikeCount(targetType, targetId);
+                setCount(total);
                 const isLiked = checkIfLikedLocal(targetType, targetId);
                 setLiked(isLiked);
 
@@ -66,7 +70,7 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
 
     const showToast = (message: string, type: 'success' | 'warning' | 'info' = 'success') => {
         setToast({ message, visible: true, type });
-        setTimeout(() => setToast(prev => ({ ...prev, visible: false })), 3000);
+        setTimeout(() => setToast(prev => ({ ...prev, visible: false })), 2500);
     };
 
     const handleLike = async (e: React.MouseEvent) => {
@@ -76,7 +80,7 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
         if (isAnimating) return;
 
         if (locked) {
-            showToast(`今日已点赞 ${dailyCount}/5 次 🌿`, 'warning');
+            showToast(`今日已点赞 ${dailyCount}/5 次`, 'warning');
             return;
         }
 
@@ -84,22 +88,24 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
         const currentLocal = parseInt(localStorage.getItem(getStorageKey()) || '0');
         if (currentLocal >= 5) {
             setLocked(true);
-            showToast(`今日已点赞 ${currentLocal}/5 次 🌿`, 'warning');
+            showToast(`今日已点赞 ${currentLocal}/5 次`, 'warning');
             return;
         }
 
         // 开始动画
         setIsAnimating(true);
         
+        // UI 立即增加反馈
+        setCount(prev => prev + 1);
         const nextLocal = currentLocal + 1;
         setDailyCount(nextLocal);
         localStorage.setItem(getStorageKey(), nextLocal.toString());
 
         if (nextLocal >= 5) {
             setLocked(true);
-            showToast(`今日点赞已达上限 (${nextLocal}/5) 🎉`, 'info');
+            showToast(`今日点赞已达上限`, 'info');
         } else {
-            showToast(`点赞成功！今日还可点赞 ${5 - nextLocal} 次 ✨`, 'success');
+            showToast(`点赞成功！还可点赞 ${5 - nextLocal} 次`, 'success');
         }
 
         // 触发物理反馈
@@ -129,54 +135,74 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                 setLocked(true);
                 setDailyCount(5);
                 localStorage.setItem(getStorageKey(), '5');
-                showToast('今日点赞已达上限 🌿', 'warning');
+                showToast('今日点赞已达上限', 'warning');
             } else {
                 console.error('Failed to toggle like:', err);
+                setCount(prev => prev - 1);
                 setDailyCount(currentLocal);
                 localStorage.setItem(getStorageKey(), currentLocal.toString());
-                showToast('点赞失败，请稍后重试 😅', 'warning');
+                showToast('点赞失败，请稍后重试', 'warning');
             }
         }
     };
 
     return (
         <div className="relative inline-block">
-            {/* Material Design风格的Toast - 修复移动端位置 */}
+            {/* Google风格的灵动岛透明提示 */}
             <AnimatePresence>
                 {toast.visible && (
                     <motion.div
-                        initial={{ opacity: 0, y: 10, scale: 0.9 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: -10, scale: 0.9 }}
+                        initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.8, y: -10 }}
                         transition={{
-                            duration: 0.2,
-                            ease: [0.4, 0.0, 0.2, 1]
+                            type: "spring",
+                            stiffness: 500,
+                            damping: 30,
+                            mass: 0.8
                         }}
-                        className="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] pointer-events-none"
+                        className="fixed top-6 left-1/2 -translate-x-1/2 z-[9999] pointer-events-none"
                         style={{
                             position: 'fixed',
-                            top: '1rem',
+                            top: isMobile ? '1.5rem' : '2rem',
                             left: '50%',
                             transform: 'translateX(-50%)',
                             zIndex: 9999
                         }}
                     >
-                        <div className={`px-3 py-2 rounded-xl shadow-lg backdrop-blur-xl border text-xs font-medium whitespace-nowrap ${
-                            toast.type === 'success' ? 'bg-green-500/90 border-green-400/50 text-white' :
+                        <div className={`px-6 py-3 rounded-full backdrop-blur-2xl border shadow-2xl text-sm font-medium whitespace-nowrap ${
+                            toast.type === 'success' ? 'bg-black/80 border-white/20 text-white' :
                             toast.type === 'warning' ? 'bg-amber-500/90 border-amber-400/50 text-white' :
                             'bg-blue-500/90 border-blue-400/50 text-white'
-                        }`}>
-                            {toast.message}
+                        }`}
+                        style={{
+                            backdropFilter: 'blur(20px) saturate(180%)',
+                            WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
+                        }}>
+                            <div className="flex items-center gap-2">
+                                <motion.div
+                                    className={`w-2 h-2 rounded-full ${
+                                        toast.type === 'success' ? 'bg-green-400' : 
+                                        toast.type === 'warning' ? 'bg-amber-300' : 'bg-blue-300'
+                                    }`}
+                                    animate={{ scale: [1, 1.2, 1] }}
+                                    transition={{ duration: 1, repeat: Infinity }}
+                                />
+                                <span>{toast.message}</span>
+                            </div>
                         </div>
                     </motion.div>
                 )}
             </AnimatePresence>
 
-            {/* Google风格的极简点赞按钮 - 全平台统一 */}
+            {/* Google风格的点赞按钮 - 带计数 */}
             <motion.button
                 onClick={handleLike}
                 disabled={isAnimating}
-                className={`group relative flex items-center justify-center w-8 h-8 rounded-full transition-all duration-200 overflow-hidden ${
+                className={`group relative flex items-center gap-2 ${
+                    isMobile ? 'px-2 py-1' : 'px-3 py-2'
+                } rounded-full transition-all duration-200 overflow-hidden ${
                     locked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
                 } ${
                     liked
@@ -184,14 +210,14 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                         : 'bg-white/5 text-white/50 hover:text-white/70 hover:bg-white/10'
                 } ${className}`}
                 whileHover={!locked && !isAnimating ? {
-                    scale: 1.1,
+                    scale: 1.05,
                     transition: { duration: 0.15, ease: [0.4, 0.0, 0.2, 1] }
                 } : {}}
                 whileTap={!locked && !isAnimating ? {
-                    scale: 0.9,
+                    scale: 0.95,
                     transition: { duration: 0.1, ease: [0.4, 0.0, 0.2, 1] }
                 } : {}}
-                aria-label={locked ? `今日已点赞 ${dailyCount}/5 次` : `点赞 (今日 ${dailyCount}/5)`}
+                aria-label={locked ? `今日已点赞 ${dailyCount}/5 次` : `点赞 (${count})`}
             >
                 {/* Ripple效果 */}
                 {!locked && (
@@ -205,7 +231,7 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
 
                 {/* 爱心图标 */}
                 <motion.svg
-                    className={`w-4 h-4 transition-all duration-200 ${
+                    className={`${isMobile ? 'w-3 h-3' : 'w-4 h-4'} transition-all duration-200 ${
                         liked ? 'fill-current scale-110' : 'fill-none scale-100'
                     }`}
                     stroke="currentColor"
@@ -227,7 +253,16 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                     />
                 </motion.svg>
 
-                {/* Google风格的微妙粒子效果 - 全平台统一 */}
+                {/* 计数显示 */}
+                <motion.span 
+                    className={`${isMobile ? 'text-xs' : 'text-sm'} font-medium tabular-nums`}
+                    animate={isAnimating ? { scale: [1, 1.2, 1] } : {}}
+                    transition={{ duration: 0.3, ease: [0.4, 0.0, 0.2, 1] }}
+                >
+                    {count}
+                </motion.span>
+
+                {/* Google风格的微妙粒子效果 */}
                 {!locked && isAnimating && (
                     <div className="absolute inset-0 pointer-events-none">
                         {/* 微妙的圆形粒子 */}
@@ -286,26 +321,6 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                     </div>
                 )}
             </motion.button>
-
-            {/* 点赞进度指示器 - 全平台统一，更简洁 */}
-            {dailyCount > 0 && (
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="absolute -bottom-6 left-1/2 -translate-x-1/2 pointer-events-none"
-                >
-                    <div className="flex items-center gap-0.5">
-                        {[...Array(5)].map((_, i) => (
-                            <div
-                                key={i}
-                                className={`w-0.5 h-0.5 rounded-full transition-all duration-200 ${
-                                    i < dailyCount ? 'bg-rose-400/60' : 'bg-white/10'
-                                }`}
-                            />
-                        ))}
-                    </div>
-                </motion.div>
-            )}
         </div>
     );
 }
