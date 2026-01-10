@@ -164,47 +164,163 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                     {count}
                 </span>
 
-                {/* 悬浮粒子扩散效果 */}
+                {/* 惊喜粒子爆炸效果 */}
                 {!locked && animating && (
                     <div className="absolute inset-0 pointer-events-none">
-                        {[...Array(12)].map((_, i) => (
+                        {/* 主要爆炸粒子 */}
+                        {[...Array(16)].map((_, i) => (
                             <div
-                                key={i}
-                                className="absolute left-1/2 top-1/2 animate-apple-particle"
+                                key={`main-${i}`}
+                                className="absolute left-1/2 top-1/2 animate-heart-explosion"
                                 style={{
-                                    '--angle': `${Math.random() * 360}deg`,
-                                    '--distance': `${Math.random() * 60 + 40}px`,
-                                    '--size': `${Math.random() * 4 + 4}px`,
-                                    '--delay': `${Math.random() * 0.2}s`,
+                                    '--angle': `${(360 / 16) * i}deg`,
+                                    '--distance': `${Math.random() * 40 + 60}px`,
+                                    '--size': `${Math.random() * 3 + 3}px`,
+                                    '--delay': `${Math.random() * 0.1}s`,
+                                    '--duration': `${0.8 + Math.random() * 0.4}s`,
                                     width: 'var(--size)',
                                     height: 'var(--size)',
                                 } as React.CSSProperties}
                             >
-                                <div className="w-full h-full bg-rose-500/40 rounded-full blur-[1px]" />
+                                <div className="w-full h-full bg-gradient-to-r from-rose-400 to-pink-500 rounded-full shadow-lg" />
                             </div>
                         ))}
+                        
+                        {/* 小星星粒子 */}
+                        {[...Array(8)].map((_, i) => (
+                            <div
+                                key={`star-${i}`}
+                                className="absolute left-1/2 top-1/2 animate-star-twinkle"
+                                style={{
+                                    '--angle': `${45 * i}deg`,
+                                    '--distance': `${Math.random() * 30 + 80}px`,
+                                    '--delay': `${0.2 + Math.random() * 0.3}s`,
+                                    '--duration': `${1.2 + Math.random() * 0.6}s`,
+                                } as React.CSSProperties}
+                            >
+                                <div className="w-2 h-2 text-yellow-300">
+                                    ✨
+                                </div>
+                            </div>
+                        ))}
+                        
+                        {/* 心形粒子 */}
+                        {[...Array(6)].map((_, i) => (
+                            <div
+                                key={`heart-${i}`}
+                                className="absolute left-1/2 top-1/2 animate-heart-float"
+                                style={{
+                                    '--angle': `${60 * i}deg`,
+                                    '--distance': `${Math.random() * 50 + 70}px`,
+                                    '--delay': `${0.1 + Math.random() * 0.2}s`,
+                                    '--duration': `${1.5 + Math.random() * 0.5}s`,
+                                } as React.CSSProperties}
+                            >
+                                <div className="text-rose-400 text-xs">💖</div>
+                            </div>
+                        ))}
+                        
+                        {/* 光环效果 */}
+                        <div className="absolute left-1/2 top-1/2 animate-ring-expand">
+                            <div className="w-16 h-16 border-2 border-rose-400/30 rounded-full -translate-x-1/2 -translate-y-1/2" />
+                        </div>
+                        <div className="absolute left-1/2 top-1/2 animate-ring-expand-delayed">
+                            <div className="w-20 h-20 border border-pink-300/20 rounded-full -translate-x-1/2 -translate-y-1/2" />
+                        </div>
                     </div>
                 )}
             </button>
 
             <style>{`
-                @keyframes apple-particle {
+                @keyframes heart-explosion {
                     0% {
                         transform: translate(-50%, -50%) rotate(0deg) scale(0);
                         opacity: 0;
                     }
-                    20% {
+                    15% {
                         opacity: 1;
-                        transform: translate(-50%, -50%) rotate(var(--angle)) translateY(0) scale(1.2);
+                        transform: translate(-50%, -50%) rotate(var(--angle)) translateY(0) scale(1.5);
                     }
                     100% {
                         transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(-1 * var(--distance))) scale(0);
                         opacity: 0;
                     }
                 }
-                .animate-apple-particle {
-                    animation: apple-particle 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                
+                @keyframes star-twinkle {
+                    0% {
+                        transform: translate(-50%, -50%) rotate(0deg) scale(0);
+                        opacity: 0;
+                    }
+                    20% {
+                        opacity: 1;
+                        transform: translate(-50%, -50%) rotate(var(--angle)) translateY(-10px) scale(1.2);
+                    }
+                    100% {
+                        transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(-1 * var(--distance))) scale(0.5) rotate(180deg);
+                        opacity: 0;
+                    }
+                }
+                
+                @keyframes heart-float {
+                    0% {
+                        transform: translate(-50%, -50%) scale(0) rotate(0deg);
+                        opacity: 0;
+                    }
+                    25% {
+                        opacity: 1;
+                        transform: translate(-50%, -50%) scale(1.3) rotate(var(--angle));
+                    }
+                    100% {
+                        transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(-1 * var(--distance))) scale(0.8) rotate(360deg);
+                        opacity: 0;
+                    }
+                }
+                
+                @keyframes ring-expand {
+                    0% {
+                        transform: translate(-50%, -50%) scale(0);
+                        opacity: 0.8;
+                    }
+                    100% {
+                        transform: translate(-50%, -50%) scale(2);
+                        opacity: 0;
+                    }
+                }
+                
+                @keyframes ring-expand-delayed {
+                    0% {
+                        transform: translate(-50%, -50%) scale(0);
+                        opacity: 0.6;
+                    }
+                    100% {
+                        transform: translate(-50%, -50%) scale(2.5);
+                        opacity: 0;
+                    }
+                }
+                
+                .animate-heart-explosion {
+                    animation: heart-explosion var(--duration) cubic-bezier(0.16, 1, 0.3, 1) forwards;
                     animation-delay: var(--delay);
+                }
+                
+                .animate-star-twinkle {
+                    animation: star-twinkle var(--duration) cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+                    animation-delay: var(--delay);
+                }
+                
+                .animate-heart-float {
+                    animation: heart-float var(--duration) cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+                    animation-delay: var(--delay);
+                }
+                
+                .animate-ring-expand {
+                    animation: ring-expand 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                }
+                
+                .animate-ring-expand-delayed {
+                    animation: ring-expand-delayed 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                    animation-delay: 0.2s;
                 }
             `}</style>
         </div>

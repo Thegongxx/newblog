@@ -195,7 +195,7 @@ export default function HomepageComments() {
 
                                     <div className="flex items-center gap-6 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <LikeButton
-                                            targetType="comment"
+                                            targetType="homepage_comment"
                                             targetId={comment.id}
                                             className="!bg-transparent !p-0 !border-none !h-auto text-white/30 hover:text-white/60 transition-colors"
                                         />
