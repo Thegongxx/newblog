@@ -20,11 +20,17 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
   // 固定显示最新的 4 篇文章
   const latestPosts = sortedPosts.slice(0, 4);
 
-  // 使用真实 Markdown 笔记数据
-  const notes = useMemo(() => getAllNotes(), []);
+  // 使用真实 Markdown 笔记数据 - 优化性能
+  const notes = useMemo(() => {
+    try {
+      return getAllNotes();
+    } catch (error) {
+      console.warn('Failed to load notes:', error);
+      return [];
+    }
+  }, []); // 移除依赖，只在组件挂载时执行一次
 
   const randomNote = useMemo(() => {
-    // 假如没有笔记，提供一个 fallback，或者 just return null (UI handle it)
     if (notes.length === 0) {
       return {
         id: 'default',
@@ -34,39 +40,41 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
         tags: ['AURA']
       };
     }
-    return notes[Math.floor(Math.random() * notes.length)];
-  }, [notes]);
+    // 使用固定种子避免每次重新随机
+    const index = Math.floor(Date.now() / (1000 * 60 * 60 * 24)) % notes.length;
+    return notes[index];
+  }, [notes]); // 每天更换一次
 
-  // Google Material Design 动画配置
+  // 简化动画配置 - 减少移动端卡顿
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        duration: 0.6,
+        duration: 0.4, // 缩短动画时间
         ease: "easeOut" as const,
-        staggerChildren: 0.1
+        staggerChildren: 0.05 // 减少交错延迟
       }
     }
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 24 },
+    hidden: { opacity: 0, y: 12 }, // 减少移动距离
     visible: {
       opacity: 1,
       y: 0,
       transition: {
-        duration: 0.6,
+        duration: 0.4, // 缩短动画时间
         ease: "easeOut" as const
       }
     }
   };
 
   const fadeInReveal = {
-    initial: { opacity: 0, y: 20, scale: 0.98 },
-    whileInView: { opacity: 1, y: 0, scale: 1 },
-    viewport: { once: true, margin: "-50px" },
-    transition: { duration: 0.8, ease: "easeOut" as const }
+    initial: { opacity: 0, y: 10 }, // 减少移动距离
+    whileInView: { opacity: 1, y: 0 },
+    viewport: { once: true, margin: "-30px" }, // 减少触发距离
+    transition: { duration: 0.5, ease: "easeOut" as const } // 缩短动画时间
   };
 
   return (
@@ -140,18 +148,17 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
         </div>
       </motion.section>
 
-      {/* 2. Loading State Only */}
+      {/* 2. Loading State - 简化 */}
       {loading && (
         <motion.section
           initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1 }}
-          className="mb-24"
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+          className="mb-12"
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="h-[450px] rounded-[2.5rem] bg-white/[0.02] border border-white/5 animate-pulse" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="h-[240px] md:h-[320px] rounded-xl md:rounded-2xl bg-white/[0.02] border border-white/5 animate-pulse" />
             ))}
           </div>
         </motion.section>
@@ -176,8 +183,8 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
               className="group"
               variants={itemVariants}
               whileHover={{ 
-                y: -4,
-                transition: { duration: 0.3, ease: [0.4, 0.0, 0.2, 1] }
+                y: -2, // 减少悬浮距离
+                transition: { duration: 0.2, ease: [0.4, 0.0, 0.2, 1] }
               }}
             >
               <motion.div

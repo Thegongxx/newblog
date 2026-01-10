@@ -11,7 +11,7 @@ interface BlogCardProps {
 const BlogCard: React.FC<BlogCardProps> = ({ post, onClick, featured }) => {
   return (
     <div
-      className={`group relative ${featured ? 'h-[280px] md:h-[380px]' : 'h-[240px] md:h-[320px]'} bg-white/[0.03] backdrop-blur-3xl rounded-xl md:rounded-2xl transition-all duration-500 hover:bg-white/[0.05] cursor-pointer overflow-hidden`}
+      className={`group relative ${featured ? 'h-[280px] md:h-[380px]' : 'h-[240px] md:h-[320px]'} bg-white/[0.03] backdrop-blur-3xl rounded-xl md:rounded-2xl transition-all duration-300 hover:bg-white/[0.05] cursor-pointer overflow-hidden will-change-transform`}
       onClick={onClick}
     >
       {/* 全幅封面图容器 */}
@@ -19,7 +19,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, onClick, featured }) => {
         <img
           src={post.image}
           alt={post.title}
-          className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 grayscale-[0.1] group-hover:grayscale-0 opacity-60 group-hover:opacity-80"
+          className="w-full h-full object-cover transition-all duration-500 group-hover:scale-103 grayscale-[0.1] group-hover:grayscale-0 opacity-60 group-hover:opacity-80"
         />
         {/* 渐变遮罩 */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
