@@ -10,6 +10,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "test:supabase": "node scripts/test-supabase.js",
+    "sync": "node scripts/sync-posts.js",
     "sync:push": "node scripts/sync-posts.js",
     "sync:pull": "node scripts/pull-from-db.js",
     "sync:posts": "node scripts/sync-local.js",
