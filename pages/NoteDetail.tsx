@@ -96,53 +96,53 @@ const NoteDetail: React.FC = () => {
 
   return (
     <motion.div 
-      className="py-12"
+      className="py-8 md:py-12"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
     >
       <div className="max-w-4xl mx-auto">
-        {/* 返回按钮 */}
+        {/* 返回按钮 - 移动端简化 */}
         <motion.button
           onClick={() => navigate('/notes')}
-          className="mb-8 flex items-center gap-2 text-white/60 hover:text-white transition-colors group"
+          className="mb-6 md:mb-8 flex items-center gap-2 text-white/60 hover:text-white transition-colors group"
           whileHover={{ x: -4 }}
           transition={{ type: "spring", stiffness: 400, damping: 25 }}
         >
           <span className="transform group-hover:-translate-x-1 transition-transform">←</span>
-          <span className="text-sm font-medium tracking-wider uppercase">返回笔记</span>
+          <span className="text-xs md:text-sm font-medium tracking-wider uppercase">返回</span>
         </motion.button>
 
-        {/* 笔记内容 */}
+        {/* 笔记内容 - 移动端简化 */}
         <motion.article 
-          className="glass p-12 rounded-[3rem] border border-white/5 mb-12"
+          className="glass p-6 md:p-12 rounded-2xl md:rounded-[3rem] border border-white/5 mb-8 md:mb-12"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6, delay: 0.1 }}
         >
           {/* 引号图标 */}
-          <div className="mb-8">{ICONS.QUOTES}</div>
+          <div className="mb-4 md:mb-8 scale-75 md:scale-100 origin-top-left">{ICONS.QUOTES}</div>
           
           {/* 笔记标题 */}
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-white/95 mb-8">
+          <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-white/95 mb-4 md:mb-8">
             {note.title}
           </h1>
           
           {/* 笔记内容 */}
-          <div className="prose prose-invert prose-lg max-w-none">
-            <div className="text-lg font-light leading-relaxed text-white/80 whitespace-pre-wrap">
+          <div className="prose prose-invert prose-sm md:prose-lg max-w-none">
+            <div className="text-sm md:text-lg font-light leading-relaxed text-white/80 whitespace-pre-wrap">
               {note.content}
             </div>
           </div>
 
-          {/* 底部信息 */}
-          <div className="flex items-center justify-between border-t border-white/5 pt-8 mt-12">
-            <div className="flex flex-col gap-2">
-              <time className="text-sm font-bold tracking-[0.3em] text-white/40 uppercase">
+          {/* 底部信息 - 移动端简化 */}
+          <div className="flex items-center justify-between border-t border-white/5 pt-4 md:pt-8 mt-8 md:mt-12">
+            <div className="flex flex-col gap-1 md:gap-2">
+              <time className="text-[10px] md:text-sm font-bold tracking-widest text-white/40 uppercase">
                 {note.date}
               </time>
               {note.tags && note.tags.length > 0 && (
-                <div className="flex gap-2 mt-2">
+                <div className="hidden md:flex gap-2 mt-2">
                   {note.tags.map((tag, idx) => (
                     <span key={idx} className="text-xs px-3 py-1 bg-white/10 rounded-full text-white/50">
                       {tag}
@@ -156,7 +156,7 @@ const NoteDetail: React.FC = () => {
               targetType="note" 
               targetId={note.id} 
               initialCount={0}
-              className="scale-110"
+              className="scale-90 md:scale-110"
             />
           </div>
         </motion.article>

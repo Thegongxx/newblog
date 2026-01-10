@@ -72,32 +72,33 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
 
   return (
     <motion.div 
-      className="space-y-32 md:space-y-64 overflow-hidden"
+      className="space-y-16 md:space-y-64 overflow-hidden"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
-      {/* 1. Google Material Design 风格 Hero 区域 */}
+      {/* 1. Hero 区域 - 移动端简化 */}
       <motion.section
         {...fadeInReveal}
-        className="min-h-[60vh] flex flex-col md:flex-row items-center gap-16 md:gap-24"
+        className="min-h-[50vh] md:min-h-[60vh] flex flex-col md:flex-row items-center gap-8 md:gap-24"
         variants={itemVariants}
       >
-        <div className="flex-1 space-y-10">
-          <div className="space-y-6">
-            <h4 className="text-white/20 uppercase tracking-[0.6em] text-[10px] font-black flex items-center gap-4">
-              <span className="w-8 h-[1px] bg-white/10" />
+        <div className="flex-1 space-y-6 md:space-y-10">
+          <div className="space-y-4 md:space-y-6">
+            <h4 className="text-white/20 uppercase tracking-[0.4em] md:tracking-[0.6em] text-[9px] md:text-[10px] font-black flex items-center gap-3 md:gap-4">
+              <span className="w-6 md:w-8 h-[1px] bg-white/10" />
               Digital Sanctuary
             </h4>
-            <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-[0.85] text-white">
+            <h1 className="text-4xl md:text-8xl font-black tracking-tighter leading-[0.9] md:leading-[0.85] text-white">
               Aura <br />
               <span className="text-white/20 italic font-light">Laboratory.</span>
             </h1>
           </div>
-          <p className="text-xl text-white/40 font-light max-w-md leading-relaxed border-l-2 border-white/5 pl-8 py-2">
-            在这里，我们探索技术、建筑与人类情感之间那些无形的联系。一个致力于纯粹体验的数字空间。
+          <p className="text-base md:text-xl text-white/40 font-light max-w-md leading-relaxed border-l-2 border-white/5 pl-4 md:pl-8 py-2">
+            探索技术与情感之间的无形联系。
           </p>
-          <div className="flex items-center gap-8 pt-4">
+          {/* 移动端隐藏滚动按钮 */}
+          <div className="hidden md:flex items-center gap-8 pt-4">
             <button
               onClick={() => window.scrollTo({ top: window.innerHeight * 0.8, behavior: 'smooth' })}
               className="group flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.3em] text-white/40 hover:text-white transition-colors"
@@ -110,37 +111,30 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
           </div>
         </div>
 
-        {/* Hero 右侧：真实 Note 推荐 (Real File Content) - Asymmetric Layout */}
-        <div className="flex-[1.2] w-full flex justify-center items-center relative min-h-[400px]">
-          {/* 背景装饰：微弱的光晕 */}
+        {/* Hero 右侧 - 移动端简化 */}
+        <div className="flex-[1.2] w-full flex justify-center items-center relative min-h-[200px] md:min-h-[400px]">
           <div className="absolute inset-0 bg-white/[0.02] blur-3xl rounded-full opacity-50" />
 
-          <div className="relative z-10 w-full max-w-lg flex flex-col space-y-12">
-            {/* Top: Label & Tags (Left Aligned) */}
-            <div className="flex items-center gap-3 opacity-60">
-              <span className="w-2 h-2 bg-white/50 rounded-full" />
-              <span className="text-[10px] font-black tracking-[0.2em] text-white uppercase mr-4">
+          <div className="relative z-10 w-full max-w-lg flex flex-col space-y-6 md:space-y-12">
+            <div className="flex items-center gap-2 md:gap-3 opacity-60">
+              <span className="w-1.5 h-1.5 md:w-2 md:h-2 bg-white/50 rounded-full" />
+              <span className="text-[9px] md:text-[10px] font-black tracking-[0.15em] md:tracking-[0.2em] text-white uppercase">
                 Daily Note
               </span>
-              {(randomNote as any).tags?.map((tag: string) => (
-                <span key={tag} className="text-[10px] uppercase tracking-widest text-white/30">#{tag}</span>
-              ))}
             </div>
 
-            {/* Middle: Content (Left Aligned) */}
-            <div className="space-y-6">
-              <h3 className="text-3xl md:text-4xl font-bold text-white tracking-tight leading-tight text-left">
-                {(randomNote as any).title || (randomNote as any).text?.substring(0, 50) + '...'}
+            <div className="space-y-3 md:space-y-6">
+              <h3 className="text-xl md:text-4xl font-bold text-white tracking-tight leading-tight">
+                {(randomNote as any).title || (randomNote as any).text?.substring(0, 30) + '...'}
               </h3>
-              <p className="text-lg md:text-xl font-light text-white/70 leading-relaxed max-w-md text-left whitespace-pre-line">
+              <p className="text-sm md:text-xl font-light text-white/70 leading-relaxed line-clamp-3 md:line-clamp-none">
                 {(randomNote as any).content || (randomNote as any).text}
               </p>
             </div>
 
-            {/* Bottom: Date (Right Aligned) */}
-            <div className="flex justify-end pt-4 border-t border-white/5">
-              <p className="text-[10px] font-mono text-white/30 uppercase tracking-widest">
-                Recorded on {(randomNote as any).date || new Date().toLocaleDateString()}
+            <div className="flex justify-end pt-2 md:pt-4 border-t border-white/5">
+              <p className="text-[9px] md:text-[10px] font-mono text-white/30 uppercase tracking-widest">
+                {(randomNote as any).date || new Date().toLocaleDateString()}
               </p>
             </div>
           </div>
@@ -164,19 +158,19 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
         </motion.section>
       )}
 
-      {/* 3. 画廊网格 (Pure Gallery) */}
+      {/* 3. 画廊网格 - 移动端单列 */}
       <motion.section
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
         transition={{ duration: 1.2 }}
       >
-        <div className="flex items-end justify-between mb-16 px-4">
-          <h2 className="text-xl md:text-2xl font-light tracking-widest text-white/40 uppercase">Selected Works</h2>
-          <div className="text-[10px] font-mono text-white/20">01 — 0{bentoPosts.length}</div>
+        <div className="flex items-end justify-between mb-8 md:mb-16 px-2 md:px-4">
+          <h2 className="text-base md:text-2xl font-light tracking-widest text-white/40 uppercase">Selected Works</h2>
+          <div className="text-[9px] md:text-[10px] font-mono text-white/20">01 — 0{bentoPosts.length}</div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-24">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-x-12 md:gap-y-24">
           {bentoPosts.map((post, i) => (
             <motion.div
               key={post.id}
@@ -188,21 +182,16 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
               }}
             >
               <motion.div
-                className="material-shadow-1 hover:material-shadow-2 rounded-[2rem] transition-all duration-300"
+                className="rounded-2xl md:rounded-[2rem] transition-all duration-300"
                 whileHover={{ scale: 1.02 }}
               >
                 <BlogCard post={post} onClick={() => onSelectPost(post)} />
               </motion.div>
-              {/* Google Material Design 风格的底部描述 */}
-              <motion.div 
-                className="mt-6 flex justify-between items-center opacity-40 group-hover:opacity-100 transition-opacity duration-300 px-2"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 0.4 }}
-                whileHover={{ opacity: 1 }}
-              >
-                <span className="text-[10px] uppercase tracking-widest">{post.date}</span>
-                <span className="text-[10px] uppercase tracking-widest">{post.readingTime}</span>
-              </motion.div>
+              {/* 底部描述 - 移动端简化 */}
+              <div className="mt-3 md:mt-6 flex justify-between items-center opacity-40 px-1 md:px-2">
+                <span className="text-[9px] md:text-[10px] uppercase tracking-widest">{post.date}</span>
+                <span className="text-[9px] md:text-[10px] uppercase tracking-widest">{post.readingTime}</span>
+              </div>
             </motion.div>
           ))}
         </div>

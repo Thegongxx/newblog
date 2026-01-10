@@ -75,18 +75,18 @@ const About: React.FC = () => {
 
     return (
         <motion.div 
-            className="max-w-3xl py-12"
+            className="max-w-3xl py-8 md:py-12"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
         >
-            <motion.header className="mb-16" variants={itemVariants}>
-                <h1 className="text-6xl md:text-8xl font-bold tracking-tighter mb-8 italic">ABOUT.</h1>
-                <p className="text-xl text-white/30 font-light max-w-lg">关于这个空间，关于我。</p>
+            <motion.header className="mb-10 md:mb-16" variants={itemVariants}>
+                <h1 className="text-4xl md:text-8xl font-bold tracking-tighter mb-4 md:mb-8 italic">ABOUT.</h1>
+                <p className="text-base md:text-xl text-white/30 font-light max-w-lg">关于这个空间，关于我。</p>
             </motion.header>
 
             <motion.article 
-                className="prose prose-invert max-w-none"
+                className="prose prose-invert max-w-none prose-p:text-sm prose-p:md:text-base prose-headings:text-lg prose-headings:md:text-xl"
                 variants={itemVariants}
                 dangerouslySetInnerHTML={{ __html: content }}
             />
