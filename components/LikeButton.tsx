@@ -69,8 +69,30 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
     }, [targetType, targetId]);
 
     const showToast = (message: string, type: 'success' | 'warning' | 'info' = 'success') => {
-        setToast({ message, visible: true, type });
-        setTimeout(() => setToast(prev => ({ ...prev, visible: false })), 2500);
+        // 苹果风格的简洁消息
+        let appleStyleMessage = message;
+        if (isMobile) {
+            // 移动端更简洁
+            if (message.includes('点赞成功')) {
+                appleStyleMessage = '❤️ Liked';
+            } else if (message.includes('已达上限')) {
+                appleStyleMessage = '❤️ 不许这么喜欢我';
+            } else if (message.includes('已点赞')) {
+                appleStyleMessage = '❤️ Daily limit';
+            }
+        } else {
+            // 桌面端稍微详细一些
+            if (message.includes('点赞成功')) {
+                appleStyleMessage = '❤️ Liked';
+            } else if (message.includes('已达上限')) {
+                appleStyleMessage = '❤️ Daily limit reached';
+            } else if (message.includes('已点赞')) {
+                appleStyleMessage = '❤️ Daily limit';
+            }
+        }
+        
+        setToast({ message: appleStyleMessage, visible: true, type });
+        setTimeout(() => setToast(prev => ({ ...prev, visible: false })), isMobile ? 2000 : 2500);
     };
 
     const handleLike = async (e: React.MouseEvent) => {
@@ -148,60 +170,141 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
 
     return (
         <div className="relative inline-block">
-            {/* Google风格的灵动岛透明提示 */}
+            {/* 苹果风格的 Dynamic Island 提示 */}
             <AnimatePresence>
                 {toast.visible && (
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.8, y: 10 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.8, y: -10 }}
+                        initial={{ 
+                            opacity: 0, 
+                            scale: 0.3, 
+                            y: isMobile ? -20 : -30,
+                            borderRadius: isMobile ? '20px' : '25px'
+                        }}
+                        animate={{ 
+                            opacity: 1, 
+                            scale: 1, 
+                            y: 0,
+                            borderRadius: isMobile ? '20px' : '25px'
+                        }}
+                        exit={{ 
+                            opacity: 0, 
+                            scale: 0.3, 
+                            y: isMobile ? -20 : -30,
+                            borderRadius: isMobile ? '20px' : '25px'
+                        }}
                         transition={{
                             type: "spring",
-                            stiffness: 500,
-                            damping: 30,
-                            mass: 0.8
+                            stiffness: 400,
+                            damping: 25,
+                            mass: 0.6
                         }}
-                        className="fixed top-6 left-1/2 -translate-x-1/2 z-[9999] pointer-events-none"
+                        className="fixed z-[9999] pointer-events-none"
                         style={{
                             position: 'fixed',
-                            top: isMobile ? '1.5rem' : '2rem',
+                            top: isMobile ? '4rem' : '5rem', // 更舒适的位置，避开导航栏
                             left: '50%',
                             transform: 'translateX(-50%)',
                             zIndex: 9999
                         }}
                     >
-                        <div className={`px-6 py-3 rounded-full backdrop-blur-2xl border shadow-2xl text-sm font-medium whitespace-nowrap ${
-                            toast.type === 'success' ? 'bg-black/80 border-white/20 text-white' :
-                            toast.type === 'warning' ? 'bg-amber-500/90 border-amber-400/50 text-white' :
-                            'bg-blue-500/90 border-blue-400/50 text-white'
-                        }`}
-                        style={{
-                            backdropFilter: 'blur(20px) saturate(180%)',
-                            WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-                            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
-                        }}>
-                            <div className="flex items-center gap-2">
+                        <motion.div 
+                            className={`relative overflow-hidden ${
+                                isMobile ? 'px-4 py-2.5 text-xs' : 'px-6 py-3 text-sm'
+                            } font-medium whitespace-nowrap ${
+                                toast.type === 'success' ? 'bg-black/85 text-white' :
+                                toast.type === 'warning' ? 'bg-amber-600/90 text-white' :
+                                'bg-blue-600/90 text-white'
+                            }`}
+                            style={{
+                                borderRadius: isMobile ? '20px' : '25px',
+                                backdropFilter: 'blur(20px) saturate(180%)',
+                                WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                                boxShadow: isMobile 
+                                    ? '0 4px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15)'
+                                    : '0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15)',
+                                border: '1px solid rgba(255, 255, 255, 0.1)'
+                            }}
+                            animate={{
+                                // 苹果风格的微妙呼吸效果
+                                scale: [1, 1.02, 1],
+                            }}
+                            transition={{
+                                duration: 2,
+                                repeat: Infinity,
+                                ease: "easeInOut"
+                            }}
+                        >
+                            {/* 背景光晕效果 */}
+                            <div 
+                                className="absolute inset-0 opacity-20"
+                                style={{
+                                    background: toast.type === 'success' 
+                                        ? 'radial-gradient(circle at center, rgba(34, 197, 94, 0.3) 0%, transparent 70%)'
+                                        : toast.type === 'warning'
+                                        ? 'radial-gradient(circle at center, rgba(245, 158, 11, 0.3) 0%, transparent 70%)'
+                                        : 'radial-gradient(circle at center, rgba(59, 130, 246, 0.3) 0%, transparent 70%)'
+                                }}
+                            />
+                            
+                            <div className="relative flex items-center gap-2">
+                                {/* 状态指示器 - 苹果风格 */}
                                 <motion.div
-                                    className={`w-2 h-2 rounded-full ${
+                                    className={`${isMobile ? 'w-1.5 h-1.5' : 'w-2 h-2'} rounded-full ${
                                         toast.type === 'success' ? 'bg-green-400' : 
                                         toast.type === 'warning' ? 'bg-amber-300' : 'bg-blue-300'
                                     }`}
-                                    animate={{ scale: [1, 1.2, 1] }}
-                                    transition={{ duration: 1, repeat: Infinity }}
+                                    animate={{ 
+                                        scale: [1, 1.3, 1],
+                                        opacity: [0.8, 1, 0.8]
+                                    }}
+                                    transition={{ 
+                                        duration: 1.5, 
+                                        repeat: Infinity,
+                                        ease: "easeInOut"
+                                    }}
                                 />
-                                <span>{toast.message}</span>
+                                
+                                {/* 消息文本 */}
+                                <motion.span
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: 0.1, duration: 0.3 }}
+                                    className="font-medium"
+                                >
+                                    {toast.message}
+                                </motion.span>
+                                
+                                {/* 苹果风格的微妙装饰 */}
+                                {toast.type === 'success' && (
+                                    <motion.div
+                                        initial={{ scale: 0, rotate: -180 }}
+                                        animate={{ scale: 1, rotate: 0 }}
+                                        transition={{ delay: 0.2, type: "spring", stiffness: 300 }}
+                                        className={`${isMobile ? 'text-xs' : 'text-sm'} opacity-80`}
+                                    >
+                                        ✨
+                                    </motion.div>
+                                )}
                             </div>
-                        </div>
+                            
+                            {/* 底部进度条 - 苹果风格 */}
+                            <motion.div
+                                className="absolute bottom-0 left-0 h-0.5 bg-white/30 rounded-full"
+                                initial={{ width: '100%' }}
+                                animate={{ width: '0%' }}
+                                transition={{ duration: 2.5, ease: "linear" }}
+                            />
+                        </motion.div>
                     </motion.div>
                 )}
             </AnimatePresence>
 
-            {/* Google风格的点赞按钮 - 带计数 */}
+            {/* 苹果风格的点赞按钮 - 移动端简化 */}
             <motion.button
                 onClick={handleLike}
                 disabled={isAnimating}
                 className={`group relative flex items-center gap-2 ${
-                    isMobile ? 'px-2 py-1' : 'px-3 py-2'
+                    isMobile ? 'px-2 py-1.5' : 'px-3 py-2'
                 } rounded-full transition-all duration-200 overflow-hidden ${
                     locked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
                 } ${
@@ -210,35 +313,42 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                         : 'bg-white/5 text-white/50 hover:text-white/70 hover:bg-white/10'
                 } ${className}`}
                 whileHover={!locked && !isAnimating ? {
-                    scale: 1.05,
+                    scale: isMobile ? 1.02 : 1.05,
                     transition: { duration: 0.15, ease: [0.4, 0.0, 0.2, 1] }
                 } : {}}
                 whileTap={!locked && !isAnimating ? {
-                    scale: 0.95,
+                    scale: isMobile ? 0.98 : 0.95,
                     transition: { duration: 0.1, ease: [0.4, 0.0, 0.2, 1] }
                 } : {}}
+                style={{
+                    backdropFilter: isMobile ? 'blur(8px)' : 'blur(12px)',
+                    WebkitBackdropFilter: isMobile ? 'blur(8px)' : 'blur(12px)',
+                }}
                 aria-label={locked ? `今日已点赞 ${dailyCount}/5 次` : `点赞 (${count})`}
             >
-                {/* Ripple效果 */}
+                {/* 苹果风格的 Ripple 效果 */}
                 {!locked && (
                     <motion.div
                         className="absolute inset-0 bg-white/10 rounded-full"
                         initial={{ scale: 0, opacity: 0 }}
-                        whileTap={{ scale: 1, opacity: 1 }}
-                        transition={{ duration: 0.2 }}
+                        whileTap={{ 
+                            scale: isMobile ? 1.5 : 2, 
+                            opacity: [0, 0.3, 0] 
+                        }}
+                        transition={{ duration: 0.4, ease: [0.4, 0.0, 0.2, 1] }}
                     />
                 )}
 
-                {/* 爱心图标 */}
+                {/* 爱心图标 - 移动端简化 */}
                 <motion.svg
-                    className={`${isMobile ? 'w-3 h-3' : 'w-4 h-4'} transition-all duration-200 ${
+                    className={`${isMobile ? 'w-3.5 h-3.5' : 'w-4 h-4'} transition-all duration-200 ${
                         liked ? 'fill-current scale-110' : 'fill-none scale-100'
                     }`}
                     stroke="currentColor"
                     viewBox="0 0 24 24"
                     animate={isAnimating ? {
-                        scale: [1, 1.3, 1],
-                        rotate: [0, -10, 10, 0]
+                        scale: isMobile ? [1, 1.2, 1] : [1, 1.3, 1],
+                        rotate: [0, -8, 8, 0]
                     } : {}}
                     transition={{
                         duration: 0.6,
@@ -253,49 +363,53 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                     />
                 </motion.svg>
 
-                {/* 计数显示 */}
+                {/* 计数显示 - 移动端简化 */}
                 <motion.span 
                     className={`${isMobile ? 'text-xs' : 'text-sm'} font-medium tabular-nums`}
-                    animate={isAnimating ? { scale: [1, 1.2, 1] } : {}}
+                    animate={isAnimating ? { 
+                        scale: isMobile ? [1, 1.15, 1] : [1, 1.2, 1] 
+                    } : {}}
                     transition={{ duration: 0.3, ease: [0.4, 0.0, 0.2, 1] }}
                 >
                     {count}
                 </motion.span>
 
-                {/* Google风格的微妙粒子效果 */}
+                {/* 苹果风格的微妙粒子效果 - 移动端简化 */}
                 {!locked && isAnimating && (
                     <div className="absolute inset-0 pointer-events-none">
-                        {/* 微妙的圆形粒子 */}
-                        {[...Array(8)].map((_, i) => (
+                        {/* 主要粒子 - 移动端减少数量 */}
+                        {[...Array(isMobile ? 4 : 6)].map((_, i) => (
                             <motion.div
                                 key={`particle-${i}`}
-                                className="absolute left-1/2 top-1/2 w-1 h-1 bg-rose-400/60 rounded-full"
+                                className={`absolute left-1/2 top-1/2 ${
+                                    isMobile ? 'w-0.5 h-0.5' : 'w-1 h-1'
+                                } bg-rose-400/70 rounded-full`}
                                 initial={{ scale: 0, opacity: 0 }}
                                 animate={{
                                     scale: [0, 1, 0],
-                                    opacity: [0, 0.8, 0],
-                                    x: Math.cos((i * 45) * Math.PI / 180) * (12 + Math.random() * 8),
-                                    y: Math.sin((i * 45) * Math.PI / 180) * (12 + Math.random() * 8),
+                                    opacity: [0, 0.9, 0],
+                                    x: Math.cos((i * 60) * Math.PI / 180) * (isMobile ? 8 : 12),
+                                    y: Math.sin((i * 60) * Math.PI / 180) * (isMobile ? 8 : 12),
                                 }}
                                 transition={{
-                                    duration: 0.6,
+                                    duration: 0.5,
                                     ease: [0.4, 0.0, 0.2, 1],
                                     delay: Math.random() * 0.1
                                 }}
                             />
                         ))}
 
-                        {/* 更微妙的光点 */}
-                        {[...Array(4)].map((_, i) => (
+                        {/* 光点效果 - 移动端简化 */}
+                        {!isMobile && [...Array(3)].map((_, i) => (
                             <motion.div
                                 key={`glow-${i}`}
-                                className="absolute left-1/2 top-1/2 w-0.5 h-0.5 bg-white/80 rounded-full"
+                                className="absolute left-1/2 top-1/2 w-0.5 h-0.5 bg-white/90 rounded-full"
                                 initial={{ scale: 0, opacity: 0 }}
                                 animate={{
                                     scale: [0, 1.5, 0],
                                     opacity: [0, 1, 0],
-                                    x: Math.cos((i * 90) * Math.PI / 180) * 8,
-                                    y: Math.sin((i * 90) * Math.PI / 180) * 8,
+                                    x: Math.cos((i * 120) * Math.PI / 180) * 6,
+                                    y: Math.sin((i * 120) * Math.PI / 180) * 6,
                                 }}
                                 transition={{
                                     duration: 0.4,
@@ -305,17 +419,23 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                             />
                         ))}
 
-                        {/* 中心扩散圆环 */}
+                        {/* 中心扩散圆环 - 苹果风格 */}
                         <motion.div
-                            className="absolute left-1/2 top-1/2 border border-rose-400/30 rounded-full"
-                            initial={{ scale: 0, opacity: 0.8 }}
-                            animate={{ scale: 3, opacity: 0 }}
-                            transition={{ duration: 0.5, ease: [0.4, 0.0, 0.2, 1] }}
+                            className="absolute left-1/2 top-1/2 border border-rose-400/40 rounded-full"
+                            initial={{ scale: 0, opacity: 0.9 }}
+                            animate={{ 
+                                scale: isMobile ? 2.5 : 3, 
+                                opacity: 0 
+                            }}
+                            transition={{ 
+                                duration: 0.5, 
+                                ease: [0.4, 0.0, 0.2, 1] 
+                            }}
                             style={{
-                                width: '8px',
-                                height: '8px',
-                                marginLeft: '-4px',
-                                marginTop: '-4px'
+                                width: isMobile ? '6px' : '8px',
+                                height: isMobile ? '6px' : '8px',
+                                marginLeft: isMobile ? '-3px' : '-4px',
+                                marginTop: isMobile ? '-3px' : '-4px'
                             }}
                         />
                     </div>
