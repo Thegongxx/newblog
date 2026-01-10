@@ -1,23 +1,25 @@
-import { motion } from 'framer-motion';
+/**
+ * 极简 loading fallback - 路由切换时几乎不可见
+ * 只在组件加载超过 150ms 时才显示淡入的加载指示器
+ */
+import { useState, useEffect } from 'react';
 
-const LoadingFallback = () => (
-  <div className="min-h-[60vh] flex items-center justify-center">
-    <motion.div
-      className="flex gap-1"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.3 }}
-    >
-      {[0, 1, 2].map((i) => (
-        <motion.div
-          key={i}
-          className="w-2 h-2 rounded-full bg-white/30"
-          animate={{ opacity: [0.3, 1, 0.3], scale: [1, 1.2, 1] }}
-          transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.15 }}
-        />
-      ))}
-    </motion.div>
-  </div>
-);
+const LoadingFallback = () => {
+  const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    // 延迟显示，避免快速切换时闪烁
+    const timer = setTimeout(() => setShow(true), 150);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (!show) return null;
+
+  return (
+    <div className="min-h-[40vh] flex items-center justify-center opacity-30">
+      <div className="w-1 h-1 rounded-full bg-white/50 animate-pulse" />
+    </div>
+  );
+};
 
 export default LoadingFallback;

@@ -1,67 +1,104 @@
+import { aiRateLimiter } from './rateLimiter';
 
-import { type Comment } from '../types';
-
-/**
- * 使用 NVIDIA NIM (OpenAI 兼容接口) 调用 Qwen 模型
- * 采用原生 fetch 实现以减少外部依赖
- */
-export async function* askNvidiaStream(prompt: string, context?: string) {
-    const systemInstruction = `You are Aura, an elegant and minimalist AI companion for a personal blog. 
-  Your tone is calm, intelligent, and helpful. 
-  Current context of the blog: ${context}. 
-  If users ask about the code, explain that this is a React-based spatial UI inspired by Apple design.`;
-
-    try {
-        // 调用我们自己的 Vercel Serverless 后端，解决 CORS 并保护 API Key
-        const response = await fetch("/api/ai", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                prompt,
-                systemInstruction
-            })
-        });
-
-        if (!response.ok) {
-            const errorMsg = await response.text();
-            if (response.status === 401 || errorMsg.includes("API Key")) {
-                yield "AI_AUTH_REQUIRED";
-                return;
-            }
-            throw new Error(`Server Error: ${response.statusText}`);
-        }
-
-        const reader = response.body?.getReader();
-        const decoder = new TextDecoder();
-
-        if (!reader) return;
-
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-
-            const chunk = decoder.decode(value);
-            // 解析流式数据
-            const lines = chunk.split("\n");
-
-            for (const line of lines) {
-                if (line.startsWith("data: ")) {
-                    const data = line.slice(6).trim();
-                    if (data === "[DONE]") return;
-                    try {
-                        const json = JSON.parse(data);
-                        const content = json.choices[0]?.delta?.content;
-                        if (content) yield content;
-                    } catch (e) {
-                        // 忽略非 JSON 行
-                    }
-                }
-            }
-        }
-    } catch (error: any) {
-        console.error("NVIDIA Stream Error:", error);
-        yield `ERROR: 服务暂时无法连接 (${error.message.slice(0, 50)}...)`;
-    }
+interface RetryConfig {
+  maxRetries: number;
+  baseDelay: number;
+  maxDelay: number;
+  timeout: number;
 }
+
+const defaultConfig: RetryConfig = {
+  maxRetries: 3,
+  baseDelay: 1000,
+  maxDelay: 10000,
+  timeout: 30000,
+};
+
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+async function* askNvidiaStreamInternal(prompt: string, context?: string, signal?: AbortSignal) {
+  const systemInstruction = `You are Aura, an elegant and minimalist AI companion for a personal blog. 
+Your tone is calm, intelligent, and helpful. 
+Current context of the blog: ${context}. 
+If users ask about the code, explain that this is a React-based spatial UI inspired by Apple design.`;
+
+  const response = await fetch("/api/ai", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ prompt, systemInstruction }),
+    signal,
+  });
+
+  if (!response.ok) {
+    const errorMsg = await response.text();
+    if (response.status === 401 || errorMsg.includes("API Key")) {
+      yield "AI_AUTH_REQUIRED";
+      return;
+    }
+    throw new Error(`Server Error: ${response.statusText}`);
+  }
+
+  const reader = response.body?.getReader();
+  const decoder = new TextDecoder();
+  if (!reader) return;
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    const chunk = decoder.decode(value);
+    for (const line of chunk.split("\n")) {
+      if (line.startsWith("data: ")) {
+        const data = line.slice(6).trim();
+        if (data === "[DONE]") return;
+        try {
+          const json = JSON.parse(data);
+          const content = json.choices[0]?.delta?.content;
+          if (content) yield content;
+        } catch { /* Ignore */ }
+      }
+    }
+  }
+}
+
+export async function* askNvidiaStream(
+  prompt: string,
+  context?: string,
+  config: RetryConfig = defaultConfig
+): AsyncGenerator<string> {
+  if (!aiRateLimiter.canRequest()) {
+    yield `RATE_LIMITED:${Math.ceil(aiRateLimiter.getRemainingTime() / 1000)}`;
+    return;
+  }
+
+  aiRateLimiter.consume();
+  let lastError: Error | null = null;
+
+  for (let attempt = 0; attempt <= config.maxRetries; attempt++) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), config.timeout);
+
+      try {
+        for await (const chunk of askNvidiaStreamInternal(prompt, context, controller.signal)) {
+          yield chunk;
+        }
+        return;
+      } finally {
+        clearTimeout(timeoutId);
+      }
+    } catch (error) {
+      lastError = error as Error;
+      if (attempt < config.maxRetries) {
+        const delay = Math.min(config.baseDelay * Math.pow(2, attempt), config.maxDelay);
+        yield `RETRY:${attempt + 1}:${config.maxRetries}`;
+        await sleep(delay);
+      }
+    }
+  }
+
+  yield `ERROR:${lastError?.message || '服务暂时不可用'}`;
+}
+
+export type { RetryConfig };
+export { defaultConfig };

@@ -42,8 +42,19 @@ describe('Lazy Route Loading', () => {
 });
 
 describe('LoadingFallback', () => {
-  it('renders loading indicator', () => {
-    render(<LoadingFallback />);
-    expect(document.querySelector('.min-h-\\[60vh\\]')).toBeInTheDocument();
+  it('renders container element', async () => {
+    const { container, rerender } = render(<LoadingFallback />);
+    
+    // Initially renders nothing (due to 150ms delay)
+    expect(container.firstChild).toBeNull();
+    
+    // Wait for the delay and re-check
+    await new Promise(r => setTimeout(r, 200));
+    rerender(<LoadingFallback />);
+    
+    // After delay, should show the indicator
+    await waitFor(() => {
+      expect(document.querySelector('.min-h-\\[40vh\\]')).toBeInTheDocument();
+    }, { timeout: 500 });
   });
 });
