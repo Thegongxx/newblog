@@ -52,10 +52,33 @@ const AppInner = () => {
 
   const handleCopy = async (text: string, label: string) => {
     try {
-      await navigator.clipboard.writeText(text);
-      showToast(`${label} 已复制到剪贴板`);
+      // 优先使用现代 Clipboard API
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        showToast(`${label} 已复制到剪贴板`);
+        return;
+      }
+      
+      // 降级方案：使用传统的 execCommand
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-9999px';
+      textArea.style.top = '-9999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      
+      const success = document.execCommand('copy');
+      document.body.removeChild(textArea);
+      
+      if (success) {
+        showToast(`${label} 已复制到剪贴板`);
+      } else {
+        showToast('复制失败，请手动复制', 'error');
+      }
     } catch {
-      showToast('复制失败', 'error');
+      showToast('复制失败，请手动复制', 'error');
     }
   };
 

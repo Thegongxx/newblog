@@ -17,9 +17,8 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
     return [...posts].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [posts]);
 
-  // 第一篇作为 Hero 展示，其余作为 Bento 网格
-  const featuredPost = sortedPosts[0] || null;
-  const bentoPosts = sortedPosts.slice(1, 5); // 只取 4 篇，保持约两行
+  // 固定显示最新的 4 篇文章
+  const latestPosts = sortedPosts.slice(0, 4);
 
   // 使用真实 Markdown 笔记数据
   const notes = useMemo(() => getAllNotes(), []);
@@ -158,37 +157,37 @@ const Feed: React.FC<FeedProps> = ({ posts, loading, onSelectPost }) => {
         </motion.section>
       )}
 
-      {/* 3. 画廊网格 - 移动端单列 */}
+      {/* 3. 画廊网格 - 固定 4 篇，黄金比例布局 */}
       <motion.section
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
         transition={{ duration: 1.2 }}
       >
-        <div className="flex items-end justify-between mb-8 md:mb-16 px-2 md:px-4">
-          <h2 className="text-base md:text-2xl font-light tracking-widest text-white/40 uppercase">Selected Works</h2>
-          <div className="text-[9px] md:text-[10px] font-mono text-white/20">01 — 0{bentoPosts.length}</div>
+        <div className="flex items-end justify-between mb-6 md:mb-12 px-1 md:px-2">
+          <h2 className="text-base md:text-xl font-light tracking-widest text-white/40 uppercase">Latest Posts</h2>
+          <div className="text-[9px] md:text-[10px] font-mono text-white/20">{latestPosts.length} articles</div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-x-12 md:gap-y-24">
-          {bentoPosts.map((post, i) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+          {latestPosts.map((post, i) => (
             <motion.div
               key={post.id}
               className="group"
               variants={itemVariants}
               whileHover={{ 
-                y: -8,
+                y: -4,
                 transition: { duration: 0.3, ease: [0.4, 0.0, 0.2, 1] }
               }}
             >
               <motion.div
-                className="rounded-2xl md:rounded-[2rem] transition-all duration-300"
-                whileHover={{ scale: 1.02 }}
+                className="rounded-xl md:rounded-2xl transition-all duration-300 overflow-hidden"
+                whileHover={{ scale: 1.01 }}
               >
                 <BlogCard post={post} onClick={() => onSelectPost(post)} />
               </motion.div>
-              {/* 底部描述 - 移动端简化 */}
-              <div className="mt-3 md:mt-6 flex justify-between items-center opacity-40 px-1 md:px-2">
+              {/* 底部描述 */}
+              <div className="mt-2 md:mt-4 flex justify-between items-center opacity-40 px-1">
                 <span className="text-[9px] md:text-[10px] uppercase tracking-widest">{post.date}</span>
                 <span className="text-[9px] md:text-[10px] uppercase tracking-widest">{post.readingTime}</span>
               </div>
