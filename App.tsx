@@ -31,9 +31,13 @@ const AppInner: React.FC = () => {
     const loadData = async () => {
       try {
         setLoading(true);
-        const [postsData] = await Promise.all([
-          postsApi.getAll()
-        ]);
+        
+        // 使用文件系统读取posts和notes，保持一致
+        const { getAllPosts } = await import('./utils/posts');
+        const { getAllNotes } = await import('./utils/notes');
+        
+        const postsData = getAllPosts();
+        const notesData = getAllNotes();
         
         const formattedPosts = postsData.map((post: any) => ({
           ...post,
@@ -44,10 +48,6 @@ const AppInner: React.FC = () => {
         }));
         
         setPosts(formattedPosts);
-        
-        // 使用文件系统读取notes，与Feed页面保持一致
-        const { getAllNotes } = await import('./utils/notes');
-        const notesData = getAllNotes();
         setNotes(notesData);
       } catch (err: any) {
         setError(err.message || '数据加载失败');

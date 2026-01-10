@@ -129,23 +129,6 @@ const PostDetail: React.FC<PostDetailProps> = ({ posts, loading }) => {
                     </div>
                 </div>
                 <p className="text-xl md:text-2xl text-white/50 leading-relaxed font-light">{post.excerpt}</p>
-                <div className="flex items-center gap-3 text-white/30 text-[10px] font-bold uppercase tracking-[0.3em] mb-6">
-                    <span>{post.date}</span>
-                    <span className="w-1 h-1 rounded-full bg-white/20"></span>
-                    <span>{post.category}</span>
-                </div>
-                <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-10 leading-tight">{post.title}</h1>
-                <div className="flex items-center justify-between">
-                    <div className="h-[2px] w-20 bg-white/20 mb-10" />
-                    <div className="flex items-center gap-6 mb-10">
-                        <div className="flex flex-col items-end">
-                            <span className="text-[10px] uppercase tracking-widest text-white/20 font-bold mb-1">VIEWS</span>
-                            <span className="text-lg font-light text-white/40 tabular-nums">{post.views || 0}</span>
-                        </div>
-                        <LikeButton targetType="post" targetId={post.id} initialCount={post.likes_count} />
-                    </div>
-                </div>
-                <p className="text-xl md:text-2xl text-white/50 leading-relaxed font-light">{post.excerpt}</p>
             </motion.header>
 
             <motion.div 
