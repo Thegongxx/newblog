@@ -28,17 +28,50 @@ function parseFrontmatter(content) {
   if (!match) return { metadata: {}, content };
   
   const metadata = {};
-  match[1].split('\n').forEach(line => {
+  const lines = match[1].split('\n');
+  let currentKey = null;
+  let currentArray = null;
+  
+  for (const line of lines) {
+    // 检查是否是数组项 (以 "  - " 开头)
+    if (line.match(/^\s+-\s+/)) {
+      if (currentKey && currentArray !== null) {
+        currentArray.push(line.replace(/^\s+-\s+/, '').trim());
+      }
+      continue;
+    }
+    
+    // 保存之前的数组
+    if (currentKey && currentArray !== null) {
+      metadata[currentKey] = currentArray;
+      currentArray = null;
+      currentKey = null;
+    }
+    
     const idx = line.indexOf(':');
     if (idx > 0) {
       const key = line.slice(0, idx).trim();
       let val = line.slice(idx + 1).trim();
+      
+      // 检查是否是数组开始 (值为空，下一行是 - 开头)
+      if (val === '') {
+        currentKey = key;
+        currentArray = [];
+        continue;
+      }
+      
       if (val === 'true') val = true;
       else if (val === 'false') val = false;
       else if (!isNaN(Number(val)) && val !== '') val = Number(val);
       metadata[key] = val;
     }
-  });
+  }
+  
+  // 保存最后一个数组
+  if (currentKey && currentArray !== null) {
+    metadata[currentKey] = currentArray;
+  }
+  
   return { metadata, content: content.slice(match[0].length) };
 }
 
