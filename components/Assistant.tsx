@@ -176,10 +176,10 @@ const Assistant = () => {
 
   return (
     <>
-      {/* 优化的浮动按钮 - 黑色主题 */}
+      {/* 浮动按钮 - 恢复白色主题 */}
       <motion.button
         onClick={handleToggle}
-        className="fixed bottom-8 right-8 z-50 flex items-center justify-center bg-black/90 backdrop-blur-xl text-white shadow-2xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-white/20 focus:ring-offset-2 focus:ring-offset-black
+        className="fixed bottom-8 right-8 z-50 flex items-center justify-center bg-white/95 backdrop-blur-xl text-black shadow-2xl border border-white/20 focus:outline-none focus:ring-2 focus:ring-black/20 focus:ring-offset-2
                    max-sm:bottom-6 max-sm:right-6 max-sm:scale-90"
         style={{
           height: '56px',
@@ -203,17 +203,18 @@ const Assistant = () => {
         }}
         whileHover={{ 
           scale: isTouchDevice ? 1 : 1.02,
-          boxShadow: "0 12px 30px rgba(0,0,0,0.3)",
+          boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
+          backgroundColor: "rgba(255,255,255,0.98)",
           transition: { 
-            duration: 0.12,
-            ease: "easeOut"
+            duration: 0.15,
+            ease: [0.4, 0.0, 0.2, 1]
           }
         }}
         whileTap={{ 
-          scale: isTouchDevice ? 0.94 : 0.98,
+          scale: isTouchDevice ? 0.96 : 0.98,
           transition: { 
-            duration: 0.06,
-            ease: "easeInOut"
+            duration: 0.1,
+            ease: [0.4, 0.0, 0.2, 1]
           }
         }}
         aria-label={isOpen ? "关闭AI助手" : "打开AI助手"}
@@ -223,19 +224,61 @@ const Assistant = () => {
           {isOpen ? (
             <motion.div
               key="close"
-              initial={{ opacity: 0, rotate: -45, scale: 0.8 }}
+              initial={{ opacity: 0, rotate: -90, scale: 0.8 }}
               animate={{ opacity: 1, rotate: 0, scale: 1 }}
-              exit={{ opacity: 0, rotate: 45, scale: 0.8 }}
+              exit={{ opacity: 0, rotate: 90, scale: 0.8 }}
               transition={{
                 type: "spring",
                 stiffness: 400,
-                damping: 20,
+                damping: 25,
                 mass: 0.3
               }}
-              className="text-2xl font-light text-white/90"
+              className="relative w-6 h-6 flex items-center justify-center group"
               style={{ willChange: 'transform, opacity' }}
             >
-              ×
+              {/* Google风格的X按钮 - 带圆形背景hover效果 */}
+              <motion.div
+                className="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/8"
+                initial={false}
+                whileHover={{ 
+                  scale: 1.2,
+                  backgroundColor: "rgba(0,0,0,0.08)"
+                }}
+                transition={{ 
+                  duration: 0.15,
+                  ease: [0.4, 0.0, 0.2, 1]
+                }}
+              />
+              <motion.div
+                className="absolute w-3.5 h-0.5 bg-black/60 rounded-full"
+                style={{ 
+                  transformOrigin: 'center',
+                  transform: 'rotate(45deg)'
+                }}
+                whileHover={{ 
+                  backgroundColor: 'rgb(0 0 0 / 0.8)',
+                  scale: 1.05
+                }}
+                transition={{ 
+                  duration: 0.1,
+                  ease: [0.4, 0.0, 0.2, 1]
+                }}
+              />
+              <motion.div
+                className="absolute w-3.5 h-0.5 bg-black/60 rounded-full"
+                style={{ 
+                  transformOrigin: 'center',
+                  transform: 'rotate(-45deg)'
+                }}
+                whileHover={{ 
+                  backgroundColor: 'rgb(0 0 0 / 0.8)',
+                  scale: 1.05
+                }}
+                transition={{ 
+                  duration: 0.1,
+                  ease: [0.4, 0.0, 0.2, 1]
+                }}
+              />
             </motion.div>
           ) : (
             <motion.div
@@ -253,7 +296,7 @@ const Assistant = () => {
               style={{ willChange: 'transform, opacity' }}
             >
               <motion.span 
-                className="text-white/80 text-lg"
+                className="text-black/70 text-lg"
                 animate={prefersReducedMotion ? {} : { 
                   rotate: [0, 6, -6, 0],
                   scale: [1, 1.02, 1]
@@ -268,7 +311,7 @@ const Assistant = () => {
               >
                 {ICONS.AI}
               </motion.span>
-              <span className="font-bold text-sm text-white/90 tracking-tight">Aura</span>
+              <span className="font-bold text-sm text-black/80 tracking-tight">Aura</span>
             </motion.div>
           )}
         </AnimatePresence>
