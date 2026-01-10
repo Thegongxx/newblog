@@ -91,28 +91,60 @@
 
 /* 移动端优化 */
 @media (max-width: 768px) {
-  /* 减少移动端的模糊效果 */
+  /* 完全禁用移动端的复杂效果 */
   .backdrop-blur-xl {
-    backdrop-filter: blur(8px) !important;
+    backdrop-filter: none !important;
+    background-color: rgba(0, 0, 0, 0.8) !important;
   }
   
   .backdrop-blur-3xl {
-    backdrop-filter: blur(12px) !important;
+    backdrop-filter: none !important;
+    background-color: rgba(0, 0, 0, 0.9) !important;
+  }
+  
+  .backdrop-blur-md {
+    backdrop-filter: blur(4px) !important;
   }
   
   /* 移动端减少阴影 */
   .shadow-2xl {
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
   }
   
-  /* 移动端优化transform */
-  .group:hover .group-hover\:scale-103 {
-    transform: scale(1.01) !important;
+  /* 移动端禁用transform动画 */
+  .group:hover .group-hover\:scale-103,
+  .group:hover .group-hover\:scale-\[1\.02\] {
+    transform: none !important;
   }
   
-  /* 移动端禁用某些hover效果 */
-  .group:hover .group-hover\:opacity-100 {
-    opacity: 1 !important;
+  /* 移动端简化渐变 */
+  .bg-gradient-to-t {
+    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent) !important;
+  }
+  
+  /* 移动端禁用复杂动画 */
+  * {
+    animation-duration: 0.2s !important;
+    transition-duration: 0.2s !important;
+  }
+  
+  /* 移动端优化字体渲染 */
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeSpeed;
+  }
+  
+  /* 移动端禁用3D变换 */
+  .transform-style-preserve-3d {
+    transform-style: flat !important;
+  }
+  
+  /* 移动端简化边框 */
+  .border-white\/5,
+  .border-white\/10,
+  .border-white\/20 {
+    border-color: rgba(255, 255, 255, 0.1) !important;
   }
 }
 

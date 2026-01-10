@@ -48,37 +48,114 @@ const Feed: React.FC<FeedProps> = memo(({ posts, loading, onSelectPost }) => {
     return notes[index];
   }, [notes]); // 每天更换一次
 
-  // 移动端简化动画配置 - 减少卡顿
-  const containerVariants = useMemo(() => ({
+  // 移动端极简动画 - Google风格
+  if (isMobile) {
+    return (
+      <div className="space-y-8 overflow-hidden">
+        {/* 移动端简化Hero */}
+        <section className="min-h-[40vh] flex flex-col justify-center space-y-6">
+          <div className="space-y-4">
+            <h4 className="text-white/30 uppercase tracking-[0.3em] text-[8px] font-bold">
+              Digital Sanctuary
+            </h4>
+            <h1 className="text-3xl font-black tracking-tight leading-tight text-white">
+              Aura <br />
+              <span className="text-white/30 italic font-light">Laboratory.</span>
+            </h1>
+            <p className="text-sm text-white/50 font-light max-w-xs leading-relaxed">
+              探索技术与情感之间的无形联系。
+            </p>
+          </div>
+        </section>
+
+        {/* 移动端简化Loading */}
+        {loading && (
+          <section className="space-y-4">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="h-32 rounded-lg bg-white/[0.02] border border-white/5 animate-pulse" />
+            ))}
+          </section>
+        )}
+
+        {/* 移动端简化文章列表 */}
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-medium text-white/60 uppercase tracking-wide">Latest</h2>
+            <div className="text-[10px] text-white/30">{latestPosts.length}</div>
+          </div>
+
+          <div className="space-y-4">
+            {latestPosts.map((post) => (
+              <div
+                key={post.id}
+                className="bg-white/[0.02] border border-white/5 rounded-lg overflow-hidden active:bg-white/[0.04] transition-colors"
+                onClick={() => onSelectPost(post)}
+              >
+                <div className="p-4 space-y-3">
+                  <div className="flex items-center gap-2 text-white/40 text-[10px] uppercase tracking-wide">
+                    <span>{post.category}</span>
+                    <span className="w-1 h-1 rounded-full bg-white/20" />
+                    <span>{post.date}</span>
+                  </div>
+                  <h3 className="text-base font-semibold text-white leading-snug line-clamp-2">
+                    {post.title}
+                  </h3>
+                  <p className="text-sm text-white/60 leading-relaxed line-clamp-2">
+                    {post.excerpt}
+                  </p>
+                  <div className="flex items-center justify-between pt-2">
+                    <span className="text-[10px] text-white/30 uppercase tracking-wide">
+                      {post.readingTime}
+                    </span>
+                    <div className="text-xs text-white/40">
+                      {post.likes_count || 0} ♡
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* 移动端简化留言板 */}
+        <section className="pt-8">
+          <HomepageComments />
+        </section>
+      </div>
+    );
+  }
+
+  // 桌面端保持原有复杂动画
+  const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        duration: isMobile ? 0.3 : 0.4,
+        duration: 0.4,
         ease: "easeOut" as const,
-        staggerChildren: isMobile ? 0.03 : 0.05
+        staggerChildren: 0.05
       }
     }
-  }), [isMobile]);
+  };
 
-  const itemVariants = useMemo(() => ({
-    hidden: { opacity: 0, y: isMobile ? 8 : 12 },
+  const itemVariants = {
+    hidden: { opacity: 0, y: 12 },
     visible: {
       opacity: 1,
       y: 0,
       transition: {
-        duration: isMobile ? 0.3 : 0.4,
+        duration: 0.4,
         ease: "easeOut" as const
       }
     }
-  }), [isMobile]);
+  };
 
-  const fadeInReveal = useMemo(() => ({
-    initial: { opacity: 0, y: isMobile ? 6 : 10 },
+  const fadeInReveal = {
+    initial: { opacity: 0, y: 10 },
     whileInView: { opacity: 1, y: 0 },
-    viewport: { once: true, margin: isMobile ? "-20px" : "-30px" },
-    transition: { duration: isMobile ? 0.4 : 0.5, ease: "easeOut" as const }
-  }), [isMobile]);
+    viewport: { once: true, margin: "-30px" },
+    transition: { duration: 0.5, ease: "easeOut" as const }
+  };
 
   return (
     <motion.div 
@@ -91,65 +168,62 @@ const Feed: React.FC<FeedProps> = memo(({ posts, loading, onSelectPost }) => {
         backfaceVisibility: 'hidden'
       }}
     >
-      {/* 1. Hero 区域 - 移动端优化 */}
+      {/* 1. Hero 区域 - 桌面端完整版 */}
       <motion.section
         {...fadeInReveal}
-        className="min-h-[50vh] md:min-h-[60vh] flex flex-col md:flex-row items-center gap-8 md:gap-24"
+        className="min-h-[60vh] flex flex-row items-center gap-24"
         variants={itemVariants}
       >
-        <div className="flex-1 space-y-6 md:space-y-10">
-          <div className="space-y-4 md:space-y-6">
-            <h4 className="text-white/20 uppercase tracking-[0.4em] md:tracking-[0.6em] text-[9px] md:text-[10px] font-black flex items-center gap-3 md:gap-4">
-              <span className="w-6 md:w-8 h-[1px] bg-white/10" />
+        <div className="flex-1 space-y-10">
+          <div className="space-y-6">
+            <h4 className="text-white/20 uppercase tracking-[0.6em] text-[10px] font-black flex items-center gap-4">
+              <span className="w-8 h-[1px] bg-white/10" />
               Digital Sanctuary
             </h4>
-            <h1 className="text-4xl md:text-8xl font-black tracking-tighter leading-[0.9] md:leading-[0.85] text-white">
+            <h1 className="text-8xl font-black tracking-tighter leading-[0.85] text-white">
               Aura <br />
               <span className="text-white/20 italic font-light">Laboratory.</span>
             </h1>
           </div>
-          <p className="text-base md:text-xl text-white/40 font-light max-w-md leading-relaxed border-l-2 border-white/5 pl-4 md:pl-8 py-2">
+          <p className="text-xl text-white/40 font-light max-w-md leading-relaxed border-l-2 border-white/5 pl-8 py-2">
             探索技术与情感之间的无形联系。
           </p>
-          {/* 移动端隐藏滚动按钮 */}
-          {!isMobile && (
-            <div className="flex items-center gap-8 pt-4">
-              <button
-                onClick={() => window.scrollTo({ top: window.innerHeight * 0.8, behavior: 'smooth' })}
-                className="group flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.3em] text-white/40 hover:text-white transition-colors"
-              >
-                Scroll to Explore
-                <div className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center group-hover:bg-white group-hover:text-black transition-all">
-                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1V11M6 11L1 6M6 11L11 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                </div>
-              </button>
-            </div>
-          )}
+          <div className="flex items-center gap-8 pt-4">
+            <button
+              onClick={() => window.scrollTo({ top: window.innerHeight * 0.8, behavior: 'smooth' })}
+              className="group flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.3em] text-white/40 hover:text-white transition-colors"
+            >
+              Scroll to Explore
+              <div className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center group-hover:bg-white group-hover:text-black transition-all">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1V11M6 11L1 6M6 11L11 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              </div>
+            </button>
+          </div>
         </div>
 
-        {/* Hero 右侧 - 移动端简化 */}
-        <div className="flex-[1.2] w-full flex justify-center items-center relative min-h-[200px] md:min-h-[400px]">
+        {/* Hero 右侧 */}
+        <div className="flex-[1.2] w-full flex justify-center items-center relative min-h-[400px]">
           <div className="absolute inset-0 bg-white/[0.02] blur-3xl rounded-full opacity-50" />
 
-          <div className="relative z-10 w-full max-w-lg flex flex-col space-y-6 md:space-y-12">
-            <div className="flex items-center gap-2 md:gap-3 opacity-60">
-              <span className="w-1.5 h-1.5 md:w-2 md:h-2 bg-white/50 rounded-full" />
-              <span className="text-[9px] md:text-[10px] font-black tracking-[0.15em] md:tracking-[0.2em] text-white uppercase">
+          <div className="relative z-10 w-full max-w-lg flex flex-col space-y-12">
+            <div className="flex items-center gap-3 opacity-60">
+              <span className="w-2 h-2 bg-white/50 rounded-full" />
+              <span className="text-[10px] font-black tracking-[0.2em] text-white uppercase">
                 Daily Note
               </span>
             </div>
 
-            <div className="space-y-3 md:space-y-6">
-              <h3 className="text-xl md:text-4xl font-bold text-white tracking-tight leading-tight">
+            <div className="space-y-6">
+              <h3 className="text-4xl font-bold text-white tracking-tight leading-tight">
                 {(randomNote as any).title || (randomNote as any).text?.substring(0, 30) + '...'}
               </h3>
-              <p className="text-sm md:text-xl font-light text-white/70 leading-relaxed line-clamp-3 md:line-clamp-none">
+              <p className="text-xl font-light text-white/70 leading-relaxed">
                 {(randomNote as any).content || (randomNote as any).text}
               </p>
             </div>
 
-            <div className="flex justify-end pt-2 md:pt-4 border-t border-white/5">
-              <p className="text-[9px] md:text-[10px] font-mono text-white/30 uppercase tracking-widest">
+            <div className="flex justify-end pt-4 border-t border-white/5">
+              <p className="text-[10px] font-mono text-white/30 uppercase tracking-widest">
                 {(randomNote as any).date || new Date().toLocaleDateString()}
               </p>
             </div>
@@ -157,7 +231,7 @@ const Feed: React.FC<FeedProps> = memo(({ posts, loading, onSelectPost }) => {
         </div>
       </motion.section>
 
-      {/* 2. Loading State - 简化 */}
+      {/* 2. Loading State */}
       {loading && (
         <motion.section
           initial={{ opacity: 0 }}
@@ -165,40 +239,40 @@ const Feed: React.FC<FeedProps> = memo(({ posts, loading, onSelectPost }) => {
           transition={{ duration: 0.3 }}
           className="mb-12"
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+          <div className="grid grid-cols-2 gap-6">
             {[1, 2, 3, 4].map(i => (
-              <div key={i} className="h-[240px] md:h-[320px] rounded-xl md:rounded-2xl bg-white/[0.02] border border-white/5 animate-pulse" />
+              <div key={i} className="h-[320px] rounded-2xl bg-white/[0.02] border border-white/5 animate-pulse" />
             ))}
           </div>
         </motion.section>
       )}
 
-      {/* 3. 画廊网格 - 固定 4 篇，黄金比例布局 */}
+      {/* 3. 画廊网格 */}
       <motion.section
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
-        transition={{ duration: isMobile ? 0.8 : 1.2 }}
+        transition={{ duration: 1.2 }}
       >
-        <div className="flex items-end justify-between mb-6 md:mb-12 px-1 md:px-2">
-          <h2 className="text-base md:text-xl font-light tracking-widest text-white/40 uppercase">Latest Posts</h2>
-          <div className="text-[9px] md:text-[10px] font-mono text-white/20">{latestPosts.length} articles</div>
+        <div className="flex items-end justify-between mb-12 px-2">
+          <h2 className="text-xl font-light tracking-widest text-white/40 uppercase">Latest Posts</h2>
+          <div className="text-[10px] font-mono text-white/20">{latestPosts.length} articles</div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-          {latestPosts.map((post, index) => (
+        <div className="grid grid-cols-2 gap-6">
+          {latestPosts.map((post) => (
             <motion.div
               key={post.id}
               className="group"
               variants={itemVariants}
-              whileHover={!isMobile ? { 
+              whileHover={{ 
                 y: -2,
                 transition: { duration: 0.2, ease: [0.4, 0.0, 0.2, 1] }
-              } : {}}
+              }}
             >
               <motion.div
-                className="rounded-xl md:rounded-2xl transition-all duration-300 overflow-hidden"
-                whileHover={!isMobile ? { scale: 1.01 } : {}}
+                className="rounded-2xl transition-all duration-300 overflow-hidden"
+                whileHover={{ scale: 1.01 }}
                 style={{
                   willChange: 'transform',
                   backfaceVisibility: 'hidden'
@@ -206,10 +280,9 @@ const Feed: React.FC<FeedProps> = memo(({ posts, loading, onSelectPost }) => {
               >
                 <BlogCard post={post} onClick={() => onSelectPost(post)} />
               </motion.div>
-              {/* 底部描述 */}
-              <div className="mt-2 md:mt-4 flex justify-between items-center opacity-40 px-1">
-                <span className="text-[9px] md:text-[10px] uppercase tracking-widest">{post.date}</span>
-                <span className="text-[9px] md:text-[10px] uppercase tracking-widest">{post.readingTime}</span>
+              <div className="mt-4 flex justify-between items-center opacity-40 px-1">
+                <span className="text-[10px] uppercase tracking-widest">{post.date}</span>
+                <span className="text-[10px] uppercase tracking-widest">{post.readingTime}</span>
               </div>
             </motion.div>
           ))}

@@ -65,22 +65,40 @@ const AppInner = () => {
 
   const handleCopy = async (text: string, label: string) => {
     try {
-      // 优先使用现代 Clipboard API
+      // 移动端优化：检查是否支持Clipboard API
       if (navigator.clipboard && window.isSecureContext) {
         await navigator.clipboard.writeText(text);
         showToast(`${label} 已复制到剪贴板`);
         return;
       }
       
-      // 降级方案：使用传统的 execCommand
+      // 移动端降级方案：使用传统的 execCommand
       const textArea = document.createElement('textarea');
       textArea.value = text;
       textArea.style.position = 'fixed';
       textArea.style.left = '-9999px';
       textArea.style.top = '-9999px';
+      textArea.style.opacity = '0';
+      textArea.setAttribute('readonly', '');
       document.body.appendChild(textArea);
+      
+      // 移动端需要特殊处理
+      if (isMobile) {
+        textArea.style.position = 'absolute';
+        textArea.style.left = '0';
+        textArea.style.top = '0';
+        textArea.style.width = '1px';
+        textArea.style.height = '1px';
+        textArea.style.padding = '0';
+        textArea.style.border = 'none';
+        textArea.style.outline = 'none';
+        textArea.style.boxShadow = 'none';
+        textArea.style.background = 'transparent';
+      }
+      
       textArea.focus();
       textArea.select();
+      textArea.setSelectionRange(0, 99999); // 移动端兼容
       
       const success = document.execCommand('copy');
       document.body.removeChild(textArea);
@@ -88,10 +106,21 @@ const AppInner = () => {
       if (success) {
         showToast(`${label} 已复制到剪贴板`);
       } else {
+        // 移动端最终降级：显示文本让用户手动复制
+        if (isMobile) {
+          showToast(`${label}: ${text}`, 'info');
+        } else {
+          showToast('复制失败，请手动复制', 'error');
+        }
+      }
+    } catch (error) {
+      console.error('Copy failed:', error);
+      // 移动端错误处理：显示文本内容
+      if (isMobile) {
+        showToast(`${label}: ${text}`, 'info');
+      } else {
         showToast('复制失败，请手动复制', 'error');
       }
-    } catch {
-      showToast('复制失败，请手动复制', 'error');
     }
   };
 
@@ -121,7 +150,7 @@ const AppInner = () => {
         <meta name="description" content="A digital sanctuary for minimalist aesthetics and intelligence." />
       </Helmet>
 
-      {/* Toast */}
+      {/* Toast - 移动端优化 */}
       <AnimatePresence>
         {toast.show && (
           <motion.div 
@@ -129,79 +158,130 @@ const AppInner = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.95 }}
             transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className={`fixed top-8 right-8 z-50 px-6 py-4 rounded-2xl text-sm font-medium border shadow-2xl backdrop-blur-xl ${
-              toast.type === 'error' 
-                ? 'bg-red-500/20 text-red-200 border-red-500/30' 
-                : 'bg-white/20 text-white border-white/20'
-            }`}
+            className={`fixed ${isMobile ? 'top-4 left-4 right-4' : 'top-8 right-8'} z-[9999] pointer-events-none`}
+            style={{
+              position: 'fixed',
+              zIndex: 9999
+            }}
           >
-            <div className="flex items-center gap-3">
-              <div className={`w-2 h-2 rounded-full animate-pulse ${toast.type === 'error' ? 'bg-red-400' : 'bg-green-400'}`} />
-              {toast.msg}
+            <div className={`${isMobile ? 'w-full' : 'max-w-sm'} px-4 py-3 rounded-xl text-sm font-medium border shadow-2xl backdrop-blur-xl ${
+              toast.type === 'error' 
+                ? 'bg-red-500/90 text-white border-red-400/50' 
+                : toast.type === 'info'
+                ? 'bg-blue-500/90 text-white border-blue-400/50'
+                : 'bg-green-500/90 text-white border-green-400/50'
+            }`}>
+              <div className="flex items-start gap-3">
+                <div className={`w-2 h-2 rounded-full mt-1 flex-shrink-0 ${
+                  toast.type === 'error' ? 'bg-red-300' : 
+                  toast.type === 'info' ? 'bg-blue-300' : 'bg-green-300'
+                }`} />
+                <div className="flex-1 min-w-0">
+                  <p className="break-words">{toast.msg}</p>
+                </div>
+              </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Navigation - 滚动渐变效果 */}
+      {/* Navigation - 移动端简化版 */}
       <motion.nav 
-        className="fixed top-0 left-0 right-0 z-40 flex justify-center pt-4 md:pt-6 px-4"
+        className={`fixed top-0 left-0 right-0 z-40 ${isMobile ? 'px-4 pt-3' : 'flex justify-center pt-6 px-4'}`}
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
       >
-        <motion.div 
-          className="relative rounded-full px-6 md:px-10 py-3"
-          style={{ 
-            backgroundColor: `rgba(0, 0, 0, ${navOpacity})`,
-            backdropFilter: `blur(${navBlur}px) saturate(${150 + scrollProgress * 30}%)`,
-            boxShadow: scrollProgress > 0.2 ? `0 8px 32px rgba(0, 0, 0, ${navShadow})` : 'none',
-            borderWidth: '1px',
-            borderStyle: 'solid',
-            borderColor: `rgba(255, 255, 255, ${navBorder})`,
-            transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-          }}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          <div className="relative flex items-center gap-6 md:gap-12">
-            <motion.button 
+        {isMobile ? (
+          // 移动端极简导航
+          <div 
+            className="flex items-center justify-between py-3 px-4 rounded-full bg-black/20 backdrop-blur-md border border-white/10"
+            style={{
+              transition: 'all 0.3s ease-out',
+            }}
+          >
+            <button 
               onClick={() => navigate('/')}
-              className="text-base md:text-lg font-bold tracking-tight text-white/90 hover:text-white transition-colors"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              className="text-lg font-bold tracking-tight text-white"
             >
               AURA
-            </motion.button>
+            </button>
             
-            <div className="flex gap-2 md:gap-6 text-xs md:text-sm font-medium">
+            <div className="flex gap-4 text-xs font-medium">
               {[
                 { path: '/notes', label: 'Notes' },
                 { path: '/archive', label: 'Archive' },
                 { path: '/about', label: 'About' }
               ].map((item) => (
-                <motion.button 
+                <button 
                   key={item.path}
                   onClick={() => handleNavigate(item.path)} 
-                  className={`px-3 md:px-4 py-2 rounded-full transition-all duration-200 ${
+                  className={`px-2 py-1 rounded-full transition-colors ${
                     location.pathname === item.path 
-                      ? 'text-white bg-white/15' 
-                      : 'text-white/60 hover:text-white hover:bg-white/10'
+                      ? 'text-white bg-white/20' 
+                      : 'text-white/60'
                   }`}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
                 >
                   {item.label}
-                </motion.button>
+                </button>
               ))}
             </div>
           </div>
-        </motion.div>
+        ) : (
+          // 桌面端完整导航
+          <motion.div 
+            className="relative rounded-full px-10 py-3"
+            style={{ 
+              backgroundColor: `rgba(0, 0, 0, ${navOpacity})`,
+              backdropFilter: `blur(${navBlur}px) saturate(${150 + scrollProgress * 30}%)`,
+              boxShadow: scrollProgress > 0.2 ? `0 8px 32px rgba(0, 0, 0, ${navShadow})` : 'none',
+              borderWidth: '1px',
+              borderStyle: 'solid',
+              borderColor: `rgba(255, 255, 255, ${navBorder})`,
+              transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+            }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <div className="relative flex items-center gap-12">
+              <motion.button 
+                onClick={() => navigate('/')}
+                className="text-lg font-bold tracking-tight text-white/90 hover:text-white transition-colors"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                AURA
+              </motion.button>
+              
+              <div className="flex gap-6 text-sm font-medium">
+                {[
+                  { path: '/notes', label: 'Notes' },
+                  { path: '/archive', label: 'Archive' },
+                  { path: '/about', label: 'About' }
+                ].map((item) => (
+                  <motion.button 
+                    key={item.path}
+                    onClick={() => handleNavigate(item.path)} 
+                    className={`px-4 py-2 rounded-full transition-all duration-200 ${
+                      location.pathname === item.path 
+                        ? 'text-white bg-white/15' 
+                        : 'text-white/60 hover:text-white hover:bg-white/10'
+                    }`}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    {item.label}
+                  </motion.button>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
       </motion.nav>
 
-      {/* Main Content - 移动端优化，减少重绘 */}
+      {/* Main Content - 移动端优化布局 */}
       <main 
-        className="pt-32 md:pt-44 pb-24 md:pb-48 px-4 md:px-6 max-w-7xl mx-auto"
+        className={`${isMobile ? 'pt-20 pb-16 px-4' : 'pt-44 pb-48 px-6'} max-w-7xl mx-auto`}
         style={{
           willChange: 'auto',
           backfaceVisibility: 'hidden',
@@ -223,31 +303,58 @@ const AppInner = () => {
 
       <Assistant />
 
-      {/* Footer */}
-      <footer className="py-16 md:py-32 px-4 md:px-6 border-t border-white/10">
+      {/* Footer - 移动端优化 */}
+      <footer className={`${isMobile ? 'py-12 px-4' : 'py-32 px-6'} border-t border-white/10`}>
         <div className="max-w-7xl mx-auto flex flex-col items-center text-center">
-          <div className="text-3xl md:text-5xl font-bold tracking-tighter mb-8 md:mb-16 opacity-20 select-none">AURA</div>
-          <div className="flex gap-6 md:gap-12 text-xs md:text-sm uppercase tracking-wider font-bold text-white/60">
-            {[
-              { label: 'QQ', value: CONTACT_INFO.QQ },
-              { label: 'WX', value: CONTACT_INFO.WX },
-              { label: 'MAIL', value: CONTACT_INFO.MAIL }
-            ].map((contact) => (
-              <button
-                key={contact.label}
-                onClick={() => handleCopy(contact.value, contact.label)}
-                className="group relative overflow-hidden h-10 md:h-12 w-16 md:w-20 hover:text-white rounded-lg"
-              >
-                <div className="absolute inset-0 flex items-center justify-center group-hover:-translate-y-full transition-transform duration-500">
-                  {contact.label}
-                </div>
-                <div className="absolute inset-0 flex items-center justify-center translate-y-full group-hover:translate-y-0 transition-transform duration-500 text-white font-bold bg-white/10 rounded-lg">
-                  COPY
-                </div>
-              </button>
-            ))}
+          <div className={`${isMobile ? 'text-2xl mb-6' : 'text-5xl mb-16'} font-bold tracking-tighter opacity-20 select-none`}>
+            AURA
           </div>
-          <p className="mt-12 md:mt-24 text-xs text-white/20 tracking-wider uppercase">Designed for clarity © 2024</p>
+          
+          {isMobile ? (
+            // 移动端简化版联系方式
+            <div className="space-y-4 w-full max-w-xs">
+              {[
+                { label: 'QQ', value: CONTACT_INFO.QQ },
+                { label: 'WeChat', value: CONTACT_INFO.WX },
+                { label: 'Email', value: CONTACT_INFO.MAIL }
+              ].map((contact) => (
+                <button
+                  key={contact.label}
+                  onClick={() => handleCopy(contact.value, contact.label)}
+                  className="w-full flex items-center justify-between p-3 bg-white/5 border border-white/10 rounded-lg text-white/70 active:bg-white/10 transition-colors"
+                >
+                  <span className="text-sm font-medium">{contact.label}</span>
+                  <span className="text-xs text-white/40 uppercase tracking-wide">Copy</span>
+                </button>
+              ))}
+            </div>
+          ) : (
+            // 桌面端完整版联系方式
+            <div className="flex gap-12 text-sm uppercase tracking-wider font-bold text-white/60">
+              {[
+                { label: 'QQ', value: CONTACT_INFO.QQ },
+                { label: 'WX', value: CONTACT_INFO.WX },
+                { label: 'MAIL', value: CONTACT_INFO.MAIL }
+              ].map((contact) => (
+                <button
+                  key={contact.label}
+                  onClick={() => handleCopy(contact.value, contact.label)}
+                  className="group relative overflow-hidden h-12 w-20 hover:text-white rounded-lg"
+                >
+                  <div className="absolute inset-0 flex items-center justify-center group-hover:-translate-y-full transition-transform duration-500">
+                    {contact.label}
+                  </div>
+                  <div className="absolute inset-0 flex items-center justify-center translate-y-full group-hover:translate-y-0 transition-transform duration-500 text-white font-bold bg-white/10 rounded-lg">
+                    COPY
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+          
+          <p className={`${isMobile ? 'mt-8 text-[10px]' : 'mt-24 text-xs'} text-white/20 tracking-wider uppercase`}>
+            Designed for clarity © 2024
+          </p>
         </div>
       </footer>
 

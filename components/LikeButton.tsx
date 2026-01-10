@@ -147,7 +147,7 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
 
     return (
         <div className="relative inline-block">
-            {/* Material Design风格的Toast */}
+            {/* Material Design风格的Toast - 修复移动端位置 */}
             <AnimatePresence>
                 {toast.visible && (
                     <motion.div
@@ -158,9 +158,16 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                             duration: 0.2,
                             ease: [0.4, 0.0, 0.2, 1]
                         }}
-                        className="absolute -top-16 left-1/2 -translate-x-1/2 z-50 pointer-events-none"
+                        className="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] pointer-events-none"
+                        style={{
+                            position: 'fixed',
+                            top: '1rem',
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            zIndex: 9999
+                        }}
                     >
-                        <div className={`px-4 py-2 rounded-2xl shadow-lg backdrop-blur-xl border text-xs font-medium whitespace-nowrap ${
+                        <div className={`px-3 py-2 rounded-xl shadow-lg backdrop-blur-xl border text-xs font-medium whitespace-nowrap ${
                             toast.type === 'success' ? 'bg-green-500/90 border-green-400/50 text-white' :
                             toast.type === 'warning' ? 'bg-amber-500/90 border-amber-400/50 text-white' :
                             'bg-blue-500/90 border-blue-400/50 text-white'
