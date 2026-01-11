@@ -469,50 +469,18 @@ const AppInner = () => {
                 { label: 'WX', value: CONTACT_INFO.WX },
                 { label: 'MAIL', value: CONTACT_INFO.MAIL }
               ].map((contact) => (
-                <MagneticButton
+                <button
                   key={contact.label}
                   onClick={() => handleCopy(contact.value, contact.label)}
-                  className="group relative overflow-hidden h-12 w-20 hover:text-white rounded-lg border border-white/10 hover:border-white/30 transition-all duration-300"
-                  strength={0.4}
+                  className="group relative overflow-hidden h-12 w-20 hover:text-white rounded-lg"
                 >
-                  {/* 名片背景效果 */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  
-                  {/* 名片光泽效果 */}
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100"
-                    initial={{ x: '-100%', skewX: -20 }}
-                    whileHover={{ 
-                      x: '100%',
-                      transition: { duration: 0.6, ease: "easeOut" }
-                    }}
-                  />
-                  
-                  <motion.div 
-                    className="absolute inset-0 flex items-center justify-center"
-                    whileHover={{ 
-                      y: -48,
-                      scale: 1.1,
-                      transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }
-                    }}
-                  >
+                  <div className="absolute inset-0 flex items-center justify-center group-hover:-translate-y-full transition-transform duration-500">
                     {contact.label}
-                  </motion.div>
-                  <motion.div 
-                    className="absolute inset-0 flex items-center justify-center text-white font-bold bg-gradient-to-br from-white/20 to-white/10 rounded-lg backdrop-blur-sm"
-                    initial={{ y: 48, scale: 0.9 }}
-                    whileHover={{ 
-                      y: 0, 
-                      scale: 1,
-                      transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }
-                    }}
-                  >
-                    <span className="relative z-10">COPY</span>
-                  </motion.div>
-                  
-                  {/* 装饰性元素 */}
-                  <div className="absolute top-1 right-1 w-1 h-1 bg-white/30 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                </MagneticButton>
+                  </div>
+                  <div className="absolute inset-0 flex items-center justify-center translate-y-full group-hover:translate-y-0 transition-transform duration-500 text-white font-bold bg-white/10 rounded-lg">
+                    COPY
+                  </div>
+                </button>
               ))}
             </div>
           )}

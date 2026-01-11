@@ -211,100 +211,181 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
                 <h3 className="text-xl font-black text-white tracking-tight uppercase">
                     Discussion <span className="text-white/20 ml-2">{comments.length}</span>
                 </h3>
-                <button
+                <motion.button
                     onClick={() => setShowForm(!showForm)}
-                    className="px-6 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-full text-white transition-all"
+                    className="px-6 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-full text-white transition-all duration-300 relative overflow-hidden group"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                 >
-                    {showForm ? '取消' : '写评论'}
-                </button>
+                    {/* 悬停时的光晕效果 */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full" />
+                    <span className="relative z-10 group-hover:tracking-wider transition-all duration-300">
+                        {showForm ? '取消' : '写评论'}
+                    </span>
+                </motion.button>
             </div>
 
             {/* 评论表单 */}
-            {showForm && (
-                <div className="mb-12 p-8 border border-white/5 rounded-3xl bg-white/[0.01]">
-                    {replyingTo && (
-                        <div className="mb-6 text-xs text-white/40 flex items-center justify-between">
-                            <span>Replying to <span className="text-white font-bold">@{replyingTo}</span></span>
-                            <button
-                                onClick={() => {
-                                    setReplyingTo(null);
-                                    setFormData({ ...formData, parent_id: '' });
-                                }}
-                                className="text-red-400/60 hover:text-red-400"
+            <AnimatePresence>
+                {showForm && (
+                    <motion.div 
+                        className="mb-12 p-8 border border-white/5 rounded-3xl bg-white/[0.01] overflow-hidden"
+                        initial={{ 
+                            opacity: 0, 
+                            height: 0, 
+                            scale: 0.95,
+                            y: -20
+                        }}
+                        animate={{ 
+                            opacity: 1, 
+                            height: 'auto', 
+                            scale: 1,
+                            y: 0
+                        }}
+                        exit={{ 
+                            opacity: 0, 
+                            height: 0, 
+                            scale: 0.95,
+                            y: -20
+                        }}
+                        transition={{ 
+                            duration: 0.8, 
+                            ease: [0.25, 0.1, 0.25, 1],
+                            height: { duration: 0.6 },
+                            opacity: { duration: 0.4 }
+                        }}
+                    >
+                        {replyingTo && (
+                            <motion.div 
+                                className="mb-6 text-xs text-white/40 flex items-center justify-between"
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.3, duration: 0.5 }}
                             >
-                                Cancel
-                            </button>
-                        </div>
-                    )}
+                                <span>Replying to <span className="text-white font-bold">@{replyingTo}</span></span>
+                                <button
+                                    onClick={() => {
+                                        setReplyingTo(null);
+                                        setFormData({ ...formData, parent_id: '' });
+                                    }}
+                                    className="text-red-400/60 hover:text-red-400 transition-colors duration-300"
+                                >
+                                    Cancel
+                                </button>
+                            </motion.div>
+                        )}
 
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4">
-                            <input
-                                type="text"
-                                placeholder="Name *"
-                                value={formData.author}
-                                onChange={(e) => setFormData({ ...formData, author: e.target.value })}
-                                className="px-0 py-2 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/40 transition-colors"
-                                required
-                            />
-                            <input
-                                type="email"
-                                placeholder="Email (Private)"
-                                value={formData.email}
-                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                className="px-0 py-2 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/40 transition-colors"
-                            />
-                        </div>
-                        <textarea
-                            placeholder="Share your thoughts..."
-                            value={formData.content}
-                            onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                            rows={3}
-                            className="w-full px-0 py-2 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/40 transition-colors resize-none"
-                            required
-                        />
-                        <div className="flex justify-end">
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="relative px-8 py-2 bg-white text-black text-[10px] font-black uppercase tracking-widest rounded-full hover:scale-105 active:scale-95 transition-all disabled:opacity-70 overflow-hidden"
+                        <form onSubmit={handleSubmit} className="space-y-6">
+                            <motion.div 
+                                className="grid grid-cols-2 gap-4"
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.2, duration: 0.6 }}
                             >
-                                <span className={loading ? 'opacity-0' : 'opacity-100'}>Post Comment</span>
-                                {loading && (
-                                    <motion.div 
-                                        className="absolute inset-0 flex items-center justify-center"
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                    >
-                                        <div className="flex gap-1">
-                                            {[0, 1, 2].map((i) => (
-                                                <motion.div
-                                                    key={i}
-                                                    className="w-1.5 h-1.5 bg-black rounded-full"
-                                                    animate={{ opacity: [0.3, 1, 0.3], scale: [1, 1.2, 1] }}
-                                                    transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.1 }}
-                                                />
-                                            ))}
-                                        </div>
-                                    </motion.div>
-                                )}
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            )}
+                                <input
+                                    type="text"
+                                    placeholder="Name *"
+                                    value={formData.author}
+                                    onChange={(e) => setFormData({ ...formData, author: e.target.value })}
+                                    className="px-0 py-2 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/40 transition-all duration-300"
+                                    required
+                                />
+                                <input
+                                    type="email"
+                                    placeholder="Email (Private)"
+                                    value={formData.email}
+                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                    className="px-0 py-2 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/40 transition-all duration-300"
+                                />
+                            </motion.div>
+                            <motion.textarea
+                                placeholder="Share your thoughts..."
+                                value={formData.content}
+                                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                                rows={3}
+                                className="w-full px-0 py-2 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/40 transition-all duration-300 resize-none"
+                                required
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.4, duration: 0.6 }}
+                            />
+                            <motion.div 
+                                className="flex justify-end"
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.6, duration: 0.6 }}
+                            >
+                                <button
+                                    type="submit"
+                                    disabled={loading}
+                                    className="relative px-8 py-2 bg-white text-black text-[10px] font-black uppercase tracking-widest rounded-full hover:scale-105 active:scale-95 transition-all duration-300 disabled:opacity-70 overflow-hidden"
+                                >
+                                    <span className={loading ? 'opacity-0' : 'opacity-100'}>Post Comment</span>
+                                    {loading && (
+                                        <motion.div 
+                                            className="absolute inset-0 flex items-center justify-center"
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                        >
+                                            <div className="flex gap-1">
+                                                {[0, 1, 2].map((i) => (
+                                                    <motion.div
+                                                        key={i}
+                                                        className="w-1.5 h-1.5 bg-black rounded-full"
+                                                        animate={{ opacity: [0.3, 1, 0.3], scale: [1, 1.2, 1] }}
+                                                        transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.1 }}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </button>
+                            </motion.div>
+                        </form>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* 评论列表 */}
             {loading && comments.length === 0 ? (
-                <div className="text-center text-white/40 py-12">加载中...</div>
+                <motion.div 
+                    className="text-center text-white/40 py-12"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.5 }}
+                >
+                    加载中...
+                </motion.div>
             ) : topLevelComments.length === 0 ? (
-                <div className="text-center text-white/40 py-12">
+                <motion.div 
+                    className="text-center text-white/40 py-12"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+                >
                     还没有评论，来抢沙发吧！
-                </div>
+                </motion.div>
             ) : (
-                <div>
-                    {topLevelComments.map(comment => renderComment(comment))}
-                </div>
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                >
+                    {topLevelComments.map((comment, index) => (
+                        <motion.div
+                            key={comment.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ 
+                                duration: 0.6, 
+                                delay: index * 0.1,
+                                ease: [0.25, 0.1, 0.25, 1] 
+                            }}
+                        >
+                            {renderComment(comment)}
+                        </motion.div>
+                    ))}
+                </motion.div>
             )}
         </div>
     );
