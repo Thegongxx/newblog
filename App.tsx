@@ -52,8 +52,15 @@ const AppInner = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // 页面切换时不自动滚动 - Google风格的页面切换
-  // 移除自动滚动逻辑，让页面在当前位置进行切换动画
+  // Google风格页面切换：新页面滚动到顶部然后渐入，当前页面保持原样
+  useEffect(() => {
+    // 只在路由真正变化时滚动，不影响当前页面的退出动画
+    const timer = setTimeout(() => {
+      window.scrollTo(0, 0);
+    }, 0); // 立即执行，但不阻塞当前页面动画
+    
+    return () => clearTimeout(timer);
+  }, [location.pathname]);
 
   const showToast = (msg: string, type = 'success') => {
     setToast({ show: true, msg, type });
@@ -280,7 +287,7 @@ const AppInner = () => {
         )}
       </motion.nav>
 
-      {/* Main Content - Google风格页面切换，不强制滚动 */}
+      {/* Main Content - Google标准页面切换：当前页面原地退出，新页面从顶部渐入 */}
       <motion.main 
         className={`${isMobile ? 'pt-16 pb-16 px-4' : 'pt-32 pb-48 px-6'} max-w-7xl mx-auto`}
         style={{
@@ -294,12 +301,12 @@ const AppInner = () => {
             <Routes location={location} key={location.pathname}>
               <Route path="/" element={
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 1.05 }}
+                  initial={{ opacity: 0, y: isMobile ? 8 : 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }} // 当前页面只淡出，不移动
                   transition={{ 
-                    duration: isMobile ? 0.4 : 0.5, 
-                    ease: [0.25, 0.46, 0.45, 0.94] 
+                    duration: isMobile ? 0.3 : 0.4, 
+                    ease: [0.4, 0.0, 0.2, 1] 
                   }}
                 >
                   <Feed posts={posts} loading={loading} onSelectPost={(p) => navigate(`/post/${p.slug}`)} />
@@ -307,12 +314,12 @@ const AppInner = () => {
               } />
               <Route path="/post/:slug" element={
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 1.05 }}
+                  initial={{ opacity: 0, y: isMobile ? 8 : 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }} // 当前页面只淡出，不移动
                   transition={{ 
-                    duration: isMobile ? 0.4 : 0.5, 
-                    ease: [0.25, 0.46, 0.45, 0.94] 
+                    duration: isMobile ? 0.3 : 0.4, 
+                    ease: [0.4, 0.0, 0.2, 1] 
                   }}
                 >
                   <PostDetail posts={posts} loading={loading} />
@@ -320,12 +327,12 @@ const AppInner = () => {
               } />
               <Route path="/notes" element={
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 1.05 }}
+                  initial={{ opacity: 0, y: isMobile ? 8 : 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }} // 当前页面只淡出，不移动
                   transition={{ 
-                    duration: isMobile ? 0.4 : 0.5, 
-                    ease: [0.25, 0.46, 0.45, 0.94] 
+                    duration: isMobile ? 0.3 : 0.4, 
+                    ease: [0.4, 0.0, 0.2, 1] 
                   }}
                 >
                   <Notes notes={notes} loading={loading} />
@@ -333,12 +340,12 @@ const AppInner = () => {
               } />
               <Route path="/note/:id" element={
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 1.05 }}
+                  initial={{ opacity: 0, y: isMobile ? 8 : 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }} // 当前页面只淡出，不移动
                   transition={{ 
-                    duration: isMobile ? 0.4 : 0.5, 
-                    ease: [0.25, 0.46, 0.45, 0.94] 
+                    duration: isMobile ? 0.3 : 0.4, 
+                    ease: [0.4, 0.0, 0.2, 1] 
                   }}
                 >
                   <NoteDetail />
@@ -346,12 +353,12 @@ const AppInner = () => {
               } />
               <Route path="/archive" element={
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 1.05 }}
+                  initial={{ opacity: 0, y: isMobile ? 8 : 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }} // 当前页面只淡出，不移动
                   transition={{ 
-                    duration: isMobile ? 0.4 : 0.5, 
-                    ease: [0.25, 0.46, 0.45, 0.94] 
+                    duration: isMobile ? 0.3 : 0.4, 
+                    ease: [0.4, 0.0, 0.2, 1] 
                   }}
                 >
                   <Archive posts={posts} loading={loading} onSelectPost={(p) => navigate(`/post/${p.slug}`)} />
@@ -359,12 +366,12 @@ const AppInner = () => {
               } />
               <Route path="/about" element={
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 1.05 }}
+                  initial={{ opacity: 0, y: isMobile ? 8 : 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }} // 当前页面只淡出，不移动
                   transition={{ 
-                    duration: isMobile ? 0.4 : 0.5, 
-                    ease: [0.25, 0.46, 0.45, 0.94] 
+                    duration: isMobile ? 0.3 : 0.4, 
+                    ease: [0.4, 0.0, 0.2, 1] 
                   }}
                 >
                   <About />
