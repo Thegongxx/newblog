@@ -1,7 +1,7 @@
 import { useState, useEffect, useLayoutEffect, useRef, type MouseEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { engagementApi, supabase } from '../services/supabaseService';
-import { getBrowserFingerprint } from '../utils/engagement';
+import { getBrowserFingerprint, checkIfLikedLocal, setLikedLocal } from '../utils/engagement';
 import { useIsMobile } from '../hooks/useResponsive';
 
 interface LikeButtonProps {
@@ -12,23 +12,24 @@ interface LikeButtonProps {
 }
 
 export default function LikeButton({ targetType, targetId, initialCount = 0, className = "" }: LikeButtonProps) {
+    const [liked, setLiked] = useState(false);
     const [count, setCount] = useState(initialCount);
+    const [isAnimating, setIsAnimating] = useState(false);
     const [locked, setLocked] = useState(false);
     const [toast, setToast] = useState<{ message: string; visible: boolean; type: 'success' | 'warning' | 'info' }>({ 
         message: '', 
         visible: false, 
         type: 'success' 
     });
-    const [burst, setBurst] = useState<{ id: number; x: number; r: number } | null>(null);
     
     const isMobile = useIsMobile();
-    const isProcessingRef = useRef(false);
 
     const buttonRef = useRef<HTMLButtonElement | null>(null);
     const iconRef = useRef<SVGSVGElement | null>(null);
     const toastRef = useRef<HTMLDivElement | null>(null);
     const toastTimerRef = useRef<number | null>(null);
     const [toastLayout, setToastLayout] = useState<{ top: number; left: number; placement: 'top' | 'bottom'; arrowLeft: number } | null>(null);
+    const [burst, setBurst] = useState<{ id: number; x: number; r: number } | null>(null);
 
     const getLocalLikeKey = () => `aura_like_${targetType}_${targetId}_${getBrowserFingerprint()}`;
 
@@ -127,39 +128,38 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
     }, [toast.visible, isMobile]);
 
     const showToast = (message: string, type: 'success' | 'warning' | 'info' = 'success') => {
+        // 只显示上限提示，使用简洁的消息
         setToast({ message, visible: true, type });
         if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current);
-        toastTimerRef.current = window.setTimeout(() => setToast(prev => ({ ...prev, visible: false })), isMobile ? 1800 : 2200);
+        toastTimerRef.current = window.setTimeout(() => setToast(prev => ({ ...prev, visible: false })), isMobile ? 1500 : 2000);
     };
 
     const handleLike = async (e: MouseEvent) => {
         e.stopPropagation();
-        if (isProcessingRef.current) return;
+        if (isAnimating) return;
 
         const currentCount = parseInt(localStorage.getItem(getLocalLikeKey()) || '0');
         
         if (locked || currentCount >= 5) {
             setLocked(true);
-            showToast(`已达到点赞上限 (5/5)`, 'warning');
             return;
         }
 
-        isProcessingRef.current = true;
-        
+        setIsAnimating(true);
         setBurst({
             id: Date.now(),
             x: (Math.random() - 0.5) * (isMobile ? 10 : 14),
             r: (Math.random() - 0.5) * 18
         });
-        window.setTimeout(() => setBurst(null), isMobile ? 600 : 700);
+        window.setTimeout(() => setBurst(null), isMobile ? 750 : 820);
         
         if (window.navigator && window.navigator.vibrate) {
-            window.navigator.vibrate([8, 30, 8]);
+            window.navigator.vibrate([10, 50, 10]);
         }
 
         setTimeout(() => {
-            isProcessingRef.current = false;
-        }, 200);
+            setIsAnimating(false);
+        }, 800);
 
         try {
             const fingerprint = getBrowserFingerprint();
@@ -187,6 +187,7 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
 
     return (
         <div className="relative inline-block">
+            {/* 智能定位的透明灵动岛提示 */}
             <AnimatePresence>
                 {toast.visible && (
                     <motion.div
@@ -255,7 +256,7 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                                 className="absolute bottom-0 left-0 h-px bg-white/20"
                                 initial={{ width: '100%' }}
                                 animate={{ width: '0%' }}
-                                transition={{ duration: isMobile ? 1.8 : 2.2, ease: "linear" }}
+                                transition={{ duration: 2, ease: "linear" }}
                             />
 
                             <div 
@@ -284,50 +285,63 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                 )}
             </AnimatePresence>
 
+            {/* 苹果风格的点赞按钮 - 移动端简化 */}
             <motion.button
                 onClick={handleLike}
-                disabled={locked}
+                disabled={isAnimating}
                 ref={buttonRef}
                 className={`group relative flex items-center gap-2 ${
                     isMobile ? 'px-2 py-1.5' : 'px-3 py-2'
-                } rounded-full transition-all duration-150 overflow-hidden ${
+                } rounded-full transition-all duration-200 overflow-hidden ${
                     locked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
                 } ${
-                    'bg-white/5 text-white/50 hover:text-white/70 hover:bg-white/10'
+                    liked
+                        ? 'bg-rose-50/10 text-rose-400'
+                        : 'bg-white/5 text-white/50 hover:text-white/70 hover:bg-white/10'
                 } ${className}`}
-                whileHover={!locked ? {
+                whileHover={!locked && !isAnimating ? {
                     scale: isMobile ? 1.02 : 1.05,
-                    transition: { duration: 0.1, ease: [0.4, 0.0, 0.2, 1] }
+                    transition: { duration: 0.15, ease: [0.4, 0.0, 0.2, 1] }
                 } : {}}
-                whileTap={!locked ? {
-                    scale: isMobile ? 0.96 : 0.94,
-                    transition: { duration: 0.08, ease: [0.4, 0.0, 0.2, 1] }
+                whileTap={!locked && !isAnimating ? {
+                    scale: isMobile ? 0.98 : 0.95,
+                    transition: { duration: 0.1, ease: [0.4, 0.0, 0.2, 1] }
                 } : {}}
                 style={{
                     backdropFilter: isMobile ? 'blur(8px)' : 'blur(12px)',
                     WebkitBackdropFilter: isMobile ? 'blur(8px)' : 'blur(12px)',
                 }}
-                aria-label={locked ? `已达到点赞上限 (5/5)` : `点赞 (${count})`}
+                aria-label={locked ? `今日已点赞 5/5 次` : `点赞 (${count})`}
             >
-                <motion.div
-                    className="absolute inset-0 bg-white/10 rounded-full"
-                    whileTap={{ 
-                        scale: isMobile ? 1.3 : 1.5, 
-                        opacity: [0, 0.25, 0] 
-                    }}
-                    transition={{ duration: 0.3, ease: [0.4, 0.0, 0.2, 1] }}
-                />
+                {/* 苹果风格的 Ripple 效果 */}
+                {!locked && (
+                    <motion.div
+                        className="absolute inset-0 bg-white/10 rounded-full"
+                        initial={{ scale: 0, opacity: 0 }}
+                        whileTap={{ 
+                            scale: isMobile ? 1.5 : 2, 
+                            opacity: [0, 0.3, 0] 
+                        }}
+                        transition={{ duration: 0.4, ease: [0.4, 0.0, 0.2, 1] }}
+                    />
+                )}
 
+                {/* 爱心图标 - 移动端简化 */}
                 <motion.svg
                     ref={iconRef}
-                    className={`${isMobile ? 'w-3.5 h-3.5' : 'w-4 h-4'} transition-colors duration-200 fill-none`}
+                    className={`${isMobile ? 'w-3.5 h-3.5' : 'w-4 h-4'} transition-all duration-200 ${
+                        liked ? 'fill-current scale-110' : 'fill-none scale-100'
+                    }`}
                     stroke="currentColor"
                     viewBox="0 0 24 24"
-                    whileTap={{ 
-                        scale: [1, 1.15, 0.95, 1],
-                        rotate: [0, -8, 6, 0]
+                    animate={isAnimating ? {
+                        scale: isMobile ? [1, 1.22, 0.96, 1] : [1, 1.28, 0.94, 1],
+                        rotate: [0, -10, 10, 0]
+                    } : {}}
+                    transition={{
+                        duration: 0.62,
+                        ease: [0.4, 0.0, 0.2, 1]
                     }}
-                    transition={{ duration: 0.35, ease: [0.4, 0.0, 0.2, 1] }}
                 >
                     <path
                         strokeLinecap="round"
@@ -337,18 +351,21 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                     />
                 </motion.svg>
 
+                {/* 计数显示 - 移动端简化 */}
                 <motion.span 
                     className={`${isMobile ? 'text-xs' : 'text-sm'} font-medium tabular-nums`}
-                    whileTap={{ 
-                        scale: [1, 1.1, 1] 
-                    }}
-                    transition={{ duration: 0.2, ease: [0.4, 0.0, 0.2, 1] }}
+                    animate={isAnimating ? { 
+                        scale: isMobile ? [1, 1.15, 1] : [1, 1.2, 1] 
+                    } : {}}
+                    transition={{ duration: 0.3, ease: [0.4, 0.0, 0.2, 1] }}
                 >
                     {count}
                 </motion.span>
 
-                {!locked && burst && (
+                {/* 苹果风格的微妙粒子效果 - 移动端简化 */}
+                {!locked && isAnimating && (
                     <div className="absolute inset-0 pointer-events-none">
+                        {/* 主要粒子 - 移动端减少数量 */}
                         {[...Array(isMobile ? 5 : 7)].map((_, i, arr) => (
                             <motion.div
                                 key={`particle-${i}`}
@@ -363,13 +380,14 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                                     y: Math.sin((i * (360 / arr.length)) * Math.PI / 180) * (isMobile ? 8 : 12),
                                 }}
                                 transition={{
-                                    duration: 0.4,
+                                    duration: 0.5,
                                     ease: [0.4, 0.0, 0.2, 1],
-                                    delay: i * 0.01
+                                    delay: i * 0.015
                                 }}
                             />
                         ))}
 
+                        {/* 光点效果 - 移动端简化 */}
                         {!isMobile && [...Array(3)].map((_, i) => (
                             <motion.div
                                 key={`glow-${i}`}
@@ -382,13 +400,14 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                                     y: Math.sin((i * 120) * Math.PI / 180) * 6,
                                 }}
                                 transition={{
-                                    duration: 0.35,
+                                    duration: 0.4,
                                     ease: [0.4, 0.0, 0.2, 1],
-                                    delay: 0.05
+                                    delay: 0.1
                                 }}
                             />
                         ))}
 
+                        {/* 中心扩散圆环 - 苹果风格 */}
                         <motion.div
                             className="absolute left-1/2 top-1/2 border border-rose-400/40 rounded-full"
                             initial={{ scale: 0, opacity: 0.9 }}
@@ -397,7 +416,7 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                                 opacity: 0 
                             }}
                             transition={{ 
-                                duration: 0.4, 
+                                duration: 0.5, 
                                 ease: [0.4, 0.0, 0.2, 1] 
                             }}
                             style={{
@@ -416,7 +435,7 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                         className="absolute left-1/2 top-1/2"
                         initial={{ opacity: 0, y: 0, x: burst.x, scale: 0.6, rotate: burst.r }}
                         animate={{ opacity: [0, 0.95, 0], y: isMobile ? -18 : -22, scale: [0.7, 1.05, 0.9] }}
-                        transition={{ duration: isMobile ? 0.55 : 0.6, ease: [0.22, 1, 0.36, 1] }}
+                        transition={{ duration: isMobile ? 0.65 : 0.7, ease: [0.22, 1, 0.36, 1] }}
                         style={{
                             marginLeft: isMobile ? '-6px' : '-7px',
                             marginTop: isMobile ? '-6px' : '-7px'
