@@ -52,7 +52,7 @@ const Feed: FC<FeedProps> = memo(({ posts, loading, onSelectPost }) => {
   // 移动端极简动画 - Google风格
   if (isMobile) {
     return (
-      <div className="space-y-8 overflow-hidden">
+      <div className="space-y-8">
         {/* 移动端简化Hero */}
         <section className="min-h-[40vh] flex flex-col justify-center space-y-6">
           <div className="space-y-4">
@@ -164,7 +164,7 @@ const Feed: FC<FeedProps> = memo(({ posts, loading, onSelectPost }) => {
 
   return (
     <motion.div 
-      className="space-y-16 md:space-y-64 overflow-hidden"
+      className="space-y-16 md:space-y-64"
       variants={containerVariants}
       initial="hidden"
       animate="visible"

@@ -2,7 +2,8 @@ import { useState, useEffect, useMemo } from 'react';
 
 type Breakpoint = 'mobile' | 'tablet' | 'desktop';
 
-const BREAKPOINTS = { mobile: 768, tablet: 1024 };
+// 与 Tailwind 断点保持一致，避免冲突
+const BREAKPOINTS = { mobile: 640, tablet: 768, desktop: 1024 };
 
 // 防抖hook
 function useDebounce<T>(value: T, delay: number): T {
@@ -26,7 +27,9 @@ export function useBreakpoint(): Breakpoint {
     // 初始化时直接计算，避免闪烁
     if (typeof window !== 'undefined') {
       const w = window.innerWidth;
-      return w < BREAKPOINTS.mobile ? 'mobile' : w < BREAKPOINTS.tablet ? 'tablet' : 'desktop';
+      return w < BREAKPOINTS.mobile ? 'mobile' : 
+             w < BREAKPOINTS.tablet ? 'tablet' : 
+             w < BREAKPOINTS.desktop ? 'tablet' : 'desktop';
     }
     return 'desktop'; // SSR 默认为桌面端
   });
@@ -50,7 +53,8 @@ export function useBreakpoint(): Breakpoint {
 
   useEffect(() => {
     const newBreakpoint = debouncedWidth < BREAKPOINTS.mobile ? 'mobile' : 
-                         debouncedWidth < BREAKPOINTS.tablet ? 'tablet' : 'desktop';
+                         debouncedWidth < BREAKPOINTS.tablet ? 'tablet' : 
+                         debouncedWidth < BREAKPOINTS.desktop ? 'tablet' : 'desktop';
     setBreakpoint(newBreakpoint);
   }, [debouncedWidth]);
 
@@ -76,5 +80,7 @@ export function useGridColumns(): number {
 
 // For testing
 export function getGridColumns(width: number): number {
-  return width < BREAKPOINTS.mobile ? 1 : width < BREAKPOINTS.tablet ? 2 : 3;
+  return width < BREAKPOINTS.mobile ? 1 : 
+         width < BREAKPOINTS.tablet ? 2 : 
+         width < BREAKPOINTS.desktop ? 2 : 3;
 }
