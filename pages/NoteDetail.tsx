@@ -46,27 +46,24 @@ const NoteDetail: React.FC = () => {
     }
   }, [id, navigate, note, notes, isLoading, cacheError]);
 
-  // Google Material Design 风格的动画 - 与页面切换同步 (+0.2s)
-  const googleFadeIn = {
+  // 苹果风格动画 - 与页面切换同步
+  const appleFadeIn = {
     opacity: isLoaded ? 1 : 0,
-    transform: isLoaded ? 'translateY(0)' : 'translateY(12px)',
-    filter: isLoaded ? 'blur(0px)' : 'blur(1px)',
-    transition: 'opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), filter 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+    x: isLoaded ? 0 : 20,
+    transition: 'opacity 0.4s cubic-bezier(0.25, 0.1, 0.25, 1), x 0.4s cubic-bezier(0.25, 0.1, 0.25, 1)'
   };
 
-  const googleStaggeredFadeIn = (delay: number) => ({
+  const appleStaggeredFadeIn = (delay: number) => ({
     opacity: isLoaded ? 1 : 0,
-    transform: isLoaded ? 'translateY(0) scale(1)' : 'translateY(16px) scale(0.98)',
-    filter: isLoaded ? 'blur(0px)' : 'blur(2px)',
-    transition: `opacity 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}ms, transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}ms, filter 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}ms`
+    x: isLoaded ? 0 : 30,
+    transition: `opacity 0.4s cubic-bezier(0.25, 0.1, 0.25, 1) ${delay}ms, x 0.4s cubic-bezier(0.25, 0.1, 0.25, 1) ${delay}ms`
   });
 
   // 特殊的内容渐入效果
   const contentFadeIn = (delay: number) => ({
     opacity: isLoaded ? 1 : 0,
-    transform: isLoaded ? 'translateY(0)' : 'translateY(20px)',
-    filter: isLoaded ? 'blur(0px)' : 'blur(2px)',
-    transition: `opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}ms, transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}ms, filter 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}ms`
+    x: isLoaded ? 0 : 40,
+    transition: `opacity 0.5s cubic-bezier(0.25, 0.1, 0.25, 1) ${delay}ms, x 0.5s cubic-bezier(0.25, 0.1, 0.25, 1) ${delay}ms`
   });
 
   // 加载状态：正在加载缓存数据，或者缓存加载完成但还没找到note且没有错误
@@ -74,7 +71,7 @@ const NoteDetail: React.FC = () => {
   
   if (error) {
     return (
-      <div className="py-12" style={googleFadeIn}>
+      <div className="py-12" style={appleFadeIn}>
         <div className="max-w-4xl mx-auto text-center">
           <div className="glass p-8 md:p-12 rounded-2xl md:rounded-[3rem] border border-red-500/20">
             <div className="text-4xl md:text-6xl mb-4 md:mb-6">😕</div>
@@ -110,13 +107,13 @@ const NoteDetail: React.FC = () => {
   return (
     <div className="py-8 md:py-12 relative">
       <div className="max-w-4xl mx-auto">
-        {/* 返回按钮 - Google 风格缓慢渐入 */}
-        <div style={googleFadeIn}>
+        {/* 返回按钮 - 苹果风格渐入 */}
+        <div style={appleFadeIn}>
           <button
             onClick={() => navigate('/notes')}
-            className="mb-6 md:mb-8 flex items-center gap-2 text-white/60 hover:text-white transition-all duration-500 group transform hover:scale-105"
+            className="mb-6 md:mb-8 flex items-center gap-2 text-white/60 hover:text-white transition-all duration-300 group transform hover:scale-105"
           >
-            <span className="transform group-hover:-translate-x-2 transition-transform duration-500">←</span>
+            <span className="transform group-hover:-translate-x-2 transition-transform duration-300">←</span>
             <span className="text-xs md:text-sm font-medium tracking-wider uppercase">返回</span>
           </button>
         </div>
@@ -124,20 +121,20 @@ const NoteDetail: React.FC = () => {
         {/* 笔记内容 - 分层渐入 */}
         <article 
           className="glass p-6 md:p-12 rounded-2xl md:rounded-[3rem] border border-white/5 mb-8 md:mb-12 relative"
-          style={googleStaggeredFadeIn(50)}
+          style={appleStaggeredFadeIn(50)}
         >
           {/* 引号图标 - 延迟渐入 */}
           <div 
-            className="mb-4 md:mb-8 scale-75 md:scale-100 origin-top-left transform transition-all duration-500"
-            style={googleStaggeredFadeIn(100)}
+            className="mb-4 md:mb-8 scale-75 md:scale-100 origin-top-left transform transition-all duration-400"
+            style={appleStaggeredFadeIn(100)}
           >
             {ICONS.QUOTES}
           </div>
           
           {/* 笔记标题 - 更长延迟 */}
           <h1 
-            className="text-2xl md:text-4xl font-bold tracking-tight text-white/95 mb-4 md:mb-8 transform transition-all duration-500"
-            style={googleStaggeredFadeIn(150)}
+            className="text-2xl md:text-4xl font-bold tracking-tight text-white/95 mb-4 md:mb-8 transform transition-all duration-400"
+            style={appleStaggeredFadeIn(150)}
           >
             {note.title}
           </h1>
@@ -155,7 +152,7 @@ const NoteDetail: React.FC = () => {
           {/* 底部信息 - 最后渐入 */}
           <div 
             className="flex items-center justify-between border-t border-white/5 pt-4 md:pt-8 mt-8 md:mt-12"
-            style={googleStaggeredFadeIn(250)}
+            style={appleStaggeredFadeIn(250)}
           >
             <div className="flex flex-col gap-1 md:gap-2">
               <time className="text-[10px] md:text-sm font-bold tracking-widest text-white/40 uppercase">
@@ -167,7 +164,7 @@ const NoteDetail: React.FC = () => {
                     <span 
                       key={idx} 
                       className="text-xs px-3 py-1 bg-white/10 rounded-full text-white/50 transform transition-all duration-300 hover:scale-110 hover:bg-white/20"
-                      style={googleStaggeredFadeIn(300 + idx * 50)}
+                      style={appleStaggeredFadeIn(300 + idx * 50)}
                     >
                       {tag}
                     </span>
@@ -176,7 +173,7 @@ const NoteDetail: React.FC = () => {
               )}
             </div>
             
-            <div style={googleStaggeredFadeIn(275)}>
+            <div style={appleStaggeredFadeIn(275)}>
               <LikeButton 
                 targetType="note" 
                 targetId={note.id} 

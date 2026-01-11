@@ -128,34 +128,41 @@ const Feed: React.FC<FeedProps> = memo(({ posts, loading, onSelectPost }) => {
 
   // 桌面端保持原有复杂动画
   const containerVariants = {
-    hidden: { opacity: 0 },
+    hidden: { x: '100%', opacity: 0 },
     visible: {
+      x: 0,
       opacity: 1,
       transition: {
-        duration: 0.6,
-        ease: [0.25, 0.46, 0.45, 0.94],
-        staggerChildren: 0.07
+        type: "tween",
+        ease: [0.25, 0.1, 0.25, 1],
+        duration: 0.4,
+        staggerChildren: 0.05
       }
     }
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 12 },
+    hidden: { x: 20, opacity: 0 },
     visible: {
+      x: 0,
       opacity: 1,
-      y: 0,
       transition: {
-        duration: 0.6,
-        ease: [0.25, 0.46, 0.45, 0.94]
+        type: "tween",
+        ease: [0.25, 0.1, 0.25, 1],
+        duration: 0.4
       }
     }
   };
 
   const fadeInReveal = {
-    initial: { opacity: 0, y: 12 },
-    whileInView: { opacity: 1, y: 0 },
+    initial: { x: 20, opacity: 0 },
+    whileInView: { x: 0, opacity: 1 },
     viewport: { once: true, margin: "-30px" },
-    transition: { duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }
+    transition: { 
+      type: "tween",
+      ease: [0.25, 0.1, 0.25, 1],
+      duration: 0.5 
+    }
   };
 
   return (

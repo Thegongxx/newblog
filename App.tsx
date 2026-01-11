@@ -52,9 +52,8 @@ const AppInner = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // 页面切换：当前页面原地渐出，新页面从顶部渐入
+  // 苹果风格页面切换：推拉效果，新页面从右侧推入，当前页面向左推出
   useEffect(() => {
-    // 在页面切换的瞬间滚动到顶部，用户看不到滚动过程
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
@@ -283,9 +282,9 @@ const AppInner = () => {
         )}
       </motion.nav>
 
-      {/* Main Content - 当前页面原地渐出，新页面从顶部渐入 */}
+      {/* Main Content - 苹果风格页面切换：推拉效果 */}
       <motion.main 
-        className={`${isMobile ? 'pt-16 pb-16 px-4' : 'pt-32 pb-48 px-6'} max-w-7xl mx-auto`}
+        className={`${isMobile ? 'pt-16 pb-16 px-4' : 'pt-32 pb-48 px-6'} max-w-7xl mx-auto overflow-hidden`}
         style={{
           willChange: 'transform',
           backfaceVisibility: 'hidden',
@@ -293,82 +292,94 @@ const AppInner = () => {
         }}
       >
         <ErrorBoundary>
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="wait" initial={false}>
             <Routes location={location} key={location.pathname}>
               <Route path="/" element={
                 <motion.div
-                  initial={{ opacity: 0, y: isMobile ? 8 : 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }} // 当前页面原地渐出
+                  initial={{ x: '100%', opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  exit={{ x: '-100%', opacity: 0 }}
                   transition={{ 
-                    duration: isMobile ? 0.5 : 0.6, 
-                    ease: [0.25, 0.46, 0.45, 0.94] 
+                    type: "tween",
+                    ease: [0.25, 0.1, 0.25, 1],
+                    duration: 0.4
                   }}
+                  style={{ width: '100%' }}
                 >
                   <Feed posts={posts} loading={loading} onSelectPost={(p) => navigate(`/post/${p.slug}`)} />
                 </motion.div>
               } />
               <Route path="/post/:slug" element={
                 <motion.div
-                  initial={{ opacity: 0, y: isMobile ? 8 : 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }} // 当前页面原地渐出
+                  initial={{ x: '100%', opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  exit={{ x: '-100%', opacity: 0 }}
                   transition={{ 
-                    duration: isMobile ? 0.5 : 0.6, 
-                    ease: [0.25, 0.46, 0.45, 0.94] 
+                    type: "tween",
+                    ease: [0.25, 0.1, 0.25, 1],
+                    duration: 0.4
                   }}
+                  style={{ width: '100%' }}
                 >
                   <PostDetail posts={posts} loading={loading} />
                 </motion.div>
               } />
               <Route path="/notes" element={
                 <motion.div
-                  initial={{ opacity: 0, y: isMobile ? 8 : 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }} // 当前页面原地渐出
+                  initial={{ x: '100%', opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  exit={{ x: '-100%', opacity: 0 }}
                   transition={{ 
-                    duration: isMobile ? 0.5 : 0.6, 
-                    ease: [0.25, 0.46, 0.45, 0.94] 
+                    type: "tween",
+                    ease: [0.25, 0.1, 0.25, 1],
+                    duration: 0.4
                   }}
+                  style={{ width: '100%' }}
                 >
                   <Notes notes={notes} loading={loading} />
                 </motion.div>
               } />
               <Route path="/note/:id" element={
                 <motion.div
-                  initial={{ opacity: 0, y: isMobile ? 8 : 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }} // 当前页面原地渐出
+                  initial={{ x: '100%', opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  exit={{ x: '-100%', opacity: 0 }}
                   transition={{ 
-                    duration: isMobile ? 0.5 : 0.6, 
-                    ease: [0.25, 0.46, 0.45, 0.94] 
+                    type: "tween",
+                    ease: [0.25, 0.1, 0.25, 1],
+                    duration: 0.4
                   }}
+                  style={{ width: '100%' }}
                 >
                   <NoteDetail />
                 </motion.div>
               } />
               <Route path="/archive" element={
                 <motion.div
-                  initial={{ opacity: 0, y: isMobile ? 8 : 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }} // 当前页面原地渐出
+                  initial={{ x: '100%', opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  exit={{ x: '-100%', opacity: 0 }}
                   transition={{ 
-                    duration: isMobile ? 0.5 : 0.6, 
-                    ease: [0.25, 0.46, 0.45, 0.94] 
+                    type: "tween",
+                    ease: [0.25, 0.1, 0.25, 1],
+                    duration: 0.4
                   }}
+                  style={{ width: '100%' }}
                 >
                   <Archive posts={posts} loading={loading} onSelectPost={(p) => navigate(`/post/${p.slug}`)} />
                 </motion.div>
               } />
               <Route path="/about" element={
                 <motion.div
-                  initial={{ opacity: 0, y: isMobile ? 8 : 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }} // 当前页面原地渐出
+                  initial={{ x: '100%', opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  exit={{ x: '-100%', opacity: 0 }}
                   transition={{ 
-                    duration: isMobile ? 0.5 : 0.6, 
-                    ease: [0.25, 0.46, 0.45, 0.94] 
+                    type: "tween",
+                    ease: [0.25, 0.1, 0.25, 1],
+                    duration: 0.4
                   }}
+                  style={{ width: '100%' }}
                 >
                   <About />
                 </motion.div>
