@@ -110,31 +110,17 @@ const NoteDetail: React.FC = () => {
         <button
           onClick={() => navigate('/notes')}
           className="mb-6 md:mb-8 flex items-center gap-2 text-white/60 hover:text-white transition-colors group"
-<<<<<<< HEAD
-=======
-          whileHover={{ x: -4 }}
-          transition={{ type: "spring", stiffness: 400, damping: 25 }}
->>>>>>> parent of 7f54d51 (x)
         >
           <span className="transform group-hover:-translate-x-1 transition-transform">←</span>
           <span className="text-xs md:text-sm font-medium tracking-wider uppercase">返回</span>
         </button>
 
-<<<<<<< HEAD
-        {/* 笔记内容 - 简化，无动画 */}
-        <article className="glass p-6 md:p-12 rounded-2xl md:rounded-[3rem] border border-white/5 mb-8 md:mb-12">
-          {/* 引号图标 */}
-          <div className="mb-4 md:mb-8 scale-75 md:scale-100 origin-top-left">
-            {ICONS.QUOTES}
-          </div>
-=======
         {/* 笔记内容 - 移动端简化 */}
         <article 
           className="glass p-6 md:p-12 rounded-2xl md:rounded-[3rem] border border-white/5 mb-8 md:mb-12"
         >
           {/* 引号图标 */}
           <div className="mb-4 md:mb-8 scale-75 md:scale-100 origin-top-left">{ICONS.QUOTES}</div>
->>>>>>> parent of 7f54d51 (x)
           
           {/* 笔记标题 */}
           <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-white/95 mb-4 md:mb-8">
@@ -148,11 +134,7 @@ const NoteDetail: React.FC = () => {
             </div>
           </div>
 
-<<<<<<< HEAD
-          {/* 底部信息 */}
-=======
           {/* 底部信息 - 移动端简化 */}
->>>>>>> parent of 7f54d51 (x)
           <div className="flex items-center justify-between border-t border-white/5 pt-4 md:pt-8 mt-8 md:mt-12">
             <div className="flex flex-col gap-1 md:gap-2">
               <time className="text-[10px] md:text-sm font-bold tracking-widest text-white/40 uppercase">
@@ -178,11 +160,7 @@ const NoteDetail: React.FC = () => {
           </div>
         </article>
 
-<<<<<<< HEAD
-        {/* 评论区域 - 简化，无动画 */}
-=======
         {/* 评论区域 */}
->>>>>>> parent of 7f54d51 (x)
         <div>
           <CommentSection targetId={note.id} targetType="note" />
         </div>
