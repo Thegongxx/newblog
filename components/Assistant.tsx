@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { ICONS } from '../constants';
+import { Z_INDEX } from '../constants/zIndex';
 import { askNvidiaStream } from '../services/nvidiaService';
 import { Message } from '../types';
 
@@ -182,13 +183,14 @@ const Assistant = () => {
       <motion.button
         onClick={handleToggle}
         disabled={isAnimating}
-        className={`fixed bottom-8 right-8 z-50 flex items-center justify-center bg-white shadow-lg border-0 focus:outline-none focus:ring-0 overflow-hidden
+        className={`fixed bottom-8 right-8 flex items-center justify-center bg-white shadow-lg border-0 focus:outline-none focus:ring-0 overflow-hidden
                    max-sm:bottom-6 max-sm:right-6 max-sm:scale-90 ${isAnimating ? 'pointer-events-none' : ''}`}
         style={{
           height: '56px',
           borderRadius: '28px',
           willChange: 'transform, width',
           backfaceVisibility: 'hidden',
+          zIndex: Z_INDEX.MODAL_BACKDROP,
         }}
         initial={false}
         animate={{
@@ -305,10 +307,11 @@ const Assistant = () => {
                 duration: 0.25,
                 ease: [0.4, 0.0, 0.2, 1]
               }}
-              className="fixed inset-0 bg-black/40 z-30"
+              className="fixed inset-0 bg-black/40"
               style={{ 
                 willChange: 'opacity',
-                backfaceVisibility: 'hidden'
+                backfaceVisibility: 'hidden',
+                zIndex: Z_INDEX.MODAL_BACKDROP
               }}
               onClick={handleToggle}
               aria-label="点击关闭AI助手"
@@ -335,13 +338,14 @@ const Assistant = () => {
                 duration: 0.3,
                 ease: [0.4, 0.0, 0.2, 1]
               }}
-              className="fixed bottom-28 right-8 z-40 w-96 max-w-[calc(100vw-2rem)] max-h-[32rem] bg-gray-900/95 backdrop-blur-xl border border-gray-700/50 rounded-3xl flex flex-col overflow-hidden shadow-2xl
+              className="fixed bottom-28 right-8 w-96 max-w-[calc(100vw-2rem)] max-h-[32rem] bg-gray-900/95 backdrop-blur-xl border border-gray-700/50 rounded-3xl flex flex-col overflow-hidden shadow-2xl
                          sm:w-96 sm:bottom-28 sm:right-8
-                         max-sm:w-[calc(100vw-1rem)] max-sm:bottom-24 max-sm:right-2 max-sm:left-2 max-sm:mx-auto max-sm:max-h-[70vh]"
+                         max-sm:w-[calc(100vw-2rem)] max-sm:bottom-24 max-sm:left-4 max-sm:right-4 max-sm:max-h-[70vh]"
               style={{
                 boxShadow: '0 24px 38px rgba(0,0,0,0.4), 0 9px 46px rgba(0,0,0,0.24)',
                 willChange: 'transform, opacity',
-                backfaceVisibility: 'hidden'
+                backfaceVisibility: 'hidden',
+                zIndex: Z_INDEX.MODAL
               }}
               role="dialog"
               aria-label="AI助手聊天面板"

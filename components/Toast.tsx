@@ -1,5 +1,7 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Z_INDEX } from '../constants/zIndex';
+import { useIsMobile } from '../hooks/useResponsive';
 
 type ToastType = 'success' | 'error' | 'info';
 
@@ -19,6 +21,7 @@ let toastId = 0;
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const isMobile = useIsMobile();
 
   const showToast = useCallback((message: string, type: ToastType = 'success') => {
     const id = ++toastId;
@@ -43,7 +46,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      <div className="fixed top-8 right-8 z-50 flex flex-col gap-2">
+      <div 
+        className={`fixed ${isMobile ? 'inset-x-4 top-4' : 'top-8 right-8'} flex flex-col gap-2`}
+        style={{ zIndex: Z_INDEX.TOAST }}
+      >
         <AnimatePresence>
           {toasts.map(toast => (
             <motion.div
