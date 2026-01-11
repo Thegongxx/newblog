@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { engagementApi, supabase } from '../services/supabaseService';
 import { getBrowserFingerprint, checkIfLikedLocal, setLikedLocal } from '../utils/engagement';
+import { useIsMobile } from '../hooks/useResponsive';
 
 interface LikeButtonProps {
     targetType: 'post' | 'quote' | 'homepage' | 'comment' | 'homepage_comment' | 'note';
@@ -15,6 +16,8 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
     const [animating, setAnimating] = useState(false);
     const [locked, setLocked] = useState(false);
     const [toast, setToast] = useState<{ message: string; visible: boolean }>({ message: '', visible: false });
+    
+    const isMobile = useIsMobile();
 
     // 持久化存储 Key
     const getStorageKey = () => `aura_like_limit_${targetType}_${targetId}_${new Date().toISOString().split('T')[0]}`;
@@ -59,7 +62,7 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
 
     const showToast = (message: string) => {
         setToast({ message, visible: true });
-        setTimeout(() => setToast(prev => ({ ...prev, visible: false })), 2000);
+        setTimeout(() => setToast(prev => ({ ...prev, visible: false })), isMobile ? 1500 : 2000);
     };
 
     const handleLike = async (e: React.MouseEvent) => {
@@ -119,15 +122,27 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
     };
 
     return (
-        <div className="relative inline-block">
-            {/* Apple 风格 Toast */}
+        <div className="relative inline-block" style={{ isolation: 'isolate' }}>
+            {/* Apple 风格 Toast - 显示在按钮附近 */}
             {toast.visible && (
-                <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[9999] animate-in fade-in zoom-in slide-in-from-bottom-2 duration-300 pointer-events-none">
-                    <div className="bg-white/10 backdrop-blur-2xl border border-white/20 px-4 py-2 rounded-2xl shadow-2xl">
-                        <span className="text-xs font-bold text-white tracking-widest whitespace-nowrap uppercase">
+                <div className={`absolute z-[9999] pointer-events-none ${
+                    isMobile 
+                        ? '-top-12 left-1/2 -translate-x-1/2' 
+                        : '-top-14 left-1/2 -translate-x-1/2'
+                } animate-in fade-in zoom-in slide-in-from-bottom-2 duration-300`}>
+                    <div className={`bg-black/80 backdrop-blur-xl border border-white/20 rounded-xl shadow-2xl ${
+                        isMobile ? 'px-3 py-1.5' : 'px-4 py-2'
+                    }`}>
+                        <span className={`font-bold text-white tracking-wide whitespace-nowrap ${
+                            isMobile ? 'text-[10px]' : 'text-xs'
+                        }`}>
                             {toast.message}
                         </span>
                     </div>
+                    {/* 小箭头指向按钮 */}
+                    <div className={`absolute top-full left-1/2 -translate-x-1/2 ${
+                        isMobile ? 'w-1.5 h-1.5' : 'w-2 h-2'
+                    } bg-black/80 border-r border-b border-white/20 rotate-45 -mt-1`} />
                 </div>
             )}
 

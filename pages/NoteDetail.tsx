@@ -5,14 +5,16 @@ import LikeButton from '../components/LikeButton';
 import CommentSection from '../components/CommentSection';
 import { notesApi } from '../services/supabaseService';
 import { ICONS } from '../constants';
+import { useIsMobile } from '../hooks/useResponsive';
 import type { FileNote } from '../types';
 
 const NoteDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [note, setNote] = useState<FileNote | null>(null);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (!id) {
@@ -24,7 +26,6 @@ const NoteDetail: React.FC = () => {
 
   const loadNote = async () => {
     try {
-      setLoading(true);
       setError(null);
       
       // 从数据库读取note
@@ -42,82 +43,91 @@ const NoteDetail: React.FC = () => {
         content: noteData.text || noteData.content
       });
     } catch (err: any) {
+      console.error('Failed to load note:', err);
       setError(err.message || '加载失败');
-    } finally {
-      // 移动端需要更长的延迟来避免闪烁
-      const delay = window.innerWidth < 768 ? 300 : 150;
-      setTimeout(() => {
-        setLoading(false);
-      }, delay);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="py-12">
-        <div className="max-w-4xl mx-auto">
-          {/* 返回按钮骨架 - 保持布局稳定 */}
-          <div className="mb-6 md:mb-8">
-            <div className="w-20 h-8 bg-white/5 rounded animate-pulse" />
-          </div>
-          
-          {/* 内容骨架 - 与实际内容布局完全一致 */}
-          <div className="glass p-6 md:p-12 rounded-2xl md:rounded-[3rem] border border-white/5 animate-pulse">
-            <div className="w-8 h-8 bg-white/5 rounded mb-4 md:mb-8" />
-            <div className="space-y-4 mb-4 md:mb-8">
-              <div className="h-8 md:h-12 w-full bg-white/5 rounded" />
-              <div className="h-8 md:h-12 w-3/4 bg-white/5 rounded" />
-            </div>
-            <div className="space-y-3 mb-8 md:mb-12">
-              <div className="h-4 w-full bg-white/5 rounded" />
-              <div className="h-4 w-full bg-white/5 rounded" />
-              <div className="h-4 w-2/3 bg-white/5 rounded" />
-            </div>
-            <div className="flex justify-between border-t border-white/5 pt-4 md:pt-8">
-              <div className="h-4 w-32 bg-white/5 rounded" />
-              <div className="h-8 w-16 bg-white/5 rounded-full" />
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // 页面进入动画配置，模仿页面切换效果
+  const pageVariants = {
+    initial: { opacity: 0, y: isMobile ? 10 : 20 },
+    animate: { 
+      opacity: 1, 
+      y: 0,
+      transition: { 
+        duration: isMobile ? 0.4 : 0.6, 
+        ease: [0.4, 0.0, 0.2, 1],
+        staggerChildren: 0.1
+      }
+    }
+  };
 
-  if (error || !note) {
+  const itemVariants = {
+    initial: { opacity: 0, y: isMobile ? 5 : 10 },
+    animate: { 
+      opacity: 1, 
+      y: 0,
+      transition: { 
+        duration: isMobile ? 0.3 : 0.5, 
+        ease: [0.4, 0.0, 0.2, 1] 
+      }
+    }
+  };
+
+  if (error) {
     return (
-      <div className="py-12">
+      <motion.div 
+        className="py-12"
+        variants={pageVariants}
+        initial="initial"
+        animate="animate"
+      >
         <div className="max-w-4xl mx-auto text-center">
-          <div className="glass p-12 rounded-[3rem] border border-red-500/20">
+          <motion.div 
+            className="glass p-12 rounded-[3rem] border border-red-500/20"
+            variants={itemVariants}
+          >
             <div className="text-6xl mb-6">😕</div>
             <h2 className="text-2xl font-bold mb-4">出了点问题</h2>
-            <p className="text-white/60 mb-8">{error || '笔记不存在'}</p>
+            <p className="text-white/60 mb-8">{error}</p>
             <button
               onClick={() => navigate('/notes')}
               className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
             >
               返回笔记列表
             </button>
-          </div>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
+  if (!note) {
+    return null; // 不显示任何内容，等待数据加载
+  }
+
   return (
-    <div className="py-8 md:py-12">
+    <motion.div 
+      className="py-8 md:py-12"
+      variants={pageVariants}
+      initial="initial"
+      animate="animate"
+    >
       <div className="max-w-4xl mx-auto">
-        {/* 返回按钮 - 简化，无动画 */}
-        <button
+        {/* 返回按钮 */}
+        <motion.button
           onClick={() => navigate('/notes')}
           className="mb-6 md:mb-8 flex items-center gap-2 text-white/60 hover:text-white transition-colors group"
+          variants={itemVariants}
         >
           <span className="transform group-hover:-translate-x-1 transition-transform">←</span>
           <span className="text-xs md:text-sm font-medium tracking-wider uppercase">返回</span>
-        </button>
+        </motion.button>
 
-        {/* 笔记内容 - 移动端简化 */}
-        <article 
+        {/* 笔记内容 */}
+        <motion.article 
           className="glass p-6 md:p-12 rounded-2xl md:rounded-[3rem] border border-white/5 mb-8 md:mb-12"
+          variants={itemVariants}
         >
           {/* 引号图标 */}
           <div className="mb-4 md:mb-8 scale-75 md:scale-100 origin-top-left">{ICONS.QUOTES}</div>
@@ -134,7 +144,7 @@ const NoteDetail: React.FC = () => {
             </div>
           </div>
 
-          {/* 底部信息 - 移动端简化 */}
+          {/* 底部信息 */}
           <div className="flex items-center justify-between border-t border-white/5 pt-4 md:pt-8 mt-8 md:mt-12">
             <div className="flex flex-col gap-1 md:gap-2">
               <time className="text-[10px] md:text-sm font-bold tracking-widest text-white/40 uppercase">
@@ -158,14 +168,14 @@ const NoteDetail: React.FC = () => {
               className="scale-90 md:scale-110"
             />
           </div>
-        </article>
+        </motion.article>
 
         {/* 评论区域 */}
-        <div>
+        <motion.div variants={itemVariants}>
           <CommentSection targetId={note.id} targetType="note" />
-        </div>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

@@ -154,16 +154,22 @@ jobs:
           fi
         fi
         
-    - name: 🔌 测试数据库连接
+    - name: 🔌 系统健康检查
       continue-on-error: true
       env:
         VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
         VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
       run: |
-        echo "🔌 测试 Supabase 连接..."
-        timeout 30s npm run test:supabase || echo "⚠️ 连接测试失败，但继续同步"
+        echo "🏥 运行系统健康检查..."
+        npm run health || echo "⚠️ 健康检查发现问题，但继续同步"
         
-    - name: 📝 同步文章
+    - name: 🧹 系统清理
+      continue-on-error: true
+      run: |
+        echo "🧹 运行系统清理..."
+        npm run cleanup || echo "⚠️ 清理过程中出现问题"
+        
+    - name: 📝 智能同步文章
       if: steps.detect-changes.outputs.sync_posts == 'true'
       continue-on-error: true
       env:
@@ -171,10 +177,10 @@ jobs:
         SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
       run: |
-        echo "📝 开始同步文章..."
-        npm run sync:posts
+        echo "📝 开始智能同步文章..."
+        npm run sync:push
         
-    - name: 📓 同步笔记
+    - name: 📓 智能同步笔记
       if: steps.detect-changes.outputs.sync_notes == 'true'
       continue-on-error: true
       env:
@@ -182,8 +188,8 @@ jobs:
         SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
       run: |
-        echo "📓 开始同步笔记..."
-        npm run sync
+        echo "📓 开始智能同步笔记..."
+        npm run sync:push
         
     - name: ✅ 同步完成通知
       if: always()
@@ -210,9 +216,11 @@ jobs:
         path: dist/
         
     - name: 🚀 部署到 Surge.sh (预览)
+      env:
+        SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
       run: |
         npm install -g surge
-        surge dist/ --domain aura-preview-${{ github.run_number }}.surge.sh --token ${{ secrets.SURGE_TOKEN }}
+        surge dist/ --domain aura-preview-${{ github.run_number }}.surge.sh --token "$SURGE_TOKEN"
         echo "🌐 预览地址: https://aura-preview-${{ github.run_number }}.surge.sh"
 
   # 🔔 通知和报告

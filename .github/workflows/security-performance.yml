@@ -61,7 +61,7 @@ jobs:
     - name: 📦 安装依赖
       run: npm ci
       
-    - name: 🏗️ 构建项目
+    - name: 🏗️ 构建项目 (性能分析)
       env:
         VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
         VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
@@ -107,7 +107,7 @@ jobs:
     - name: 📦 安装依赖
       run: npm ci
       
-    - name: 🏗️ 构建项目
+    - name: 🏗️ 构建项目 (可访问性)
       env:
         VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
         VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}

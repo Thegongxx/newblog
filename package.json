@@ -12,10 +12,15 @@
     "test:coverage": "vitest run --coverage",
     "test:supabase": "node scripts/test-supabase.js",
     "sync": "node scripts/sync-posts.js",
-    "sync:push": "node scripts/sync-posts.js",
+    "sync:push": "node scripts/sync-local.js",
     "sync:pull": "node scripts/pull-from-db.js",
     "sync:posts": "node scripts/sync-local.js",
     "sync:posts:prod": "node scripts/sync-posts.js",
+    "health": "node scripts/health-monitor.js",
+    "cleanup": "node scripts/cleanup.js",
+    "workflow:test": "npm run health && npm run test",
+    "workflow:sync": "npm run sync:push && npm run sync:pull",
+    "workflow:full": "npm run cleanup && npm run health && npm run sync:push",
     "test:db": "node scripts/test-connection.js"
   },
   "dependencies": {
