@@ -205,7 +205,7 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                 <div 
                     className={`absolute pointer-events-none ${
                         isMobile 
-                            ? '-top-16 left-0 translate-x-2' // 移动端偏左一点，不遮挡爱心
+                            ? '-top-16 right-0 -translate-x-2' // 移动端偏左一点，不遮挡爱心
                             : '-top-20 left-1/2 -translate-x-1/2'
                     } animate-in fade-in zoom-in slide-in-from-bottom-2 duration-300`}
                     style={{ zIndex: Z_INDEX.LIKE_TOAST }}
@@ -228,7 +228,7 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                     
                     {/* 小箭头指向按钮 - 移动端调整箭头位置 */}
                     <div className={`absolute top-full ${
-                        isMobile ? 'left-6' : 'left-1/2 -translate-x-1/2'
+                        isMobile ? 'right-6' : 'left-1/2 -translate-x-1/2'
                     } ${
                         isMobile ? 'w-2 h-2' : 'w-2.5 h-2.5'
                     } bg-gradient-to-br from-black/95 to-gray-900/95 border-r border-b border-white/40 rotate-45 -mt-1`} />
