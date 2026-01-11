@@ -1,4 +1,4 @@
-import { useEffect, useState, type FC } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import aboutMd from '../content/pages/about.md?raw';
 
@@ -7,16 +7,16 @@ const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
         opacity: 1,
-        transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] as const, staggerChildren: 0.1 }
+        transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94], staggerChildren: 0.1 }
     }
 };
 
 const itemVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] as const } }
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] } }
 };
 
-const About: FC = () => {
+const About: React.FC = () => {
     const [content, setContent] = useState<string>('');
     const [frontmatter, setFrontmatter] = useState<any>({});
 

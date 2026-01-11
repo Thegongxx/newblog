@@ -1,4 +1,4 @@
-import { useState, useEffect, useLayoutEffect, useRef, type MouseEvent } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { engagementApi, supabase } from '../services/supabaseService';
 import { getBrowserFingerprint, checkIfLikedLocal, setLikedLocal } from '../utils/engagement';
@@ -145,7 +145,7 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
         toastTimerRef.current = window.setTimeout(() => setToast(prev => ({ ...prev, visible: false })), isMobile ? 1500 : 2000);
     };
 
-    const handleLike = async (e: MouseEvent) => {
+    const handleLike = async (e: React.MouseEvent) => {
         e.stopPropagation();
 
         // 防止动画期间重复点击

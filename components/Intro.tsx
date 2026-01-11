@@ -1,11 +1,11 @@
 
-import { useEffect, useState, useRef, type FC } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 
 interface IntroProps {
   onComplete: () => void;
 }
 
-const Intro: FC<IntroProps> = ({ onComplete }) => {
+const Intro: React.FC<IntroProps> = ({ onComplete }) => {
   const [phase, setPhase] = useState<'dot' | 'expand' | 'fade'>('dot');
   const [displayText, setDisplayText] = useState('');
   const [subTextOpacity, setSubTextOpacity] = useState(0);

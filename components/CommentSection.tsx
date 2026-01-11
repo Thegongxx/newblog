@@ -1,5 +1,5 @@
 
-import { useEffect, useState, type FormEvent } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../services/supabaseService';
 import LikeButton from './LikeButton';
@@ -23,7 +23,7 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
     const [replyingTo, setReplyingTo] = useState<string | null>(null);
 
     // 加载评论
-    useEffect(() => {
+    React.useEffect(() => {
         loadComments();
     }, [targetId, targetType]);
 
@@ -71,7 +71,7 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
     };
 
     // 提交评论
-    const handleSubmit = async (e: FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!formData.author || !formData.content) {
             alert('请填写姓名和内容哦 🌿');

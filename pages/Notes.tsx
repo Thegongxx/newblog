@@ -1,4 +1,4 @@
-import type { FC } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import LikeButton from '../components/LikeButton';
@@ -10,7 +10,7 @@ interface NotesProps {
     loading?: boolean;
 }
 
-const Notes: FC<NotesProps> = ({ notes, loading }) => {
+const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
     const navigate = useNavigate();
     const isMobile = useIsMobile();
 
