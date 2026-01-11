@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "notes/productivity-tips.md",
+                "file": "pages/about.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "productivity-tips"
+              "title": "about"
             }
           }
         ]
@@ -195,14 +195,14 @@
   },
   "active": "7c3a802da6e94b4e",
   "lastOpenFiles": [
-    "posts/minimalist-design-philosophy.md",
-    "notes/daily-reflection.md",
-    "notes/productivity-tips.md",
-    "notes/design-inspiration.md",
-    "notes/测试.md",
     "notes/reading-notes.md",
-    "posts/obsidian-workflow.md",
+    "notes/daily-reflection.md",
+    "notes/design-inspiration.md",
+    "notes/productivity-tips.md",
+    "notes/测试.md",
     "posts/hello-world.md",
+    "posts/minimalist-design-philosophy.md",
+    "posts/obsidian-workflow.md",
     "posts/web-development-trends-2024.md",
     "pages/about.md",
     "notes/test-note-1.md",

@@ -5,7 +5,6 @@ date: 2024-01-01
 category: System
 published: true
 excerpt: Aura 是一个极简主义的数字避风港，在这里美学与智能相遇。
-cover_image: https://images.unsplash.com/photo-1499750310159-5254f4cc65cc?q=80&w=2070&auto=format&fit=crop
 ---
 
 # 关于我.
