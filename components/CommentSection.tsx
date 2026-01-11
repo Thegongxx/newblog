@@ -158,48 +158,148 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
         const marginLeft = depth > 0 ? `${depth * 1.5}rem` : '0';
 
         return (
-            <div key={comment.id} style={{ marginLeft }} className="group mb-8 animate-in fade-in slide-in-from-left-4 duration-500">
+            <motion.div 
+                key={comment.id} 
+                style={{ marginLeft }} 
+                className="group mb-8"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+                whileHover={{ 
+                    scale: 1.01,
+                    transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }
+                }}
+            >
                 <div className="flex gap-4">
-                    {/* Notion 风格头像 */}
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/10 text-[10px] font-black text-white/60 group-hover:bg-white/10 transition-colors">
+                    {/* Notion 风格头像 - 缓慢渐变 */}
+                    <motion.div 
+                        className="flex-shrink-0 w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/10 text-[10px] font-black text-white/60"
+                        whileHover={{ 
+                            backgroundColor: "rgba(255, 255, 255, 0.15)",
+                            borderColor: "rgba(255, 255, 255, 0.2)",
+                            scale: 1.1,
+                            transition: { duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }
+                        }}
+                        transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+                    >
                         {comment.author[0].toUpperCase()}
-                    </div>
+                    </motion.div>
 
                     <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-3 mb-1">
+                        <motion.div 
+                            className="flex items-center gap-3 mb-1"
+                            initial={{ opacity: 0.8 }}
+                            whileHover={{ 
+                                opacity: 1,
+                                x: 2,
+                                transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }
+                            }}
+                            transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+                        >
                             <span className="font-bold text-white text-sm tracking-tight">{comment.author}</span>
-                            <span className="text-white/20 text-[10px] font-medium">
+                            <motion.span 
+                                className="text-white/20 text-[10px] font-medium"
+                                whileHover={{ 
+                                    color: "rgba(255, 255, 255, 0.4)",
+                                    transition: { duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }
+                                }}
+                                transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+                            >
                                 {new Date(comment.created_at).toLocaleDateString()}
-                            </span>
-                        </div>
+                            </motion.span>
+                        </motion.div>
 
-                        <p className="text-white/70 text-sm leading-relaxed mb-3 whitespace-pre-wrap">
+                        <motion.p 
+                            className="text-white/70 text-sm leading-relaxed mb-3 whitespace-pre-wrap"
+                            whileHover={{ 
+                                color: "rgba(255, 255, 255, 0.85)",
+                                x: 4,
+                                transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }
+                            }}
+                            transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+                        >
                             {comment.content}
-                        </p>
+                        </motion.p>
 
-                        <div className="flex items-center gap-6 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <LikeButton
-                                targetType="comment"
-                                targetId={comment.id}
-                                className="!bg-transparent !p-0 !border-none !h-auto text-white/30 hover:text-white/60 transition-colors"
-                            />
-                            <button
+                        {/* 操作按钮区域 - 缓慢渐变 */}
+                        <motion.div 
+                            className="flex items-center gap-6 opacity-0 group-hover:opacity-100"
+                            transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+                            whileHover={{ 
+                                y: -2,
+                                transition: { duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }
+                            }}
+                        >
+                            <motion.div
+                                whileHover={{ 
+                                    scale: 1.1,
+                                    transition: { duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }
+                                }}
+                                transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+                            >
+                                <LikeButton
+                                    targetType="comment"
+                                    targetId={comment.id}
+                                    className="!bg-transparent !p-0 !border-none !h-auto text-white/30 hover:text-white/60 transition-all duration-500"
+                                />
+                            </motion.div>
+                            <motion.button
                                 onClick={() => handleReply(comment.id, comment.author)}
-                                className="text-[10px] font-bold text-white/30 hover:text-white uppercase tracking-widest transition-colors"
+                                className="text-[10px] font-bold text-white/30 hover:text-white uppercase tracking-widest"
+                                whileHover={{ 
+                                    color: "rgba(255, 255, 255, 0.8)",
+                                    scale: 1.05,
+                                    x: 2,
+                                    transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }
+                                }}
+                                transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
                             >
                                 Reply
-                            </button>
-                        </div>
+                            </motion.button>
+                        </motion.div>
                     </div>
                 </div>
 
-                {/* 渲染回复 */}
+                {/* 渲染回复 - 缓慢展开 */}
                 {replies.length > 0 && (
-                    <div className="mt-6 border-l border-white/5 ml-4">
-                        {replies.map(reply => renderComment(reply, depth + 1))}
-                    </div>
+                    <motion.div 
+                        className="mt-6 border-l border-white/5 ml-4"
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ 
+                            opacity: 1, 
+                            height: 'auto',
+                            transition: { 
+                                duration: 0.8, 
+                                ease: [0.25, 0.1, 0.25, 1],
+                                height: { duration: 0.6 }
+                            }
+                        }}
+                        whileHover={{
+                            borderColor: "rgba(255, 255, 255, 0.1)",
+                            transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }
+                        }}
+                        transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+                    >
+                        {replies.map((reply, index) => (
+                            <motion.div
+                                key={reply.id}
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ 
+                                    opacity: 1, 
+                                    x: 0,
+                                    transition: { 
+                                        delay: index * 0.1,
+                                        duration: 0.6, 
+                                        ease: [0.25, 0.1, 0.25, 1] 
+                                    }
+                                }}
+                            >
+                                {renderComment(reply, depth + 1)}
+                            </motion.div>
+                        ))}
+                    </motion.div>
                 )}
-            </div>
+            </motion.div>
         );
     };
 
@@ -207,23 +307,68 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
 
     return (
         <div className="mt-24 max-w-2xl">
-            <div className="flex items-center justify-between mb-12">
-                <h3 className="text-xl font-black text-white tracking-tight uppercase">
-                    Discussion <span className="text-white/20 ml-2">{comments.length}</span>
-                </h3>
+            <motion.div 
+                className="flex items-center justify-between mb-12"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+            >
+                <motion.h3 
+                    className="text-xl font-black text-white tracking-tight uppercase"
+                    whileHover={{ 
+                        scale: 1.02,
+                        x: 2,
+                        transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }
+                    }}
+                    transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+                >
+                    Discussion <motion.span 
+                        className="text-white/20 ml-2"
+                        whileHover={{ 
+                            color: "rgba(255, 255, 255, 0.4)",
+                            transition: { duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }
+                        }}
+                        transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+                    >
+                        {comments.length}
+                    </motion.span>
+                </motion.h3>
                 <motion.button
                     onClick={() => setShowForm(!showForm)}
-                    className="px-6 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-full text-white transition-all duration-300 relative overflow-hidden group"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    className="px-6 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-full text-white relative overflow-hidden group"
+                    whileHover={{ 
+                        scale: 1.05,
+                        backgroundColor: "rgba(255, 255, 255, 0.25)",
+                        borderColor: "rgba(255, 255, 255, 0.3)",
+                        transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }
+                    }}
+                    whileTap={{ 
+                        scale: 0.95,
+                        transition: { duration: 0.1 }
+                    }}
+                    transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
                 >
                     {/* 悬停时的光晕效果 */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full" />
-                    <span className="relative z-10 group-hover:tracking-wider transition-all duration-300">
+                    <motion.div 
+                        className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 rounded-full"
+                        whileHover={{ 
+                            opacity: 1,
+                            transition: { duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }
+                        }}
+                        transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+                    />
+                    <motion.span 
+                        className="relative z-10"
+                        whileHover={{ 
+                            letterSpacing: "0.1em",
+                            transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }
+                        }}
+                        transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+                    >
                         {showForm ? '取消' : '写评论'}
-                    </span>
+                    </motion.span>
                 </motion.button>
-            </div>
+            </motion.div>
 
             {/* 评论表单 */}
             <AnimatePresence>
@@ -278,9 +423,9 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <motion.div 
                                 className="grid grid-cols-2 gap-4"
-                                initial={{ opacity: 0, y: 10 }}
+                                initial={{ opacity: 0, y: 15 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.2, duration: 0.6 }}
+                                transition={{ delay: 0.4, duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
                             >
                                 <input
                                     type="text"
@@ -305,15 +450,15 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
                                 rows={3}
                                 className="w-full px-0 py-2 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/40 transition-all duration-300 resize-none"
                                 required
-                                initial={{ opacity: 0, y: 10 }}
+                                initial={{ opacity: 0, y: 15 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.4, duration: 0.6 }}
+                                transition={{ delay: 0.8, duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
                             />
                             <motion.div 
                                 className="flex justify-end"
-                                initial={{ opacity: 0, y: 10 }}
+                                initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.6, duration: 0.6 }}
+                                transition={{ delay: 1.2, duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
                             >
                                 <button
                                     type="submit"
