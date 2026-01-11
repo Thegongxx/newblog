@@ -34,8 +34,13 @@ const BlogCard: React.FC<BlogCardProps> = memo(({ post, onClick, featured }) => 
           <span className="text-[10px] text-white/30 uppercase tracking-wide">
             {post.readingTime}
           </span>
-          <div className="text-xs text-white/40">
-            {post.likes_count || 0} ♡
+          <div onClick={(e) => e.stopPropagation()}>
+            <LikeButton
+              targetType="post"
+              targetId={post.id}
+              initialCount={post.likes_count || 0}
+              className="!bg-transparent !border-none !px-2 !py-1 scale-90"
+            />
           </div>
         </div>
       </div>
@@ -76,7 +81,7 @@ const BlogCard: React.FC<BlogCardProps> = memo(({ post, onClick, featured }) => 
       </div>
 
       {/* 点赞按钮 */}
-      <div className="absolute top-4 right-4 z-30">
+      <div className="absolute top-4 right-4 z-30" onClick={(e) => e.stopPropagation()}>
         <LikeButton
           targetType="post"
           targetId={post.id}
