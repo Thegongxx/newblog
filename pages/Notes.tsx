@@ -84,7 +84,7 @@ const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
                     notes.map((note, i) => (
                         <motion.div
                             key={note.id || i}
-                            className={`glass p-6 md:p-10 rounded-2xl md:rounded-[2.5rem] relative group border border-white/5 cursor-pointer overflow-hidden ${
+                            className={`glass p-6 md:p-10 rounded-2xl md:rounded-[2.5rem] relative group border border-white/5 cursor-pointer ${
                                 isMobile 
                                     ? 'active:scale-[0.98] active:bg-white/[0.02] transition-all duration-200' 
                                     : 'hover:border-white/20 hover:shadow-2xl hover:shadow-white/5 transition-all duration-500'
