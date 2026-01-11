@@ -76,14 +76,6 @@ export interface Quote {
   date: string;
 }
 
-export enum ViewState {
-  INTRO = 'intro',
-  FEED = 'list',
-  NOTEBOOK = 'notes',
-  ARCHIVE = 'detail',
-  ABOUT = 'assistant'
-}
-
 export interface Message {
   role: 'user' | 'assistant';
   content: string;
