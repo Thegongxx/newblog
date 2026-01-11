@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 导入悬停效果样式 */
+@import './styles/hover-effects.css';
+
 /* 自定义组件样式 */
 @layer components {
   .glass {

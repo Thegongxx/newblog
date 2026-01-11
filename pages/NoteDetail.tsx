@@ -1,14 +1,18 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import LikeButton from '../components/LikeButton';
 import CommentSection from '../components/CommentSection';
 import { useNotesCache } from '../services/cacheService';
 import { ICONS } from '../constants';
+import { Z_INDEX } from '../constants/zIndex';
+import { useIsMobile } from '../hooks/useResponsive';
 import type { FileNote } from '../types';
 
 const NoteDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [error, setError] = useState<string | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   
@@ -107,16 +111,24 @@ const NoteDetail: React.FC = () => {
   return (
     <div className="py-8 md:py-12 relative">
       <div className="max-w-4xl mx-auto">
-        {/* 返回按钮 - 苹果风格渐入 */}
-        <div style={appleFadeIn}>
-          <button
-            onClick={() => navigate('/notes')}
-            className="mb-6 md:mb-8 flex items-center gap-2 text-white/60 hover:text-white transition-all duration-300 group transform hover:scale-105"
-          >
-            <span className="transform group-hover:-translate-x-2 transition-transform duration-300">←</span>
-            <span className="text-xs md:text-sm font-medium tracking-wider uppercase">返回</span>
-          </button>
-        </div>
+        {/* 返回按钮 - 移动端优化位置 */}
+        <motion.button
+          onClick={() => navigate('/notes')}
+          className={`group flex items-center gap-2 text-white/60 hover:text-white transition-all duration-300 mb-6 md:mb-8 px-4 py-2 rounded-full backdrop-blur-xl bg-white/[0.02] border border-white/5 ${
+            isMobile ? 'fixed top-24 left-4' : 'relative'
+          }`}
+          style={isMobile ? { zIndex: Z_INDEX.BACK_BUTTON, ...appleFadeIn } : appleFadeIn}
+          whileHover={{ scale: 1.02, x: -4 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <motion.div className="rotate-180">
+            {ICONS.CHEVRON_RIGHT}
+          </motion.div>
+          <span className="text-xs md:text-sm font-medium">返回</span>
+        </motion.button>
+
+        {/* 移动端为固定返回按钮留出空间 */}
+        <div className={isMobile ? 'mt-16' : ''}>
 
         {/* 笔记内容 - 分层渐入 */}
         <article 
@@ -187,6 +199,7 @@ const NoteDetail: React.FC = () => {
         {/* 评论区域 - 最后的渐入 */}
         <div style={contentFadeIn(350)}>
           <CommentSection targetId={note.id} targetType="note" />
+        </div>
         </div>
       </div>
     </div>

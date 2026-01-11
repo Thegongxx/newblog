@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { useLocation } from 'react-router-dom';
 import { ICONS } from '../constants';
 import { Z_INDEX } from '../constants/zIndex';
 import { askNvidiaStream } from '../services/nvidiaService';
 import { Message } from '../types';
+import { useIsMobile } from '../hooks/useResponsive';
 
 const TypingIndicator = () => (
   <div className="flex gap-1 px-4 py-3">
@@ -26,6 +28,10 @@ const Assistant = () => {
   const [retryInfo, setRetryInfo] = useState<{ show: boolean; lastPrompt: string }>({ show: false, lastPrompt: '' });
   const [rateLimited, setRateLimited] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  
+  // 路由和移动端检测
+  const location = useLocation();
+  const isMobile = useIsMobile();
   
   // 可访问性支持
   const prefersReducedMotion = useReducedMotion();
@@ -183,20 +189,24 @@ const Assistant = () => {
       <motion.button
         onClick={handleToggle}
         disabled={isAnimating}
-        className={`fixed bottom-8 right-8 flex items-center justify-center bg-white shadow-lg border-0 focus:outline-none focus:ring-0 overflow-hidden
-                   max-sm:bottom-6 max-sm:right-6 max-sm:scale-90 ${isAnimating ? 'pointer-events-none' : ''}`}
+        className={`fixed flex items-center justify-center bg-white shadow-lg border-0 focus:outline-none focus:ring-0 overflow-hidden ${
+          isMobile 
+            ? 'bottom-20 right-4' // 移动端在导航栏上方，避免冲突
+            : 'bottom-8 right-8'
+        } ${isAnimating ? 'pointer-events-none' : ''}`}
         style={{
-          height: '56px',
-          borderRadius: '28px',
+          height: isMobile ? '48px' : '56px', // 移动端稍小一些
+          width: isMobile ? (isOpen ? '48px' : '100px') : (isOpen ? '56px' : '120px'),
+          borderRadius: isMobile ? '24px' : '28px',
           willChange: 'transform, width',
           backfaceVisibility: 'hidden',
-          zIndex: Z_INDEX.MODAL_BACKDROP,
-        }}
+          zIndex: Z_INDEX.AI_ASSISTANT,
+        }}}
         initial={false}
         animate={{
-          width: isOpen ? 56 : 120,
-          paddingLeft: isOpen ? 0 : 16,
-          paddingRight: isOpen ? 0 : 16,
+          width: isOpen ? (isMobile ? 48 : 56) : (isMobile ? 100 : 120),
+          paddingLeft: isOpen ? 0 : (isMobile ? 12 : 16),
+          paddingRight: isOpen ? 0 : (isMobile ? 12 : 16),
         }}
         transition={{
           type: "tween",
@@ -286,7 +296,7 @@ const Assistant = () => {
               >
                 {ICONS.AI}
               </motion.div>
-              <span className="font-medium text-sm text-gray-800 tracking-normal">
+              <span className="font-medium text-gray-800 tracking-normal" style={{ fontSize: isMobile ? '12px' : '14px' }}>
                 Aura
               </span>
             </motion.div>
@@ -338,10 +348,21 @@ const Assistant = () => {
                 duration: 0.3,
                 ease: [0.4, 0.0, 0.2, 1]
               }}
-              className="fixed bottom-28 right-8 w-96 max-w-[calc(100vw-2rem)] max-h-[32rem] bg-gray-900/95 backdrop-blur-xl border border-gray-700/50 rounded-3xl flex flex-col overflow-hidden shadow-2xl
-                         sm:w-96 sm:bottom-28 sm:right-8
-                         max-sm:w-[calc(100vw-2rem)] max-sm:bottom-24 max-sm:left-4 max-sm:right-4 max-sm:max-h-[70vh]"
+              className="fixed bg-gray-900/95 backdrop-blur-xl border border-gray-700/50 rounded-3xl flex flex-col overflow-hidden shadow-2xl"
               style={{
+                // 移动端和桌面端不同的定位
+                ...(isMobile ? {
+                  bottom: '6rem', // 在AI助手按钮上方
+                  left: '1rem',
+                  right: '1rem',
+                  width: 'calc(100vw - 2rem)',
+                  maxHeight: '50vh', // 移动端限制高度，确保不遮挡导航栏
+                } : {
+                  bottom: '7rem',
+                  right: '2rem',
+                  width: '24rem',
+                  maxHeight: '32rem',
+                }),
                 boxShadow: '0 24px 38px rgba(0,0,0,0.4), 0 9px 46px rgba(0,0,0,0.24)',
                 willChange: 'transform, opacity',
                 backfaceVisibility: 'hidden',

@@ -9,6 +9,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import PageTransition from './components/PageTransition';
 import MobilePageTransition from './components/MobilePageTransition';
 import PageTransitionMask from './components/PageTransitionMask';
+import { MagneticButton, RippleButton } from './components/HoverEffects';
 import { CONTACT_INFO } from './constants';
 import { Z_INDEX } from './constants/zIndex';
 import { usePostsCache, useNotesCache } from './services/cacheService';
@@ -23,6 +24,7 @@ import Notes from './pages/Notes';
 import NoteDetail from './pages/NoteDetail';
 import About from './pages/About';
 import Archive from './pages/Archive';
+import HoverShowcase from './components/HoverShowcase';
 
 const AppInner = () => {
   const navigate = useNavigate();
@@ -232,21 +234,21 @@ const AppInner = () => {
       >
         {isMobile ? (
           // 移动端极简导航
-          <div 
-            className="flex items-center justify-between py-3 px-4 rounded-full bg-black/20 backdrop-blur-md border border-white/10"
+          <motion.div 
+            className="flex items-center justify-between py-3 px-4 rounded-full bg-black/20 backdrop-blur-md border border-white/10 ripple-effect"
             style={{
               transition: 'all 0.3s ease-out',
             }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
-            <motion.button 
+            <MagneticButton 
               onClick={() => navigate('/')}
               className="text-lg font-bold tracking-tight text-white"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              transition={{ type: "spring", stiffness: 400, damping: 25 }}
+              strength={0.2}
             >
               AURA
-            </motion.button>
+            </MagneticButton>
             
             <div className="flex gap-4 text-xs font-medium">
               {[
@@ -254,7 +256,7 @@ const AppInner = () => {
                 { path: '/archive', label: 'Archive' },
                 { path: '/about', label: 'About' }
               ].map((item) => (
-                <motion.button 
+                <RippleButton
                   key={item.path}
                   onClick={() => handleNavigate(item.path)} 
                   className={`px-2 py-1 rounded-full transition-all duration-200 ${
@@ -262,19 +264,17 @@ const AppInner = () => {
                       ? 'text-white bg-white/20' 
                       : 'text-white/60'
                   }`}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                  rippleColor="rgba(255, 255, 255, 0.2)"
                 >
                   {item.label}
-                </motion.button>
+                </RippleButton>
               ))}
             </div>
-          </div>
+          </motion.div>
         ) : (
           // 桌面端完整导航
           <motion.div 
-            className="relative rounded-full px-10 py-3"
+            className="relative rounded-full px-10 py-3 magnetic-hover"
             style={{ 
               backgroundColor: `rgba(0, 0, 0, ${navOpacity})`,
               backdropFilter: `blur(${navBlur}px) saturate(${150 + scrollProgress * 30}%)`,
@@ -284,38 +284,37 @@ const AppInner = () => {
               borderColor: `rgba(255, 255, 255, ${navBorder})`,
               transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
             }}
-            whileHover={{ scale: 1.02 }}
+            whileHover={{ scale: 1.02, y: -2 }}
             whileTap={{ scale: 0.98 }}
           >
             <div className="relative flex items-center gap-12">
-              <motion.button 
+              <MagneticButton 
                 onClick={() => navigate('/')}
                 className="text-lg font-bold tracking-tight text-white/90 hover:text-white transition-colors"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                strength={0.3}
               >
                 AURA
-              </motion.button>
+              </MagneticButton>
               
               <div className="flex gap-6 text-sm font-medium">
                 {[
                   { path: '/notes', label: 'Notes' },
                   { path: '/archive', label: 'Archive' },
+                  { path: '/hover', label: 'Effects' },
                   { path: '/about', label: 'About' }
                 ].map((item) => (
-                  <motion.button 
+                  <RippleButton
                     key={item.path}
                     onClick={() => handleNavigate(item.path)} 
-                    className={`px-4 py-2 rounded-full transition-all duration-200 ${
+                    className={`px-4 py-2 rounded-full transition-all duration-200 liquid-morph ${
                       location.pathname === item.path 
                         ? 'text-white bg-white/15' 
                         : 'text-white/60 hover:text-white hover:bg-white/10'
                     }`}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    rippleColor="rgba(255, 255, 255, 0.3)"
                   >
                     {item.label}
-                  </motion.button>
+                  </RippleButton>
                 ))}
               </div>
             </div>
@@ -325,7 +324,7 @@ const AppInner = () => {
 
       {/* Main Content - 智能页面切换动画系统 */}
       <motion.main 
-        className={`${isMobile ? 'pt-16 pb-16 px-4' : 'pt-32 pb-48 px-6'} max-w-7xl mx-auto relative`}
+        className={`${isMobile ? 'pt-16 pb-32 px-4' : 'pt-32 pb-48 px-6'} max-w-7xl mx-auto relative`}
         style={{
           willChange: 'transform',
           backfaceVisibility: 'hidden',
@@ -424,6 +423,17 @@ const AppInner = () => {
                   </PageTransition>
                 )
               } />
+              <Route path="/hover" element={
+                isMobile ? (
+                  <MobilePageTransition>
+                    <HoverShowcase />
+                  </MobilePageTransition>
+                ) : (
+                  <PageTransition>
+                    <HoverShowcase />
+                  </PageTransition>
+                )
+              } />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </AnimatePresence>
@@ -447,10 +457,11 @@ const AppInner = () => {
                 { label: 'WX', value: CONTACT_INFO.WX },
                 { label: 'MAIL', value: CONTACT_INFO.MAIL }
               ].map((contact) => (
-                <button
+                <RippleButton
                   key={contact.label}
                   onClick={() => handleCopy(contact.value, contact.label)}
-                  className="group relative overflow-hidden h-10 w-16 hover:text-white rounded-lg"
+                  className="group relative overflow-hidden h-10 w-16 hover:text-white rounded-lg elastic-scale"
+                  rippleColor="rgba(255, 255, 255, 0.3)"
                 >
                   <div className="absolute inset-0 flex items-center justify-center group-hover:-translate-y-full transition-transform duration-500">
                     {contact.label}
@@ -458,7 +469,7 @@ const AppInner = () => {
                   <div className="absolute inset-0 flex items-center justify-center translate-y-full group-hover:translate-y-0 transition-transform duration-500 text-white font-bold bg-white/10 rounded-lg">
                     COPY
                   </div>
-                </button>
+                </RippleButton>
               ))}
             </div>
           ) : (
@@ -469,18 +480,28 @@ const AppInner = () => {
                 { label: 'WX', value: CONTACT_INFO.WX },
                 { label: 'MAIL', value: CONTACT_INFO.MAIL }
               ].map((contact) => (
-                <button
+                <MagneticButton
                   key={contact.label}
                   onClick={() => handleCopy(contact.value, contact.label)}
-                  className="group relative overflow-hidden h-12 w-20 hover:text-white rounded-lg"
+                  className="group relative overflow-hidden h-12 w-20 hover:text-white rounded-lg floating-shadow"
+                  strength={0.4}
                 >
-                  <div className="absolute inset-0 flex items-center justify-center group-hover:-translate-y-full transition-transform duration-500">
+                  <motion.div 
+                    className="absolute inset-0 flex items-center justify-center"
+                    whileHover={{ y: -48 }}
+                    transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+                  >
                     {contact.label}
-                  </div>
-                  <div className="absolute inset-0 flex items-center justify-center translate-y-full group-hover:translate-y-0 transition-transform duration-500 text-white font-bold bg-white/10 rounded-lg">
+                  </motion.div>
+                  <motion.div 
+                    className="absolute inset-0 flex items-center justify-center text-white font-bold bg-white/10 rounded-lg"
+                    initial={{ y: 48 }}
+                    whileHover={{ y: 0 }}
+                    transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+                  >
                     COPY
-                  </div>
-                </button>
+                  </motion.div>
+                </MagneticButton>
               ))}
             </div>
           )}

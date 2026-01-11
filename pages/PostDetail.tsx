@@ -4,8 +4,10 @@ import { motion } from 'framer-motion';
 import CommentSection from '../components/CommentSection';
 import LikeButton from '../components/LikeButton';
 import { ICONS } from '../constants';
+import { Z_INDEX } from '../constants/zIndex';
 import { engagementApi } from '../services/supabaseService';
 import { Post } from '../types';
+import { useIsMobile } from '../hooks/useResponsive';
 
 interface PostDetailProps {
     posts: Post[];
@@ -16,6 +18,7 @@ const PostDetail: React.FC<PostDetailProps> = ({ posts, loading }) => {
     const { slug } = useParams<{ slug: string }>();
     const navigate = useNavigate();
     const location = useLocation();
+    const isMobile = useIsMobile();
     const post = posts.find(p => p.slug === slug);
 
     // Google Material Design 风格的返回动画
@@ -78,10 +81,13 @@ const PostDetail: React.FC<PostDetailProps> = ({ posts, loading }) => {
 
     return (
         <div className="max-w-4xl mx-auto">
-            {/* 返回按钮 - 移动端简化 */}
+            {/* 返回按钮 - 移动端优化位置 */}
             <motion.button 
                 onClick={handleBackToList} 
-                className="group flex items-center gap-2 md:gap-3 text-white/40 hover:text-white transition-all duration-200 mb-8 md:mb-12 px-4 md:px-6 py-2 md:py-3 rounded-full backdrop-blur-xl bg-white/[0.02] border border-white/5"
+                className={`group flex items-center gap-2 md:gap-3 text-white/40 hover:text-white transition-all duration-200 mb-8 md:mb-12 px-4 md:px-6 py-2 md:py-3 rounded-full backdrop-blur-xl bg-white/[0.02] border border-white/5 ${
+                    isMobile ? 'fixed top-24 left-4' : 'relative'
+                }`}
+                style={isMobile ? { zIndex: Z_INDEX.BACK_BUTTON } : {}}
                 whileHover={{ scale: 1.02, x: -4 }}
                 whileTap={{ scale: 0.98 }}
             >
@@ -91,38 +97,41 @@ const PostDetail: React.FC<PostDetailProps> = ({ posts, loading }) => {
                 <span className="text-xs md:text-sm font-medium">返回</span>
             </motion.button>
 
-            <header className="mb-12 md:mb-20">
-                <div className="flex items-center gap-2 md:gap-3 text-white/30 text-[9px] md:text-[10px] font-bold uppercase tracking-widest md:tracking-[0.3em] mb-4 md:mb-6">
-                    <span>{post.date}</span>
-                    <span className="w-1 h-1 rounded-full bg-white/20"></span>
-                    <span>{post.category}</span>
-                </div>
-                <h1 className="text-3xl md:text-7xl font-bold tracking-tighter mb-6 md:mb-10 leading-tight">{post.title}</h1>
-                <div className="flex items-center justify-between mb-6 md:mb-10">
-                    <div className="h-[2px] w-12 md:w-20 bg-white/20" />
-                    <div className="flex items-center gap-4 md:gap-6">
-                        <div className="flex flex-col items-end">
-                            <span className="text-[9px] md:text-[10px] uppercase tracking-widest text-white/20 font-bold mb-1">VIEWS</span>
-                            <span className="text-base md:text-lg font-light text-white/40 tabular-nums">{post.views || 0}</span>
-                        </div>
-                        <LikeButton targetType="post" targetId={post.id} initialCount={post.likes_count} />
+            {/* 移动端为固定返回按钮留出空间 */}
+            <div className={isMobile ? 'mt-16' : ''}>
+                <header className="mb-12 md:mb-20">
+                    <div className="flex items-center gap-2 md:gap-3 text-white/30 text-[9px] md:text-[10px] font-bold uppercase tracking-widest md:tracking-[0.3em] mb-4 md:mb-6">
+                        <span>{post.date}</span>
+                        <span className="w-1 h-1 rounded-full bg-white/20"></span>
+                        <span>{post.category}</span>
                     </div>
+                    <h1 className="text-3xl md:text-7xl font-bold tracking-tighter mb-6 md:mb-10 leading-tight">{post.title}</h1>
+                    <div className="flex items-center justify-between mb-6 md:mb-10">
+                        <div className="h-[2px] w-12 md:w-20 bg-white/20" />
+                        <div className="flex items-center gap-4 md:gap-6">
+                            <div className="flex flex-col items-end">
+                                <span className="text-[9px] md:text-[10px] uppercase tracking-widest text-white/20 font-bold mb-1">VIEWS</span>
+                                <span className="text-base md:text-lg font-light text-white/40 tabular-nums">{post.views || 0}</span>
+                            </div>
+                            <LikeButton targetType="post" targetId={post.id} initialCount={post.likes_count} />
+                        </div>
+                    </div>
+                    <p className="text-base md:text-2xl text-white/50 leading-relaxed font-light">{post.excerpt}</p>
+                </header>
+
+                <div className="rounded-2xl md:rounded-[3rem] overflow-hidden mb-12 md:mb-24 aspect-[16/9]">
+                    <img src={post.image} className="w-full h-full object-cover" />
                 </div>
-                <p className="text-base md:text-2xl text-white/50 leading-relaxed font-light">{post.excerpt}</p>
-            </header>
 
-            <div className="rounded-2xl md:rounded-[3rem] overflow-hidden mb-12 md:mb-24 aspect-[16/9]">
-                <img src={post.image} className="w-full h-full object-cover" />
-            </div>
+                <article
+                    className="prose prose-invert max-w-none prose-p:text-white/60 prose-p:leading-[1.8] prose-p:text-base prose-p:md:text-xl prose-p:font-light prose-headings:font-bold prose-headings:tracking-tighter prose-blockquote:border-white/20 prose-blockquote:text-white/80"
+                    dangerouslySetInnerHTML={{ __html: post.content }}
+                />
 
-            <article
-                className="prose prose-invert max-w-none prose-p:text-white/60 prose-p:leading-[1.8] prose-p:text-base prose-p:md:text-xl prose-p:font-light prose-headings:font-bold prose-headings:tracking-tighter prose-blockquote:border-white/20 prose-blockquote:text-white/80"
-                dangerouslySetInnerHTML={{ __html: post.content }}
-            />
-
-            {/* 评论区 */}
-            <div>
-                <CommentSection targetId={post.id} targetType="post" />
+                {/* 评论区 */}
+                <div>
+                    <CommentSection targetId={post.id} targetType="post" />
+                </div>
             </div>
         </div>
     );
