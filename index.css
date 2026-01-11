@@ -9,6 +9,14 @@
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   }
   
+  /* 移动端glass样式优化 */
+  @media (max-width: 768px) {
+    .glass {
+      @apply bg-white/[0.05] backdrop-blur-[8px] saturate-[150%] border border-white/[0.12];
+      box-shadow: 0 2px 15px rgba(0, 0, 0, 0.2);
+    }
+  }
+  
   .view-transition {
     animation: aura-entrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     will-change: transform, opacity, filter;
@@ -91,15 +99,15 @@
 
 /* 移动端优化 */
 @media (max-width: 768px) {
-  /* 完全禁用移动端的复杂效果 */
+  /* 移动端使用简化的模糊效果 */
   .backdrop-blur-xl {
-    backdrop-filter: none !important;
-    background-color: rgba(0, 0, 0, 0.8) !important;
+    backdrop-filter: blur(8px) !important;
+    background-color: rgba(0, 0, 0, 0.6) !important;
   }
   
   .backdrop-blur-3xl {
-    backdrop-filter: none !important;
-    background-color: rgba(0, 0, 0, 0.9) !important;
+    backdrop-filter: blur(12px) !important;
+    background-color: rgba(0, 0, 0, 0.7) !important;
   }
   
   .backdrop-blur-md {

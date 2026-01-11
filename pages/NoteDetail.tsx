@@ -18,6 +18,12 @@ const NoteDetail: React.FC = () => {
       navigate('/notes');
       return;
     }
+    
+    // 重置状态
+    setNote(null);
+    setError(null);
+    setIsLoaded(false);
+    
     loadNote();
   }, [id, navigate]);
 
@@ -29,21 +35,29 @@ const NoteDetail: React.FC = () => {
       
       if (!noteData) {
         setError('笔记不存在');
+        setIsLoaded(true);
         return;
       }
       
-      setNote({
-        ...noteData,
+      // 使用与cacheService一致的数据映射
+      const mappedNote: FileNote = {
+        id: noteData.id,
+        title: noteData.title || noteData.text?.substring(0, 50) || '无标题', // 如果没有title，使用text的前50个字符
+        content: noteData.text || '', // 正确映射 text 字段到 content
         date: new Date(noteData.created_at).toLocaleDateString('zh-CN'),
-        content: noteData.text || noteData.content
-      });
+        likes_count: noteData.likes_count || 0,
+        created_at: noteData.created_at,
+        tags: noteData.tags || []
+      };
       
-      // Google 风格延迟加载动画
-      setTimeout(() => setIsLoaded(true), 50);
+      setNote(mappedNote);
+      setIsLoaded(true);
     } catch (err: any) {
       console.error('Failed to load note:', err);
-      setError(err.message || '加载失败');
-      setTimeout(() => setIsLoaded(true), 50);
+      const errorMessage = err.message === 'PGRST116' ? '笔记不存在' : 
+                          err.message || '加载失败，请稍后重试';
+      setError(errorMessage);
+      setIsLoaded(true);
     }
   };
 
@@ -64,40 +78,67 @@ const NoteDetail: React.FC = () => {
     return (
       <div className="py-12" style={fadeInStyle}>
         <div className="max-w-4xl mx-auto text-center">
-          <div className="glass p-12 rounded-[3rem] border border-red-500/20">
-            <div className="text-6xl mb-6">😕</div>
-            <h2 className="text-2xl font-bold mb-4">出了点问题</h2>
-            <p className="text-white/60 mb-8">{error}</p>
-            <button
-              onClick={() => navigate('/notes')}
-              className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
-            >
-              返回笔记列表
-            </button>
+          <div className="glass p-8 md:p-12 rounded-2xl md:rounded-[3rem] border border-red-500/20">
+            <div className="text-4xl md:text-6xl mb-4 md:mb-6">😕</div>
+            <h2 className="text-xl md:text-2xl font-bold mb-3 md:mb-4">出了点问题</h2>
+            <p className="text-white/60 mb-6 md:mb-8 text-sm md:text-base">{error}</p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <button
+                onClick={() => {
+                  setError(null);
+                  setIsLoaded(false);
+                  loadNote();
+                }}
+                className="px-4 md:px-6 py-2 md:py-3 bg-white/10 hover:bg-white/20 rounded-full transition-colors text-sm md:text-base"
+              >
+                重试
+              </button>
+              <button
+                onClick={() => navigate('/notes')}
+                className="px-4 md:px-6 py-2 md:py-3 bg-white/5 hover:bg-white/10 rounded-full transition-colors text-sm md:text-base"
+              >
+                返回笔记列表
+              </button>
+            </div>
           </div>
         </div>
       </div>
     );
   }
 
-  if (!note) {
+  if (!note && !error) {
     return (
-      <div className="py-12">
+      <div className="py-8 md:py-12">
         <div className="max-w-4xl mx-auto">
-          {/* Google 风格的加载骨架 */}
+          {/* 返回按钮骨架 */}
           <div className="mb-6 md:mb-8">
-            <div className="w-20 h-6 bg-white/5 rounded animate-pulse" />
+            <div className="w-16 md:w-20 h-4 md:h-6 bg-white/5 rounded animate-pulse" />
           </div>
+          
+          {/* 内容骨架 */}
           <div className="glass p-6 md:p-12 rounded-2xl md:rounded-[3rem] border border-white/5">
-            <div className="w-8 h-8 bg-white/5 rounded mb-6 animate-pulse" />
-            <div className="space-y-4 mb-8">
-              <div className="h-8 w-full bg-white/5 rounded animate-pulse" />
-              <div className="h-8 w-3/4 bg-white/5 rounded animate-pulse" />
+            {/* 引号图标骨架 */}
+            <div className="w-6 md:w-8 h-6 md:h-8 bg-white/5 rounded mb-4 md:mb-8 animate-pulse" />
+            
+            {/* 标题骨架 */}
+            <div className="space-y-3 md:space-y-4 mb-6 md:mb-8">
+              <div className="h-6 md:h-8 w-full bg-white/5 rounded animate-pulse" />
+              <div className="h-6 md:h-8 w-3/4 bg-white/5 rounded animate-pulse" />
             </div>
-            <div className="space-y-3">
+            
+            {/* 内容骨架 */}
+            <div className="space-y-2 md:space-y-3 mb-8 md:mb-12">
               <div className="h-4 w-full bg-white/5 rounded animate-pulse" />
               <div className="h-4 w-full bg-white/5 rounded animate-pulse" />
               <div className="h-4 w-2/3 bg-white/5 rounded animate-pulse" />
+              <div className="h-4 w-4/5 bg-white/5 rounded animate-pulse" />
+              <div className="h-4 w-3/5 bg-white/5 rounded animate-pulse" />
+            </div>
+            
+            {/* 底部信息骨架 */}
+            <div className="flex items-center justify-between border-t border-white/5 pt-4 md:pt-8">
+              <div className="h-3 md:h-4 w-20 md:w-24 bg-white/5 rounded animate-pulse" />
+              <div className="h-8 md:h-10 w-16 md:w-20 bg-white/5 rounded-full animate-pulse" />
             </div>
           </div>
         </div>
@@ -106,7 +147,7 @@ const NoteDetail: React.FC = () => {
   }
 
   return (
-    <div className="py-8 md:py-12">
+    <div className="py-8 md:py-12 relative z-10">
       <div className="max-w-4xl mx-auto">
         {/* 返回按钮 - Google 风格渐入 */}
         <div style={fadeInStyle}>
@@ -121,7 +162,7 @@ const NoteDetail: React.FC = () => {
 
         {/* 笔记内容 - 分层渐入 */}
         <article 
-          className="glass p-6 md:p-12 rounded-2xl md:rounded-[3rem] border border-white/5 mb-8 md:mb-12"
+          className="glass p-6 md:p-12 rounded-2xl md:rounded-[3rem] border border-white/5 mb-8 md:mb-12 relative"
           style={staggeredFadeIn(100)}
         >
           {/* 引号图标 */}
