@@ -201,7 +201,7 @@ const Assistant = () => {
           willChange: 'transform, width',
           backfaceVisibility: 'hidden',
           zIndex: Z_INDEX.AI_ASSISTANT,
-        }}}
+        }}
         initial={false}
         animate={{
           width: isOpen ? (isMobile ? 48 : 56) : (isMobile ? 100 : 120),
