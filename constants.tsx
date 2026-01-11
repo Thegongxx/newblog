@@ -1,3 +1,6 @@
+import React from 'react';
+import { Post, Quote } from './types';
+
 /**
  * ==========================================
  * 1. 基础信息配置 (Basic Info)
@@ -8,6 +11,113 @@ export const CONTACT_INFO = {
   WX: 'Your_WX_ID',
   MAIL: 'hello@aura.com'
 };
+
+/**
+ * ==========================================
+ * 2. 博客文章数据 (Blog Posts)
+ * ==========================================
+ */
+export const BLOG_POSTS: Post[] = [
+  {
+    id: '1',
+    title: '空间计算的未来设计',
+    slug: 'future-of-spatial-computing',
+    excerpt: '从 2D 屏幕到 3D 空间的转变如何重新定义我们与技术的关系。',
+    category: '设计',
+    created_at: '2023-10-12T00:00:00Z',
+    updated_at: '2023-10-12T00:00:00Z',
+    date: '2023年10月12日',
+    readingTime: '6 分钟',
+    reading_time: 6,
+    published: true,
+    cover_image: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=2070&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=2070&auto=format&fit=crop',
+    content: `
+      <p>在数字时代，复杂性往往被误认为是先进。但真正的创新在于能够将深刻的想法提炼成简单、优雅的形式。</p>
+      <p>随着我们转向感觉更像环境而非工具的界面，设计的语言必须进化。这不再仅仅关乎你点击哪里，而关乎居住在数字空间中的感受。</p>
+      <blockquote class="italic text-2xl font-light my-12">“设计不仅仅是外观与感觉，设计是它是如何工作的。”</blockquote>
+      <p>Aura 的哲学就建立在这个基础上。我们寻求在嘈杂的世界中创造清晰的时刻。</p>
+    `
+  },
+  {
+    id: '2',
+    title: '极简主义的诗学',
+    slug: 'poetics-of-minimalism',
+    excerpt: '探讨为什么“少即是多”，以及减法设计如何带来更有意义的体验。',
+    category: '哲学',
+    created_at: '2023-09-28T00:00:00Z',
+    updated_at: '2023-09-28T00:00:00Z',
+    date: '2023年9月28日',
+    readingTime: '4 分钟',
+    reading_time: 4,
+    published: true,
+    cover_image: 'https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?q=80&w=2067&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?q=80&w=2067&auto=format&fit=crop',
+    content: `
+      <p>极简主义不是为了空无一物，而是为了去除那些阻碍我们体验本质的杂质。</p>
+      <p>当我们减少视觉上的噪音，留白便开始说话。每一个线条，每一个像素都承担了更多的责任。</p>
+    `
+  },
+  {
+    id: '3',
+    title: '数字时代的寂静',
+    slug: 'silence-in-digital-age',
+    excerpt: '在信息爆炸的洪流中，如何通过设计为心灵留出一片空白处理。',
+    category: '生活',
+    created_at: '2024-01-15T00:00:00Z',
+    updated_at: '2024-01-15T00:00:00Z',
+    date: '2024年1月15日',
+    readingTime: '5 分钟',
+    reading_time: 5,
+    published: true,
+    cover_image: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?q=80&w=2062&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?q=80&w=2062&auto=format&fit=crop',
+    content: `
+      <p>我们生活在一个被算法包围的时代，每一个通知都在争夺我们的注意力。真正的奢侈不再是拥有更多，而是能够随时关掉。</p>
+      <h3 class="text-2xl font-bold text-white mt-12 mb-6">呼吸的空间</h3>
+      <p>在 Aura 中，我们大量使用留白（Whitespace）。这不是浪费空间，而是给内容以呼吸的自由。</p>
+    `
+  }
+];
+
+export const QUOTES_DATA: Quote[] = [
+  { text: "真正的自由不是想做什么就做什么，而是不想做什么就可以不做什么。", author: "康德", date: "2024.03.12" },
+  { text: "在这个世界上，只有一种真正的英雄主义，那就是认清生活的真相后依然热爱它。", author: "罗曼·罗兰", date: "2024.03.15" },
+  { text: "如果你能把日子过得像是在设计一件作品，那么你的生活本身就是艺术。", author: "Aura", date: "2024.04.01" },
+  { text: "技术应该是隐形的，只有当它能连接人心时，它才具有生命力。", author: "Unknown", date: "2024.04.10" }
+];
+
+export interface Note {
+  id: string;
+  title: string;
+  content: string;
+  date: string;
+  tags: string[];
+}
+
+export const NOTES_DATA: Note[] = [
+  {
+    id: '1',
+    title: '碎片化思考',
+    content: '在信息过载的时代，我们习惯了碎片的摄入，却遗忘了系统的思考。Notes 板块存在的意义，就是捕捉那些稍纵即逝的灵感火花，让它们有机会生长成参天大树。',
+    date: '2024.01.20',
+    tags: ['Thinking', 'Life']
+  },
+  {
+    id: '2',
+    title: '设计的边界',
+    content: '最近在思考“无界面”设计的可能性。当 AI 足够理解意图，传统的 GUI 是否会变得多余？也许未来的交互，是如同呼吸一般自然的潜意识行为。',
+    date: '2024.02.14',
+    tags: ['Design', 'AI']
+  },
+  {
+    id: '3',
+    title: '数字花园',
+    content: '将博客视为一个数字花园，而不是展示橱窗。允许未完成的想法存在，允许修剪和重构。这里的每一篇 Note，都是一颗正在发芽的种子。',
+    date: '2024.03.05',
+    tags: ['Metaphor', 'Growth']
+  }
+];
 
 export const ICONS = {
   SEARCH: (

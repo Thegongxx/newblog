@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { engagementApi, supabase } from '../services/supabaseService';
 import { getBrowserFingerprint, checkIfLikedLocal, setLikedLocal } from '../utils/engagement';
@@ -24,13 +24,6 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
     });
     
     const isMobile = useIsMobile();
-
-    const buttonRef = useRef<HTMLButtonElement | null>(null);
-    const iconRef = useRef<SVGSVGElement | null>(null);
-    const toastRef = useRef<HTMLDivElement | null>(null);
-    const toastTimerRef = useRef<number | null>(null);
-    const [toastLayout, setToastLayout] = useState<{ top: number; left: number; placement: 'top' | 'bottom'; arrowLeft: number } | null>(null);
-    const [burst, setBurst] = useState<{ id: number; x: number; r: number } | null>(null);
 
     // 持久化存储 Key
     const getStorageKey = () => `aura_like_limit_${targetType}_${targetId}_${new Date().toISOString().split('T')[0]}`;
@@ -75,74 +68,10 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
         fetchInitial();
     }, [targetType, targetId]);
 
-    useEffect(() => {
-        return () => {
-            if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current);
-        };
-    }, []);
-
-    const updateToastPosition = () => {
-        const anchorEl = iconRef.current || buttonRef.current;
-        const toastEl = toastRef.current;
-        if (!anchorEl || !toastEl) return;
-
-        const anchorRect = anchorEl.getBoundingClientRect();
-        const toastRect = toastEl.getBoundingClientRect();
-
-        const vw = window.innerWidth;
-        const vh = window.innerHeight;
-        const margin = isMobile ? 10 : 12;
-        const gap = isMobile ? 8 : 10;
-
-        const anchorX = anchorRect.left + anchorRect.width / 2;
-        const preferTop = anchorRect.top - gap - toastRect.height >= margin;
-
-        const placement: 'top' | 'bottom' = preferTop ? 'top' : 'bottom';
-
-        let left = anchorX - toastRect.width / 2;
-        left = Math.max(margin, Math.min(left, vw - margin - toastRect.width));
-
-        let top =
-            placement === 'top'
-                ? anchorRect.top - gap - toastRect.height
-                : anchorRect.bottom + gap;
-        top = Math.max(margin, Math.min(top, vh - margin - toastRect.height));
-
-        const minArrow = isMobile ? 14 : 16;
-        const maxArrow = toastRect.width - minArrow;
-        const arrowLeft = Math.max(minArrow, Math.min(anchorX - left, maxArrow));
-
-        setToastLayout({ top, left, placement, arrowLeft });
-    };
-
-    useLayoutEffect(() => {
-        if (!toast.visible) {
-            setToastLayout(null);
-            return;
-        }
-
-        requestAnimationFrame(() => {
-            updateToastPosition();
-        });
-    }, [toast.visible, toast.message, isMobile]);
-
-    useEffect(() => {
-        if (!toast.visible) return;
-
-        const handler = () => updateToastPosition();
-        window.addEventListener('resize', handler, { passive: true });
-        window.addEventListener('scroll', handler, true);
-        return () => {
-            window.removeEventListener('resize', handler);
-            window.removeEventListener('scroll', handler, true);
-        };
-    }, [toast.visible, isMobile]);
-
     const showToast = (message: string, type: 'success' | 'warning' | 'info' = 'success') => {
         // 只显示上限提示，使用简洁的消息
         setToast({ message, visible: true, type });
-        if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current);
-        toastTimerRef.current = window.setTimeout(() => setToast(prev => ({ ...prev, visible: false })), isMobile ? 1500 : 2000);
+        setTimeout(() => setToast(prev => ({ ...prev, visible: false })), isMobile ? 1500 : 2000);
     };
 
     const handleLike = async (e: React.MouseEvent) => {
@@ -164,18 +93,8 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
             return;
         }
 
-        const previouslyLiked = liked;
-
         // 开始动画
         setIsAnimating(true);
-        setBurst({
-            id: Date.now(),
-            x: (Math.random() - 0.5) * (isMobile ? 10 : 14),
-            r: (Math.random() - 0.5) * 18
-        });
-        window.setTimeout(() => setBurst(null), isMobile ? 750 : 820);
-        setLiked(true);
-        setLikedLocal(targetType, targetId, true);
         
         // UI 立即增加反馈
         setCount(prev => prev + 1);
@@ -216,14 +135,12 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                 setLocked(true);
                 setDailyCount(5);
                 localStorage.setItem(getStorageKey(), '5');
-                showToast('❤️ 不许这么喜欢我', 'warning');
+                showToast('❤️ Daily limit', 'warning');
             } else {
                 console.error('Failed to toggle like:', err);
                 setCount(prev => prev - 1);
                 setDailyCount(currentLocal);
                 localStorage.setItem(getStorageKey(), currentLocal.toString());
-                setLiked(previouslyLiked);
-                setLikedLocal(targetType, targetId, previouslyLiked);
                 showToast('点赞失败，请稍后重试', 'warning');
             }
         }
@@ -235,25 +152,23 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
             <AnimatePresence>
                 {toast.visible && (
                     <motion.div
-                        style={{
-                            top: toastLayout?.top ?? 0,
-                            left: toastLayout?.left ?? 0,
-                            visibility: toastLayout ? 'visible' : 'hidden'
-                        }}
                         initial={{ 
                             opacity: 0, 
                             scale: 0.8, 
-                            y: (toastLayout?.placement ?? 'top') === 'top' ? 6 : -6
+                            x: -10,
+                            y: 5
                         }}
                         animate={{ 
                             opacity: 1, 
                             scale: 1, 
+                            x: 0,
                             y: 0
                         }}
                         exit={{ 
                             opacity: 0, 
                             scale: 0.8, 
-                            y: (toastLayout?.placement ?? 'top') === 'top' ? 4 : -4
+                            x: -5,
+                            y: 2
                         }}
                         transition={{
                             type: "spring",
@@ -262,10 +177,15 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                             mass: 0.8,
                             duration: isMobile ? 0.5 : 0.6
                         }}
-                        className="fixed z-[9999] pointer-events-none"
+                        className="absolute z-[9999] pointer-events-none"
+                        style={{
+                            // 定位在点赞按钮的左上方
+                            top: isMobile ? '-40px' : '-45px',
+                            left: isMobile ? '-60px' : '-80px',
+                            minWidth: 'max-content', // 防止文字换行
+                        }}
                     >
                         <motion.div 
-                            ref={toastRef}
                             className={`relative overflow-hidden ${
                                 isMobile ? 'px-3 py-2 text-xs' : 'px-4 py-2.5 text-sm'
                             } font-medium whitespace-nowrap text-white/90`}
@@ -342,22 +262,13 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                             <div 
                                 className="absolute"
                                 style={{
-                                    left: toastLayout?.arrowLeft ?? 0,
-                                    transform: 'translateX(-50%)',
-                                    top: (toastLayout?.placement ?? 'top') === 'bottom' ? (isMobile ? '-4px' : '-6px') : undefined,
-                                    bottom: (toastLayout?.placement ?? 'top') === 'top' ? (isMobile ? '-4px' : '-6px') : undefined,
+                                    right: isMobile ? '-4px' : '-6px',
+                                    bottom: isMobile ? '8px' : '10px',
                                     width: 0,
                                     height: 0,
-                                    borderLeft: isMobile ? '4px solid transparent' : '6px solid transparent',
-                                    borderRight: isMobile ? '4px solid transparent' : '6px solid transparent',
-                                    borderTop:
-                                        (toastLayout?.placement ?? 'top') === 'bottom'
-                                            ? (isMobile ? '4px solid rgba(0, 0, 0, 0.9)' : '6px solid rgba(0, 0, 0, 0.9)')
-                                            : undefined,
-                                    borderBottom:
-                                        (toastLayout?.placement ?? 'top') === 'top'
-                                            ? (isMobile ? '4px solid rgba(0, 0, 0, 0.9)' : '6px solid rgba(0, 0, 0, 0.9)')
-                                            : undefined,
+                                    borderLeft: isMobile ? '4px solid rgba(0, 0, 0, 0.9)' : '6px solid rgba(0, 0, 0, 0.9)',
+                                    borderTop: isMobile ? '4px solid transparent' : '6px solid transparent',
+                                    borderBottom: isMobile ? '4px solid transparent' : '6px solid transparent',
                                 }}
                             />
                         </motion.div>
@@ -369,7 +280,6 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
             <motion.button
                 onClick={handleLike}
                 disabled={isAnimating}
-                ref={buttonRef}
                 className={`group relative flex items-center gap-2 ${
                     isMobile ? 'px-2 py-1.5' : 'px-3 py-2'
                 } rounded-full transition-all duration-200 overflow-hidden ${
@@ -408,18 +318,17 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
 
                 {/* 爱心图标 - 移动端简化 */}
                 <motion.svg
-                    ref={iconRef}
                     className={`${isMobile ? 'w-3.5 h-3.5' : 'w-4 h-4'} transition-all duration-200 ${
                         liked ? 'fill-current scale-110' : 'fill-none scale-100'
                     }`}
                     stroke="currentColor"
                     viewBox="0 0 24 24"
                     animate={isAnimating ? {
-                        scale: isMobile ? [1, 1.22, 0.96, 1] : [1, 1.28, 0.94, 1],
-                        rotate: [0, -10, 10, 0]
+                        scale: isMobile ? [1, 1.2, 1] : [1, 1.3, 1],
+                        rotate: [0, -8, 8, 0]
                     } : {}}
                     transition={{
-                        duration: 0.62,
+                        duration: 0.6,
                         ease: [0.4, 0.0, 0.2, 1]
                     }}
                 >
@@ -446,7 +355,7 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                 {!locked && isAnimating && (
                     <div className="absolute inset-0 pointer-events-none">
                         {/* 主要粒子 - 移动端减少数量 */}
-                        {[...Array(isMobile ? 5 : 7)].map((_, i, arr) => (
+                        {[...Array(isMobile ? 4 : 6)].map((_, i) => (
                             <motion.div
                                 key={`particle-${i}`}
                                 className={`absolute left-1/2 top-1/2 ${
@@ -456,13 +365,13 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                                 animate={{
                                     scale: [0, 1, 0],
                                     opacity: [0, 0.9, 0],
-                                    x: Math.cos((i * (360 / arr.length)) * Math.PI / 180) * (isMobile ? 8 : 12),
-                                    y: Math.sin((i * (360 / arr.length)) * Math.PI / 180) * (isMobile ? 8 : 12),
+                                    x: Math.cos((i * 60) * Math.PI / 180) * (isMobile ? 8 : 12),
+                                    y: Math.sin((i * 60) * Math.PI / 180) * (isMobile ? 8 : 12),
                                 }}
                                 transition={{
                                     duration: 0.5,
                                     ease: [0.4, 0.0, 0.2, 1],
-                                    delay: i * 0.015
+                                    delay: Math.random() * 0.1
                                 }}
                             />
                         ))}
@@ -507,30 +416,6 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                             }}
                         />
                     </div>
-                )}
-
-                {!locked && burst && (
-                    <motion.div
-                        key={burst.id}
-                        className="absolute left-1/2 top-1/2"
-                        initial={{ opacity: 0, y: 0, x: burst.x, scale: 0.6, rotate: burst.r }}
-                        animate={{ opacity: [0, 0.95, 0], y: isMobile ? -18 : -22, scale: [0.7, 1.05, 0.9] }}
-                        transition={{ duration: isMobile ? 0.65 : 0.7, ease: [0.22, 1, 0.36, 1] }}
-                        style={{
-                            marginLeft: isMobile ? '-6px' : '-7px',
-                            marginTop: isMobile ? '-6px' : '-7px'
-                        }}
-                    >
-                        <svg
-                            width={isMobile ? 12 : 14}
-                            height={isMobile ? 12 : 14}
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                            className="text-rose-400/80"
-                        >
-                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                        </svg>
-                    </motion.div>
                 )}
             </motion.button>
         </div>

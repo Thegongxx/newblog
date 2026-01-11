@@ -14,9 +14,9 @@
     "sync": "node scripts/sync-posts.js",
     "sync:push": "node scripts/sync-posts.js",
     "sync:pull": "node scripts/pull-from-db.js",
-    "sync:posts": "node scripts/sync-posts.js",
+    "sync:posts": "node scripts/sync-local.js",
     "sync:posts:prod": "node scripts/sync-posts.js",
-    "test:db": "node scripts/test-supabase.js"
+    "test:db": "node scripts/test-connection.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.3",

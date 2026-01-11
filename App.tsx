@@ -1,5 +1,5 @@
-import { useState, useEffect, useLayoutEffect, useMemo } from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, Navigate, useNavigationType } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { HelmetProvider, Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SWRConfig } from 'swr';
@@ -21,7 +21,6 @@ import Archive from './pages/Archive';
 const AppInner = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const navigationType = useNavigationType();
   const [showIntro, setShowIntro] = useState(true);
   const [scrollY, setScrollY] = useState(0);
   const [toast, setToast] = useState({ show: false, msg: '', type: 'success' });
@@ -52,31 +51,18 @@ const AppInner = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  useLayoutEffect(() => {
-    window.scrollTo(0, 0);
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
-  }, [location.pathname]);
-
-  const routeMotion = useMemo(() => {
-    const dir = navigationType === 'POP' ? -1 : 1;
-    const distance = isMobile ? 14 : 18;
-
-    return {
-      dir,
-      variants: {
-        initial: (d: number) => ({ opacity: 0, x: d * distance, scale: isMobile ? 0.995 : 0.998 }),
-        animate: { opacity: 1, x: 0, scale: 1 },
-        exit: (d: number) => ({ opacity: 0, x: -d * distance, scale: isMobile ? 0.995 : 0.998 })
-      },
-      transition: {
-        type: 'spring' as const,
-        stiffness: isMobile ? 380 : 420,
-        damping: isMobile ? 38 : 42,
-        mass: 0.9
-      }
-    };
-  }, [navigationType, isMobile]);
+  // 页面切换时滚动到顶部 - 移动端防闪烁优化
+  useEffect(() => {
+    // 移动端需要更长的延迟来避免闪烁
+    const delay = isMobile ? 200 : 100;
+    const timer = setTimeout(() => {
+      // 移动端使用instant避免滚动动画与页面切换冲突
+      const behavior = isMobile ? 'instant' : 'smooth';
+      window.scrollTo({ top: 0, behavior: behavior as ScrollBehavior });
+    }, delay);
+    
+    return () => clearTimeout(timer);
+  }, [location.pathname, isMobile]);
 
   const showToast = (msg: string, type = 'success') => {
     setToast({ show: true, msg, type });
@@ -313,79 +299,85 @@ const AppInner = () => {
           backfaceVisibility: 'hidden',
           transform: 'translateZ(0)'
         }}
-        layout={false}
+        layout={isMobile} // 移动端启用布局动画
       >
         <ErrorBoundary>
-          <AnimatePresence mode="wait" initial={false}>
+          <AnimatePresence mode="wait">
             <Routes location={location} key={location.pathname}>
               <Route path="/" element={
                 <motion.div
-                  custom={routeMotion.dir}
-                  variants={routeMotion.variants}
-                  initial="initial"
-                  animate="animate"
-                  exit="exit"
-                  transition={routeMotion.transition}
+                  initial={{ opacity: 0, y: isMobile ? 15 : 20, scale: isMobile ? 0.98 : 0.99 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: isMobile ? -15 : -20, scale: isMobile ? 0.98 : 0.99 }}
+                  transition={{ 
+                    duration: isMobile ? 0.5 : 0.6, 
+                    ease: [0.4, 0.0, 0.2, 1] 
+                  }}
                 >
                   <Feed posts={posts} loading={loading} onSelectPost={(p) => navigate(`/post/${p.slug}`)} />
                 </motion.div>
               } />
               <Route path="/post/:slug" element={
                 <motion.div
-                  custom={routeMotion.dir}
-                  variants={routeMotion.variants}
-                  initial="initial"
-                  animate="animate"
-                  exit="exit"
-                  transition={routeMotion.transition}
+                  initial={{ opacity: 0, y: isMobile ? 15 : 20, scale: isMobile ? 0.98 : 0.99 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: isMobile ? -15 : -20, scale: isMobile ? 0.98 : 0.99 }}
+                  transition={{ 
+                    duration: isMobile ? 0.5 : 0.6, 
+                    ease: [0.4, 0.0, 0.2, 1] 
+                  }}
                 >
                   <PostDetail posts={posts} loading={loading} />
                 </motion.div>
               } />
               <Route path="/notes" element={
                 <motion.div
-                  custom={routeMotion.dir}
-                  variants={routeMotion.variants}
-                  initial="initial"
-                  animate="animate"
-                  exit="exit"
-                  transition={routeMotion.transition}
+                  initial={{ opacity: 0, y: isMobile ? 15 : 20, scale: isMobile ? 0.98 : 0.99 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: isMobile ? -15 : -20, scale: isMobile ? 0.98 : 0.99 }}
+                  transition={{ 
+                    duration: isMobile ? 0.5 : 0.6, 
+                    ease: [0.4, 0.0, 0.2, 1] 
+                  }}
                 >
                   <Notes notes={notes} loading={loading} />
                 </motion.div>
               } />
               <Route path="/note/:id" element={
                 <motion.div
-                  custom={routeMotion.dir}
-                  variants={routeMotion.variants}
-                  initial="initial"
-                  animate="animate"
-                  exit="exit"
-                  transition={routeMotion.transition}
+                  initial={{ opacity: 0, y: isMobile ? 20 : 20, scale: isMobile ? 0.95 : 0.99 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: isMobile ? -20 : -20, scale: isMobile ? 0.95 : 0.99 }}
+                  transition={{ 
+                    duration: isMobile ? 0.6 : 0.6, 
+                    ease: [0.4, 0.0, 0.2, 1] 
+                  }}
                 >
                   <NoteDetail />
                 </motion.div>
               } />
               <Route path="/archive" element={
                 <motion.div
-                  custom={routeMotion.dir}
-                  variants={routeMotion.variants}
-                  initial="initial"
-                  animate="animate"
-                  exit="exit"
-                  transition={routeMotion.transition}
+                  initial={{ opacity: 0, y: isMobile ? 15 : 20, scale: isMobile ? 0.98 : 0.99 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: isMobile ? -15 : -20, scale: isMobile ? 0.98 : 0.99 }}
+                  transition={{ 
+                    duration: isMobile ? 0.5 : 0.6, 
+                    ease: [0.4, 0.0, 0.2, 1] 
+                  }}
                 >
                   <Archive posts={posts} loading={loading} onSelectPost={(p) => navigate(`/post/${p.slug}`)} />
                 </motion.div>
               } />
               <Route path="/about" element={
                 <motion.div
-                  custom={routeMotion.dir}
-                  variants={routeMotion.variants}
-                  initial="initial"
-                  animate="animate"
-                  exit="exit"
-                  transition={routeMotion.transition}
+                  initial={{ opacity: 0, y: isMobile ? 15 : 20, scale: isMobile ? 0.98 : 0.99 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: isMobile ? -15 : -20, scale: isMobile ? 0.98 : 0.99 }}
+                  transition={{ 
+                    duration: isMobile ? 0.5 : 0.6, 
+                    ease: [0.4, 0.0, 0.2, 1] 
+                  }}
                 >
                   <About />
                 </motion.div>
