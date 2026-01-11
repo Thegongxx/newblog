@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../services/supabaseService';
@@ -152,7 +151,7 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
         setShowForm(true);
     };
 
-    // 渲染嵌套评论
+    // 渲染嵌套评论 - 使用与notes一致的苹果风格动画
     const renderComment = (comment: Comment, depth = 0) => {
         const replies = comments.filter(c => c.parent_id === comment.id);
         const marginLeft = depth > 0 ? `${depth * 1.5}rem` : '0';
@@ -162,25 +161,24 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
                 key={comment.id} 
                 style={{ marginLeft }} 
                 className="group mb-8"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+                initial={{ opacity: 0, x: 30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
                 whileHover={{ 
-                    scale: 1.01,
+                    x: 4,
                     transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }
                 }}
             >
                 <div className="flex gap-4">
-                    {/* Notion 风格头像 - 缓慢渐变 */}
+                    {/* Notion 风格头像 - 苹果风格渐变 */}
                     <motion.div 
                         className="flex-shrink-0 w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/10 text-[10px] font-black text-white/60"
                         whileHover={{ 
                             backgroundColor: "rgba(255, 255, 255, 0.15)",
                             borderColor: "rgba(255, 255, 255, 0.2)",
-                            scale: 1.1,
-                            transition: { duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }
+                            transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }
                         }}
-                        transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+                        transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
                     >
                         {comment.author[0].toUpperCase()}
                     </motion.div>
@@ -201,9 +199,9 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
                                 className="text-white/20 text-[10px] font-medium"
                                 whileHover={{ 
                                     color: "rgba(255, 255, 255, 0.4)",
-                                    transition: { duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }
+                                    transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }
                                 }}
-                                transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+                                transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
                             >
                                 {new Date(comment.created_at).toLocaleDateString()}
                             </motion.span>
@@ -213,7 +211,7 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
                             className="text-white/70 text-sm leading-relaxed mb-3 whitespace-pre-wrap"
                             whileHover={{ 
                                 color: "rgba(255, 255, 255, 0.85)",
-                                x: 4,
+                                x: 2,
                                 transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }
                             }}
                             transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
@@ -221,21 +219,20 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
                             {comment.content}
                         </motion.p>
 
-                        {/* 操作按钮区域 - 缓慢渐变 */}
+                        {/* 操作按钮区域 - 苹果风格渐变 */}
                         <motion.div 
                             className="flex items-center gap-6 opacity-0 group-hover:opacity-100"
-                            transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+                            transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
                             whileHover={{ 
-                                y: -2,
-                                transition: { duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }
+                                x: 2,
+                                transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }
                             }}
                         >
                             <motion.div
                                 whileHover={{ 
-                                    scale: 1.1,
-                                    transition: { duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }
+                                    transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }
                                 }}
-                                transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+                                transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
                             >
                                 <LikeButton
                                     targetType="comment"
@@ -248,7 +245,6 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
                                 className="text-[10px] font-bold text-white/30 hover:text-white uppercase tracking-widest"
                                 whileHover={{ 
                                     color: "rgba(255, 255, 255, 0.8)",
-                                    scale: 1.05,
                                     x: 2,
                                     transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }
                                 }}
@@ -260,7 +256,7 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
                     </div>
                 </div>
 
-                {/* 渲染回复 - 缓慢展开 */}
+                {/* 渲染回复 - 苹果风格展开 */}
                 {replies.length > 0 && (
                     <motion.div 
                         className="mt-6 border-l border-white/5 ml-4"
@@ -269,9 +265,8 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
                             opacity: 1, 
                             height: 'auto',
                             transition: { 
-                                duration: 0.8, 
-                                ease: [0.25, 0.1, 0.25, 1],
-                                height: { duration: 0.6 }
+                                duration: 0.4, 
+                                ease: [0.25, 0.1, 0.25, 1]
                             }
                         }}
                         whileHover={{
@@ -283,13 +278,13 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
                         {replies.map((reply, index) => (
                             <motion.div
                                 key={reply.id}
-                                initial={{ opacity: 0, x: -10 }}
+                                initial={{ opacity: 0, x: 20 }}
                                 animate={{ 
                                     opacity: 1, 
                                     x: 0,
                                     transition: { 
-                                        delay: index * 0.1,
-                                        duration: 0.6, 
+                                        delay: index * 0.05,
+                                        duration: 0.4, 
                                         ease: [0.25, 0.1, 0.25, 1] 
                                     }
                                 }}
@@ -309,14 +304,13 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
         <div className="mt-24 max-w-2xl">
             <motion.div 
                 className="flex items-center justify-between mb-12"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+                initial={{ opacity: 0, x: 30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
             >
                 <motion.h3 
                     className="text-xl font-black text-white tracking-tight uppercase"
                     whileHover={{ 
-                        scale: 1.02,
                         x: 2,
                         transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }
                     }}
@@ -326,9 +320,9 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
                         className="text-white/20 ml-2"
                         whileHover={{ 
                             color: "rgba(255, 255, 255, 0.4)",
-                            transition: { duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }
+                            transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }
                         }}
-                        transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+                        transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
                     >
                         {comments.length}
                     </motion.span>
@@ -337,13 +331,12 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
                     onClick={() => setShowForm(!showForm)}
                     className="px-6 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-full text-white relative overflow-hidden group"
                     whileHover={{ 
-                        scale: 1.05,
                         backgroundColor: "rgba(255, 255, 255, 0.25)",
                         borderColor: "rgba(255, 255, 255, 0.3)",
                         transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }
                     }}
                     whileTap={{ 
-                        scale: 0.95,
+                        scale: 0.98,
                         transition: { duration: 0.1 }
                     }}
                     transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
@@ -353,14 +346,14 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
                         className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 rounded-full"
                         whileHover={{ 
                             opacity: 1,
-                            transition: { duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }
+                            transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }
                         }}
-                        transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+                        transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
                     />
                     <motion.span 
                         className="relative z-10"
                         whileHover={{ 
-                            letterSpacing: "0.1em",
+                            letterSpacing: "0.05em",
                             transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }
                         }}
                         transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
@@ -378,34 +371,29 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
                         initial={{ 
                             opacity: 0, 
                             height: 0, 
-                            scale: 0.95,
-                            y: -20
+                            x: 30
                         }}
                         animate={{ 
                             opacity: 1, 
                             height: 'auto', 
-                            scale: 1,
-                            y: 0
+                            x: 0
                         }}
                         exit={{ 
                             opacity: 0, 
                             height: 0, 
-                            scale: 0.95,
-                            y: -20
+                            x: 30
                         }}
                         transition={{ 
-                            duration: 0.8, 
-                            ease: [0.25, 0.1, 0.25, 1],
-                            height: { duration: 0.6 },
-                            opacity: { duration: 0.4 }
+                            duration: 0.4, 
+                            ease: [0.25, 0.1, 0.25, 1]
                         }}
                     >
                         {replyingTo && (
                             <motion.div 
                                 className="mb-6 text-xs text-white/40 flex items-center justify-between"
-                                initial={{ opacity: 0, x: -10 }}
+                                initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0.3, duration: 0.5 }}
+                                transition={{ delay: 0.1, duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
                             >
                                 <span>Replying to <span className="text-white font-bold">@{replyingTo}</span></span>
                                 <button
@@ -423,9 +411,9 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
                         <form onSubmit={handleSubmit} className="space-y-6">
                             <motion.div 
                                 className="grid grid-cols-2 gap-4"
-                                initial={{ opacity: 0, y: 15 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.4, duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.15, duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
                             >
                                 <input
                                     type="text"
@@ -450,15 +438,15 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
                                 rows={3}
                                 className="w-full px-0 py-2 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/40 transition-all duration-300 resize-none"
                                 required
-                                initial={{ opacity: 0, y: 15 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.8, duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.2, duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
                             />
                             <motion.div 
                                 className="flex justify-end"
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 1.2, duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.25, duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
                             >
                                 <button
                                     type="submit"
@@ -504,9 +492,9 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
             ) : topLevelComments.length === 0 ? (
                 <motion.div 
                     className="text-center text-white/40 py-12"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+                    initial={{ opacity: 0, x: 30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
                 >
                     还没有评论，来抢沙发吧！
                 </motion.div>
@@ -519,11 +507,11 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
                     {topLevelComments.map((comment, index) => (
                         <motion.div
                             key={comment.id}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
+                            initial={{ opacity: 0, x: 30 }}
+                            animate={{ opacity: 1, x: 0 }}
                             transition={{ 
-                                duration: 0.6, 
-                                delay: index * 0.1,
+                                duration: 0.4, 
+                                delay: index * 0.05,
                                 ease: [0.25, 0.1, 0.25, 1] 
                             }}
                         >

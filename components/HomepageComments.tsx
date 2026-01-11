@@ -96,10 +96,10 @@ export default function HomepageComments() {
 
     return (
         <motion.section
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, x: 30 }}
+            whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 1.2 }}
+            transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
             className="max-w-2xl mx-auto"
         >
             {/* 标题区域 - 与其他评论区保持一致 */}
@@ -109,23 +109,34 @@ export default function HomepageComments() {
                 </h3>
                 <button
                     onClick={() => setShowForm(!showForm)}
-                    className="px-6 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-full text-white transition-all"
+                    className="px-6 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-full text-white transition-all duration-300 hover:bg-white/25 hover:border-white/30"
                 >
                     {showForm ? '取消' : '写留言'}
                 </button>
             </div>
 
-            {/* 评论表单 - 与其他评论区保持一致的样式 */}
+            {/* 评论表单 - 与其他评论区保持一致的样式和动画 */}
             {showForm && (
-                <div className="mb-12 p-8 border border-white/5 rounded-3xl bg-white/[0.01]">
+                <motion.div 
+                    className="mb-12 p-8 border border-white/5 rounded-3xl bg-white/[0.01]"
+                    initial={{ opacity: 0, height: 0, x: 30 }}
+                    animate={{ opacity: 1, height: 'auto', x: 0 }}
+                    exit={{ opacity: 0, height: 0, x: 30 }}
+                    transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+                >
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4">
+                        <motion.div 
+                            className="grid grid-cols-2 gap-4"
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.15, duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+                        >
                             <input
                                 type="text"
                                 placeholder="Name *"
                                 value={formData.author}
                                 onChange={(e) => setFormData({ ...formData, author: e.target.value })}
-                                className="px-0 py-2 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/40 transition-colors"
+                                className="px-0 py-2 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/40 transition-all duration-300"
                                 required
                             />
                             <input
@@ -133,28 +144,36 @@ export default function HomepageComments() {
                                 placeholder="Email (Private)"
                                 value={formData.email}
                                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                className="px-0 py-2 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/40 transition-colors"
+                                className="px-0 py-2 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/40 transition-all duration-300"
                             />
-                        </div>
-                        <textarea
+                        </motion.div>
+                        <motion.textarea
                             placeholder="Share your thoughts..."
                             value={formData.content}
                             onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                             rows={3}
-                            className="w-full px-0 py-2 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/40 transition-colors resize-none"
+                            className="w-full px-0 py-2 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/40 transition-all duration-300 resize-none"
                             required
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.2, duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
                         />
-                        <div className="flex justify-end">
+                        <motion.div 
+                            className="flex justify-end"
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.25, duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+                        >
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="px-8 py-2 bg-white text-black text-[10px] font-black uppercase tracking-widest rounded-full hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
+                                className="px-8 py-2 bg-white text-black text-[10px] font-black uppercase tracking-widest rounded-full hover:scale-105 active:scale-95 transition-all duration-300 disabled:opacity-50"
                             >
                                 {loading ? 'Sending...' : 'Post Message'}
                             </button>
-                        </div>
+                        </motion.div>
                     </form>
-                </div>
+                </motion.div>
             )}
 
             {/* 评论列表 - 与其他评论区保持一致的样式 */}
@@ -169,37 +188,75 @@ export default function HomepageComments() {
                     {comments.map((comment, index) => (
                         <motion.div
                             key={comment.id}
-                            initial={{ opacity: 0, x: -20 }}
+                            initial={{ opacity: 0, x: 30 }}
                             whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true }}
-                            transition={{ duration: 0.5, delay: index * 0.1 }}
-                            className="group mb-8 animate-in fade-in slide-in-from-left-4 duration-500"
+                            transition={{ duration: 0.4, delay: index * 0.05, ease: [0.25, 0.1, 0.25, 1] }}
+                            className="group mb-8"
+                            whileHover={{ x: 4, transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] } }}
                         >
                             <div className="flex gap-4">
                                 {/* Notion 风格头像 - 与其他评论区一致 */}
-                                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/10 text-[10px] font-black text-white/60 group-hover:bg-white/10 transition-colors">
+                                <motion.div 
+                                    className="flex-shrink-0 w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/10 text-[10px] font-black text-white/60"
+                                    whileHover={{ 
+                                        backgroundColor: "rgba(255, 255, 255, 0.15)",
+                                        borderColor: "rgba(255, 255, 255, 0.2)",
+                                        transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }
+                                    }}
+                                    transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+                                >
                                     {comment.author[0].toUpperCase()}
-                                </div>
+                                </motion.div>
 
                                 <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-3 mb-1">
+                                    <motion.div 
+                                        className="flex items-center gap-3 mb-1"
+                                        whileHover={{ 
+                                            x: 2,
+                                            transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }
+                                        }}
+                                        transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+                                    >
                                         <span className="font-bold text-white text-sm tracking-tight">{comment.author}</span>
-                                        <span className="text-white/20 text-[10px] font-medium">
+                                        <motion.span 
+                                            className="text-white/20 text-[10px] font-medium"
+                                            whileHover={{ 
+                                                color: "rgba(255, 255, 255, 0.4)",
+                                                transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }
+                                            }}
+                                            transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+                                        >
                                             {new Date(comment.created_at).toLocaleDateString()}
-                                        </span>
-                                    </div>
+                                        </motion.span>
+                                    </motion.div>
 
-                                    <p className="text-white/70 text-sm leading-relaxed mb-3 whitespace-pre-wrap">
+                                    <motion.p 
+                                        className="text-white/70 text-sm leading-relaxed mb-3 whitespace-pre-wrap"
+                                        whileHover={{ 
+                                            color: "rgba(255, 255, 255, 0.85)",
+                                            x: 2,
+                                            transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }
+                                        }}
+                                        transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+                                    >
                                         {comment.content}
-                                    </p>
+                                    </motion.p>
 
-                                    <div className="flex items-center gap-6 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <motion.div 
+                                        className="flex items-center gap-6 opacity-0 group-hover:opacity-100"
+                                        transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+                                        whileHover={{ 
+                                            x: 2,
+                                            transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }
+                                        }}
+                                    >
                                         <LikeButton
                                             targetType="homepage_comment"
                                             targetId={comment.id}
-                                            className="!bg-transparent !p-0 !border-none !h-auto text-white/30 hover:text-white/60 transition-colors"
+                                            className="!bg-transparent !p-0 !border-none !h-auto text-white/30 hover:text-white/60 transition-all duration-300"
                                         />
-                                    </div>
+                                    </motion.div>
                                 </div>
                             </div>
                         </motion.div>
