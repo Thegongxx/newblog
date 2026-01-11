@@ -10,35 +10,23 @@ interface NotesProps {
     loading?: boolean;
 }
 
+// 统一动画配置
+const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: { duration: 0.5, ease: "easeOut" as const, staggerChildren: 0.08 }
+    }
+};
+
+const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" as const } }
+};
+
 const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
     const navigate = useNavigate();
     const isMobile = useIsMobile();
-
-    // 统一动画配置 - 移动端优化
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: { 
-                duration: 0.3, 
-                ease: "easeOut" as const, 
-                staggerChildren: isMobile ? 0.05 : 0.08,
-                delayChildren: 0.1 // 延迟子元素动画，避免与页面切换冲突
-            }
-        }
-    };
-
-    const itemVariants = {
-        hidden: { opacity: 0, y: isMobile ? 10 : 20 },
-        visible: { 
-            opacity: 1, 
-            y: 0, 
-            transition: { 
-                duration: isMobile ? 0.4 : 0.5, 
-                ease: "easeOut" as const 
-            } 
-        }
-    };
 
     return (
         <motion.div 
