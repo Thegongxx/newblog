@@ -84,35 +84,79 @@ const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
                     notes.map((note, i) => (
                         <motion.div
                             key={note.id || i}
-                            className={`glass p-6 md:p-10 rounded-2xl md:rounded-[2.5rem] relative group border border-white/5 transition-all duration-300 ${
-                                !isMobile ? 'hover:border-white/20 hover:-translate-y-1' : 'active:bg-white/[0.02]'
+                            className={`glass p-6 md:p-10 rounded-2xl md:rounded-[2.5rem] relative group border border-white/5 cursor-pointer overflow-hidden ${
+                                isMobile 
+                                    ? 'active:scale-[0.98] active:bg-white/[0.02] transition-all duration-200' 
+                                    : 'hover:border-white/20 hover:shadow-2xl hover:shadow-white/5 transition-all duration-500'
                             }`}
                             variants={itemVariants}
                             style={{
                                 willChange: 'transform',
                                 backfaceVisibility: 'hidden'
                             }}
+                            onClick={() => navigate(`/note/${note.id}`)}
+                            // 桌面端专属：纸张翻页效果
+                            whileHover={!isMobile ? {
+                                y: -8,
+                                rotateX: 2,
+                                rotateY: 1,
+                                scale: 1.02,
+                                transition: { 
+                                    type: "spring", 
+                                    stiffness: 300, 
+                                    damping: 30 
+                                }
+                            } : {}}
+                            whileTap={isMobile ? {
+                                scale: 0.98,
+                                transition: { duration: 0.1 }
+                            } : {}}
                         >
-                            <div className="absolute top-4 left-4 md:top-8 md:left-8 scale-75 md:scale-100 origin-top-left">{ICONS.QUOTES}</div>
+                            {/* 桌面端专属：悬停时的纸张阴影效果 */}
+                            {!isMobile && (
+                                <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl md:rounded-[2.5rem]" />
+                            )}
                             
-                            {/* 可点击的内容区域 */}
-                            <div 
-                                className="cursor-pointer"
-                                onClick={() => navigate(`/note/${note.id}`)}
-                            >
-                                <h3 className={`text-xl md:text-3xl font-bold tracking-tight text-white/90 mb-3 md:mb-4 pt-8 md:pt-10 transition-colors line-clamp-2 ${
-                                    !isMobile ? 'hover:text-white' : ''
+                            {/* 移动端专属：点击时的涟漪效果 */}
+                            {isMobile && (
+                                <div className="absolute inset-0 bg-gradient-to-r from-white/3 to-transparent opacity-0 group-active:opacity-100 transition-opacity duration-200 rounded-2xl pointer-events-none" />
+                            )}
+
+                            <div className={`absolute top-4 left-4 md:top-8 md:left-8 scale-75 md:scale-100 origin-top-left transition-all duration-300 ${
+                                !isMobile ? 'group-hover:scale-110 group-hover:text-white/80' : 'group-active:scale-105'
+                            }`}>
+                                {ICONS.QUOTES}
+                            </div>
+                            
+                            {/* 内容区域 */}
+                            <div className="relative z-10">
+                                <h3 className={`text-xl md:text-3xl font-bold tracking-tight text-white/90 mb-3 md:mb-4 pt-8 md:pt-10 line-clamp-2 transition-all duration-300 ${
+                                    !isMobile 
+                                        ? 'group-hover:text-white group-hover:translate-x-2' 
+                                        : 'group-active:text-white/95'
                                 }`}>
                                     {note.title}
                                 </h3>
-                                <p className="text-sm md:text-lg font-light leading-relaxed text-white/60 mb-6 md:mb-10 line-clamp-2 md:line-clamp-3">
+                                <p className={`text-sm md:text-lg font-light leading-relaxed text-white/60 mb-6 md:mb-10 line-clamp-2 md:line-clamp-3 transition-all duration-300 ${
+                                    !isMobile 
+                                        ? 'group-hover:text-white/70' 
+                                        : 'group-active:text-white/70'
+                                }`}>
                                     {note.content?.substring(0, 150)}...
                                 </p>
                             </div>
 
-                            {/* 底部信息 - 移动端简化 */}
-                            <div className="flex items-center justify-between border-t border-white/5 pt-4 md:pt-8">
-                                <span className="text-[10px] md:text-xs font-bold tracking-widest text-white/40 uppercase">{note.date}</span>
+                            {/* 底部信息 */}
+                            <div className={`flex items-center justify-between border-t border-white/5 pt-4 md:pt-8 relative z-10 transition-all duration-300 ${
+                                !isMobile ? 'group-hover:border-white/10' : ''
+                            }`}>
+                                <span className={`text-[10px] md:text-xs font-bold tracking-widest text-white/40 uppercase transition-all duration-300 ${
+                                    !isMobile 
+                                        ? 'group-hover:text-white/60 group-hover:tracking-[0.2em]' 
+                                        : 'group-active:text-white/60'
+                                }`}>
+                                    {note.date}
+                                </span>
                                 <div className="flex items-center gap-2 md:gap-4">
                                     {/* 详情按钮 */}
                                     <button
@@ -120,14 +164,16 @@ const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
                                             e.stopPropagation();
                                             navigate(`/note/${note.id}`);
                                         }}
-                                        className={`text-[10px] md:text-xs font-bold text-white/30 uppercase tracking-widest transition-colors ${
-                                            !isMobile ? 'hover:text-white' : ''
+                                        className={`text-[10px] md:text-xs font-bold text-white/30 uppercase tracking-widest transition-all duration-300 ${
+                                            !isMobile 
+                                                ? 'group-hover:text-white group-hover:translate-x-1' 
+                                                : 'active:text-white/60'
                                         }`}
                                     >
                                         详情 →
                                     </button>
                                     
-                                    {/* 点赞按钮 - 带计数，添加稳定的key */}
+                                    {/* 点赞按钮 */}
                                     <div onClick={(e) => e.stopPropagation()}>
                                         <LikeButton 
                                             key={`note-${note.id}-like`}

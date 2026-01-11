@@ -24,7 +24,6 @@ import Notes from './pages/Notes';
 import NoteDetail from './pages/NoteDetail';
 import About from './pages/About';
 import Archive from './pages/Archive';
-import HoverShowcase from './components/HoverShowcase';
 
 const AppInner = () => {
   const navigate = useNavigate();
@@ -290,17 +289,18 @@ const AppInner = () => {
             <div className="relative flex items-center gap-12">
               <MagneticButton 
                 onClick={() => navigate('/')}
-                className="text-lg font-bold tracking-tight text-white/90 hover:text-white transition-colors"
+                className="text-lg font-bold tracking-tight text-white/90 hover:text-white transition-all duration-300 relative overflow-hidden group"
                 strength={0.3}
               >
-                AURA
+                {/* 悬停时的背景光效 */}
+                <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg blur-sm" />
+                <span className="relative z-10 group-hover:tracking-wider transition-all duration-300">AURA</span>
               </MagneticButton>
               
               <div className="flex gap-6 text-sm font-medium">
                 {[
                   { path: '/notes', label: 'Notes' },
                   { path: '/archive', label: 'Archive' },
-                  { path: '/hover', label: 'Effects' },
                   { path: '/about', label: 'About' }
                 ].map((item) => (
                   <RippleButton
@@ -423,17 +423,6 @@ const AppInner = () => {
                   </PageTransition>
                 )
               } />
-              <Route path="/hover" element={
-                isMobile ? (
-                  <MobilePageTransition>
-                    <HoverShowcase />
-                  </MobilePageTransition>
-                ) : (
-                  <PageTransition>
-                    <HoverShowcase />
-                  </PageTransition>
-                )
-              } />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </AnimatePresence>
@@ -483,24 +472,46 @@ const AppInner = () => {
                 <MagneticButton
                   key={contact.label}
                   onClick={() => handleCopy(contact.value, contact.label)}
-                  className="group relative overflow-hidden h-12 w-20 hover:text-white rounded-lg floating-shadow"
+                  className="group relative overflow-hidden h-12 w-20 hover:text-white rounded-lg border border-white/10 hover:border-white/30 transition-all duration-300"
                   strength={0.4}
                 >
+                  {/* 名片背景效果 */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  
+                  {/* 名片光泽效果 */}
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100"
+                    initial={{ x: '-100%', skewX: -20 }}
+                    whileHover={{ 
+                      x: '100%',
+                      transition: { duration: 0.6, ease: "easeOut" }
+                    }}
+                  />
+                  
                   <motion.div 
                     className="absolute inset-0 flex items-center justify-center"
-                    whileHover={{ y: -48 }}
-                    transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+                    whileHover={{ 
+                      y: -48,
+                      scale: 1.1,
+                      transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }
+                    }}
                   >
                     {contact.label}
                   </motion.div>
                   <motion.div 
-                    className="absolute inset-0 flex items-center justify-center text-white font-bold bg-white/10 rounded-lg"
-                    initial={{ y: 48 }}
-                    whileHover={{ y: 0 }}
-                    transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+                    className="absolute inset-0 flex items-center justify-center text-white font-bold bg-gradient-to-br from-white/20 to-white/10 rounded-lg backdrop-blur-sm"
+                    initial={{ y: 48, scale: 0.9 }}
+                    whileHover={{ 
+                      y: 0, 
+                      scale: 1,
+                      transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }
+                    }}
                   >
-                    COPY
+                    <span className="relative z-10">COPY</span>
                   </motion.div>
+                  
+                  {/* 装饰性元素 */}
+                  <div className="absolute top-1 right-1 w-1 h-1 bg-white/30 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </MagneticButton>
               ))}
             </div>

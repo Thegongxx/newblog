@@ -89,26 +89,29 @@ const Feed: React.FC<FeedProps> = memo(({ posts, loading, onSelectPost }) => {
             {latestPosts.map((post) => (
               <div
                 key={post.id}
-                className="bg-white/[0.02] border border-white/5 rounded-lg overflow-hidden active:bg-white/[0.04] transition-colors"
+                className="bg-white/[0.02] border border-white/5 rounded-lg overflow-hidden active:bg-white/[0.04] transition-all duration-300 active:scale-[0.98] active:border-white/10 relative group"
                 onClick={() => onSelectPost(post)}
               >
-                <div className="p-4 space-y-3">
-                  <div className="flex items-center gap-2 text-white/40 text-[10px] uppercase tracking-wide">
+                {/* 点击时的涟漪效果 */}
+                <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent opacity-0 group-active:opacity-100 transition-opacity duration-200 pointer-events-none" />
+                
+                <div className="p-4 space-y-3 relative z-10">
+                  <div className="flex items-center gap-2 text-white/40 text-[10px] uppercase tracking-wide group-active:text-white/60 transition-colors duration-200">
                     <span>{post.category}</span>
-                    <span className="w-1 h-1 rounded-full bg-white/20" />
+                    <span className="w-1 h-1 rounded-full bg-white/20 group-active:bg-white/40 transition-colors duration-200" />
                     <span>{post.date}</span>
                   </div>
-                  <h3 className="text-base font-semibold text-white leading-snug line-clamp-2">
+                  <h3 className="text-base font-semibold text-white leading-snug line-clamp-2 group-active:text-white/90 transition-colors duration-200">
                     {post.title}
                   </h3>
-                  <p className="text-sm text-white/60 leading-relaxed line-clamp-2">
+                  <p className="text-sm text-white/60 leading-relaxed line-clamp-2 group-active:text-white/70 transition-colors duration-200">
                     {post.excerpt}
                   </p>
                   <div className="flex items-center justify-between pt-2">
-                    <span className="text-[10px] text-white/30 uppercase tracking-wide">
+                    <span className="text-[10px] text-white/30 uppercase tracking-wide group-active:text-white/50 transition-colors duration-200">
                       {post.readingTime}
                     </span>
-                    <span className="text-[10px] text-white/30 uppercase tracking-wide">
+                    <span className="text-[10px] text-white/30 uppercase tracking-wide group-active:text-white/50 group-active:translate-x-1 transition-all duration-200">
                       阅读更多 →
                     </span>
                   </div>
@@ -199,10 +202,15 @@ const Feed: React.FC<FeedProps> = memo(({ posts, loading, onSelectPost }) => {
           <div className="flex items-center gap-8 pt-4">
             <button
               onClick={() => window.scrollTo({ top: window.innerHeight * 0.8, behavior: 'smooth' })}
-              className="group flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.3em] text-white/40 hover:text-white transition-colors"
+              className="group flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.3em] text-white/40 hover:text-white transition-all duration-300 relative overflow-hidden"
             >
-              Scroll to Explore
-              <div className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center group-hover:bg-white group-hover:text-black transition-all">
+              {/* 悬停时的背景光晕效果 */}
+              <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full blur-sm" />
+              
+              <span className="relative z-10 group-hover:translate-x-1 transition-transform duration-300">
+                Scroll to Explore
+              </span>
+              <div className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center group-hover:bg-white group-hover:text-black transition-all duration-300 group-hover:scale-110 group-hover:rotate-90 relative z-10">
                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1V11M6 11L1 6M6 11L11 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </div>
             </button>
@@ -223,27 +231,28 @@ const Feed: React.FC<FeedProps> = memo(({ posts, loading, onSelectPost }) => {
 
         {/* Hero 右侧 */}
         <div className="flex-[1.2] w-full flex justify-center items-center relative min-h-[400px]">
-          <div className="absolute inset-0 bg-white/[0.02] blur-3xl rounded-full opacity-50" />
+          {/* 背景光晕效果 */}
+          <div className="absolute inset-0 bg-white/[0.02] blur-3xl rounded-full opacity-50 group-hover:opacity-70 transition-opacity duration-500" />
 
-          <div className="relative z-10 w-full max-w-lg flex flex-col space-y-12">
-            <div className="flex items-center gap-3 opacity-60">
-              <span className="w-2 h-2 bg-white/50 rounded-full" />
-              <span className="text-[10px] font-black tracking-[0.2em] text-white uppercase">
+          <div className="relative z-10 w-full max-w-lg flex flex-col space-y-12 group cursor-pointer hover:scale-[1.02] transition-all duration-500">
+            <div className="flex items-center gap-3 opacity-60 group-hover:opacity-100 transition-opacity duration-300">
+              <span className="w-2 h-2 bg-white/50 rounded-full group-hover:bg-white group-hover:scale-125 transition-all duration-300" />
+              <span className="text-[10px] font-black tracking-[0.2em] text-white uppercase group-hover:tracking-[0.3em] transition-all duration-300">
                 Daily Note
               </span>
             </div>
 
             <div className="space-y-6">
-              <h3 className="text-4xl font-bold text-white tracking-tight leading-tight">
+              <h3 className="text-4xl font-bold text-white tracking-tight leading-tight group-hover:text-white/90 group-hover:translate-x-2 transition-all duration-300">
                 {(randomNote as any).title || (randomNote as any).text?.substring(0, 30) + '...'}
               </h3>
-              <p className="text-xl font-light text-white/70 leading-relaxed">
+              <p className="text-xl font-light text-white/70 leading-relaxed group-hover:text-white/80 transition-colors duration-300">
                 {(randomNote as any).content || (randomNote as any).text}
               </p>
             </div>
 
-            <div className="flex justify-end pt-4 border-t border-white/5">
-              <p className="text-[10px] font-mono text-white/30 uppercase tracking-widest">
+            <div className="flex justify-end pt-4 border-t border-white/5 group-hover:border-white/10 transition-colors duration-300">
+              <p className="text-[10px] font-mono text-white/30 uppercase tracking-widest group-hover:text-white/50 transition-colors duration-300">
                 {(randomNote as any).date || new Date().toLocaleDateString()}
               </p>
             </div>

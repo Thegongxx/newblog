@@ -94,15 +94,61 @@ const About: React.FC = () => {
             initial="hidden"
             animate="visible"
         >
-            <motion.header className="mb-10 md:mb-16" variants={itemVariants}>
-                <h1 className="text-4xl md:text-8xl font-bold tracking-tighter mb-4 md:mb-8 italic">ABOUT.</h1>
-                <p className="text-base md:text-xl text-white/30 font-light max-w-lg">关于这个空间，关于我。</p>
+            <motion.header 
+                className="mb-10 md:mb-16 relative group cursor-default" 
+                variants={itemVariants}
+                // 桌面端专属：名片翻转效果
+                whileHover={!window.matchMedia('(max-width: 768px)').matches ? {
+                    scale: 1.02,
+                    rotateY: 2,
+                    transition: { 
+                        type: "spring", 
+                        stiffness: 300, 
+                        damping: 30 
+                    }
+                } : {}}
+            >
+                {/* 桌面端专属：名片背景光效 */}
+                <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl blur-xl" />
+                
+                {/* 桌面端专属：名片边框光晕 */}
+                <div className="absolute inset-0 bg-gradient-to-r from-white/10 via-transparent to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-xl" />
+                
+                <div className="relative z-10 p-6 md:p-8 rounded-xl border border-white/5 group-hover:border-white/20 transition-all duration-500 bg-white/[0.01] group-hover:bg-white/[0.03]">
+                    <h1 className={`text-4xl md:text-8xl font-bold tracking-tighter mb-4 md:mb-8 italic transition-all duration-500 ${
+                        'text-white group-hover:text-white/90 group-hover:tracking-wide'
+                    }`}>
+                        ABOUT.
+                    </h1>
+                    <p className={`text-base md:text-xl font-light max-w-lg transition-all duration-500 ${
+                        'text-white/30 group-hover:text-white/50 group-hover:translate-x-2'
+                    }`}>
+                        关于这个空间，关于我。
+                    </p>
+                    
+                    {/* 桌面端专属：装饰性元素 */}
+                    <div className={`absolute top-4 right-4 w-2 h-2 rounded-full transition-all duration-500 ${
+                        'bg-white/20 group-hover:bg-white/60 group-hover:scale-150'
+                    }`} />
+                    <div className={`absolute bottom-4 left-4 w-1 h-8 transition-all duration-500 ${
+                        'bg-white/10 group-hover:bg-white/30 group-hover:h-12'
+                    }`} />
+                </div>
             </motion.header>
 
             <motion.article 
-                className="prose prose-invert max-w-none prose-p:text-sm prose-p:md:text-base prose-headings:text-lg prose-headings:md:text-xl"
+                className="prose prose-invert max-w-none prose-p:text-sm prose-p:md:text-base prose-headings:text-lg prose-headings:md:text-xl relative group"
                 variants={itemVariants}
                 dangerouslySetInnerHTML={{ __html: content }}
+                // 桌面端专属：内容区域悬停效果
+                whileHover={!window.matchMedia('(max-width: 768px)').matches ? {
+                    y: -4,
+                    transition: { 
+                        type: "spring", 
+                        stiffness: 400, 
+                        damping: 25 
+                    }
+                } : {}}
             />
         </motion.div>
     );

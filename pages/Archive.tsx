@@ -126,14 +126,37 @@ const Archive: React.FC<ArchiveProps> = ({ posts, loading, onSelectPost }) => {
 
                       <div className="space-y-2 md:space-y-4">
                         {monthPosts.map((post, index) => (
-                          <article 
+                          <motion.article 
                             key={post.id}
-                            className="group/post cursor-pointer"
+                            className="group/post cursor-pointer relative overflow-hidden"
                             onClick={() => onSelectPost?.(post)}
+                            // 桌面端：书架翻阅效果
+                            whileHover={{
+                              x: 8,
+                              transition: { 
+                                type: "spring", 
+                                stiffness: 400, 
+                                damping: 25 
+                              }
+                            }}
+                            // 移动端：轻微缩放
+                            whileTap={{
+                              scale: 0.98,
+                              x: 4,
+                              transition: { duration: 0.1 }
+                            }}
                           >
-                            <div className="flex items-start gap-3 md:gap-6 p-3 md:p-4 rounded-xl hover:bg-white/[0.015] transition-all">
+                            {/* 桌面端专属：书脊光效 */}
+                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-white/20 via-white/10 to-white/5 opacity-0 group-hover/post:opacity-100 transition-opacity duration-300 rounded-r" />
+                            
+                            {/* 桌面端专属：悬停背景 */}
+                            <div className="absolute inset-0 bg-gradient-to-r from-white/[0.02] to-transparent opacity-0 group-hover/post:opacity-100 transition-opacity duration-300 rounded-xl" />
+                            
+                            <div className="flex items-start gap-3 md:gap-6 p-3 md:p-4 rounded-xl transition-all duration-300 relative z-10">
                               <div className="flex-shrink-0 w-8 md:w-12 text-right">
-                                <time className="text-[10px] md:text-xs text-white/30 font-mono">
+                                <time className={`text-[10px] md:text-xs font-mono transition-all duration-300 ${
+                                  'text-white/30 group-hover/post:text-white/50 group-hover/post:font-bold'
+                                }`}>
                                   {new Date(post.created_at).toLocaleDateString('zh-CN', {
                                     day: '2-digit'
                                   })}
@@ -141,21 +164,29 @@ const Archive: React.FC<ArchiveProps> = ({ posts, loading, onSelectPost }) => {
                               </div>
                               
                               <div className="flex-1 min-w-0">
-                                <h4 className="text-sm md:text-lg font-medium text-white/70 group-hover/post:text-white transition-colors line-clamp-1">
+                                <h4 className={`text-sm md:text-lg font-medium line-clamp-1 transition-all duration-300 ${
+                                  'text-white/70 group-hover/post:text-white group-hover/post:translate-x-2'
+                                }`}>
                                   {post.title}
                                 </h4>
                                 
                                 {/* 移动端隐藏摘要 */}
                                 {post.excerpt && (
-                                  <p className="hidden md:block text-white/30 text-sm leading-relaxed line-clamp-1 mt-1">
+                                  <p className={`hidden md:block text-sm leading-relaxed line-clamp-1 mt-1 transition-all duration-300 ${
+                                    'text-white/30 group-hover/post:text-white/50'
+                                  }`}>
                                     {post.excerpt}
                                   </p>
                                 )}
                               </div>
 
-                              <div className="flex-shrink-0 text-white/20">→</div>
+                              <div className={`flex-shrink-0 transition-all duration-300 ${
+                                'text-white/20 group-hover/post:text-white/60 group-hover/post:translate-x-1 group-hover/post:scale-110'
+                              }`}>
+                                →
+                              </div>
                             </div>
-                          </article>
+                          </motion.article>
                         ))}
                       </div>
                     </div>
