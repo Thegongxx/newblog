@@ -75,7 +75,7 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
         e.stopPropagation();
 
         if (locked) {
-            showToast('不许这么喜欢我');
+            showToast('不许这么喜欢我❤️');
             return;
         }
 
@@ -83,7 +83,7 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
         const currentUserCount = parseInt(localStorage.getItem(getStorageKey()) || '0');
         if (currentUserCount >= 5) {
             setLocked(true);
-            showToast('不许这么喜欢我');
+            showToast('不许这么喜欢我❤️');
             return;
         }
 
@@ -117,7 +117,7 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
             if (err.message === 'CONTENT_LIMIT_REACHED') {
                 setLocked(true);
                 localStorage.setItem(getStorageKey(), '5');
-                showToast('此内容已达点赞上限 🌿');
+                showToast('不许这么喜欢我❤️');
             } else {
                 console.error('Failed to toggle like:', err);
                 // 回滚UI状态
@@ -165,7 +165,7 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
 
             <button
                 onClick={handleLike}
-                disabled={locked} // 达到上限时禁用按钮
+                disabled={false} // 不禁用，以便显示提示
                 className={`group flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-500 ${
                     locked ? 'opacity-40 grayscale cursor-not-allowed' : 'active:scale-95 hover:scale-105'
                 } ${
