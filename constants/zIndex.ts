@@ -16,7 +16,7 @@ export const Z_INDEX = {
   
   // 通知层级
   TOAST: 70,
-  LIKE_TOAST: 9999, // 点赞提示最高优先级
+  LIKE_TOAST: 99999, // 点赞提示最高优先级，确保显示在notes卡片上方
   
   // AI助手层级
   AI_ASSISTANT: 35, // 在返回按钮之下

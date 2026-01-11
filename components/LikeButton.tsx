@@ -199,7 +199,11 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
     }
 
     return (
-        <div className="relative inline-block" style={{ isolation: 'isolate', overflow: 'visible' }}>
+        <div className="relative inline-block" style={{ 
+            isolation: 'isolate', 
+            overflow: 'visible',
+            zIndex: Z_INDEX.LIKE_TOAST // 确保整个容器在最高层级
+        }}>
             {/* Apple 风格 Toast - 显示在按钮附近，避开导航栏 */}
             {toast.visible && (
                 <div 
