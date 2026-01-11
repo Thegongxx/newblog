@@ -52,14 +52,10 @@ const AppInner = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Google风格页面切换：新页面滚动到顶部然后渐入，当前页面保持原样
+  // 页面切换：当前页面原地渐出，新页面从顶部渐入
   useEffect(() => {
-    // 只在路由真正变化时滚动，不影响当前页面的退出动画
-    const timer = setTimeout(() => {
-      window.scrollTo(0, 0);
-    }, 0); // 立即执行，但不阻塞当前页面动画
-    
-    return () => clearTimeout(timer);
+    // 在页面切换的瞬间滚动到顶部，用户看不到滚动过程
+    window.scrollTo(0, 0);
   }, [location.pathname]);
 
   const showToast = (msg: string, type = 'success') => {
@@ -287,7 +283,7 @@ const AppInner = () => {
         )}
       </motion.nav>
 
-      {/* Main Content - Google标准页面切换：当前页面原地退出，新页面从顶部渐入 */}
+      {/* Main Content - 当前页面原地渐出，新页面从顶部渐入 */}
       <motion.main 
         className={`${isMobile ? 'pt-16 pb-16 px-4' : 'pt-32 pb-48 px-6'} max-w-7xl mx-auto`}
         style={{
@@ -303,10 +299,10 @@ const AppInner = () => {
                 <motion.div
                   initial={{ opacity: 0, y: isMobile ? 8 : 12 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }} // 当前页面只淡出，不移动
+                  exit={{ opacity: 0 }} // 当前页面原地渐出
                   transition={{ 
-                    duration: isMobile ? 0.3 : 0.4, 
-                    ease: [0.4, 0.0, 0.2, 1] 
+                    duration: isMobile ? 0.5 : 0.6, 
+                    ease: [0.25, 0.46, 0.45, 0.94] 
                   }}
                 >
                   <Feed posts={posts} loading={loading} onSelectPost={(p) => navigate(`/post/${p.slug}`)} />
@@ -316,10 +312,10 @@ const AppInner = () => {
                 <motion.div
                   initial={{ opacity: 0, y: isMobile ? 8 : 12 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }} // 当前页面只淡出，不移动
+                  exit={{ opacity: 0 }} // 当前页面原地渐出
                   transition={{ 
-                    duration: isMobile ? 0.3 : 0.4, 
-                    ease: [0.4, 0.0, 0.2, 1] 
+                    duration: isMobile ? 0.5 : 0.6, 
+                    ease: [0.25, 0.46, 0.45, 0.94] 
                   }}
                 >
                   <PostDetail posts={posts} loading={loading} />
@@ -329,10 +325,10 @@ const AppInner = () => {
                 <motion.div
                   initial={{ opacity: 0, y: isMobile ? 8 : 12 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }} // 当前页面只淡出，不移动
+                  exit={{ opacity: 0 }} // 当前页面原地渐出
                   transition={{ 
-                    duration: isMobile ? 0.3 : 0.4, 
-                    ease: [0.4, 0.0, 0.2, 1] 
+                    duration: isMobile ? 0.5 : 0.6, 
+                    ease: [0.25, 0.46, 0.45, 0.94] 
                   }}
                 >
                   <Notes notes={notes} loading={loading} />
@@ -342,10 +338,10 @@ const AppInner = () => {
                 <motion.div
                   initial={{ opacity: 0, y: isMobile ? 8 : 12 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }} // 当前页面只淡出，不移动
+                  exit={{ opacity: 0 }} // 当前页面原地渐出
                   transition={{ 
-                    duration: isMobile ? 0.3 : 0.4, 
-                    ease: [0.4, 0.0, 0.2, 1] 
+                    duration: isMobile ? 0.5 : 0.6, 
+                    ease: [0.25, 0.46, 0.45, 0.94] 
                   }}
                 >
                   <NoteDetail />
@@ -355,10 +351,10 @@ const AppInner = () => {
                 <motion.div
                   initial={{ opacity: 0, y: isMobile ? 8 : 12 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }} // 当前页面只淡出，不移动
+                  exit={{ opacity: 0 }} // 当前页面原地渐出
                   transition={{ 
-                    duration: isMobile ? 0.3 : 0.4, 
-                    ease: [0.4, 0.0, 0.2, 1] 
+                    duration: isMobile ? 0.5 : 0.6, 
+                    ease: [0.25, 0.46, 0.45, 0.94] 
                   }}
                 >
                   <Archive posts={posts} loading={loading} onSelectPost={(p) => navigate(`/post/${p.slug}`)} />
@@ -368,10 +364,10 @@ const AppInner = () => {
                 <motion.div
                   initial={{ opacity: 0, y: isMobile ? 8 : 12 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }} // 当前页面只淡出，不移动
+                  exit={{ opacity: 0 }} // 当前页面原地渐出
                   transition={{ 
-                    duration: isMobile ? 0.3 : 0.4, 
-                    ease: [0.4, 0.0, 0.2, 1] 
+                    duration: isMobile ? 0.5 : 0.6, 
+                    ease: [0.25, 0.46, 0.45, 0.94] 
                   }}
                 >
                   <About />
