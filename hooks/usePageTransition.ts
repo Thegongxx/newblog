@@ -4,11 +4,14 @@ import {
   TransitionType, 
   TransitionConfig, 
   pageTransitions, 
-  getSmartTransition 
+  getSmartTransition,
+  getTransitionConfig
 } from '../utils/pageTransitions';
+import { useIsMobile } from './useResponsive';
 
 export const usePageTransition = () => {
   const location = useLocation();
+  const isMobile = useIsMobile();
   const [navigationMethod, setNavigationMethod] = useState<TransitionType>('fade');
   const [currentScrollPosition, setCurrentScrollPosition] = useState(0);
   const previousLocation = useRef(location.pathname);
@@ -35,17 +38,25 @@ export const usePageTransition = () => {
       const isBack = navigationHistory.current.includes(currentPath) && 
                     navigationHistory.current.indexOf(currentPath) < navigationHistory.current.indexOf(previousPath);
       
-      const method = getSmartTransition(previousPath, currentPath, isBack);
+      const method = getSmartTransition(previousPath, currentPath, isBack, isMobile);
       setNavigationMethod(method);
     }
     
     // 重置手动导航标志
     isManualNavigation.current = false;
     previousLocation.current = currentPath;
-  }, [location.pathname]);
+  }, [location.pathname, isMobile]);
 
   const getPageTransition = (): TransitionConfig => {
-    return pageTransitions[navigationMethod];
+    const config = pageTransitions[navigationMethod];
+    const transition = getTransitionConfig(navigationMethod, isMobile);
+    
+    return {
+      initial: config.initial,
+      animate: config.animate,
+      exit: config.exit,
+      transition: transition
+    };
   };
 
   const setCustomNavigationMethod = (method: TransitionType) => {
@@ -57,6 +68,7 @@ export const usePageTransition = () => {
     navigationMethod,
     currentScrollPosition,
     getPageTransition,
-    setNavigationMethod: setCustomNavigationMethod
+    setNavigationMethod: setCustomNavigationMethod,
+    isMobile
   };
 };

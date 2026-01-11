@@ -14,48 +14,47 @@ const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
     const navigate = useNavigate();
     const isMobile = useIsMobile();
 
-    // 简化动画配置，模仿页面切换效果
-    const pageVariants = {
-        initial: { x: '100%', opacity: 0 },
+    // 移除页面级动画，让PageTransition处理
+    const itemVariants = {
+        initial: { y: isMobile ? 10 : 20, opacity: 0 },
         animate: { 
-            x: 0,
+            y: 0,
             opacity: 1,
             transition: { 
                 type: "tween",
                 ease: [0.25, 0.1, 0.25, 1],
-                duration: 0.4,
-                staggerChildren: 0.05
+                duration: isMobile ? 0.4 : 0.6
             }
-        },
-        exit: { x: '-100%', opacity: 0 }
+        }
     };
 
-    const itemVariants = {
-        initial: { x: 20, opacity: 0 },
-        animate: { 
-            x: 0,
-            opacity: 1,
-            transition: { 
-                type: "tween",
-                ease: [0.25, 0.1, 0.25, 1],
-                duration: 0.4
+    const containerVariants = {
+        animate: {
+            transition: {
+                staggerChildren: isMobile ? 0.05 : 0.1,
+                delayChildren: isMobile ? 0.1 : 0.2
             }
         }
     };
 
     return (
-        <motion.div 
-            className="py-8 md:py-12"
-            variants={pageVariants}
-            initial="initial"
-            animate="animate"
-        >
-            <motion.header className="mb-12 md:mb-24" variants={itemVariants}>
+        <div className="py-8 md:py-12">
+            <motion.header 
+                className="mb-12 md:mb-24" 
+                variants={itemVariants}
+                initial="initial"
+                animate="animate"
+            >
                 <h2 className="text-4xl md:text-8xl font-bold tracking-tighter mb-4 md:mb-8 italic">NOTES.</h2>
                 <p className="text-base md:text-xl text-white/30 font-light max-w-lg">那些转瞬即逝的思想，在留白间沉淀。</p>
             </motion.header>
 
-            <motion.div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8" variants={itemVariants}>
+            <motion.div 
+                className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8" 
+                variants={containerVariants}
+                initial="initial"
+                animate="animate"
+            >
                 {loading ? (
                     // 加载状态下的骨架屏 - 移动端简化
                     Array.from({ length: 2 }).map((_, i) => (
@@ -128,9 +127,10 @@ const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
                                         详情 →
                                     </button>
                                     
-                                    {/* 点赞按钮 - 带计数 */}
+                                    {/* 点赞按钮 - 带计数，添加稳定的key */}
                                     <div onClick={(e) => e.stopPropagation()}>
                                         <LikeButton 
+                                            key={`note-${note.id}-like`}
                                             targetType="note" 
                                             targetId={note.id} 
                                             initialCount={note.likes_count || 0}
@@ -143,7 +143,7 @@ const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
                     ))
                 )}
             </motion.div>
-        </motion.div>
+        </div>
     );
 };
 

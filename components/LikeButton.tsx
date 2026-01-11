@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { engagementApi, supabase } from '../services/supabaseService';
 import { getBrowserFingerprint, checkIfLikedLocal, setLikedLocal } from '../utils/engagement';
 import { useIsMobile } from '../hooks/useResponsive';
@@ -17,31 +17,47 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
     const [animating, setAnimating] = useState(false);
     const [locked, setLocked] = useState(false);
     const [toast, setToast] = useState<{ message: string; visible: boolean }>({ message: '', visible: false });
+    const [isInitialized, setIsInitialized] = useState(false);
     
     const isMobile = useIsMobile();
+    const mountedRef = useRef(true);
 
     // 持久化存储 Key - 针对单个内容
     const getStorageKey = () => `aura_like_${targetType}_${targetId}_${new Date().toISOString().split('T')[0]}`;
 
     useEffect(() => {
+        mountedRef.current = true;
+        return () => {
+            mountedRef.current = false;
+        };
+    }, []);
+
+    useEffect(() => {
         const fetchInitial = async () => {
             try {
-                // 1. 获取总点赞数
-                const total = await engagementApi.getLikeCount(targetType, targetId);
-                setCount(total);
-                
-                // 2. 检查用户是否点过赞
+                // 先设置本地状态，避免闪烁
                 const isLiked = checkIfLikedLocal(targetType, targetId);
-                setLiked(isLiked);
-
-                // 3. 检查本地存储的用户点赞次数
                 const localUserCount = parseInt(localStorage.getItem(getStorageKey()) || '0');
                 
-                if (localUserCount >= 5) {
-                    setLocked(true);
+                if (mountedRef.current) {
+                    setLiked(isLiked);
+                    setCount(initialCount);
+                    
+                    if (localUserCount >= 5) {
+                        setLocked(true);
+                    }
+                    
+                    setIsInitialized(true);
                 }
 
-                // 4. 后端验证用户对此内容的点赞次数
+                // 然后异步获取最新数据
+                const total = await engagementApi.getLikeCount(targetType, targetId);
+                
+                if (mountedRef.current) {
+                    setCount(total);
+                }
+
+                // 后端验证用户对此内容的点赞次数
                 const fingerprint = getBrowserFingerprint();
                 const today = new Date().toISOString().split('T')[0];
                 const { data } = await supabase
@@ -55,20 +71,29 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
 
                 const dbUserCount = data?.count || 0;
                 
-                if (dbUserCount >= 5) {
+                if (mountedRef.current && dbUserCount >= 5) {
                     setLocked(true);
                     localStorage.setItem(getStorageKey(), dbUserCount.toString());
                 }
             } catch (err) {
                 console.error('Failed to fetch initial like data:', err);
+                if (mountedRef.current) {
+                    setIsInitialized(true);
+                }
             }
         };
+        
         fetchInitial();
-    }, [targetType, targetId]);
+    }, [targetType, targetId, initialCount]);
 
     const showToast = (message: string) => {
+        if (!mountedRef.current) return;
         setToast({ message, visible: true });
-        setTimeout(() => setToast(prev => ({ ...prev, visible: false })), isMobile ? 1500 : 2000);
+        setTimeout(() => {
+            if (mountedRef.current) {
+                setToast(prev => ({ ...prev, visible: false }));
+            }
+        }, isMobile ? 1500 : 2000);
     };
 
     const handleLike = async (e: React.MouseEvent) => {
@@ -88,32 +113,47 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
         }
 
         // UI 立即反馈
-        setCount(prev => prev + 1);
-        const nextUserCount = currentUserCount + 1;
-        localStorage.setItem(getStorageKey(), nextUserCount.toString());
+        if (mountedRef.current) {
+            setCount(prev => prev + 1);
+            const nextUserCount = currentUserCount + 1;
+            localStorage.setItem(getStorageKey(), nextUserCount.toString());
 
-        if (nextUserCount >= 5) {
-            setLocked(true);
+            if (nextUserCount >= 5) {
+                setLocked(true);
+            }
+
+            // 触发动画效果
+            setAnimating(true);
+            setTimeout(() => {
+                if (mountedRef.current) {
+                    setAnimating(false);
+                }
+            }, isMobile ? 400 : 600); // 移动端动画更快
         }
 
-        // 触发动画效果
-        setAnimating(true);
-        setTimeout(() => setAnimating(false), 600);
-        if (window.navigator && window.navigator.vibrate) window.navigator.vibrate(10);
+        // 移动端触觉反馈
+        if (isMobile && window.navigator && window.navigator.vibrate) {
+            window.navigator.vibrate([10, 50, 10]); // 更丰富的震动模式
+        }
 
         // 后端同步
         try {
             const fingerprint = getBrowserFingerprint();
             const result = await engagementApi.toggleLike(targetType, targetId, fingerprint);
-            setLiked(true);
-            setLikedLocal(targetType, targetId, true);
+            
+            if (mountedRef.current) {
+                setLiked(true);
+                setLikedLocal(targetType, targetId, true);
 
-            // 后端确认点赞次数
-            if (result.count >= 5) {
-                setLocked(true);
-                localStorage.setItem(getStorageKey(), '5');
+                // 后端确认点赞次数
+                if (result.count >= 5) {
+                    setLocked(true);
+                    localStorage.setItem(getStorageKey(), '5');
+                }
             }
         } catch (err: any) {
+            if (!mountedRef.current) return;
+            
             if (err.message === 'CONTENT_LIMIT_REACHED') {
                 setLocked(true);
                 localStorage.setItem(getStorageKey(), '5');
@@ -127,6 +167,36 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
             }
         }
     };
+
+    // 在初始化完成前显示稳定状态，避免闪烁
+    if (!isInitialized) {
+        return (
+            <div className="relative inline-block" style={{ isolation: 'isolate', overflow: 'visible' }}>
+                <button
+                    className={`group flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 bg-white/5 text-white/40 border border-white/5 ${className}`}
+                    disabled
+                >
+                    <div className="relative">
+                        <svg
+                            className="w-5 h-5 fill-none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="1.5"
+                                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                            />
+                        </svg>
+                    </div>
+                    <span className="text-sm font-bold tracking-tight tabular-nums">
+                        {initialCount}
+                    </span>
+                </button>
+            </div>
+        );
+    }
 
     return (
         <div className="relative inline-block" style={{ isolation: 'isolate', overflow: 'visible' }}>
@@ -166,17 +236,29 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
             <button
                 onClick={handleLike}
                 disabled={false} // 不禁用，以便显示提示
-                className={`group flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-500 ${
-                    locked ? 'opacity-40 grayscale cursor-not-allowed' : 'active:scale-95 hover:scale-105'
+                className={`group flex items-center gap-2 rounded-full transition-all duration-300 ${
+                    isMobile ? 'px-3 py-1.5 text-sm' : 'px-4 py-2'
+                } ${
+                    locked ? 'opacity-40 grayscale cursor-not-allowed' : 
+                    isMobile ? 'active:scale-90 active:bg-white/20' : 'active:scale-95 hover:scale-105'
                 } ${
                     liked
                         ? 'bg-rose-500/10 text-rose-500 border-rose-500/20'
-                        : 'bg-white/5 text-white/40 hover:text-white/60 hover:bg-white/10 border-white/5'
+                        : `bg-white/5 text-white/40 border-white/5 ${
+                            isMobile ? 'active:text-white/80 active:bg-white/15' : 'hover:text-white/60 hover:bg-white/10'
+                        }`
                 } border ${className}`}
+                style={{
+                    // 移动端优化触摸区域
+                    minHeight: isMobile ? '44px' : 'auto',
+                    minWidth: isMobile ? '44px' : 'auto',
+                    // 防止双击缩放
+                    touchAction: 'manipulation'
+                }}
             >
                 <div className="relative">
                     <svg
-                        className={`w-5 h-5 transition-all duration-500 ${
+                        className={`w-5 h-5 transition-all duration-300 ${
                             liked ? 'fill-current scale-110' : 'fill-none scale-100'
                         }`}
                         stroke="currentColor"

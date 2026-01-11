@@ -7,12 +7,14 @@ import Intro from './components/Intro';
 import Assistant from './components/Assistant';
 import ErrorBoundary from './components/ErrorBoundary';
 import PageTransition from './components/PageTransition';
+import MobilePageTransition from './components/MobilePageTransition';
 import PageTransitionMask from './components/PageTransitionMask';
 import { CONTACT_INFO } from './constants';
 import { Z_INDEX } from './constants/zIndex';
 import { usePostsCache, useNotesCache } from './services/cacheService';
 import { useIsMobile } from './hooks/useResponsive';
 import { usePageTransition } from './hooks/usePageTransition';
+import { useMobileOptimization } from './hooks/useMobileOptimization';
 
 // 直接导入所有页面组件 - 避免懒加载导致的首次切换延迟
 import Feed from './pages/Feed';
@@ -33,6 +35,9 @@ const AppInner = () => {
   const { setNavigationMethod } = usePageTransition();
   
   const isMobile = useIsMobile();
+  
+  // 移动端优化
+  useMobileOptimization();
 
   const { data: posts = [], isLoading: postsLoading, error: postsError } = usePostsCache();
   const { data: notes = [], isLoading: notesLoading, error: notesError } = useNotesCache();
@@ -130,21 +135,35 @@ const AppInner = () => {
       return;
     }
     
-    // 设置导航方式
+    // 设置导航方式 - 移动端优化
     const currentPath = location.pathname;
     const isToDetail = path.includes('/post/') || path.includes('/note/');
     const isFromDetail = currentPath.includes('/post/') || currentPath.includes('/note/');
     const isToAbout = path === '/about';
     const isFromAbout = currentPath === '/about';
     
-    if (isToDetail && !isFromDetail) {
-      setNavigationMethod('slideDown');
-    } else if (!isToDetail && isFromDetail) {
-      setNavigationMethod('slideUp');
-    } else if (isToAbout || isFromAbout) {
-      setNavigationMethod('zoomIn');
+    if (isMobile) {
+      // 移动端使用原生App风格的左右滑动
+      if (isToDetail && !isFromDetail) {
+        setNavigationMethod('slideRight');
+      } else if (!isToDetail && isFromDetail) {
+        setNavigationMethod('slideLeft');
+      } else if (isToAbout || isFromAbout) {
+        setNavigationMethod('zoomIn');
+      } else {
+        setNavigationMethod('fade');
+      }
     } else {
-      setNavigationMethod('fade');
+      // 桌面端保持原有逻辑
+      if (isToDetail && !isFromDetail) {
+        setNavigationMethod('slideDown');
+      } else if (!isToDetail && isFromDetail) {
+        setNavigationMethod('slideUp');
+      } else if (isToAbout || isFromAbout) {
+        setNavigationMethod('zoomIn');
+      } else {
+        setNavigationMethod('fade');
+      }
     }
     
     navigate(path);
@@ -328,40 +347,82 @@ const AppInner = () => {
           >
             <Routes location={location} key={location.pathname}>
               <Route path="/" element={
-                <PageTransition>
-                  <Feed posts={posts} loading={loading} onSelectPost={(p) => {
-                    setNavigationMethod('slideDown');
-                    navigate(`/post/${p.slug}`);
-                  }} />
-                </PageTransition>
+                isMobile ? (
+                  <MobilePageTransition>
+                    <Feed posts={posts} loading={loading} onSelectPost={(p) => {
+                      setNavigationMethod('slideRight');
+                      navigate(`/post/${p.slug}`);
+                    }} />
+                  </MobilePageTransition>
+                ) : (
+                  <PageTransition>
+                    <Feed posts={posts} loading={loading} onSelectPost={(p) => {
+                      setNavigationMethod('slideDown');
+                      navigate(`/post/${p.slug}`);
+                    }} />
+                  </PageTransition>
+                )
               } />
               <Route path="/post/:slug" element={
-                <PageTransition>
-                  <PostDetail posts={posts} loading={loading} />
-                </PageTransition>
+                isMobile ? (
+                  <MobilePageTransition>
+                    <PostDetail posts={posts} loading={loading} />
+                  </MobilePageTransition>
+                ) : (
+                  <PageTransition>
+                    <PostDetail posts={posts} loading={loading} />
+                  </PageTransition>
+                )
               } />
               <Route path="/notes" element={
-                <PageTransition>
-                  <Notes notes={notes} loading={loading} />
-                </PageTransition>
+                isMobile ? (
+                  <MobilePageTransition>
+                    <Notes notes={notes} loading={loading} />
+                  </MobilePageTransition>
+                ) : (
+                  <PageTransition>
+                    <Notes notes={notes} loading={loading} />
+                  </PageTransition>
+                )
               } />
               <Route path="/note/:id" element={
-                <PageTransition>
-                  <NoteDetail />
-                </PageTransition>
+                isMobile ? (
+                  <MobilePageTransition>
+                    <NoteDetail />
+                  </MobilePageTransition>
+                ) : (
+                  <PageTransition>
+                    <NoteDetail />
+                  </PageTransition>
+                )
               } />
               <Route path="/archive" element={
-                <PageTransition>
-                  <Archive posts={posts} loading={loading} onSelectPost={(p) => {
-                    setNavigationMethod('slideDown');
-                    navigate(`/post/${p.slug}`);
-                  }} />
-                </PageTransition>
+                isMobile ? (
+                  <MobilePageTransition>
+                    <Archive posts={posts} loading={loading} onSelectPost={(p) => {
+                      setNavigationMethod('slideRight');
+                      navigate(`/post/${p.slug}`);
+                    }} />
+                  </MobilePageTransition>
+                ) : (
+                  <PageTransition>
+                    <Archive posts={posts} loading={loading} onSelectPost={(p) => {
+                      setNavigationMethod('slideDown');
+                      navigate(`/post/${p.slug}`);
+                    }} />
+                  </PageTransition>
+                )
               } />
               <Route path="/about" element={
-                <PageTransition>
-                  <About />
-                </PageTransition>
+                isMobile ? (
+                  <MobilePageTransition>
+                    <About />
+                  </MobilePageTransition>
+                ) : (
+                  <PageTransition>
+                    <About />
+                  </PageTransition>
+                )
               } />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
