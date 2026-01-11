@@ -305,12 +305,12 @@ const AppInner = () => {
             <Routes location={location} key={location.pathname}>
               <Route path="/" element={
                 <motion.div
-                  initial={{ opacity: 0, y: isMobile ? 10 : 20 }}
+                  initial={{ opacity: 0, y: isMobile ? 15 : 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: isMobile ? -10 : -20 }}
+                  exit={{ opacity: 0, y: isMobile ? -15 : -30 }}
                   transition={{ 
-                    duration: isMobile ? 0.4 : 0.6, 
-                    ease: [0.4, 0.0, 0.2, 1] 
+                    duration: isMobile ? 0.8 : 1.2, 
+                    ease: [0.25, 0.46, 0.45, 0.94] 
                   }}
                 >
                   <Feed posts={posts} loading={loading} onSelectPost={(p) => navigate(`/post/${p.slug}`)} />
@@ -318,12 +318,12 @@ const AppInner = () => {
               } />
               <Route path="/post/:slug" element={
                 <motion.div
-                  initial={{ opacity: 0, y: isMobile ? 10 : 20 }}
+                  initial={{ opacity: 0, y: isMobile ? 15 : 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: isMobile ? -10 : -20 }}
+                  exit={{ opacity: 0, y: isMobile ? -15 : -30 }}
                   transition={{ 
-                    duration: isMobile ? 0.4 : 0.6, 
-                    ease: [0.4, 0.0, 0.2, 1] 
+                    duration: isMobile ? 0.8 : 1.2, 
+                    ease: [0.25, 0.46, 0.45, 0.94] 
                   }}
                 >
                   <PostDetail posts={posts} loading={loading} />
@@ -331,26 +331,38 @@ const AppInner = () => {
               } />
               <Route path="/notes" element={
                 <motion.div
-                  initial={{ opacity: 0, y: isMobile ? 10 : 20 }}
+                  initial={{ opacity: 0, y: isMobile ? 15 : 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: isMobile ? -10 : -20 }}
+                  exit={{ opacity: 0, y: isMobile ? -15 : -30 }}
                   transition={{ 
-                    duration: isMobile ? 0.4 : 0.6, 
-                    ease: [0.4, 0.0, 0.2, 1] 
+                    duration: isMobile ? 0.8 : 1.2, 
+                    ease: [0.25, 0.46, 0.45, 0.94] 
                   }}
                 >
                   <Notes notes={notes} loading={loading} />
                 </motion.div>
               } />
-              <Route path="/note/:id" element={<NoteDetail />} />
+              <Route path="/note/:id" element={
+                <motion.div
+                  initial={{ opacity: 0, y: isMobile ? 15 : 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: isMobile ? -15 : -30 }}
+                  transition={{ 
+                    duration: isMobile ? 0.8 : 1.2, 
+                    ease: [0.25, 0.46, 0.45, 0.94] 
+                  }}
+                >
+                  <NoteDetail />
+                </motion.div>
+              } />
               <Route path="/archive" element={
                 <motion.div
-                  initial={{ opacity: 0, y: isMobile ? 10 : 20 }}
+                  initial={{ opacity: 0, y: isMobile ? 15 : 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: isMobile ? -10 : -20 }}
+                  exit={{ opacity: 0, y: isMobile ? -15 : -30 }}
                   transition={{ 
-                    duration: isMobile ? 0.4 : 0.6, 
-                    ease: [0.4, 0.0, 0.2, 1] 
+                    duration: isMobile ? 0.8 : 1.2, 
+                    ease: [0.25, 0.46, 0.45, 0.94] 
                   }}
                 >
                   <Archive posts={posts} loading={loading} onSelectPost={(p) => navigate(`/post/${p.slug}`)} />
@@ -358,12 +370,12 @@ const AppInner = () => {
               } />
               <Route path="/about" element={
                 <motion.div
-                  initial={{ opacity: 0, y: isMobile ? 10 : 20 }}
+                  initial={{ opacity: 0, y: isMobile ? 15 : 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: isMobile ? -10 : -20 }}
+                  exit={{ opacity: 0, y: isMobile ? -15 : -30 }}
                   transition={{ 
-                    duration: isMobile ? 0.4 : 0.6, 
-                    ease: [0.4, 0.0, 0.2, 1] 
+                    duration: isMobile ? 0.8 : 1.2, 
+                    ease: [0.25, 0.46, 0.45, 0.94] 
                   }}
                 >
                   <About />

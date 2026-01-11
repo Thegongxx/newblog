@@ -46,27 +46,27 @@ const NoteDetail: React.FC = () => {
     }
   }, [id, navigate, note, notes, isLoading, cacheError]);
 
-  // Google Material Design 风格的缓慢丝滑动画
+  // Google Material Design 风格的缓慢丝滑动画 - 与页面切换同步
   const googleFadeIn = {
     opacity: isLoaded ? 1 : 0,
-    transform: isLoaded ? 'translateY(0)' : 'translateY(12px)',
-    filter: isLoaded ? 'blur(0px)' : 'blur(1px)',
-    transition: 'opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), filter 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+    transform: isLoaded ? 'translateY(0)' : 'translateY(20px)',
+    filter: isLoaded ? 'blur(0px)' : 'blur(2px)',
+    transition: 'opacity 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), filter 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
   };
 
   const googleStaggeredFadeIn = (delay: number) => ({
     opacity: isLoaded ? 1 : 0,
-    transform: isLoaded ? 'translateY(0) scale(1)' : 'translateY(16px) scale(0.98)',
-    filter: isLoaded ? 'blur(0px)' : 'blur(2px)',
-    transition: `opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}ms, transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}ms, filter 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}ms`
+    transform: isLoaded ? 'translateY(0) scale(1)' : 'translateY(25px) scale(0.97)',
+    filter: isLoaded ? 'blur(0px)' : 'blur(3px)',
+    transition: `opacity 1.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}ms, transform 1.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}ms, filter 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}ms`
   });
 
-  // 特殊的内容渐入效果
+  // 特殊的内容渐入效果 - 最慢最丝滑
   const contentFadeIn = (delay: number) => ({
     opacity: isLoaded ? 1 : 0,
-    transform: isLoaded ? 'translateY(0)' : 'translateY(20px)',
-    filter: isLoaded ? 'blur(0px)' : 'blur(3px)',
-    transition: `opacity 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}ms, transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}ms, filter 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}ms`
+    transform: isLoaded ? 'translateY(0)' : 'translateY(30px)',
+    filter: isLoaded ? 'blur(0px)' : 'blur(4px)',
+    transition: `opacity 1.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}ms, transform 1.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}ms, filter 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}ms`
   });
 
   // 加载状态：正在加载缓存数据，或者缓存加载完成但还没找到note且没有错误
@@ -124,20 +124,20 @@ const NoteDetail: React.FC = () => {
         {/* 笔记内容 - 分层缓慢渐入 */}
         <article 
           className="glass p-6 md:p-12 rounded-2xl md:rounded-[3rem] border border-white/5 mb-8 md:mb-12 relative"
-          style={googleStaggeredFadeIn(150)}
+          style={googleStaggeredFadeIn(200)}
         >
           {/* 引号图标 - 延迟渐入 */}
           <div 
-            className="mb-4 md:mb-8 scale-75 md:scale-100 origin-top-left transform transition-all duration-700"
-            style={googleStaggeredFadeIn(200)}
+            className="mb-4 md:mb-8 scale-75 md:scale-100 origin-top-left transform transition-all duration-1000"
+            style={googleStaggeredFadeIn(400)}
           >
             {ICONS.QUOTES}
           </div>
           
           {/* 笔记标题 - 更长延迟 */}
           <h1 
-            className="text-2xl md:text-4xl font-bold tracking-tight text-white/95 mb-4 md:mb-8 transform transition-all duration-800"
-            style={googleStaggeredFadeIn(300)}
+            className="text-2xl md:text-4xl font-bold tracking-tight text-white/95 mb-4 md:mb-8 transform transition-all duration-1200"
+            style={googleStaggeredFadeIn(600)}
           >
             {note.title}
           </h1>
@@ -145,7 +145,7 @@ const NoteDetail: React.FC = () => {
           {/* 笔记内容 - 最慢渐入 */}
           <div 
             className="prose prose-invert prose-sm md:prose-lg max-w-none"
-            style={contentFadeIn(450)}
+            style={contentFadeIn(800)}
           >
             <div className="text-sm md:text-lg font-light leading-relaxed text-white/80 whitespace-pre-wrap">
               {note.content}
@@ -155,7 +155,7 @@ const NoteDetail: React.FC = () => {
           {/* 底部信息 - 最后渐入 */}
           <div 
             className="flex items-center justify-between border-t border-white/5 pt-4 md:pt-8 mt-8 md:mt-12"
-            style={googleStaggeredFadeIn(600)}
+            style={googleStaggeredFadeIn(1000)}
           >
             <div className="flex flex-col gap-1 md:gap-2">
               <time className="text-[10px] md:text-sm font-bold tracking-widest text-white/40 uppercase">
@@ -166,8 +166,8 @@ const NoteDetail: React.FC = () => {
                   {note.tags.map((tag, idx) => (
                     <span 
                       key={idx} 
-                      className="text-xs px-3 py-1 bg-white/10 rounded-full text-white/50 transform transition-all duration-300 hover:scale-110 hover:bg-white/20"
-                      style={googleStaggeredFadeIn(700 + idx * 50)}
+                      className="text-xs px-3 py-1 bg-white/10 rounded-full text-white/50 transform transition-all duration-500 hover:scale-110 hover:bg-white/20"
+                      style={googleStaggeredFadeIn(1200 + idx * 100)}
                     >
                       {tag}
                     </span>
@@ -176,19 +176,19 @@ const NoteDetail: React.FC = () => {
               )}
             </div>
             
-            <div style={googleStaggeredFadeIn(650)}>
+            <div style={googleStaggeredFadeIn(1100)}>
               <LikeButton 
                 targetType="note" 
                 targetId={note.id} 
                 initialCount={(note as any).likes_count || 0}
-                className="scale-90 md:scale-110 transform transition-all duration-300 hover:scale-125"
+                className="scale-90 md:scale-110 transform transition-all duration-500 hover:scale-125"
               />
             </div>
           </div>
         </article>
 
         {/* 评论区域 - 最后的缓慢渐入 */}
-        <div style={contentFadeIn(800)}>
+        <div style={contentFadeIn(1400)}>
           <CommentSection targetId={note.id} targetType="note" />
         </div>
       </div>
