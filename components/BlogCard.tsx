@@ -50,7 +50,7 @@ const BlogCard: React.FC<BlogCardProps> = memo(({ post, onClick, featured }) => 
   // 桌面端完整版本
   return (
     <div
-      className={`group relative ${featured ? 'h-[380px]' : 'h-[320px]'} bg-white/[0.03] backdrop-blur-3xl rounded-2xl transition-all duration-300 hover:bg-white/[0.05] cursor-pointer overflow-hidden`}
+      className={`group relative ${featured ? 'h-[380px]' : 'h-[320px]'} bg-white/[0.03] backdrop-blur-3xl rounded-2xl transition-all duration-300 hover:bg-white/[0.05] cursor-pointer`}
       onClick={onClick}
       style={{ 
         willChange: 'transform',
@@ -59,7 +59,7 @@ const BlogCard: React.FC<BlogCardProps> = memo(({ post, onClick, featured }) => 
       }}
     >
       {/* 全幅封面图容器 - 优化图片加载 */}
-      <div className="absolute inset-0 overflow-hidden rounded-2xl">
+      <div className="absolute inset-0 rounded-2xl overflow-hidden">
         <img
           src={post.image}
           alt={post.title}

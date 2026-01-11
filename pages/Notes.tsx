@@ -10,30 +10,42 @@ interface NotesProps {
     loading?: boolean;
 }
 
-// 统一动画配置
-const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-        opacity: 1,
-        transition: { duration: 0.5, ease: "easeOut" as const, staggerChildren: 0.08 }
-    }
-};
-
-const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" as const } }
-};
-
 const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
     const navigate = useNavigate();
     const isMobile = useIsMobile();
 
+    // 简化动画配置，模仿页面切换效果
+    const pageVariants = {
+        initial: { opacity: 0, y: isMobile ? 5 : 10 },
+        animate: { 
+            opacity: 1, 
+            y: 0,
+            transition: { 
+                duration: isMobile ? 0.4 : 0.6, 
+                ease: [0.4, 0.0, 0.2, 1],
+                staggerChildren: 0.05
+            }
+        }
+    };
+
+    const itemVariants = {
+        initial: { opacity: 0, y: isMobile ? 3 : 5 },
+        animate: { 
+            opacity: 1, 
+            y: 0,
+            transition: { 
+                duration: isMobile ? 0.3 : 0.4, 
+                ease: [0.4, 0.0, 0.2, 1] 
+            }
+        }
+    };
+
     return (
         <motion.div 
             className="py-8 md:py-12"
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
+            variants={pageVariants}
+            initial="initial"
+            animate="animate"
         >
             <motion.header className="mb-12 md:mb-24" variants={itemVariants}>
                 <h2 className="text-4xl md:text-8xl font-bold tracking-tighter mb-4 md:mb-8 italic">NOTES.</h2>
@@ -44,7 +56,11 @@ const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
                 {loading ? (
                     // 加载状态下的骨架屏 - 移动端简化
                     Array.from({ length: 2 }).map((_, i) => (
-                        <div key={i} className="glass p-6 md:p-10 rounded-2xl md:rounded-[2.5rem] border border-white/5 animate-pulse">
+                        <motion.div 
+                            key={i} 
+                            className="glass p-6 md:p-10 rounded-2xl md:rounded-[2.5rem] border border-white/5 animate-pulse"
+                            variants={itemVariants}
+                        >
                             <div className="w-6 h-6 bg-white/5 rounded mb-6" />
                             <div className="space-y-3 mb-6">
                                 <div className="h-4 w-full bg-white/5 rounded" />
@@ -53,19 +69,27 @@ const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
                             <div className="flex justify-between border-t border-white/5 pt-4">
                                 <div className="h-3 w-20 bg-white/5 rounded" />
                             </div>
-                        </div>
+                        </motion.div>
                     ))
                 ) : notes.length === 0 ? (
-                    <div className="col-span-full py-12 md:py-20 text-center text-white/20 font-light border border-dashed border-white/5 rounded-2xl md:rounded-[3rem]">
+                    <motion.div 
+                        className="col-span-full py-12 md:py-20 text-center text-white/20 font-light border border-dashed border-white/5 rounded-2xl md:rounded-[3rem]"
+                        variants={itemVariants}
+                    >
                         暂无笔记
-                    </div>
+                    </motion.div>
                 ) : (
                     notes.map((note, i) => (
-                        <div
+                        <motion.div
                             key={note.id || i}
                             className={`glass p-6 md:p-10 rounded-2xl md:rounded-[2.5rem] relative group border border-white/5 transition-all duration-300 ${
                                 !isMobile ? 'hover:border-white/20 hover:-translate-y-1' : 'active:bg-white/[0.02]'
                             }`}
+                            variants={itemVariants}
+                            style={{
+                                willChange: 'transform',
+                                backfaceVisibility: 'hidden'
+                            }}
                         >
                             <div className="absolute top-4 left-4 md:top-8 md:left-8 scale-75 md:scale-100 origin-top-left">{ICONS.QUOTES}</div>
                             
@@ -112,7 +136,7 @@ const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </motion.div>
                     ))
                 )}
             </motion.div>

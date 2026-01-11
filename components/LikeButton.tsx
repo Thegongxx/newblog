@@ -122,7 +122,7 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
         <div className="relative inline-block">
             {/* Apple 风格 Toast */}
             {toast.visible && (
-                <div className="absolute -top-16 left-1/2 -translate-x-1/2 z-50 animate-in fade-in zoom-in slide-in-from-bottom-2 duration-300">
+                <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[9999] animate-in fade-in zoom-in slide-in-from-bottom-2 duration-300 pointer-events-none">
                     <div className="bg-white/10 backdrop-blur-2xl border border-white/20 px-4 py-2 rounded-2xl shadow-2xl">
                         <span className="text-xs font-bold text-white tracking-widest whitespace-nowrap uppercase">
                             {toast.message}
