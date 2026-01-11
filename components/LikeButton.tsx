@@ -16,7 +16,6 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
     const [count, setCount] = useState(initialCount);
     const [isAnimating, setIsAnimating] = useState(false);
     const [locked, setLocked] = useState(false);
-    const [dailyCount, setDailyCount] = useState(0);
     const [toast, setToast] = useState<{ message: string; visible: boolean; type: 'success' | 'warning' | 'info' }>({ 
         message: '', 
         visible: false, 
@@ -32,41 +31,29 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
     const [toastLayout, setToastLayout] = useState<{ top: number; left: number; placement: 'top' | 'bottom'; arrowLeft: number } | null>(null);
     const [burst, setBurst] = useState<{ id: number; x: number; r: number } | null>(null);
 
-    // 持久化存储 Key
-    const getStorageKey = () => `aura_like_limit_${targetType}_${targetId}_${new Date().toISOString().split('T')[0]}`;
+    const getLocalLikeKey = () => `aura_like_${targetType}_${targetId}_${getBrowserFingerprint()}`;
 
     useEffect(() => {
         const fetchInitial = async () => {
             try {
-                // 获取总数
+                const fingerprint = getBrowserFingerprint();
+                
                 const total = await engagementApi.getLikeCount(targetType, targetId);
                 setCount(total);
-                const isLiked = checkIfLikedLocal(targetType, targetId);
-                setLiked(isLiked);
 
-                // 检查本地持久化锁定
-                const localCount = parseInt(localStorage.getItem(getStorageKey()) || '0');
-                setDailyCount(localCount);
-                if (localCount >= 5) {
-                    setLocked(true);
-                }
-
-                // 后端双重校验
-                const fingerprint = getBrowserFingerprint();
-                const today = new Date().toISOString().split('T')[0];
                 const { data } = await supabase
                     .from('likes')
                     .select('count')
                     .eq('target_type', targetType)
                     .eq('target_id', targetId)
                     .eq('user_fingerprint', fingerprint)
-                    .gte('created_at', today);
+                    .maybeSingle();
 
-                const dbCount = data?.reduce((acc, curr) => acc + (curr.count || 0), 0) || 0;
-                if (dbCount >= 5) {
+                const localCount = parseInt(localStorage.getItem(getLocalLikeKey()) || '0');
+                const dbCount = data?.count || 0;
+                
+                if (dbCount >= 5 || localCount >= 5) {
                     setLocked(true);
-                    setDailyCount(dbCount);
-                    localStorage.setItem(getStorageKey(), dbCount.toString());
                 }
             } catch (err) {
                 console.error('Failed to fetch initial like data:', err);
@@ -82,7 +69,7 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
     }, []);
 
     const updateToastPosition = () => {
-        const anchorEl = iconRef.current || buttonRef.current;
+        const anchorEl = buttonRef.current;
         const toastEl = toastRef.current;
         if (!anchorEl || !toastEl) return;
 
@@ -91,24 +78,26 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
 
         const vw = window.innerWidth;
         const vh = window.innerHeight;
-        const margin = isMobile ? 10 : 12;
-        const gap = isMobile ? 8 : 10;
+        const margin = isMobile ? 12 : 16;
+        const gap = isMobile ? 10 : 14;
 
         const anchorX = anchorRect.left + anchorRect.width / 2;
-        const preferTop = anchorRect.top - gap - toastRect.height >= margin;
-
-        const placement: 'top' | 'bottom' = preferTop ? 'top' : 'bottom';
+        const anchorY = anchorRect.top;
+        
+        const spaceTop = anchorY - margin;
+        const spaceBottom = vh - anchorRect.bottom - margin;
+        
+        const placement: 'top' | 'bottom' = spaceTop >= toastRect.height ? 'top' : 'bottom';
 
         let left = anchorX - toastRect.width / 2;
         left = Math.max(margin, Math.min(left, vw - margin - toastRect.width));
 
-        let top =
-            placement === 'top'
-                ? anchorRect.top - gap - toastRect.height
-                : anchorRect.bottom + gap;
+        let top = placement === 'top'
+            ? anchorRect.top - gap - toastRect.height
+            : anchorRect.bottom + gap;
         top = Math.max(margin, Math.min(top, vh - margin - toastRect.height));
 
-        const minArrow = isMobile ? 14 : 16;
+        const minArrow = isMobile ? 16 : 20;
         const maxArrow = toastRect.width - minArrow;
         const arrowLeft = Math.max(minArrow, Math.min(anchorX - left, maxArrow));
 
@@ -147,26 +136,15 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
 
     const handleLike = async (e: MouseEvent) => {
         e.stopPropagation();
-
-        // 防止动画期间重复点击
         if (isAnimating) return;
 
-        if (locked) {
-            showToast(`❤️ 不许这么喜欢我 `, 'warning');
-            return;
-        }
-
-        // 立即计算新的本地计数
-        const currentLocal = parseInt(localStorage.getItem(getStorageKey()) || '0');
-        if (currentLocal >= 5) {
+        const currentCount = parseInt(localStorage.getItem(getLocalLikeKey()) || '0');
+        
+        if (locked || currentCount >= 5) {
             setLocked(true);
-            showToast(`❤️ 不许这么喜欢我`, 'warning');
             return;
         }
 
-        const previouslyLiked = liked;
-
-        // 开始动画
         setIsAnimating(true);
         setBurst({
             id: Date.now(),
@@ -174,56 +152,34 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
             r: (Math.random() - 0.5) * 18
         });
         window.setTimeout(() => setBurst(null), isMobile ? 750 : 820);
-        setLiked(true);
-        setLikedLocal(targetType, targetId, true);
         
-        // UI 立即增加反馈
-        setCount(prev => prev + 1);
-        const nextLocal = currentLocal + 1;
-        setDailyCount(nextLocal);
-        localStorage.setItem(getStorageKey(), nextLocal.toString());
-
-        if (nextLocal >= 5) {
-            setLocked(true);
-            showToast(`❤️ 不许这么喜欢我`, 'warning');
-        }
-        // 移除点赞成功提示，只保留上限提示
-
-        // 触发物理反馈
         if (window.navigator && window.navigator.vibrate) {
             window.navigator.vibrate([10, 50, 10]);
         }
 
-        // 动画完成后重置状态
         setTimeout(() => {
             setIsAnimating(false);
         }, 800);
 
-        // 后端同步
         try {
             const fingerprint = getBrowserFingerprint();
             const result = await engagementApi.toggleLike(targetType, targetId, fingerprint);
-            setLiked(true);
-            setLikedLocal(targetType, targetId, true);
+            
+            localStorage.setItem(getLocalLikeKey(), result.count.toString());
+            setCount(prev => prev + 1);
 
             if (result.count >= 5) {
                 setLocked(true);
-                setDailyCount(5);
-                localStorage.setItem(getStorageKey(), '5');
+                showToast(`已达到点赞上限 (5/5)`, 'warning');
             }
         } catch (err: any) {
-            if (err.message === 'DAILY_LIMIT_REACHED') {
+            if (err.message === 'LIMIT_REACHED') {
                 setLocked(true);
-                setDailyCount(5);
-                localStorage.setItem(getStorageKey(), '5');
-                showToast('❤️ 不许这么喜欢我', 'warning');
+                localStorage.setItem(getLocalLikeKey(), '5');
+                showToast(`已达到点赞上限 (5/5)`, 'warning');
             } else {
                 console.error('Failed to toggle like:', err);
                 setCount(prev => prev - 1);
-                setDailyCount(currentLocal);
-                localStorage.setItem(getStorageKey(), currentLocal.toString());
-                setLiked(previouslyLiked);
-                setLikedLocal(targetType, targetId, previouslyLiked);
                 showToast('点赞失败，请稍后重试', 'warning');
             }
         }
@@ -242,8 +198,8 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                         }}
                         initial={{ 
                             opacity: 0, 
-                            scale: 0.8, 
-                            y: (toastLayout?.placement ?? 'top') === 'top' ? 6 : -6
+                            scale: 0.75,
+                            y: (toastLayout?.placement ?? 'top') === 'top' ? 8 : -8
                         }}
                         animate={{ 
                             opacity: 1, 
@@ -252,111 +208,75 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                         }}
                         exit={{ 
                             opacity: 0, 
-                            scale: 0.8, 
-                            y: (toastLayout?.placement ?? 'top') === 'top' ? 4 : -4
+                            scale: 0.85,
+                            y: (toastLayout?.placement ?? 'top') === 'top' ? -6 : 6
                         }}
                         transition={{
                             type: "spring",
-                            stiffness: isMobile ? 250 : 300,
-                            damping: isMobile ? 25 : 30,
-                            mass: 0.8,
-                            duration: isMobile ? 0.5 : 0.6
+                            stiffness: 400,
+                            damping: 28,
+                            mass: 0.6
                         }}
                         className="fixed z-[9999] pointer-events-none"
                     >
                         <motion.div 
                             ref={toastRef}
                             className={`relative overflow-hidden ${
-                                isMobile ? 'px-3 py-2 text-xs' : 'px-4 py-2.5 text-sm'
-                            } font-medium whitespace-nowrap text-white/90`}
+                                isMobile ? 'px-3 py-1.5 text-xs' : 'px-4 py-2 text-sm'
+                            } font-medium text-white/90`}
                             style={{
-                                borderRadius: isMobile ? '14px' : '20px',
-                                background: 'rgba(0, 0, 0, 0.9)', // 增强背景不透明度
-                                backdropFilter: isMobile ? 'blur(20px) saturate(150%)' : 'blur(24px) saturate(160%)',
-                                WebkitBackdropFilter: isMobile ? 'blur(20px) saturate(150%)' : 'blur(24px) saturate(160%)',
-                                boxShadow: isMobile 
-                                    ? '0 6px 25px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.1)'
-                                    : '0 10px 40px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.15)',
-                                border: isMobile ? '1px solid rgba(255, 255, 255, 0.2)' : '1px solid rgba(255, 255, 255, 0.25)'
-                            }}
-                            animate={{
-                                // 微妙的浮动效果
-                                y: isMobile ? [0, -1, 0] : [0, -2, 0],
-                            }}
-                            transition={{
-                                duration: isMobile ? 2.5 : 3,
-                                repeat: Infinity,
-                                ease: "easeInOut"
+                                borderRadius: isMobile ? '12px' : '16px',
+                                background: 'rgba(0, 0, 0, 0.88)',
+                                backdropFilter: 'blur(16px) saturate(180%)',
+                                WebkitBackdropFilter: 'blur(16px) saturate(180%)',
+                                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0 0 0.5px rgba(255, 255, 255, 0.15)',
+                                border: '0.5px solid rgba(255, 255, 255, 0.2)'
                             }}
                         >
-                            {/* 透明背景光晕 */}
-                            <div 
-                                className={`absolute inset-0 ${isMobile ? 'opacity-8' : 'opacity-12'}`}
-                                style={{
-                                    background: toast.type === 'success' 
-                                        ? 'radial-gradient(circle at center, rgba(255, 255, 255, 0.2) 0%, transparent 70%)'
-                                        : toast.type === 'warning'
-                                        ? 'radial-gradient(circle at center, rgba(255, 255, 255, 0.15) 0%, transparent 70%)'
-                                        : 'radial-gradient(circle at center, rgba(255, 255, 255, 0.18) 0%, transparent 70%)'
-                                }}
-                            />
-                            
                             <div className="relative flex items-center gap-2">
-                                {/* 状态指示器 */}
                                 <motion.div
-                                    className={`${isMobile ? 'w-1.5 h-1.5' : 'w-2 h-2'} rounded-full ${
-                                        toast.type === 'success' ? 'bg-white/80' : 
-                                        toast.type === 'warning' ? 'bg-white/60' : 'bg-white/70'
+                                    className={`w-1.5 h-1.5 rounded-full ${
+                                        toast.type === 'warning' ? 'bg-white/70' : 'bg-white/90'
                                     }`}
                                     animate={{ 
-                                        scale: isMobile ? [1, 1.1, 1] : [1, 1.2, 1],
-                                        opacity: [0.8, 1, 0.8]
+                                        scale: [1, 1.15, 1],
+                                        opacity: [0.7, 1, 0.7]
                                     }}
                                     transition={{ 
-                                        duration: isMobile ? 1.5 : 2, 
+                                        duration: 1.8,
                                         repeat: Infinity,
                                         ease: "easeInOut"
                                     }}
                                 />
                                 
-                                {/* 消息文本 */}
-                                <motion.span
-                                    initial={{ opacity: 0, x: -3 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: 0.1, duration: 0.3 }}
-                                    className="font-medium text-white/95"
-                                >
-                                    {toast.message}
-                                </motion.span>
+                                <span className="text-white/95">{toast.message}</span>
                             </div>
-                            
-                            {/* 底部透明进度条 */}
+
                             <motion.div
-                                className="absolute bottom-0 left-0 h-0.5 bg-white/30 rounded-full"
+                                className="absolute bottom-0 left-0 h-px bg-white/20"
                                 initial={{ width: '100%' }}
                                 animate={{ width: '0%' }}
-                                transition={{ duration: isMobile ? 1.5 : 2, ease: "linear" }}
+                                transition={{ duration: 2, ease: "linear" }}
                             />
 
-                            {/* 指向点赞按钮的小箭头 */}
                             <div 
                                 className="absolute"
                                 style={{
                                     left: toastLayout?.arrowLeft ?? 0,
                                     transform: 'translateX(-50%)',
-                                    top: (toastLayout?.placement ?? 'top') === 'bottom' ? (isMobile ? '-4px' : '-6px') : undefined,
-                                    bottom: (toastLayout?.placement ?? 'top') === 'top' ? (isMobile ? '-4px' : '-6px') : undefined,
+                                    top: (toastLayout?.placement ?? 'top') === 'bottom' ? '-5px' : undefined,
+                                    bottom: (toastLayout?.placement ?? 'top') === 'top' ? '-5px' : undefined,
                                     width: 0,
                                     height: 0,
-                                    borderLeft: isMobile ? '4px solid transparent' : '6px solid transparent',
-                                    borderRight: isMobile ? '4px solid transparent' : '6px solid transparent',
+                                    borderLeft: '5px solid transparent',
+                                    borderRight: '5px solid transparent',
                                     borderTop:
                                         (toastLayout?.placement ?? 'top') === 'bottom'
-                                            ? (isMobile ? '4px solid rgba(0, 0, 0, 0.9)' : '6px solid rgba(0, 0, 0, 0.9)')
+                                            ? '5px solid rgba(0, 0, 0, 0.88)'
                                             : undefined,
                                     borderBottom:
                                         (toastLayout?.placement ?? 'top') === 'top'
-                                            ? (isMobile ? '4px solid rgba(0, 0, 0, 0.9)' : '6px solid rgba(0, 0, 0, 0.9)')
+                                            ? '5px solid rgba(0, 0, 0, 0.88)'
                                             : undefined,
                                 }}
                             />
@@ -391,7 +311,7 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                     backdropFilter: isMobile ? 'blur(8px)' : 'blur(12px)',
                     WebkitBackdropFilter: isMobile ? 'blur(8px)' : 'blur(12px)',
                 }}
-                aria-label={locked ? `今日已点赞 ${dailyCount}/5 次` : `点赞 (${count})`}
+                aria-label={locked ? `今日已点赞 5/5 次` : `点赞 (${count})`}
             >
                 {/* 苹果风格的 Ripple 效果 */}
                 {!locked && (
