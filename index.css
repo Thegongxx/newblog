@@ -1,36 +1,88 @@
-/* Apple-like ripple and toast styles for LikeButton */
-.apple-ripple {
-  position: absolute;
-  width: 42px;
-  height: 42px;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  border-radius: 9999px;
-  background: rgba(255,255,255,0.95);
-  pointer-events: none;
-  animation: appleRipple 600ms ease-out forwards;
-  z-index: 1;
-}
-@keyframes appleRipple {
-  0% { transform: translate(-50%, -50%) scale(0); opacity: 0.9; }
-  100% { transform: translate(-50%, -50%) scale(3); opacity: 0; }
+/* Apple-style Like Button Animations */
+
+/* 点赞按钮容器的涟漪效果 */
+@keyframes like-ripple {
+  0% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
 }
 
-.apple-toast {
-  padding: 6px 12px;
-  border-radius: 999px;
-  background: rgba(0,0,0,0.88);
-  color: white;
-  font-size: 12px;
-  line-height: 1.2;
-  white-space: nowrap;
+/* 心形脉冲动画 */
+@keyframes heart-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
 }
 
-.apple-burst {
-  position: absolute;
-  width: 16px;
-  height: 16px;
-  display: inline-block;
-  opacity: 0.9;
+/* 数字滚动动画 */
+@keyframes count-up {
+  0% {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes count-down {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+}
+
+/* 粒子爆发效果 */
+@keyframes particle-burst {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0);
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1) translateY(-20px);
+  }
+}
+
+/* 发光效果 */
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(244, 63, 94, 0);
+  }
+  50% {
+    box-shadow: 0 0 20px 4px rgba(244, 63, 94, 0.3);
+  }
+}
+
+/* 按钮按压反馈 */
+.like-button-press {
+  animation: like-press 0.15s ease-out;
+}
+
+@keyframes like-press {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
