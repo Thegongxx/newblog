@@ -54,9 +54,9 @@ const BlogCard: FC<BlogCardProps> = memo(({ post, onClick, featured }) => {
       }}
     >
       {/* 全幅封面图容器 - 优化图片加载 */}
-      <div className="absolute inset-0 overflow-hidden rounded-2xl z-0">
+      <div className="absolute inset-0 overflow-hidden rounded-2xl">
         <img
-          src={post.image || post.cover_image}
+          src={post.image}
           alt={post.title}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02] grayscale-[0.1] group-hover:grayscale-0 opacity-60 group-hover:opacity-80"
           loading="lazy"
@@ -66,8 +66,8 @@ const BlogCard: FC<BlogCardProps> = memo(({ post, onClick, featured }) => {
             backfaceVisibility: 'hidden'
           }}
         />
-        {/* 渐变遮罩 - 增强底部遮罩确保文字可见 */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+        {/* 渐变遮罩 */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
       </div>
 
       {/* 分类标签 */}
@@ -85,20 +85,20 @@ const BlogCard: FC<BlogCardProps> = memo(({ post, onClick, featured }) => {
         />
       </div>
 
-      {/* 内容区域 - 确保在最上层 */}
-      <div className="absolute inset-x-0 bottom-0 p-5 flex flex-col justify-end z-30">
-        <div className="flex items-center gap-2 mb-2 text-white/70 text-[9px] font-medium uppercase tracking-wider">
+      {/* 内容区域 */}
+      <div className="absolute inset-x-0 bottom-0 p-5 flex flex-col justify-end z-20">
+        <div className="flex items-center gap-2 mb-2 text-white/50 text-[9px] font-medium uppercase tracking-wider">
           <span>{post.date}</span>
-          <span className="w-0.5 h-0.5 rounded-full bg-white/50" />
+          <span className="w-0.5 h-0.5 rounded-full bg-white/30" />
           <span>{post.readingTime}</span>
         </div>
 
-        <h3 className={`${featured ? 'text-2xl' : 'text-xl'} font-bold text-white tracking-tight leading-snug line-clamp-2 drop-shadow-lg`}>
+        <h3 className={`${featured ? 'text-2xl' : 'text-xl'} font-bold text-white tracking-tight leading-snug line-clamp-2`}>
           {post.title}
         </h3>
 
         {/* 桌面端显示摘要 */}
-        <p className="mt-2 text-white/60 text-sm font-light leading-relaxed line-clamp-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <p className="mt-2 text-white/50 text-sm font-light leading-relaxed line-clamp-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           {post.excerpt}
         </p>
       </div>
