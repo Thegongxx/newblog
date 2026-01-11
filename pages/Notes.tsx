@@ -16,25 +16,25 @@ const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
 
     // 简化动画配置，模仿页面切换效果
     const pageVariants = {
-        initial: { opacity: 0, y: isMobile ? 15 : 30 },
+        initial: { opacity: 0, y: isMobile ? 8 : 12 },
         animate: { 
             opacity: 1, 
             y: 0,
             transition: { 
-                duration: isMobile ? 0.8 : 1.2, 
+                duration: isMobile ? 0.3 : 0.4, 
                 ease: [0.25, 0.46, 0.45, 0.94],
-                staggerChildren: 0.1
+                staggerChildren: 0.05
             }
         }
     };
 
     const itemVariants = {
-        initial: { opacity: 0, y: isMobile ? 10 : 20 },
+        initial: { opacity: 0, y: isMobile ? 6 : 10 },
         animate: { 
             opacity: 1, 
             y: 0,
             transition: { 
-                duration: isMobile ? 0.6 : 0.8, 
+                duration: isMobile ? 0.3 : 0.4, 
                 ease: [0.25, 0.46, 0.45, 0.94] 
             }
         }

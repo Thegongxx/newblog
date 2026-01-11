@@ -12,13 +12,13 @@ const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
         opacity: 1,
-        transition: { duration: 1.0, ease: [0.25, 0.46, 0.45, 0.94], staggerChildren: 0.15 }
+        transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94], staggerChildren: 0.08 }
     }
 };
 
 const itemVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0, transition: { duration: 1.0, ease: [0.25, 0.46, 0.45, 0.94] } }
+    hidden: { opacity: 0, y: 16 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] } }
 };
 
 const Archive: React.FC<ArchiveProps> = ({ posts, loading, onSelectPost }) => {

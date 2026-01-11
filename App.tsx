@@ -305,11 +305,11 @@ const AppInner = () => {
             <Routes location={location} key={location.pathname}>
               <Route path="/" element={
                 <motion.div
-                  initial={{ opacity: 0, y: isMobile ? 15 : 30 }}
+                  initial={{ opacity: 0, y: isMobile ? 8 : 12 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: isMobile ? -15 : -30 }}
+                  exit={{ opacity: 0, y: isMobile ? -8 : -12 }}
                   transition={{ 
-                    duration: isMobile ? 0.8 : 1.2, 
+                    duration: isMobile ? 0.3 : 0.4, 
                     ease: [0.25, 0.46, 0.45, 0.94] 
                   }}
                 >
@@ -318,11 +318,11 @@ const AppInner = () => {
               } />
               <Route path="/post/:slug" element={
                 <motion.div
-                  initial={{ opacity: 0, y: isMobile ? 15 : 30 }}
+                  initial={{ opacity: 0, y: isMobile ? 8 : 12 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: isMobile ? -15 : -30 }}
+                  exit={{ opacity: 0, y: isMobile ? -8 : -12 }}
                   transition={{ 
-                    duration: isMobile ? 0.8 : 1.2, 
+                    duration: isMobile ? 0.3 : 0.4, 
                     ease: [0.25, 0.46, 0.45, 0.94] 
                   }}
                 >
@@ -331,11 +331,11 @@ const AppInner = () => {
               } />
               <Route path="/notes" element={
                 <motion.div
-                  initial={{ opacity: 0, y: isMobile ? 15 : 30 }}
+                  initial={{ opacity: 0, y: isMobile ? 8 : 12 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: isMobile ? -15 : -30 }}
+                  exit={{ opacity: 0, y: isMobile ? -8 : -12 }}
                   transition={{ 
-                    duration: isMobile ? 0.8 : 1.2, 
+                    duration: isMobile ? 0.3 : 0.4, 
                     ease: [0.25, 0.46, 0.45, 0.94] 
                   }}
                 >
@@ -344,11 +344,11 @@ const AppInner = () => {
               } />
               <Route path="/note/:id" element={
                 <motion.div
-                  initial={{ opacity: 0, y: isMobile ? 15 : 30 }}
+                  initial={{ opacity: 0, y: isMobile ? 8 : 12 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: isMobile ? -15 : -30 }}
+                  exit={{ opacity: 0, y: isMobile ? -8 : -12 }}
                   transition={{ 
-                    duration: isMobile ? 0.8 : 1.2, 
+                    duration: isMobile ? 0.3 : 0.4, 
                     ease: [0.25, 0.46, 0.45, 0.94] 
                   }}
                 >
@@ -357,11 +357,11 @@ const AppInner = () => {
               } />
               <Route path="/archive" element={
                 <motion.div
-                  initial={{ opacity: 0, y: isMobile ? 15 : 30 }}
+                  initial={{ opacity: 0, y: isMobile ? 8 : 12 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: isMobile ? -15 : -30 }}
+                  exit={{ opacity: 0, y: isMobile ? -8 : -12 }}
                   transition={{ 
-                    duration: isMobile ? 0.8 : 1.2, 
+                    duration: isMobile ? 0.3 : 0.4, 
                     ease: [0.25, 0.46, 0.45, 0.94] 
                   }}
                 >
@@ -370,11 +370,11 @@ const AppInner = () => {
               } />
               <Route path="/about" element={
                 <motion.div
-                  initial={{ opacity: 0, y: isMobile ? 15 : 30 }}
+                  initial={{ opacity: 0, y: isMobile ? 8 : 12 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: isMobile ? -15 : -30 }}
+                  exit={{ opacity: 0, y: isMobile ? -8 : -12 }}
                   transition={{ 
-                    duration: isMobile ? 0.8 : 1.2, 
+                    duration: isMobile ? 0.3 : 0.4, 
                     ease: [0.25, 0.46, 0.45, 0.94] 
                   }}
                 >
