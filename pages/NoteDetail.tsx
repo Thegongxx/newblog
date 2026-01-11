@@ -1,10 +1,18 @@
-import { useState, useEffect, type FC } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { useEffect, useState, type FC } from 'react';
 import LikeButton from '../components/LikeButton';
 import CommentSection from '../components/CommentSection';
 import { notesApi } from '../services/supabaseService';
 import { ICONS } from '../constants';
 import type { FileNote } from '../types';
+
+// unified page transition for notes
+const pageVariants = {
+  hidden: { opacity: 0, y: 12 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.28 } },
+  exit: { opacity: 0, y: -12, transition: { duration: 0.2 } }
+};
 
 const NoteDetail: FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -76,7 +84,7 @@ const NoteDetail: FC = () => {
           <div className="mb-6 md:mb-8">
             <div className="w-20 h-8 bg-white/5 rounded animate-pulse" />
           </div>
-          
+
           {/* 内容骨架 - 与实际内容布局完全一致 */}
           <div className="glass p-6 md:p-12 rounded-2xl md:rounded-[3rem] border border-white/5 animate-pulse">
             <div className="w-8 h-8 bg-white/5 rounded mb-4 md:mb-8" />
@@ -107,12 +115,7 @@ const NoteDetail: FC = () => {
             <div className="text-6xl mb-6">😕</div>
             <h2 className="text-2xl font-bold mb-4">出了点问题</h2>
             <p className="text-white/60 mb-8">{error || '笔记不存在'}</p>
-            <button
-              onClick={() => navigate('/notes')}
-              className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
-            >
-              返回笔记列表
-            </button>
+            <button onClick={() => navigate('/notes')} className="px-6 py-3 bg-white/10 hover:bg-white/20 rounded-full transition-colors">返回笔记列表</button>
           </div>
         </div>
       </div>
@@ -120,68 +123,37 @@ const NoteDetail: FC = () => {
   }
 
   return (
-    <div className="py-8 md:py-12">
+    <motion.div initial="hidden" animate="visible" exit="exit" variants={pageVariants} className="py-8 md:py-12">
       <div className="max-w-4xl mx-auto">
-        {/* 返回按钮 - 简化，无动画 */}
-        <button
-          onClick={() => navigate('/notes')}
-          className="mb-6 md:mb-8 flex items-center gap-2 text-white/60 hover:text-white transition-colors group"
-        >
+        {/* 返回按钮 */}
+        <button onClick={() => navigate('/notes')} className="mb-6 md:mb-8 flex items-center gap-2 text-white/60 hover:text-white transition-colors group">
           <span className="transform group-hover:-translate-x-1 transition-transform">←</span>
           <span className="text-xs md:text-sm font-medium tracking-wider uppercase">返回</span>
         </button>
 
-        {/* 笔记内容 - 简化，无动画 */}
         <article className="glass p-6 md:p-12 rounded-2xl md:rounded-[3rem] border border-white/5 mb-8 md:mb-12">
-          {/* 引号图标 */}
-          <div className="mb-4 md:mb-8 scale-75 md:scale-100 origin-top-left">
-            {ICONS.QUOTES}
-          </div>
-          
-          {/* 笔记标题 */}
-          <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-white/95 mb-4 md:mb-8">
-            {note.title}
-          </h1>
-          
-          {/* 笔记内容 */}
+          <div className="mb-4 md:mb-8 scale-75 md:scale-100 origin-top-left">{ICONS.QUOTES}</div>
+
+          <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-white/95 mb-4 md:mb-8">{note?.title}</h1>
+
           <div className="prose prose-invert prose-sm md:prose-lg max-w-none">
-            <div className="text-sm md:text-lg font-light leading-relaxed text-white/80 whitespace-pre-wrap">
-              {note.content}
-            </div>
+            <div className="text-sm md:text-lg font-light leading-relaxed text-white/80 whitespace-pre-wrap">{note?.content}</div>
           </div>
 
-          {/* 底部信息 */}
           <div className="flex items-center justify-between border-t border-white/5 pt-4 md:pt-8 mt-8 md:mt-12">
             <div className="flex flex-col gap-1 md:gap-2">
-              <time className="text-[10px] md:text-sm font-bold tracking-widest text-white/40 uppercase">
-                {note.date}
-              </time>
-              {note.tags && note.tags.length > 0 && (
-                <div className="hidden md:flex gap-2 mt-2">
-                  {note.tags.map((tag, idx) => (
-                    <span key={idx} className="text-xs px-3 py-1 bg-white/10 rounded-full text-white/50">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
+              <time className="text-[10px] md:text-sm font-bold tracking-widest text-white/40 uppercase">{note?.date}</time>
+              {note?.tags && note.tags.length > 0 && (
+                <div className="hidden md:flex gap-2 mt-2">{note.tags.map((tag, idx) => (<span key={idx} className="text-xs px-3 py-1 bg-white/10 rounded-full text-white/50">{tag}</span>))}</div>
               )}
             </div>
-            
-            <LikeButton 
-              targetType="note" 
-              targetId={note.id} 
-              initialCount={note.likes_count || 0}
-              className="scale-90 md:scale-110"
-            />
+            <LikeButton targetType="note" targetId={note?.id ?? ''} initialCount={note?.likes_count || 0} className="scale-90 md:scale-110" />
           </div>
         </article>
 
-        {/* 评论区域 - 简化，无动画 */}
-        <div>
-          <CommentSection targetId={note.id} targetType="note" />
-        </div>
+        <div><CommentSection targetId={note?.id ?? ''} targetType="note" /></div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

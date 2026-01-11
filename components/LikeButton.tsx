@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type MouseEvent } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { engagementApi, supabase } from '../services/supabaseService';
 import { getBrowserFingerprint } from '../utils/engagement';
@@ -29,21 +29,15 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
   const toastRef = useRef<HTMLDivElement | null>(null);
   const toastTimerRef = useRef<number | null>(null);
   const [toastLayout, setToastLayout] = useState<{ top: number; left: number; placement: 'top' | 'bottom'; arrowLeft: number } | null>(null);
-  const localContentKey = useRef<string>('');
 
-  // Build per-content local storage key using fingerprint
-  const getLocalLikeKey = () => {
-    const fp = getBrowserFingerprint();
-    return `aura_like_${targetType}_${targetId}_${fp}`;
-  };
+  const getLikeKey = () => `aura_like_${targetType}_${targetId}_${getBrowserFingerprint()}`;
 
-  // Ripples and heart pulse helpers (Apple-like feedback)
+  // Ripple and heart pulse helpers (Apple-like feedback)
   const spawnRipple = () => {
     const id = Date.now();
     setRipples(rs => [...rs, { id }]);
     setTimeout(() => setRipples(rs => rs.filter(r => r.id !== id)), 600);
   };
-
   const triggerHeartPulse = () => {
     setPulse(true);
     setTimeout(() => setPulse(false), 180);
@@ -55,44 +49,38 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
       try {
         const total = await engagementApi.getLikeCount(targetType, targetId);
         setCount(total);
-        // local per-content limit check
-        const key = getLocalLikeKey();
-        localContentKey.current = key;
-        const localVal = parseInt(localStorage.getItem(key) || '0');
+        const key = getLikeKey();
+        const localVal = parseInt(localStorage.getItem(key) || '0', 10);
         if (localVal >= 5) setLocked(true);
-        // confirm with server for today
+        // Optional daily per-content check from server
         const fingerprint = getBrowserFingerprint();
         const today = new Date().toISOString().split('T')[0];
-        const { data } = await supabase.from('likes')
-          .select('count')
-          .eq('target_type', targetType)
-          .eq('target_id', targetId)
-          .eq('user_fingerprint', fingerprint)
-          .gte('created_at', today)
-          .maybeSingle();
+        const { data } = await supabase.from('likes').select('count')
+          .eq('target_type', targetType).eq('target_id', targetId).eq('user_fingerprint', fingerprint)
+          .gte('created_at', today).maybeSingle();
         const dbCount = data?.count ?? 0;
         if (dbCount >= 5) setLocked(true);
       } catch {
-        // ignore initialization errors
+        // ignore
       }
     };
     init();
   }, [targetType, targetId]);
 
-  // Toast positioning helper
+  // Toast positioning helpers
   const updateToastPosition = () => {
     const btn = buttonRef.current;
     const t = toastRef.current;
     if (!btn || !t) return;
-    const r = btn.getBoundingClientRect();
+    const rect = btn.getBoundingClientRect();
     const w = window.innerWidth, h = window.innerHeight;
-    const margin = isMobile ? 8 : 12; // spacing
-    const placement: 'top' | 'bottom' = r.top - 8 - t.offsetHeight >= margin ? 'top' : 'bottom';
-    let left = r.left + r.width / 2 - t.offsetWidth / 2;
+    const margin = isMobile ? 8 : 12;
+    const placement: 'top'|'bottom' = rect.top - 8 - t.offsetHeight >= margin ? 'top' : 'bottom';
+    let left = rect.left + rect.width / 2 - t.offsetWidth / 2;
     left = Math.max(margin, Math.min(left, w - margin - t.offsetWidth));
-    let top = placement === 'top' ? r.top - t.offsetHeight - 8 : r.bottom + 8;
+    let top = placement === 'top' ? rect.top - t.offsetHeight - 8 : rect.bottom + 8;
     top = Math.max(margin, Math.min(top, h - margin - t.offsetHeight));
-    const arrowLeft = Math.max(8, Math.min(t.offsetWidth - 8, r.left + r.width / 2 - left));
+    const arrowLeft = Math.max(8, Math.min(t.offsetWidth - 8, rect.left + rect.width / 2 - left));
     setToastLayout({ top, left, placement, arrowLeft });
   };
 
@@ -107,7 +95,7 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
   useEffect(() => {
     if (!toast.visible) return;
     const onResize = () => updateToastPosition();
-    window.addEventListener('resize', onResize, { passive: true });
+    window.addEventListener('resize', onResize);
     window.addEventListener('scroll', onResize, true);
     return () => {
       window.removeEventListener('resize', onResize);
@@ -121,32 +109,28 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
     toastTimerRef.current = window.setTimeout(() => setToast(p => ({ ...p, visible: false })), isMobile ? 1800 : 2200);
   };
 
-  // Click handler - Apple-like interaction
-  const handleLike = async (e: MouseEvent) => {
+  // Click handler
+  const handleLike = async (e: any) => {
     e.stopPropagation();
-    // Always breathe Apple style feedback
+    // visual feedback first
     spawnRipple();
     triggerHeartPulse();
 
-    const key = getLocalLikeKey();
-    const currentLocal = parseInt(localStorage.getItem(key) || '0');
-
-    if (currentLocal >= 5) {
+    const key = getLikeKey();
+    const current = parseInt(localStorage.getItem(key) || '0', 10);
+    if (current >= 5) {
       setLocked(true);
-      showToast('已达到点赞上限 (5/5)', 'warning');
+      showToast('不许这么喜欢我', 'warning');
       return;
     }
 
-    // Optimistic UI update
-    const nextLocal = currentLocal + 1;
-    localStorage.setItem(key, String(nextLocal));
-    setCount(n => n + 1);
-
-    // quick burst
+    // Optimistic update
+    const next = current + 1;
+    localStorage.setItem(key, String(next));
+    setCount(c => c + 1);
     setBurst({ id: Date.now(), x: (Math.random() - 0.5) * (isMobile ? 10 : 14), r: (Math.random() - 0.5) * 18 });
     window.setTimeout(() => setBurst(null), isMobile ? 600 : 700);
 
-    // Server sync
     try {
       const fingerprint = getBrowserFingerprint();
       const result = await engagementApi.toggleLike(targetType, targetId, fingerprint);
@@ -161,18 +145,18 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
       if (err?.message === 'LIMIT_REACHED' || err?.message === 'DAILY_LIMIT_REACHED') {
         setLocked(true);
         localStorage.setItem(key, '5');
-        showToast('已达到点赞上限 (5/5)', 'warning');
+        showToast('不许这么喜欢我', 'warning');
       } else {
-        // 回滚本地计数
-        localStorage.setItem(key, String(currentLocal));
+        // rollback local increment
+        localStorage.setItem(key, String(current));
         setCount(c => Math.max(0, c - 1));
         console.error('Failed to toggle like:', err);
       }
     }
   };
 
-  // Helpers for rendering Apple-like visuals
-  const localKey = localContentKey.current;
+  // Render
+  const localCountForColor = parseInt(localStorage.getItem(getLikeKey()) || '0', 10);
 
   return (
     <div className="relative inline-block">
@@ -181,29 +165,17 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
       ))}
       <AnimatePresence>
         {toast.visible && (
-          <motion.div
-            style={{ position: 'absolute', top: toastLayout?.top ?? 0, left: toastLayout?.left ?? 0, zIndex: 9999 }}
-            initial={{ opacity: 0, scale: 0.9, y: 6 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: -6 }}
-          >
+          <motion.div style={{ position: 'absolute', top: toastLayout?.top ?? 0, left: toastLayout?.left ?? 0, zIndex: 9999 }} initial={{ opacity: 0, scale: 0.9, y: 6 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: -6 }}>
             <div ref={toastRef} className="apple-toast">{toast.message}</div>
           </motion.div>
         )}
       </AnimatePresence>
 
       <motion.button onClick={handleLike} ref={buttonRef} className={`group rounded-full ${className}`} style={{ padding: isMobile ? '6px' : '8px 12px' }} aria-label={locked ? '已达到点赞上限 (5/5)' : `点赞 (${count})`}>
-        <motion.svg
-          width={isMobile ? 20 : 24}
-          height={isMobile ? 20 : 24}
-          viewBox="0 0 24 24"
-          fill={pulse ? '#e11d48' : 'none'}
-          stroke="currentColor"
-          strokeWidth={1.5}
-        >
+        <motion.svg width={isMobile ? 20 : 24} height={isMobile ? 20 : 24} viewBox="0 0 24 24" fill={pulse ? '#e11d48' : 'none'} stroke="currentColor" strokeWidth={1.5}>
           <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
         </motion.svg>
-        <span className="ml-2">{count}</span>
+        <span className={`ml-2 ${localCountForColor > 0 ? 'text-red-600' : 'text-gray-400'}`}>{count}</span>
       </motion.button>
 
       {burst && (
