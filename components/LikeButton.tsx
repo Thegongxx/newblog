@@ -123,11 +123,15 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
     };
 
     return (
-        <div className="relative inline-block" style={{ isolation: 'isolate' }}>
-            {/* Apple 风格 Toast - 固定在屏幕顶部，最高层级 */}
+        <div className="relative inline-block" style={{ isolation: 'isolate', overflow: 'visible' }}>
+            {/* Apple 风格 Toast - 显示在按钮附近，避开导航栏 */}
             {toast.visible && (
                 <div 
-                    className="fixed top-6 left-1/2 -translate-x-1/2 pointer-events-none animate-in fade-in zoom-in slide-in-from-top-2 duration-300"
+                    className={`absolute pointer-events-none ${
+                        isMobile 
+                            ? '-top-16 left-1/2 -translate-x-1/2' 
+                            : '-top-20 left-1/2 -translate-x-1/2'
+                    } animate-in fade-in zoom-in slide-in-from-bottom-2 duration-300`}
                     style={{ zIndex: Z_INDEX.LIKE_TOAST }}
                 >
                     <div className={`relative bg-gradient-to-r from-black/95 to-gray-900/95 backdrop-blur-xl border border-white/40 rounded-2xl shadow-2xl ${
@@ -145,6 +149,11 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                         {/* 装饰性光点 */}
                         <div className="absolute -top-1 -right-1 w-2 h-2 bg-rose-400 rounded-full animate-pulse" />
                     </div>
+                    
+                    {/* 小箭头指向按钮 */}
+                    <div className={`absolute top-full left-1/2 -translate-x-1/2 ${
+                        isMobile ? 'w-2 h-2' : 'w-2.5 h-2.5'
+                    } bg-gradient-to-br from-black/95 to-gray-900/95 border-r border-b border-white/40 rotate-45 -mt-1`} />
                 </div>
             )}
 
