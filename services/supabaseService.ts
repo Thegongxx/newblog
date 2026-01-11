@@ -40,20 +40,33 @@ export const engagementApi = {
     },
 
     async toggleLike(targetType: string, targetId: string, fingerprint: string) {
-        const { data: existing, error: countError } = await supabase
+        const today = new Date().toISOString().split('T')[0];
+        
+        // 检查今日总点赞次数
+        const { data: todayLikes, error: countError } = await supabase
+            .from('likes')
+            .select('count')
+            .eq('user_fingerprint', fingerprint)
+            .gte('created_at', today);
+            
+        if (countError) throw countError;
+        
+        const totalToday = todayLikes?.reduce((acc, curr) => acc + (curr.count || 0), 0) || 0;
+        if (totalToday >= 5) {
+            throw new Error('DAILY_LIMIT_REACHED');
+        }
+        
+        const { data: existing, error } = await supabase
             .from('likes')
             .select('id, count')
             .eq('target_type', targetType)
             .eq('target_id', targetId)
             .eq('user_fingerprint', fingerprint)
-            .maybeSingle();
-             
-        if (countError && countError.code !== 'PGRST116') throw countError;
-        
-        if (existing && existing.count >= 5) {
-            throw new Error('LIMIT_REACHED');
-        }
-        
+            .gte('created_at', today)
+            .single();
+
+        if (error && error.code !== 'PGRST116') throw error;
+
         if (existing) {
             const newCount = existing.count + 1;
             const { error: updateError } = await supabase
