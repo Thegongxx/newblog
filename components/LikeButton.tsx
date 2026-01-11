@@ -20,25 +20,28 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
     
     const isMobile = useIsMobile();
 
-    // 持久化存储 Key
-    const getStorageKey = () => `aura_like_limit_${targetType}_${targetId}_${new Date().toISOString().split('T')[0]}`;
+    // 持久化存储 Key - 针对单个内容
+    const getStorageKey = () => `aura_like_${targetType}_${targetId}_${new Date().toISOString().split('T')[0]}`;
 
     useEffect(() => {
         const fetchInitial = async () => {
             try {
-                // 1. 获取总数
+                // 1. 获取总点赞数
                 const total = await engagementApi.getLikeCount(targetType, targetId);
                 setCount(total);
+                
+                // 2. 检查用户是否点过赞
                 const isLiked = checkIfLikedLocal(targetType, targetId);
                 setLiked(isLiked);
 
-                // 2. 检查本地持久化锁定
-                const localCount = parseInt(localStorage.getItem(getStorageKey()) || '0');
-                if (localCount >= 5) {
+                // 3. 检查本地存储的用户点赞次数
+                const localUserCount = parseInt(localStorage.getItem(getStorageKey()) || '0');
+                
+                if (localUserCount >= 5) {
                     setLocked(true);
                 }
 
-                // 3. 后端双重校验（防止清除缓存后刷票）
+                // 4. 后端验证用户对此内容的点赞次数
                 const fingerprint = getBrowserFingerprint();
                 const today = new Date().toISOString().split('T')[0];
                 const { data } = await supabase
@@ -47,12 +50,14 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                     .eq('target_type', targetType)
                     .eq('target_id', targetId)
                     .eq('user_fingerprint', fingerprint)
-                    .gte('created_at', today);
+                    .gte('created_at', today)
+                    .single();
 
-                const dbCount = data?.reduce((acc, curr) => acc + (curr.count || 0), 0) || 0;
-                if (dbCount >= 5) {
+                const dbUserCount = data?.count || 0;
+                
+                if (dbUserCount >= 5) {
                     setLocked(true);
-                    localStorage.setItem(getStorageKey(), dbCount.toString());
+                    localStorage.setItem(getStorageKey(), dbUserCount.toString());
                 }
             } catch (err) {
                 console.error('Failed to fetch initial like data:', err);
@@ -70,28 +75,28 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
         e.stopPropagation();
 
         if (locked) {
-            showToast('今日已达上限 🌿');
+            showToast('不许这么喜欢我');
             return;
         }
 
-        // 立即计算新的本地计数
-        const currentLocal = parseInt(localStorage.getItem(getStorageKey()) || '0');
-        if (currentLocal >= 5) {
+        // 检查当前用户对此内容的点赞次数
+        const currentUserCount = parseInt(localStorage.getItem(getStorageKey()) || '0');
+        if (currentUserCount >= 5) {
             setLocked(true);
-            showToast('今日已达上限 🌿');
+            showToast('不许这么喜欢我');
             return;
         }
 
-        // UI 立即增加反馈
+        // UI 立即反馈
         setCount(prev => prev + 1);
-        const nextLocal = currentLocal + 1;
-        localStorage.setItem(getStorageKey(), nextLocal.toString());
+        const nextUserCount = currentUserCount + 1;
+        localStorage.setItem(getStorageKey(), nextUserCount.toString());
 
-        if (nextLocal >= 5) {
+        if (nextUserCount >= 5) {
             setLocked(true);
         }
 
-        // 触发物理动效
+        // 触发动画效果
         setAnimating(true);
         setTimeout(() => setAnimating(false), 600);
         if (window.navigator && window.navigator.vibrate) window.navigator.vibrate(10);
@@ -103,21 +108,22 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
             setLiked(true);
             setLikedLocal(targetType, targetId, true);
 
-            // 如果后端确认已达上限，强制同步锁定
+            // 后端确认点赞次数
             if (result.count >= 5) {
                 setLocked(true);
                 localStorage.setItem(getStorageKey(), '5');
             }
         } catch (err: any) {
-            if (err.message === 'DAILY_LIMIT_REACHED') {
+            if (err.message === 'CONTENT_LIMIT_REACHED') {
                 setLocked(true);
                 localStorage.setItem(getStorageKey(), '5');
-                showToast('今日已达上限 🌿');
+                showToast('此内容已达点赞上限 🌿');
             } else {
                 console.error('Failed to toggle like:', err);
-                // Rollback UI count and local storage if other errors occur
+                // 回滚UI状态
                 setCount(prev => prev - 1);
-                localStorage.setItem(getStorageKey(), currentLocal.toString());
+                localStorage.setItem(getStorageKey(), currentUserCount.toString());
+                showToast('点赞失败，请重试 😅');
             }
         }
     };
@@ -159,9 +165,9 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
 
             <button
                 onClick={handleLike}
-                disabled={false} // 改为不禁用，以便展示 Toast 提示
+                disabled={locked} // 达到上限时禁用按钮
                 className={`group flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-500 ${
-                    locked ? 'opacity-40 grayscale-[0.5]' : 'active:scale-95'
+                    locked ? 'opacity-40 grayscale cursor-not-allowed' : 'active:scale-95 hover:scale-105'
                 } ${
                     liked
                         ? 'bg-rose-500/10 text-rose-500 border-rose-500/20'
@@ -184,7 +190,7 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                         />
                     </svg>
 
-                    {animating && (
+                    {animating && !locked && (
                         <div className="absolute inset-0 animate-ping">
                             <svg className="w-5 h-5 fill-current text-rose-500 opacity-50" viewBox="0 0 24 24">
                                 <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />

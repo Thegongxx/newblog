@@ -21,9 +21,9 @@ const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
             opacity: 1, 
             y: 0,
             transition: { 
-                duration: isMobile ? 0.3 : 0.4, 
+                duration: isMobile ? 0.5 : 0.6, 
                 ease: [0.25, 0.46, 0.45, 0.94],
-                staggerChildren: 0.05
+                staggerChildren: 0.07
             }
         }
     };
@@ -34,7 +34,7 @@ const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
             opacity: 1, 
             y: 0,
             transition: { 
-                duration: isMobile ? 0.3 : 0.4, 
+                duration: isMobile ? 0.5 : 0.6, 
                 ease: [0.25, 0.46, 0.45, 0.94] 
             }
         }

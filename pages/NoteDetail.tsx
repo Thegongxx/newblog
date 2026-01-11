@@ -46,19 +46,19 @@ const NoteDetail: React.FC = () => {
     }
   }, [id, navigate, note, notes, isLoading, cacheError]);
 
-  // Google Material Design 风格的动画 - 与页面切换同步
+  // Google Material Design 风格的动画 - 与页面切换同步 (+0.2s)
   const googleFadeIn = {
     opacity: isLoaded ? 1 : 0,
     transform: isLoaded ? 'translateY(0)' : 'translateY(12px)',
     filter: isLoaded ? 'blur(0px)' : 'blur(1px)',
-    transition: 'opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), filter 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+    transition: 'opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), filter 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
   };
 
   const googleStaggeredFadeIn = (delay: number) => ({
     opacity: isLoaded ? 1 : 0,
     transform: isLoaded ? 'translateY(0) scale(1)' : 'translateY(16px) scale(0.98)',
     filter: isLoaded ? 'blur(0px)' : 'blur(2px)',
-    transition: `opacity 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}ms, transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}ms, filter 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}ms`
+    transition: `opacity 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}ms, transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}ms, filter 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}ms`
   });
 
   // 特殊的内容渐入效果
@@ -66,7 +66,7 @@ const NoteDetail: React.FC = () => {
     opacity: isLoaded ? 1 : 0,
     transform: isLoaded ? 'translateY(0)' : 'translateY(20px)',
     filter: isLoaded ? 'blur(0px)' : 'blur(2px)',
-    transition: `opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}ms, transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}ms, filter 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}ms`
+    transition: `opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}ms, transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}ms, filter 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay}ms`
   });
 
   // 加载状态：正在加载缓存数据，或者缓存加载完成但还没找到note且没有错误

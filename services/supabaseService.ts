@@ -42,20 +42,7 @@ export const engagementApi = {
     async toggleLike(targetType: string, targetId: string, fingerprint: string) {
         const today = new Date().toISOString().split('T')[0];
         
-        // 检查今日总点赞次数
-        const { data: todayLikes, error: countError } = await supabase
-            .from('likes')
-            .select('count')
-            .eq('user_fingerprint', fingerprint)
-            .gte('created_at', today);
-            
-        if (countError) throw countError;
-        
-        const totalToday = todayLikes?.reduce((acc, curr) => acc + (curr.count || 0), 0) || 0;
-        if (totalToday >= 5) {
-            throw new Error('DAILY_LIMIT_REACHED');
-        }
-        
+        // 检查当前内容的点赞次数（单个内容最多5次）
         const { data: existing, error } = await supabase
             .from('likes')
             .select('id, count')
@@ -68,6 +55,11 @@ export const engagementApi = {
         if (error && error.code !== 'PGRST116') throw error;
 
         if (existing) {
+            // 检查单个内容是否已达5次上限
+            if (existing.count >= 5) {
+                throw new Error('CONTENT_LIMIT_REACHED');
+            }
+            
             const newCount = existing.count + 1;
             const { error: updateError } = await supabase
                 .from('likes')

@@ -132,9 +132,9 @@ const Feed: React.FC<FeedProps> = memo(({ posts, loading, onSelectPost }) => {
     visible: {
       opacity: 1,
       transition: {
-        duration: 0.4,
+        duration: 0.6,
         ease: [0.25, 0.46, 0.45, 0.94],
-        staggerChildren: 0.05
+        staggerChildren: 0.07
       }
     }
   };
@@ -145,7 +145,7 @@ const Feed: React.FC<FeedProps> = memo(({ posts, loading, onSelectPost }) => {
       opacity: 1,
       y: 0,
       transition: {
-        duration: 0.4,
+        duration: 0.6,
         ease: [0.25, 0.46, 0.45, 0.94]
       }
     }
@@ -155,7 +155,7 @@ const Feed: React.FC<FeedProps> = memo(({ posts, loading, onSelectPost }) => {
     initial: { opacity: 0, y: 12 },
     whileInView: { opacity: 1, y: 0 },
     viewport: { once: true, margin: "-30px" },
-    transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }
+    transition: { duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }
   };
 
   return (

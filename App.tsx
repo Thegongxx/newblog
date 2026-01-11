@@ -309,7 +309,7 @@ const AppInner = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: isMobile ? -8 : -12 }}
                   transition={{ 
-                    duration: isMobile ? 0.3 : 0.4, 
+                    duration: isMobile ? 0.5 : 0.6, 
                     ease: [0.25, 0.46, 0.45, 0.94] 
                   }}
                 >
@@ -322,7 +322,7 @@ const AppInner = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: isMobile ? -8 : -12 }}
                   transition={{ 
-                    duration: isMobile ? 0.3 : 0.4, 
+                    duration: isMobile ? 0.5 : 0.6, 
                     ease: [0.25, 0.46, 0.45, 0.94] 
                   }}
                 >
@@ -335,7 +335,7 @@ const AppInner = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: isMobile ? -8 : -12 }}
                   transition={{ 
-                    duration: isMobile ? 0.3 : 0.4, 
+                    duration: isMobile ? 0.5 : 0.6, 
                     ease: [0.25, 0.46, 0.45, 0.94] 
                   }}
                 >
@@ -348,7 +348,7 @@ const AppInner = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: isMobile ? -8 : -12 }}
                   transition={{ 
-                    duration: isMobile ? 0.3 : 0.4, 
+                    duration: isMobile ? 0.5 : 0.6, 
                     ease: [0.25, 0.46, 0.45, 0.94] 
                   }}
                 >
@@ -361,7 +361,7 @@ const AppInner = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: isMobile ? -8 : -12 }}
                   transition={{ 
-                    duration: isMobile ? 0.3 : 0.4, 
+                    duration: isMobile ? 0.5 : 0.6, 
                     ease: [0.25, 0.46, 0.45, 0.94] 
                   }}
                 >
@@ -374,7 +374,7 @@ const AppInner = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: isMobile ? -8 : -12 }}
                   transition={{ 
-                    duration: isMobile ? 0.3 : 0.4, 
+                    duration: isMobile ? 0.5 : 0.6, 
                     ease: [0.25, 0.46, 0.45, 0.94] 
                   }}
                 >
