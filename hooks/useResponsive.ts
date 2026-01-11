@@ -28,7 +28,7 @@ export function useBreakpoint(): Breakpoint {
       const w = window.innerWidth;
       return w < BREAKPOINTS.mobile ? 'mobile' : w < BREAKPOINTS.tablet ? 'tablet' : 'desktop';
     }
-    return 'desktop'; // SSR 默认为桌面端
+    return 'desktop';
   });
 
   // 防抖处理resize事件，减少频繁更新
