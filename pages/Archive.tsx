@@ -1,4 +1,4 @@
-import React from 'react';
+import type { FC } from 'react';
 import { motion } from 'framer-motion';
 
 interface ArchiveProps {
@@ -12,16 +12,16 @@ const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
         opacity: 1,
-        transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94], staggerChildren: 0.08 }
+        transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] as const, staggerChildren: 0.08 }
     }
 };
 
 const itemVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] } }
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] as const } }
 };
 
-const Archive: React.FC<ArchiveProps> = ({ posts, loading, onSelectPost }) => {
+const Archive: FC<ArchiveProps> = ({ posts, loading, onSelectPost }) => {
   // 按年月分组文章
   const postsByYearMonth = posts.reduce((acc, post) => {
     const date = new Date(post.created_at);

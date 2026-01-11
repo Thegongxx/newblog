@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import { motion } from 'framer-motion';
 import { supabase } from '../services/supabaseService';
 import LikeButton from './LikeButton';
@@ -45,7 +45,7 @@ export default function HomepageComments() {
         }
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         if (!formData.author || !formData.content) {
             alert('请填写姓名和内容哦 🌿');

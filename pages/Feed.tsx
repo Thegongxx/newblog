@@ -1,4 +1,4 @@
-import React, { useMemo, memo } from 'react';
+import { useMemo, memo, type FC } from 'react';
 import { motion } from 'framer-motion';
 import BlogCard from '../components/BlogCard';
 import HomepageComments from '../components/HomepageComments';
@@ -13,7 +13,7 @@ interface FeedProps {
   onSelectPost: (post: Post) => void;
 }
 
-const Feed: React.FC<FeedProps> = memo(({ posts, loading, onSelectPost }) => {
+const Feed: FC<FeedProps> = memo(({ posts, loading, onSelectPost }) => {
   const isMobile = useIsMobile();
 
   // 按时间排序，最新的文章在前面

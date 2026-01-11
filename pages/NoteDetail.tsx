@@ -1,13 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, type FC } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import LikeButton from '../components/LikeButton';
 import CommentSection from '../components/CommentSection';
 import { notesApi } from '../services/supabaseService';
 import { ICONS } from '../constants';
 import type { FileNote } from '../types';
 
-const NoteDetail: React.FC = () => {
+const NoteDetail: FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [note, setNote] = useState<FileNote | null>(null);
@@ -19,38 +18,55 @@ const NoteDetail: React.FC = () => {
       navigate('/notes');
       return;
     }
-    loadNote();
-  }, [id, navigate]);
 
-  const loadNote = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      // 从数据库读取note
-      const noteData = await notesApi.getById(id!);
-      
-      if (!noteData) {
-        setError('笔记不存在');
-        return;
+    let cancelled = false;
+    let timer: number | null = null;
+
+    const minSkeletonMs = window.innerWidth < 768 ? 220 : 120;
+    const start = performance.now();
+
+    const loadNote = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const noteData = await notesApi.getById(id);
+
+        if (!noteData) {
+          setError('笔记不存在');
+          return;
+        }
+
+        setNote({
+          ...noteData,
+          date: new Date(noteData.created_at).toLocaleDateString('zh-CN'),
+          content: noteData.text || noteData.content
+        });
+      } catch (err: any) {
+        setError(err.message || '加载失败');
+      } finally {
+        if (cancelled) return;
+
+        const elapsed = performance.now() - start;
+        const remaining = Math.max(0, minSkeletonMs - elapsed);
+
+        if (remaining === 0) {
+          setLoading(false);
+        } else {
+          timer = window.setTimeout(() => {
+            if (!cancelled) setLoading(false);
+          }, remaining);
+        }
       }
-      
-      // 格式化数据
-      setNote({
-        ...noteData,
-        date: new Date(noteData.created_at).toLocaleDateString('zh-CN'),
-        content: noteData.text || noteData.content
-      });
-    } catch (err: any) {
-      setError(err.message || '加载失败');
-    } finally {
-      // 移动端需要更长的延迟来避免闪烁
-      const delay = window.innerWidth < 768 ? 300 : 150;
-      setTimeout(() => {
-        setLoading(false);
-      }, delay);
-    }
-  };
+    };
+
+    loadNote();
+
+    return () => {
+      cancelled = true;
+      if (timer) window.clearTimeout(timer);
+    };
+  }, [id, navigate]);
 
   if (loading) {
     return (

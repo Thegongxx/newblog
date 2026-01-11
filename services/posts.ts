@@ -11,21 +11,26 @@ export const postsApi = {
 
         if (error) throw error;
 
-        // 为每个 post 计算点赞总数
-        const postsWithLikes = await Promise.all(
-            posts.map(async (post) => {
-                const { data: likes } = await supabase
-                    .from('likes')
-                    .select('count')
-                    .eq('target_type', 'post')
-                    .eq('target_id', post.id);
-                
-                const likes_count = likes?.reduce((acc, curr) => acc + (curr.count || 0), 0) || 0;
-                return { ...post, likes_count };
-            })
-        );
+        const ids = posts.map((p) => p.id).filter(Boolean);
+        if (ids.length === 0) return posts;
 
-        return postsWithLikes;
+        const { data: likes } = await supabase
+            .from('likes')
+            .select('target_id, count')
+            .eq('target_type', 'post')
+            .in('target_id', ids);
+
+        const likeMap = (likes || []).reduce<Record<string, number>>((acc, row: any) => {
+            const key = row.target_id;
+            if (!key) return acc;
+            acc[key] = (acc[key] || 0) + (row.count || 0);
+            return acc;
+        }, {});
+
+        return posts.map((post) => ({
+            ...post,
+            likes_count: likeMap[post.id] || 0
+        }));
     },
 
     async getBySlug(slug: string) {

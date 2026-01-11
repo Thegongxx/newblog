@@ -68,6 +68,7 @@ export interface FileNote {
   content: string;
   date: string;
   tags: string[];
+  likes_count?: number;
 }
 
 export interface Quote {

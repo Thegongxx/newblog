@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import { memo, type FC } from 'react';
 import { Post } from '../types';
 import LikeButton from './LikeButton';
 import { useIsMobile } from '../hooks/useResponsive';
@@ -9,7 +9,7 @@ interface BlogCardProps {
   featured?: boolean;
 }
 
-const BlogCard: React.FC<BlogCardProps> = memo(({ post, onClick, featured }) => {
+const BlogCard: FC<BlogCardProps> = memo(({ post, onClick, featured }) => {
   const isMobile = useIsMobile();
 
   // 移动端极简版本

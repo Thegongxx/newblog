@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, type FC } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import CommentSection from '../components/CommentSection';
@@ -12,7 +12,7 @@ interface PostDetailProps {
     loading?: boolean;
 }
 
-const PostDetail: React.FC<PostDetailProps> = ({ posts, loading }) => {
+const PostDetail: FC<PostDetailProps> = ({ posts, loading }) => {
     const { slug } = useParams<{ slug: string }>();
     const navigate = useNavigate();
     const location = useLocation();
