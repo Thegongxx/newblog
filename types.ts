@@ -67,7 +67,10 @@ export interface FileNote {
   title: string;
   content: string;
   date: string;
-  tags: string[];
+  tags?: string[];
+  likes_count?: number;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Quote {

@@ -15,6 +15,7 @@ export const Z_INDEX = {
   
   // 通知层级
   TOAST: 70,
+  LIKE_TOAST: 9999, // 点赞提示最高优先级
   
   // 最高层级
   TOOLTIP: 80,
