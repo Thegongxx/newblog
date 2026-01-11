@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { HelmetProvider, Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -6,10 +6,13 @@ import { SWRConfig } from 'swr';
 import Intro from './components/Intro';
 import Assistant from './components/Assistant';
 import ErrorBoundary from './components/ErrorBoundary';
+import PageTransition from './components/PageTransition';
+import PageTransitionMask from './components/PageTransitionMask';
 import { CONTACT_INFO } from './constants';
 import { Z_INDEX } from './constants/zIndex';
 import { usePostsCache, useNotesCache } from './services/cacheService';
 import { useIsMobile } from './hooks/useResponsive';
+import { usePageTransition } from './hooks/usePageTransition';
 
 // 直接导入所有页面组件 - 避免懒加载导致的首次切换延迟
 import Feed from './pages/Feed';
@@ -25,6 +28,9 @@ const AppInner = () => {
   const [showIntro, setShowIntro] = useState(true);
   const [scrollY, setScrollY] = useState(0);
   const [toast, setToast] = useState({ show: false, msg: '', type: 'success' });
+  
+  // 使用页面切换动画 hook
+  const { setNavigationMethod } = usePageTransition();
   
   const isMobile = useIsMobile();
 
@@ -51,11 +57,6 @@ const AppInner = () => {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  // 苹果风格页面切换：推拉效果，新页面从右侧推入，当前页面向左推出
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [location.pathname]);
 
   const showToast = (msg: string, type = 'success') => {
     setToast({ show: true, msg, type });
@@ -128,6 +129,24 @@ const AppInner = () => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
+    
+    // 设置导航方式
+    const currentPath = location.pathname;
+    const isToDetail = path.includes('/post/') || path.includes('/note/');
+    const isFromDetail = currentPath.includes('/post/') || currentPath.includes('/note/');
+    const isToAbout = path === '/about';
+    const isFromAbout = currentPath === '/about';
+    
+    if (isToDetail && !isFromDetail) {
+      setNavigationMethod('slideDown');
+    } else if (!isToDetail && isFromDetail) {
+      setNavigationMethod('slideUp');
+    } else if (isToAbout || isFromAbout) {
+      setNavigationMethod('zoomIn');
+    } else {
+      setNavigationMethod('fade');
+    }
+    
     navigate(path);
   };
 
@@ -148,6 +167,9 @@ const AppInner = () => {
         <title>Aura - 极简主义个人空间</title>
         <meta name="description" content="A digital sanctuary for minimalist aesthetics and intelligence." />
       </Helmet>
+
+      {/* 页面切换遮罩 - 确保切换时不显示其他内容 */}
+      <PageTransitionMask />
 
       {/* Toast - 移动端优化 */}
       <AnimatePresence>
@@ -282,107 +304,64 @@ const AppInner = () => {
         )}
       </motion.nav>
 
-      {/* Main Content - 苹果风格页面切换：推拉效果 */}
+      {/* Main Content - 智能页面切换动画系统 */}
       <motion.main 
-        className={`${isMobile ? 'pt-16 pb-16 px-4' : 'pt-32 pb-48 px-6'} max-w-7xl mx-auto overflow-hidden`}
+        className={`${isMobile ? 'pt-16 pb-16 px-4' : 'pt-32 pb-48 px-6'} max-w-7xl mx-auto relative`}
         style={{
           willChange: 'transform',
           backfaceVisibility: 'hidden',
-          transform: 'translateZ(0)'
+          transform: 'translateZ(0)',
+          // 确保主容器有最小高度，避免页面切换时的空白
+          minHeight: 'calc(100vh - 8rem)',
+          // 添加背景色确保切换时不会透出其他内容
+          backgroundColor: 'transparent'
         }}
       >
         <ErrorBoundary>
-          <AnimatePresence mode="wait" initial={false}>
+          <AnimatePresence 
+            mode="wait" 
+            initial={false}
+            onExitComplete={() => {
+              // 确保退出动画完成后再进行滚动
+              window.scrollTo(0, 0);
+            }}
+          >
             <Routes location={location} key={location.pathname}>
               <Route path="/" element={
-                <motion.div
-                  initial={{ x: '100%', opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  exit={{ x: '-100%', opacity: 0 }}
-                  transition={{ 
-                    type: "tween",
-                    ease: [0.25, 0.1, 0.25, 1],
-                    duration: 0.4
-                  }}
-                  style={{ width: '100%' }}
-                >
-                  <Feed posts={posts} loading={loading} onSelectPost={(p) => navigate(`/post/${p.slug}`)} />
-                </motion.div>
+                <PageTransition>
+                  <Feed posts={posts} loading={loading} onSelectPost={(p) => {
+                    setNavigationMethod('slideDown');
+                    navigate(`/post/${p.slug}`);
+                  }} />
+                </PageTransition>
               } />
               <Route path="/post/:slug" element={
-                <motion.div
-                  initial={{ x: '100%', opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  exit={{ x: '-100%', opacity: 0 }}
-                  transition={{ 
-                    type: "tween",
-                    ease: [0.25, 0.1, 0.25, 1],
-                    duration: 0.4
-                  }}
-                  style={{ width: '100%' }}
-                >
+                <PageTransition>
                   <PostDetail posts={posts} loading={loading} />
-                </motion.div>
+                </PageTransition>
               } />
               <Route path="/notes" element={
-                <motion.div
-                  initial={{ x: '100%', opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  exit={{ x: '-100%', opacity: 0 }}
-                  transition={{ 
-                    type: "tween",
-                    ease: [0.25, 0.1, 0.25, 1],
-                    duration: 0.4
-                  }}
-                  style={{ width: '100%' }}
-                >
+                <PageTransition>
                   <Notes notes={notes} loading={loading} />
-                </motion.div>
+                </PageTransition>
               } />
               <Route path="/note/:id" element={
-                <motion.div
-                  initial={{ x: '100%', opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  exit={{ x: '-100%', opacity: 0 }}
-                  transition={{ 
-                    type: "tween",
-                    ease: [0.25, 0.1, 0.25, 1],
-                    duration: 0.4
-                  }}
-                  style={{ width: '100%' }}
-                >
+                <PageTransition>
                   <NoteDetail />
-                </motion.div>
+                </PageTransition>
               } />
               <Route path="/archive" element={
-                <motion.div
-                  initial={{ x: '100%', opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  exit={{ x: '-100%', opacity: 0 }}
-                  transition={{ 
-                    type: "tween",
-                    ease: [0.25, 0.1, 0.25, 1],
-                    duration: 0.4
-                  }}
-                  style={{ width: '100%' }}
-                >
-                  <Archive posts={posts} loading={loading} onSelectPost={(p) => navigate(`/post/${p.slug}`)} />
-                </motion.div>
+                <PageTransition>
+                  <Archive posts={posts} loading={loading} onSelectPost={(p) => {
+                    setNavigationMethod('slideDown');
+                    navigate(`/post/${p.slug}`);
+                  }} />
+                </PageTransition>
               } />
               <Route path="/about" element={
-                <motion.div
-                  initial={{ x: '100%', opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  exit={{ x: '-100%', opacity: 0 }}
-                  transition={{ 
-                    type: "tween",
-                    ease: [0.25, 0.1, 0.25, 1],
-                    duration: 0.4
-                  }}
-                  style={{ width: '100%' }}
-                >
+                <PageTransition>
                   <About />
-                </motion.div>
+                </PageTransition>
               } />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
