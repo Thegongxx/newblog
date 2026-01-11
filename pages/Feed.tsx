@@ -108,15 +108,9 @@ const Feed: React.FC<FeedProps> = memo(({ posts, loading, onSelectPost }) => {
                     <span className="text-[10px] text-white/30 uppercase tracking-wide">
                       {post.readingTime}
                     </span>
-                    {/* 使用统一的点赞按钮 */}
-                    <div onClick={(e) => e.stopPropagation()}>
-                      <LikeButton 
-                        targetType="post" 
-                        targetId={post.id} 
-                        initialCount={post.likes_count || 0}
-                        className="!bg-transparent !border-none !px-2 !py-1 scale-90" 
-                      />
-                    </div>
+                    <span className="text-[10px] text-white/30 uppercase tracking-wide">
+                      阅读更多 →
+                    </span>
                   </div>
                 </div>
               </div>
@@ -205,6 +199,18 @@ const Feed: React.FC<FeedProps> = memo(({ posts, loading, onSelectPost }) => {
                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1V11M6 11L1 6M6 11L11 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </div>
             </button>
+            
+            {/* 主页点赞按钮 */}
+            <div className="flex items-center gap-4">
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">
+                Like This Space
+              </span>
+              <LikeButton 
+                targetType="homepage" 
+                targetId="main" 
+                className="!bg-white/5 !border-white/10 hover:!bg-white/10 !px-4 !py-2" 
+              />
+            </div>
           </div>
         </div>
 

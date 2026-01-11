@@ -342,19 +342,7 @@ const AppInner = () => {
                   <Notes notes={notes} loading={loading} />
                 </motion.div>
               } />
-              <Route path="/note/:id" element={
-                <motion.div
-                  initial={{ opacity: 0, y: isMobile ? 10 : 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: isMobile ? -10 : -20 }}
-                  transition={{ 
-                    duration: isMobile ? 0.4 : 0.6, 
-                    ease: [0.4, 0.0, 0.2, 1] 
-                  }}
-                >
-                  <NoteDetail />
-                </motion.div>
-              } />
+              <Route path="/note/:id" element={<NoteDetail />} />
               <Route path="/archive" element={
                 <motion.div
                   initial={{ opacity: 0, y: isMobile ? 10 : 20 }}

@@ -80,16 +80,6 @@ const BlogCard: React.FC<BlogCardProps> = memo(({ post, onClick, featured }) => 
         {post.category}
       </div>
 
-      {/* 点赞按钮 */}
-      <div className="absolute top-4 right-4 z-30" onClick={(e) => e.stopPropagation()}>
-        <LikeButton
-          targetType="post"
-          targetId={post.id}
-          initialCount={post.likes_count}
-          className="!bg-white/10 !backdrop-blur-xl"
-        />
-      </div>
-
       {/* 内容区域 */}
       <div className="absolute inset-x-0 bottom-0 p-5 flex flex-col justify-end z-20">
         <div className="flex items-center gap-2 mb-2 text-white/50 text-[9px] font-medium uppercase tracking-wider">
