@@ -7,7 +7,6 @@ import Intro from './components/Intro';
 import Assistant from './components/Assistant';
 import ErrorBoundary from './components/ErrorBoundary';
 import { CONTACT_INFO } from './constants';
-import { Z_INDEX } from './constants/zIndex';
 import { usePostsCache, useNotesCache } from './services/cacheService';
 import { useIsMobile } from './hooks/useResponsive';
 
@@ -179,8 +178,11 @@ const AppInner = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.95 }}
             transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className={`fixed ${isMobile ? 'inset-x-4 top-4' : 'top-8 right-8'} pointer-events-none`}
-            style={{ zIndex: Z_INDEX.TOAST }}
+            className={`fixed ${isMobile ? 'top-4 left-4 right-4' : 'top-8 right-8'} z-[9999] pointer-events-none`}
+            style={{
+              position: 'fixed',
+              zIndex: 9999
+            }}
           >
             <div className={`${isMobile ? 'w-full' : 'max-w-sm'} px-4 py-3 rounded-xl text-sm font-medium border shadow-2xl backdrop-blur-xl ${
               toast.type === 'error' 
@@ -205,8 +207,7 @@ const AppInner = () => {
 
       {/* Navigation - 移动端简化版 */}
       <motion.nav 
-        className={`fixed top-0 left-0 right-0 ${isMobile ? 'px-4 pt-3' : 'flex justify-center pt-6 px-4'}`}
-        style={{ zIndex: Z_INDEX.NAVIGATION }}
+        className={`fixed top-0 left-0 right-0 z-40 ${isMobile ? 'px-4 pt-3' : 'flex justify-center pt-6 px-4'}`}
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
@@ -306,9 +307,9 @@ const AppInner = () => {
 
       {/* Main Content - 移动端优化布局，添加页面切换容器 */}
       <motion.main 
-        className={`${isMobile ? 'pt-16 pb-16 px-4' : 'pt-32 pb-48 px-6'} max-w-7xl mx-auto`}
+        className={`${isMobile ? 'pt-20 pb-16 px-4' : 'pt-44 pb-48 px-6'} max-w-7xl mx-auto`}
         style={{
-          willChange: 'transform',
+          willChange: 'auto',
           backfaceVisibility: 'hidden',
           transform: 'translateZ(0)'
         }}
