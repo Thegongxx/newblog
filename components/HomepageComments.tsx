@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../services/supabaseService';
 import LikeButton from './LikeButton';
 import type { Comment } from '../types';
@@ -116,14 +116,15 @@ export default function HomepageComments() {
             </div>
 
             {/* 评论表单 - 与其他评论区保持一致的样式和动画 */}
-            {showForm && (
-                <motion.div 
-                    className="mb-12 p-8 border border-white/5 rounded-3xl bg-white/[0.01]"
-                    initial={{ opacity: 0, height: 0, x: 30 }}
-                    animate={{ opacity: 1, height: 'auto', x: 0 }}
-                    exit={{ opacity: 0, height: 0, x: 30 }}
-                    transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
-                >
+            <AnimatePresence>
+                {showForm && (
+                    <motion.div 
+                        className="mb-12 p-8 border border-white/5 rounded-3xl bg-white/[0.01]"
+                        initial={{ opacity: 0, height: 0, x: 30 }}
+                        animate={{ opacity: 1, height: 'auto', x: 0 }}
+                        exit={{ opacity: 0, height: 0, x: 30 }}
+                        transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+                    >
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <motion.div 
                             className="grid grid-cols-2 gap-4"
@@ -174,7 +175,8 @@ export default function HomepageComments() {
                         </motion.div>
                     </form>
                 </motion.div>
-            )}
+                )}
+            </AnimatePresence>
 
             {/* 评论列表 - 与其他评论区保持一致的样式 */}
             {loading && comments.length === 0 ? (

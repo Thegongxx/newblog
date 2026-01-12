@@ -516,10 +516,10 @@ const AppInner = () => {
             </Routes>
           </AnimatePresence>
         </ErrorBoundary>
-        
-        {/* AI助手 - 跟随页面流动 */}
-        <Assistant />
       </motion.main>
+
+      {/* AI助手 - 固定在屏幕右下角，像导航栏一样跟随用户 */}
+      <Assistant />
 
       {/* Footer - 移动端优化 */}
       <footer className={`${isMobile ? 'py-12 px-4' : 'py-32 px-6'} border-t border-white/10`}>

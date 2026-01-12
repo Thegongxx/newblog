@@ -191,8 +191,8 @@ const Assistant = () => {
         disabled={isAnimating}
         className={`assistant-button fixed flex items-center justify-center bg-white shadow-lg border-0 focus:outline-none focus:ring-0 overflow-hidden ${
           isMobile 
-            ? 'bottom-6 right-4' // 移动端固定定位，始终跟随用户屏幕
-            : 'bottom-8 right-8'
+            ? 'bottom-6 right-4' // 移动端固定在屏幕右下角
+            : 'bottom-8 right-8'  // 桌面端固定在屏幕右下角
         } ${isAnimating ? 'pointer-events-none' : ''}`}
         style={{
           height: isMobile ? '48px' : '56px',

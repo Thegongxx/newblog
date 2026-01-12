@@ -75,12 +75,30 @@ export const RippleButton: React.FC<RippleButtonProps> = ({
   const [ripples, setRipples] = useState<Array<{ id: number; x: number; y: number }>>([]);
   const ref = useRef<HTMLButtonElement>(null);
 
-  const handleClick = (e: React.MouseEvent) => {
+  const handleClick = (e: React.MouseEvent | React.TouchEvent) => {
     if (!ref.current) return;
     
     const rect = ref.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    let clientX: number;
+    let clientY: number;
+    
+    // 处理触摸事件和鼠标事件
+    if ('touches' in e && e.touches.length > 0) {
+      // 触摸事件
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    } else if ('changedTouches' in e && e.changedTouches.length > 0) {
+      // 触摸结束事件
+      clientX = e.changedTouches[0].clientX;
+      clientY = e.changedTouches[0].clientY;
+    } else {
+      // 鼠标事件
+      clientX = (e as React.MouseEvent).clientX;
+      clientY = (e as React.MouseEvent).clientY;
+    }
+    
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
     
     const newRipple = { id: Date.now(), x, y };
     setRipples(prev => [...prev, newRipple]);
@@ -98,6 +116,7 @@ export const RippleButton: React.FC<RippleButtonProps> = ({
       ref={ref}
       className={`relative overflow-hidden ${className}`}
       onClick={handleClick}
+      onTouchStart={handleClick} // 添加触摸事件支持
     >
       {children}
       

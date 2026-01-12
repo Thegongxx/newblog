@@ -78,6 +78,46 @@
     transform: translateZ(0);
     backface-visibility: hidden;
     perspective: 1000px;
+    transition: all 0.35s var(--apple-ease);
+  }
+  
+  /* 涟漪点击效果 */
+  .ripple-effect {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .ripple-effect::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+    pointer-events: none;
+    opacity: 0;
+  }
+  
+  .ripple-effect:active::before {
+    width: 300px;
+    height: 300px;
+    opacity: 1;
+    transition: width 0.6s, height 0.6s, opacity 0.1s;
+  }
+  
+  /* 移动端触摸优化 */
+  @media (max-width: 768px) {
+    .ripple-effect:active::before {
+      width: 200px;
+      height: 200px;
+    }
+  }
+  
+  .assistant-panel {
     transform-style: preserve-3d;
   }
   
