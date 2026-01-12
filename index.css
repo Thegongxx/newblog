@@ -2,11 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 苹果风格的缓动函数 */
+:root {
+  --apple-ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --apple-ease-in: cubic-bezier(0.42, 0, 1, 1);
+  --apple-ease-out: cubic-bezier(0, 0, 0.58, 1);
+  --apple-ease-in-out: cubic-bezier(0.42, 0, 0.58, 1);
+  --apple-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
 /* 自定义组件样式 */
 @layer components {
   .glass {
     @apply bg-white/[0.03] backdrop-blur-[20px] saturate-[180%] border border-white/[0.08];
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    transition: all 0.35s var(--apple-ease);
   }
   
   /* 移动端glass样式优化 */
@@ -18,7 +28,7 @@
   }
   
   .view-transition {
-    animation: aura-entrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: aura-entrance 0.8s var(--apple-ease) forwards;
     will-change: transform, opacity, filter;
   }
   
@@ -32,17 +42,36 @@
   
   .custom-scrollbar::-webkit-scrollbar-thumb {
     @apply bg-white/10 rounded-[10px];
+    transition: background-color 0.2s var(--apple-ease);
   }
   
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     @apply bg-white/20;
   }
 
-  /* AI助手动画优化 */
+  /* 苹果风格的按钮交互 */
+  .apple-button {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+    transition: all 0.2s var(--apple-ease);
+  }
+  
+  .apple-button:hover {
+    transform: translateY(-1px) scale(1.02);
+  }
+  
+  .apple-button:active {
+    transform: translateY(0) scale(0.98);
+    transition-duration: 0.1s;
+  }
+  
+  /* AI助手苹果风格动画优化 */
   .assistant-button {
     transform: translateZ(0);
     backface-visibility: hidden;
     perspective: 1000px;
+    transition: all 0.35s var(--apple-ease);
   }
   
   .assistant-panel {
@@ -74,9 +103,23 @@
     backface-visibility: hidden;
     perspective: 1000px;
   }
+  
+  /* 苹果风格的弹性效果 */
+  .apple-spring {
+    transition: all 0.35s var(--apple-spring);
+  }
+  
+  /* 苹果风格的悬停效果 */
+  .apple-hover {
+    transition: all 0.2s var(--apple-ease);
+  }
+  
+  .apple-hover:hover {
+    transform: translateY(-2px) scale(1.02);
+  }
 }
 
-/* 动画关键帧优化 */
+/* 苹果风格的动画关键帧优化 */
 @keyframes aura-entrance {
   0% {
     opacity: 0;
@@ -88,6 +131,19 @@
   }
 }
 
+/* 苹果风格的弹性动画 */
+@keyframes apple-bounce {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 /* 针对低性能设备的优化 */
 @media (prefers-reduced-motion: reduce) {
   * {
@@ -95,11 +151,19 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+  
+  :root {
+    --apple-ease: ease !important;
+    --apple-ease-in: ease-in !important;
+    --apple-ease-out: ease-out !important;
+    --apple-ease-in-out: ease-in-out !important;
+    --apple-spring: ease !important;
+  }
 }
 
-/* 移动端优化 */
+/* 移动端苹果风格优化 */
 @media (max-width: 768px) {
-  /* 移动端使用简化的模糊效果 */
+  /* 移动端使用苹果标准的简化模糊效果 */
   .backdrop-blur-xl {
     backdrop-filter: blur(8px) !important;
     background-color: rgba(0, 0, 0, 0.6) !important;
@@ -114,12 +178,12 @@
     backdrop-filter: blur(4px) !important;
   }
   
-  /* 移动端减少阴影 */
+  /* 移动端苹果风格阴影 */
   .shadow-2xl {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
   }
   
-  /* 移动端禁用transform动画 */
+  /* 移动端禁用复杂的hover效果，保留tap效果 */
   .group:hover .group-hover\:scale-103,
   .group:hover .group-hover\:scale-\[1\.02\] {
     transform: none !important;
@@ -130,10 +194,11 @@
     background: linear-gradient(to top, rgba(0,0,0,0.8), transparent) !important;
   }
   
-  /* 移动端禁用复杂动画 */
+  /* 移动端使用苹果标准动画时长 */
   * {
-    animation-duration: 0.2s !important;
-    transition-duration: 0.2s !important;
+    animation-duration: 0.35s !important;
+    transition-duration: 0.35s !important;
+    transition-timing-function: var(--apple-ease) !important;
   }
   
   /* 移动端优化字体渲染 */
@@ -154,9 +219,18 @@
   .border-white\/20 {
     border-color: rgba(255, 255, 255, 0.1) !important;
   }
+  
+  /* 移动端苹果风格按钮 */
+  .apple-button {
+    transition: all 0.2s var(--apple-ease) !important;
+  }
+  
+  .apple-button:active {
+    transform: scale(0.95) !important;
+  }
 }
 
-/* 触摸设备优化 */
+/* 触摸设备苹果风格优化 */
 @media (hover: none) and (pointer: coarse) {
   .hover\:scale-105:hover {
     transform: none !important;
@@ -166,10 +240,17 @@
     background-color: transparent !important;
   }
   
-  /* 移动端点击反馈 */
-  .group:active .group-hover\:scale-103 {
-    transform: scale(0.98) !important;
-    transition: transform 0.1s ease-out !important;
+  /* 苹果风格的触摸反馈 */
+  .group:active .group-hover\:scale-103,
+  .apple-button:active {
+    transform: scale(0.95) !important;
+    transition: transform 0.1s var(--apple-ease-out) !important;
+  }
+  
+  /* 触摸设备的弹性反馈 */
+  button:active,
+  .apple-button:active {
+    animation: apple-bounce 0.3s var(--apple-ease);
   }
 }
 

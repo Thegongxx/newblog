@@ -6,7 +6,7 @@ export const Z_INDEX = {
   STICKY: 20,
   FIXED: 30,
   
-  // 导航层级
+  // 导航层级 - 灵动岛风格，不需要太高层级
   NAVIGATION: 40,
   BACK_BUTTON: 35, // 返回按钮在导航栏下面
   
@@ -18,8 +18,8 @@ export const Z_INDEX = {
   TOAST: 70,
   LIKE_TOAST: 99999, // 点赞提示最高优先级，确保显示在notes卡片上方
   
-  // AI助手层级
-  AI_ASSISTANT: 35, // 在返回按钮之下
+  // AI助手层级 - 确保在移动端始终可见
+  AI_ASSISTANT: 999, // 高层级，确保始终在右下角可见
   
   // 最高层级
   TOOLTIP: 80,

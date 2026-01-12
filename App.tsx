@@ -191,14 +191,19 @@ const AppInner = () => {
       {/* 页面切换遮罩 - 确保切换时不显示其他内容 */}
       <PageTransitionMask />
 
-      {/* Toast - 移动端优化 */}
+      {/* Toast - 苹果风格通知 */}
       <AnimatePresence>
         {toast.show && (
           <motion.div 
-            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+            initial={{ opacity: 0, y: -30, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.95 }}
-            transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
+            exit={{ opacity: 0, y: -30, scale: 0.9 }}
+            transition={{ 
+              type: "spring",
+              stiffness: 400,
+              damping: 25,
+              duration: 0.35
+            }}
             className={`fixed ${isMobile ? 'inset-x-4 top-4' : 'top-8 right-8'} pointer-events-none`}
             style={{ zIndex: Z_INDEX.TOAST }}
           >
@@ -223,23 +228,55 @@ const AppInner = () => {
         )}
       </AnimatePresence>
 
-      {/* Navigation - 移动端简化版 */}
+      {/* Navigation - 灵动岛风格，跟随页面自然流动 */}
       <motion.nav 
-        className={`fixed top-0 left-0 right-0 ${isMobile ? 'px-4 pt-3' : 'flex justify-center pt-6 px-4'}`}
-        style={{ zIndex: Z_INDEX.NAVIGATION }}
+        className={`${isMobile ? 'px-4 pt-3' : 'flex justify-center pt-6 px-4'}`}
+        style={{ 
+          zIndex: Z_INDEX.NAVIGATION,
+          // 移除fixed定位，让导航栏自然跟随页面流动
+          position: 'relative',
+          willChange: 'transform',
+          backfaceVisibility: 'hidden',
+        }}
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
+        transition={{ 
+          type: "spring",
+          stiffness: 300,
+          damping: 30,
+          duration: 0.6
+        }}
       >
         {isMobile ? (
-          // 移动端极简导航
+          // 移动端灵动岛风格导航 - 苹果风格交互
           <motion.div 
             className="flex items-center justify-between py-3 px-4 rounded-full bg-black/20 backdrop-blur-md border border-white/10 ripple-effect"
             style={{
-              transition: 'all 0.3s ease-out',
+              transition: 'all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)', // 苹果标准缓动
+              // 灵动岛效果：根据滚动动态调整透明度和模糊度
+              backgroundColor: `rgba(0, 0, 0, ${Math.max(0.15, navOpacity * 0.8)})`,
+              backdropFilter: `blur(${Math.max(8, navBlur * 0.6)}px) saturate(150%)`,
+              borderColor: `rgba(255, 255, 255, ${Math.max(0.08, navBorder * 0.8)})`,
             }}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={{ 
+              scale: 1.02,
+              y: -1,
+              transition: {
+                type: "spring",
+                stiffness: 400,
+                damping: 25,
+                duration: 0.2
+              }
+            }}
+            whileTap={{ 
+              scale: 0.98,
+              transition: {
+                type: "spring",
+                stiffness: 600,
+                damping: 30,
+                duration: 0.1
+              }
+            }}
           >
             <MagneticButton 
               onClick={() => navigate('/')}
@@ -255,7 +292,7 @@ const AppInner = () => {
                 { path: '/archive', label: 'Archive' },
                 { path: '/about', label: 'About' }
               ].map((item) => (
-                <RippleButton
+                <motion.button
                   key={item.path}
                   onClick={() => handleNavigate(item.path)} 
                   className={`px-2 py-1 rounded-full transition-all duration-200 ${
@@ -263,15 +300,33 @@ const AppInner = () => {
                       ? 'text-white bg-white/20' 
                       : 'text-white/60'
                   }`}
-                  rippleColor="rgba(255, 255, 255, 0.2)"
+                  whileHover={{
+                    scale: 1.05,
+                    color: 'rgba(255, 255, 255, 1)',
+                    transition: {
+                      type: "spring",
+                      stiffness: 400,
+                      damping: 25,
+                      duration: 0.2
+                    }
+                  }}
+                  whileTap={{
+                    scale: 0.95,
+                    transition: {
+                      type: "spring",
+                      stiffness: 600,
+                      damping: 30,
+                      duration: 0.1
+                    }
+                  }}
                 >
                   {item.label}
-                </RippleButton>
+                </motion.button>
               ))}
             </div>
           </motion.div>
         ) : (
-          // 桌面端完整导航
+          // 桌面端苹果风格导航
           <motion.div 
             className="relative rounded-full px-10 py-3 magnetic-hover"
             style={{ 
@@ -281,10 +336,27 @@ const AppInner = () => {
               borderWidth: '1px',
               borderStyle: 'solid',
               borderColor: `rgba(255, 255, 255, ${navBorder})`,
-              transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+              transition: 'all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)', // 苹果标准缓动
             }}
-            whileHover={{ scale: 1.02, y: -2 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={{ 
+              scale: 1.02, 
+              y: -2,
+              transition: {
+                type: "spring",
+                stiffness: 400,
+                damping: 25,
+                duration: 0.2
+              }
+            }}
+            whileTap={{ 
+              scale: 0.98,
+              transition: {
+                type: "spring",
+                stiffness: 600,
+                damping: 30,
+                duration: 0.1
+              }
+            }}
           >
             <div className="relative flex items-center gap-12">
               <MagneticButton 
@@ -292,7 +364,7 @@ const AppInner = () => {
                 className="text-lg font-bold tracking-tight text-white/90 hover:text-white transition-all duration-300 relative overflow-hidden group"
                 strength={0.3}
               >
-                {/* 悬停时的背景光效 */}
+                {/* 苹果风格的悬停背景光效 */}
                 <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg blur-sm" />
                 <span className="relative z-10 group-hover:tracking-wider transition-all duration-300">AURA</span>
               </MagneticButton>
@@ -303,7 +375,7 @@ const AppInner = () => {
                   { path: '/archive', label: 'Archive' },
                   { path: '/about', label: 'About' }
                 ].map((item) => (
-                  <RippleButton
+                  <motion.button
                     key={item.path}
                     onClick={() => handleNavigate(item.path)} 
                     className={`px-4 py-2 rounded-full transition-all duration-200 liquid-morph ${
@@ -311,10 +383,29 @@ const AppInner = () => {
                         ? 'text-white bg-white/15' 
                         : 'text-white/60 hover:text-white hover:bg-white/10'
                     }`}
-                    rippleColor="rgba(255, 255, 255, 0.3)"
+                    whileHover={{
+                      scale: 1.05,
+                      y: -1,
+                      backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                      transition: {
+                        type: "spring",
+                        stiffness: 400,
+                        damping: 25,
+                        duration: 0.2
+                      }
+                    }}
+                    whileTap={{
+                      scale: 0.95,
+                      transition: {
+                        type: "spring",
+                        stiffness: 600,
+                        damping: 30,
+                        duration: 0.1
+                      }
+                    }}
                   >
                     {item.label}
-                  </RippleButton>
+                  </motion.button>
                 ))}
               </div>
             </div>
@@ -324,7 +415,7 @@ const AppInner = () => {
 
       {/* Main Content - 智能页面切换动画系统 */}
       <motion.main 
-        className={`${isMobile ? 'pt-16 pb-32 px-4' : 'pt-32 pb-48 px-6'} max-w-7xl mx-auto relative`}
+        className={`${isMobile ? 'pb-32 px-4' : 'pb-48 px-6'} max-w-7xl mx-auto relative`}
         style={{
           willChange: 'transform',
           backfaceVisibility: 'hidden',
@@ -427,9 +518,10 @@ const AppInner = () => {
             </Routes>
           </AnimatePresence>
         </ErrorBoundary>
+        
+        {/* AI助手 - 跟随页面流动 */}
+        <Assistant />
       </motion.main>
-
-      <Assistant />
 
       {/* Footer - 移动端优化 */}
       <footer className={`${isMobile ? 'py-12 px-4' : 'py-32 px-6'} border-t border-white/10`}>
@@ -439,48 +531,125 @@ const AppInner = () => {
           </div>
           
           {isMobile ? (
-            // 移动端恢复翻转效果
+            // 移动端苹果风格翻转效果
             <div className="flex gap-6 text-xs uppercase tracking-wider font-bold text-white/60">
               {[
                 { label: 'QQ', value: CONTACT_INFO.QQ },
                 { label: 'WX', value: CONTACT_INFO.WX },
                 { label: 'MAIL', value: CONTACT_INFO.MAIL }
               ].map((contact) => (
-                <RippleButton
+                <motion.button
                   key={contact.label}
                   onClick={() => handleCopy(contact.value, contact.label)}
                   className="group relative overflow-hidden h-10 w-16 hover:text-white rounded-lg elastic-scale"
-                  rippleColor="rgba(255, 255, 255, 0.3)"
+                  whileHover={{
+                    scale: 1.05,
+                    y: -2,
+                    transition: {
+                      type: "spring",
+                      stiffness: 400,
+                      damping: 25,
+                      duration: 0.2
+                    }
+                  }}
+                  whileTap={{
+                    scale: 0.95,
+                    transition: {
+                      type: "spring",
+                      stiffness: 600,
+                      damping: 30,
+                      duration: 0.1
+                    }
+                  }}
                 >
-                  <div className="absolute inset-0 flex items-center justify-center group-hover:-translate-y-full transition-transform duration-500">
+                  <motion.div 
+                    className="absolute inset-0 flex items-center justify-center"
+                    animate={{ y: 0 }}
+                    whileHover={{ y: '-100%' }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 400,
+                      damping: 25,
+                      duration: 0.3
+                    }}
+                  >
                     {contact.label}
-                  </div>
-                  <div className="absolute inset-0 flex items-center justify-center translate-y-full group-hover:translate-y-0 transition-transform duration-500 text-white font-bold bg-white/10 rounded-lg">
+                  </motion.div>
+                  <motion.div 
+                    className="absolute inset-0 flex items-center justify-center text-white font-bold bg-white/10 rounded-lg"
+                    animate={{ y: '100%' }}
+                    whileHover={{ y: 0 }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 400,
+                      damping: 25,
+                      duration: 0.3
+                    }}
+                  >
                     COPY
-                  </div>
-                </RippleButton>
+                  </motion.div>
+                </motion.button>
               ))}
             </div>
           ) : (
-            // 桌面端完整版联系方式
+            // 桌面端苹果风格联系方式
             <div className="flex gap-12 text-sm uppercase tracking-wider font-bold text-white/60">
               {[
                 { label: 'QQ', value: CONTACT_INFO.QQ },
                 { label: 'WX', value: CONTACT_INFO.WX },
                 { label: 'MAIL', value: CONTACT_INFO.MAIL }
               ].map((contact) => (
-                <button
+                <motion.button
                   key={contact.label}
                   onClick={() => handleCopy(contact.value, contact.label)}
                   className="group relative overflow-hidden h-12 w-20 hover:text-white rounded-lg"
+                  whileHover={{
+                    scale: 1.05,
+                    y: -2,
+                    transition: {
+                      type: "spring",
+                      stiffness: 400,
+                      damping: 25,
+                      duration: 0.2
+                    }
+                  }}
+                  whileTap={{
+                    scale: 0.95,
+                    transition: {
+                      type: "spring",
+                      stiffness: 600,
+                      damping: 30,
+                      duration: 0.1
+                    }
+                  }}
                 >
-                  <div className="absolute inset-0 flex items-center justify-center group-hover:-translate-y-full transition-transform duration-500">
+                  <motion.div 
+                    className="absolute inset-0 flex items-center justify-center"
+                    animate={{ y: 0 }}
+                    whileHover={{ y: '-100%' }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 400,
+                      damping: 25,
+                      duration: 0.35
+                    }}
+                  >
                     {contact.label}
-                  </div>
-                  <div className="absolute inset-0 flex items-center justify-center translate-y-full group-hover:translate-y-0 transition-transform duration-500 text-white font-bold bg-white/10 rounded-lg">
+                  </motion.div>
+                  <motion.div 
+                    className="absolute inset-0 flex items-center justify-center text-white font-bold bg-white/10 rounded-lg"
+                    animate={{ y: '100%' }}
+                    whileHover={{ y: 0 }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 400,
+                      damping: 25,
+                      duration: 0.35
+                    }}
+                  >
                     COPY
-                  </div>
-                </button>
+                  </motion.div>
+                </motion.button>
               ))}
             </div>
           )}

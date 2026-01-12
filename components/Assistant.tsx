@@ -49,7 +49,7 @@ const Assistant = () => {
     return () => window.removeEventListener('resize', checkTouchDevice);
   }, []);
 
-  // 优化的状态切换处理 - 完全重写，模仿Google的交互
+  // 优化的状态切换处理 - 苹果风格交互
   const [isAnimating, setIsAnimating] = useState(false);
   
   const handleToggle = useCallback(() => {
@@ -59,10 +59,10 @@ const Assistant = () => {
     setIsAnimating(true);
     setIsOpen(prev => !prev);
     
-    // 动画完成后重置状态
+    // 苹果标准动画时长
     setTimeout(() => {
       setIsAnimating(false);
-    }, 400);
+    }, 350); // 苹果标准350ms
   }, [isAnimating]);
 
   // 键盘导航支持
@@ -185,17 +185,17 @@ const Assistant = () => {
 
   return (
     <>
-      {/* Google Material Design风格的FAB按钮 */}
+      {/* 苹果风格的FAB按钮 - 跟随页面流动 */}
       <motion.button
         onClick={handleToggle}
         disabled={isAnimating}
-        className={`fixed flex items-center justify-center bg-white shadow-lg border-0 focus:outline-none focus:ring-0 overflow-hidden ${
+        className={`assistant-button absolute flex items-center justify-center bg-white shadow-lg border-0 focus:outline-none focus:ring-0 overflow-hidden ${
           isMobile 
-            ? 'bottom-20 right-4' // 移动端在导航栏上方，避免冲突
+            ? 'bottom-6 right-4' // 移动端相对定位，跟随页面流动
             : 'bottom-8 right-8'
         } ${isAnimating ? 'pointer-events-none' : ''}`}
         style={{
-          height: isMobile ? '48px' : '56px', // 移动端稍小一些
+          height: isMobile ? '48px' : '56px',
           width: isMobile ? (isOpen ? '48px' : '100px') : (isOpen ? '56px' : '120px'),
           borderRadius: isMobile ? '24px' : '28px',
           willChange: 'transform, width',
@@ -209,50 +209,68 @@ const Assistant = () => {
           paddingRight: isOpen ? 0 : (isMobile ? 12 : 16),
         }}
         transition={{
-          type: "tween",
-          duration: 0.3,
-          ease: [0.4, 0.0, 0.2, 1], // Google's standard easing
+          type: "spring",
+          stiffness: 400,
+          damping: 30,
+          mass: 0.8,
+          duration: 0.35, // 苹果标准时长
         }}
         whileHover={!isAnimating ? {
           scale: 1.05,
-          boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
+          y: -2,
+          boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
           transition: {
-            duration: 0.2,
-            ease: [0.4, 0.0, 0.2, 1]
+            type: "spring",
+            stiffness: 400,
+            damping: 25,
+            duration: 0.2
           }
         } : {}}
         whileTap={!isAnimating ? {
           scale: 0.95,
+          y: 0,
           transition: {
-            duration: 0.1,
-            ease: [0.4, 0.0, 0.2, 1]
+            type: "spring",
+            stiffness: 600,
+            damping: 30,
+            duration: 0.1
           }
         } : {}}
         aria-label={isOpen ? "关闭AI助手" : "打开AI助手"}
         aria-expanded={isOpen}
       >
-        {/* Ripple效果背景 */}
+        {/* 苹果风格的涟漪效果背景 */}
         <motion.div
           className="absolute inset-0 bg-black/5 rounded-full"
           initial={{ scale: 0, opacity: 0 }}
-          whileTap={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.2 }}
+          whileTap={{ 
+            scale: 1, 
+            opacity: 1,
+            transition: {
+              type: "spring",
+              stiffness: 500,
+              damping: 30,
+              duration: 0.15
+            }
+          }}
         />
         
         <AnimatePresence mode="wait">
           {isOpen ? (
             <motion.div
               key="close-icon"
-              initial={{ opacity: 0, rotate: -180, scale: 0.5 }}
+              initial={{ opacity: 0, rotate: -90, scale: 0.8 }}
               animate={{ opacity: 1, rotate: 0, scale: 1 }}
-              exit={{ opacity: 0, rotate: 180, scale: 0.5 }}
+              exit={{ opacity: 0, rotate: 90, scale: 0.8 }}
               transition={{
-                duration: 0.3,
-                ease: [0.4, 0.0, 0.2, 1]
+                type: "spring",
+                stiffness: 400,
+                damping: 25,
+                duration: 0.35
               }}
               className="relative flex items-center justify-center w-6 h-6"
             >
-              {/* Material Design Close Icon */}
+              {/* 苹果风格的关闭图标 */}
               <svg
                 width="18"
                 height="18"
@@ -263,35 +281,44 @@ const Assistant = () => {
                 <motion.path
                   d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
                   fill="currentColor"
-                  initial={{ pathLength: 0 }}
-                  animate={{ pathLength: 1 }}
-                  transition={{ duration: 0.3, ease: [0.4, 0.0, 0.2, 1] }}
+                  initial={{ pathLength: 0, opacity: 0 }}
+                  animate={{ pathLength: 1, opacity: 1 }}
+                  transition={{ 
+                    type: "spring",
+                    stiffness: 300,
+                    damping: 25,
+                    duration: 0.4 
+                  }}
                 />
               </svg>
             </motion.div>
           ) : (
             <motion.div
               key="open-content"
-              initial={{ opacity: 0, x: -10, scale: 0.9 }}
+              initial={{ opacity: 0, x: -8, scale: 0.9 }}
               animate={{ opacity: 1, x: 0, scale: 1 }}
-              exit={{ opacity: 0, x: 10, scale: 0.9 }}
+              exit={{ opacity: 0, x: 8, scale: 0.9 }}
               transition={{
-                duration: 0.3,
-                ease: [0.4, 0.0, 0.2, 1]
+                type: "spring",
+                stiffness: 400,
+                damping: 25,
+                duration: 0.35
               }}
               className="flex items-center gap-3"
             >
               <motion.div
                 className="text-gray-700 text-lg"
                 animate={prefersReducedMotion ? {} : {
-                  rotate: [0, 5, -5, 0],
-                  scale: [1, 1.05, 1]
+                  rotate: [0, 3, -3, 0],
+                  scale: [1, 1.02, 1]
                 }}
                 transition={prefersReducedMotion ? {} : {
-                  duration: 3,
+                  type: "spring",
+                  stiffness: 200,
+                  damping: 20,
+                  duration: 2.5,
                   repeat: Infinity,
                   repeatDelay: 3,
-                  ease: [0.4, 0.0, 0.2, 1]
                 }}
               >
                 {ICONS.AI}
@@ -308,14 +335,16 @@ const Assistant = () => {
       <AnimatePresence>
         {isOpen && (
           <>
-            {/* 背景遮罩 - Material Design风格 */}
+            {/* 苹果风格的背景遮罩 */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{
-                duration: 0.25,
-                ease: [0.4, 0.0, 0.2, 1]
+                type: "spring",
+                stiffness: 300,
+                damping: 30,
+                duration: 0.3
               }}
               className="fixed inset-0 bg-black/40"
               style={{ 
@@ -327,12 +356,12 @@ const Assistant = () => {
               aria-label="点击关闭AI助手"
             />
             
-            {/* 聊天面板 - Material Design风格 */}
+            {/* 苹果风格的聊天面板 */}
             <motion.div
               initial={{ 
                 opacity: 0, 
-                y: 40, 
-                scale: 0.9
+                y: 30, 
+                scale: 0.95
               }}
               animate={{ 
                 opacity: 1, 
@@ -341,25 +370,28 @@ const Assistant = () => {
               }}
               exit={{ 
                 opacity: 0, 
-                y: 40, 
-                scale: 0.9
+                y: 30, 
+                scale: 0.95
               }}
               transition={{
-                duration: 0.3,
-                ease: [0.4, 0.0, 0.2, 1]
+                type: "spring",
+                stiffness: 400,
+                damping: 30,
+                mass: 0.8,
+                duration: 0.35
               }}
-              className="fixed bg-gray-900/95 backdrop-blur-xl border border-gray-700/50 rounded-3xl flex flex-col overflow-hidden shadow-2xl"
+              className="absolute bg-gray-900/95 backdrop-blur-xl border border-gray-700/50 rounded-3xl flex flex-col overflow-hidden shadow-2xl"
               style={{
-                // 移动端和桌面端不同的定位
+                // 移动端和桌面端不同的定位 - 现在相对于按钮定位
                 ...(isMobile ? {
-                  bottom: '6rem', // 在AI助手按钮上方
-                  left: '1rem',
-                  right: '1rem',
-                  width: 'calc(100vw - 2rem)',
-                  maxHeight: '50vh', // 移动端限制高度，确保不遮挡导航栏
+                  bottom: '4rem', // 在AI助手按钮上方
+                  right: '0',
+                  left: '-15rem', // 向左扩展，确保有足够宽度
+                  width: '20rem',
+                  maxHeight: '60vh',
                 } : {
-                  bottom: '7rem',
-                  right: '2rem',
+                  bottom: '5rem',
+                  right: '0',
                   width: '24rem',
                   maxHeight: '32rem',
                 }),
@@ -372,15 +404,17 @@ const Assistant = () => {
               aria-label="AI助手聊天面板"
               aria-modal="true"
             >
-              {/* Header - Material Design风格 */}
+              {/* Header - 苹果风格 */}
               <motion.div 
                 className="px-6 py-5 border-b border-gray-700/50 flex items-center justify-between bg-gradient-to-r from-gray-800/50 to-gray-900/30"
-                initial={{ opacity: 0, y: -20 }}
+                initial={{ opacity: 0, y: -15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ 
-                  delay: 0.1, 
-                  duration: 0.25,
-                  ease: [0.4, 0.0, 0.2, 1]
+                  type: "spring",
+                  stiffness: 400,
+                  damping: 25,
+                  delay: 0.1,
+                  duration: 0.25
                 }}
               >
                 <div className="flex items-center gap-3">
@@ -391,9 +425,11 @@ const Assistant = () => {
                       opacity: [0.7, 1, 0.7]
                     }}
                     transition={prefersReducedMotion ? {} : { 
+                      type: "spring",
+                      stiffness: 200,
+                      damping: 20,
                       duration: 2, 
-                      repeat: Infinity,
-                      ease: [0.4, 0.0, 0.2, 1]
+                      repeat: Infinity
                     }}
                   />
                   <h3 className="text-gray-300 text-xs font-medium uppercase tracking-wider">Assistant Aura</h3>
@@ -405,8 +441,10 @@ const Assistant = () => {
                     animate={{ scale: 1, opacity: 1 }}
                     exit={{ scale: 0, opacity: 0 }}
                     transition={{ 
-                      duration: 0.2,
-                      ease: [0.4, 0.0, 0.2, 1]
+                      type: "spring",
+                      stiffness: 400,
+                      damping: 25,
+                      duration: 0.2
                     }}
                   >
                     冷却中 {rateLimited}s
