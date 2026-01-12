@@ -390,6 +390,91 @@ export const ParticleExplosion: React.FC<ParticleExplosionProps> = ({
   );
 };
 
+// 苹果风格3D翻转卡片
+interface AppleFlipCardProps {
+  children: React.ReactNode;
+  backContent: React.ReactNode;
+  className?: string;
+  onClick?: () => void;
+  isMobile?: boolean;
+}
+
+export const AppleFlipCard: React.FC<AppleFlipCardProps> = ({ 
+  children, 
+  backContent,
+  className = "", 
+  onClick,
+  isMobile = false
+}) => {
+  return (
+    <motion.button
+      onClick={onClick}
+      className={`group relative ${className}`}
+      style={{ 
+        perspective: '1000px',
+        transformStyle: 'preserve-3d'
+      }}
+      whileHover={!isMobile ? {
+        y: -3,
+        transition: {
+          type: "spring",
+          stiffness: 400,
+          damping: 25,
+          duration: 0.2
+        }
+      } : undefined}
+      whileTap={{
+        scale: 0.95,
+        transition: {
+          type: "spring",
+          stiffness: 600,
+          damping: 30,
+          duration: 0.1
+        }
+      }}
+    >
+      {/* 前面 */}
+      <motion.div 
+        className="absolute inset-0 flex items-center justify-center bg-white/5 rounded-lg border border-white/10 backdrop-blur-sm"
+        style={{ 
+          backfaceVisibility: 'hidden',
+          transformStyle: 'preserve-3d'
+        }}
+        animate={{ rotateY: 0 }}
+        whileHover={{ rotateY: 180 }}
+        transition={{
+          type: "spring",
+          stiffness: isMobile ? 300 : 280,
+          damping: isMobile ? 25 : 22,
+          duration: isMobile ? 0.6 : 0.7
+        }}
+      >
+        {children}
+      </motion.div>
+      
+      {/* 背面 */}
+      <motion.div 
+        className="absolute inset-0 flex items-center justify-center bg-white/15 rounded-lg border border-white/20 backdrop-blur-sm"
+        style={{ 
+          backfaceVisibility: 'hidden',
+          transformStyle: 'preserve-3d',
+          rotateY: '180deg'
+        }}
+        animate={{ rotateY: 180 }}
+        whileHover={{ rotateY: 0 }}
+        transition={{
+          type: "spring",
+          stiffness: isMobile ? 300 : 280,
+          damping: isMobile ? 25 : 22,
+          duration: isMobile ? 0.6 : 0.7
+        }}
+      >
+        {backContent}
+      </motion.div>
+    </motion.button>
+  );
+};
+
 // 呼吸光效
 interface BreathingGlowProps {
   children: React.ReactNode;
