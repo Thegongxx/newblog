@@ -439,14 +439,14 @@ const AppInner = () => {
                   <MobilePageTransition>
                     <Feed posts={posts} loading={loading} onSelectPost={(p) => {
                       setNavigationMethod('slideRight');
-                      navigate(`/post/${p.slug}`);
+                      navigate(`/post/${p.slug}`, { state: { from: '/' } });
                     }} />
                   </MobilePageTransition>
                 ) : (
                   <PageTransition>
                     <Feed posts={posts} loading={loading} onSelectPost={(p) => {
                       setNavigationMethod('slideDown');
-                      navigate(`/post/${p.slug}`);
+                      navigate(`/post/${p.slug}`, { state: { from: '/' } });
                     }} />
                   </PageTransition>
                 )
@@ -489,14 +489,14 @@ const AppInner = () => {
                   <MobilePageTransition>
                     <Archive posts={posts} loading={loading} onSelectPost={(p) => {
                       setNavigationMethod('slideRight');
-                      navigate(`/post/${p.slug}`);
+                      navigate(`/post/${p.slug}`, { state: { from: '/archive' } });
                     }} />
                   </MobilePageTransition>
                 ) : (
                   <PageTransition>
                     <Archive posts={posts} loading={loading} onSelectPost={(p) => {
                       setNavigationMethod('slideDown');
-                      navigate(`/post/${p.slug}`);
+                      navigate(`/post/${p.slug}`, { state: { from: '/archive' } });
                     }} />
                   </PageTransition>
                 )
@@ -529,125 +529,47 @@ const AppInner = () => {
           </div>
           
           {isMobile ? (
-            // 移动端苹果风格翻转效果
+            // 移动端恢复翻转效果 - 缩小尺寸
             <div className="flex gap-6 text-xs uppercase tracking-wider font-bold text-white/60">
               {[
                 { label: 'QQ', value: CONTACT_INFO.QQ },
                 { label: 'WX', value: CONTACT_INFO.WX },
                 { label: 'MAIL', value: CONTACT_INFO.MAIL }
               ].map((contact) => (
-                <motion.button
+                <button
                   key={contact.label}
                   onClick={() => handleCopy(contact.value, contact.label)}
-                  className="group relative overflow-hidden h-10 w-16 hover:text-white rounded-lg elastic-scale"
-                  whileHover={{
-                    scale: 1.05,
-                    y: -2,
-                    transition: {
-                      type: "spring",
-                      stiffness: 400,
-                      damping: 25,
-                      duration: 0.2
-                    }
-                  }}
-                  whileTap={{
-                    scale: 0.95,
-                    transition: {
-                      type: "spring",
-                      stiffness: 600,
-                      damping: 30,
-                      duration: 0.1
-                    }
-                  }}
+                  className="group relative overflow-hidden h-8 w-12 hover:text-white rounded-lg transition-colors duration-300"
                 >
-                  <motion.div
-                    className="absolute inset-0 flex items-center justify-center"
-                    animate={{ y: 0 }}
-                    whileHover={{ y: '-100%' }}
-                    transition={{
-                      type: "spring",
-                      stiffness: 400,
-                      damping: 25,
-                      duration: 0.3
-                    }}
-                  >
+                  <div className="absolute inset-0 flex items-center justify-center group-hover:-translate-y-full transition-transform duration-500">
                     {contact.label}
-                  </motion.div>
-                  <motion.div
-                    className="absolute inset-0 flex items-center justify-center text-white font-bold bg-white/10 rounded-lg"
-                    animate={{ y: '100%' }}
-                    whileHover={{ y: 0 }}
-                    transition={{
-                      type: "spring",
-                      stiffness: 400,
-                      damping: 25,
-                      duration: 0.3
-                    }}
-                  >
+                  </div>
+                  <div className="absolute inset-0 flex items-center justify-center translate-y-full group-hover:translate-y-0 transition-transform duration-500 text-white font-bold bg-white/10 rounded-lg text-[10px]">
                     COPY
-                  </motion.div>
-                </motion.button>
+                  </div>
+                </button>
               ))}
             </div>
           ) : (
-            // 桌面端苹果风格联系方式
+            // 桌面端完整版联系方式 - 缩小尺寸
             <div className="flex gap-12 text-sm uppercase tracking-wider font-bold text-white/60">
               {[
                 { label: 'QQ', value: CONTACT_INFO.QQ },
                 { label: 'WX', value: CONTACT_INFO.WX },
                 { label: 'MAIL', value: CONTACT_INFO.MAIL }
               ].map((contact) => (
-                <motion.button
+                <button
                   key={contact.label}
                   onClick={() => handleCopy(contact.value, contact.label)}
-                  className="group relative overflow-hidden h-12 w-20 hover:text-white rounded-lg"
-                  whileHover={{
-                    scale: 1.05,
-                    y: -2,
-                    transition: {
-                      type: "spring",
-                      stiffness: 400,
-                      damping: 25,
-                      duration: 0.2
-                    }
-                  }}
-                  whileTap={{
-                    scale: 0.95,
-                    transition: {
-                      type: "spring",
-                      stiffness: 600,
-                      damping: 30,
-                      duration: 0.1
-                    }
-                  }}
+                  className="group relative overflow-hidden h-10 w-16 hover:text-white rounded-lg transition-colors duration-300"
                 >
-                  <motion.div
-                    className="absolute inset-0 flex items-center justify-center"
-                    animate={{ y: 0 }}
-                    whileHover={{ y: '-100%' }}
-                    transition={{
-                      type: "spring",
-                      stiffness: 400,
-                      damping: 25,
-                      duration: 0.35
-                    }}
-                  >
+                  <div className="absolute inset-0 flex items-center justify-center group-hover:-translate-y-full transition-transform duration-500">
                     {contact.label}
-                  </motion.div>
-                  <motion.div
-                    className="absolute inset-0 flex items-center justify-center text-white font-bold bg-white/10 rounded-lg"
-                    animate={{ y: '100%' }}
-                    whileHover={{ y: 0 }}
-                    transition={{
-                      type: "spring",
-                      stiffness: 400,
-                      damping: 25,
-                      duration: 0.35
-                    }}
-                  >
+                  </div>
+                  <div className="absolute inset-0 flex items-center justify-center translate-y-full group-hover:translate-y-0 transition-transform duration-500 text-white font-bold bg-white/10 rounded-lg">
                     COPY
-                  </motion.div>
-                </motion.button>
+                  </div>
+                </button>
               ))}
             </div>
           )}

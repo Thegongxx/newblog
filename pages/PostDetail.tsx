@@ -36,12 +36,8 @@ const PostDetail: React.FC<PostDetailProps> = ({ posts, loading }) => {
         if (location.state?.from) {
             navigate(location.state.from);
         } else {
-            // 根据当前路径判断返回目标
-            if (location.pathname.includes('/post/')) {
-                navigate('/'); // 返回主页
-            } else {
-                navigate('/'); // 默认返回主页
-            }
+            // 文章详情页应该返回到主页（Feed页面）
+            navigate('/');
         }
     };
 

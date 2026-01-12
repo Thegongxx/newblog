@@ -94,7 +94,7 @@ const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
                                 willChange: 'transform',
                                 backfaceVisibility: 'hidden'
                             }}
-                            onClick={() => navigate(`/note/${note.id}`)}
+                            onClick={() => navigate(`/note/${note.id}`, { state: { from: '/notes' } })}
                             // 桌面端专属：纸张翻页效果
                             whileHover={!isMobile ? {
                                 y: -8,
@@ -162,7 +162,7 @@ const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            navigate(`/note/${note.id}`);
+                                            navigate(`/note/${note.id}`, { state: { from: '/notes' } });
                                         }}
                                         className={`text-[10px] md:text-xs font-bold text-white/30 uppercase tracking-widest transition-all duration-300 ${
                                             !isMobile 
