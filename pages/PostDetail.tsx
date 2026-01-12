@@ -85,7 +85,7 @@ const PostDetail: React.FC<PostDetailProps> = ({ posts, loading }) => {
             <motion.button 
                 onClick={handleBackToList} 
                 className={`group flex items-center gap-2 md:gap-3 text-white/40 hover:text-white transition-all duration-200 mb-8 md:mb-12 px-4 md:px-6 py-2 md:py-3 rounded-full backdrop-blur-xl bg-white/[0.02] border border-white/5 ${
-                    isMobile ? 'fixed top-24 left-4' : 'relative'
+                    isMobile ? 'fixed top-28 left-4' : 'relative'
                 }`}
                 style={isMobile ? { zIndex: Z_INDEX.BACK_BUTTON } : {}}
                 whileHover={{ scale: 1.02, x: -4 }}
@@ -98,7 +98,7 @@ const PostDetail: React.FC<PostDetailProps> = ({ posts, loading }) => {
             </motion.button>
 
             {/* 移动端为固定返回按钮留出空间 */}
-            <div className={isMobile ? 'mt-16' : ''}>
+            <div className={isMobile ? 'mt-20' : ''}>
                 <header className="mb-12 md:mb-20">
                     <div className="flex items-center gap-2 md:gap-3 text-white/30 text-[9px] md:text-[10px] font-bold uppercase tracking-widest md:tracking-[0.3em] mb-4 md:mb-6">
                         <span>{post.date}</span>

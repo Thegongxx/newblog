@@ -189,9 +189,9 @@ const Assistant = () => {
       <motion.button
         onClick={handleToggle}
         disabled={isAnimating}
-        className={`assistant-button absolute flex items-center justify-center bg-white shadow-lg border-0 focus:outline-none focus:ring-0 overflow-hidden ${
+        className={`assistant-button fixed flex items-center justify-center bg-white shadow-lg border-0 focus:outline-none focus:ring-0 overflow-hidden ${
           isMobile 
-            ? 'bottom-6 right-4' // 移动端相对定位，跟随页面流动
+            ? 'bottom-6 right-4' // 移动端固定定位，始终跟随用户屏幕
             : 'bottom-8 right-8'
         } ${isAnimating ? 'pointer-events-none' : ''}`}
         style={{
@@ -380,18 +380,19 @@ const Assistant = () => {
                 mass: 0.8,
                 duration: 0.35
               }}
-              className="absolute bg-gray-900/95 backdrop-blur-xl border border-gray-700/50 rounded-3xl flex flex-col overflow-hidden shadow-2xl"
+              className="fixed bg-gray-900/95 backdrop-blur-xl border border-gray-700/50 rounded-3xl flex flex-col overflow-hidden shadow-2xl"
               style={{
-                // 移动端和桌面端不同的定位 - 现在相对于按钮定位
+                // 移动端和桌面端不同的定位 - 固定在屏幕上
                 ...(isMobile ? {
-                  bottom: '4rem', // 在AI助手按钮上方
-                  right: '0',
-                  left: '-15rem', // 向左扩展，确保有足够宽度
-                  width: '20rem',
+                  bottom: '6rem', // 在固定的AI助手按钮上方
+                  right: '1rem', // 与按钮右边对齐
+                  left: '1rem', // 左边距，确保不超出屏幕
+                  width: 'auto', // 自动宽度
                   maxHeight: '60vh',
+                  maxWidth: '20rem', // 最大宽度限制
                 } : {
-                  bottom: '5rem',
-                  right: '0',
+                  bottom: '6rem', // 在固定的AI助手按钮上方
+                  right: '2rem', // 与按钮右边对齐
                   width: '24rem',
                   maxHeight: '32rem',
                 }),

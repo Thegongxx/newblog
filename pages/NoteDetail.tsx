@@ -115,7 +115,7 @@ const NoteDetail: React.FC = () => {
         <motion.button
           onClick={() => navigate('/notes')}
           className={`group flex items-center gap-2 text-white/60 hover:text-white transition-all duration-300 mb-6 md:mb-8 px-4 py-2 rounded-full backdrop-blur-xl bg-white/[0.02] border border-white/5 ${
-            isMobile ? 'fixed top-24 left-4' : 'relative'
+            isMobile ? 'fixed top-28 left-4' : 'relative'
           }`}
           style={isMobile ? { zIndex: Z_INDEX.BACK_BUTTON, ...appleFadeIn } : appleFadeIn}
           whileHover={{ scale: 1.02, x: -4 }}
@@ -128,7 +128,7 @@ const NoteDetail: React.FC = () => {
         </motion.button>
 
         {/* 移动端为固定返回按钮留出空间 */}
-        <div className={isMobile ? 'mt-16' : ''}>
+        <div className={isMobile ? 'mt-20' : ''}>
 
         {/* 笔记内容 - 分层渐入 */}
         <article 

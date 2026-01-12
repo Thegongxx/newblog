@@ -228,13 +228,11 @@ const AppInner = () => {
         )}
       </AnimatePresence>
 
-      {/* Navigation - 灵动岛风格，跟随页面自然流动 */}
+      {/* Navigation - iPhone灵动岛风格，固定在屏幕顶部 */}
       <motion.nav 
-        className={`${isMobile ? 'px-4 pt-3' : 'flex justify-center pt-6 px-4'}`}
+        className={`fixed top-0 left-0 right-0 ${isMobile ? 'px-4 pt-3' : 'flex justify-center pt-6 px-4'}`}
         style={{ 
           zIndex: Z_INDEX.NAVIGATION,
-          // 移除fixed定位，让导航栏自然跟随页面流动
-          position: 'relative',
           willChange: 'transform',
           backfaceVisibility: 'hidden',
         }}
@@ -415,7 +413,7 @@ const AppInner = () => {
 
       {/* Main Content - 智能页面切换动画系统 */}
       <motion.main 
-        className={`${isMobile ? 'pb-32 px-4' : 'pb-48 px-6'} max-w-7xl mx-auto relative`}
+        className={`${isMobile ? 'pb-32 px-4 pt-20' : 'pb-48 px-6 pt-24'} max-w-7xl mx-auto relative`}
         style={{
           willChange: 'transform',
           backfaceVisibility: 'hidden',
