@@ -88,21 +88,66 @@ const PostDetail: React.FC<PostDetailProps> = ({ posts, loading }) => {
             {/* 返回按钮 - 移动端优化位置 */}
             <motion.button 
                 onClick={handleBackToList} 
-                className={`group flex items-center gap-2 md:gap-3 text-white/40 hover:text-white transition-all duration-200 mb-8 md:mb-12 px-4 md:px-6 py-2 md:py-3 rounded-full backdrop-blur-xl bg-white/[0.02] border border-white/5 ${
-                    isMobile ? 'fixed top-28 left-4' : 'relative'
+                className={`group flex items-center gap-2 md:gap-3 text-white/40 hover:text-white transition-all duration-300 mb-8 md:mb-12 px-4 md:px-6 py-2 md:py-3 rounded-full backdrop-blur-xl bg-white/[0.02] hover:bg-white/[0.08] border border-white/5 hover:border-white/15 ${
+                    isMobile ? 'fixed top-24 left-4' : 'relative'
                 }`}
-                style={isMobile ? { zIndex: Z_INDEX.BACK_BUTTON } : {}}
-                whileHover={{ scale: 1.02, x: -4 }}
-                whileTap={{ scale: 0.98 }}
+                style={isMobile ? { 
+                    zIndex: Z_INDEX.BACK_BUTTON,
+                    // 确保按钮始终可点击
+                    pointerEvents: 'auto',
+                    // 防止被其他元素遮挡
+                    isolation: 'isolate',
+                    // 增加点击区域
+                    minWidth: '44px',
+                    minHeight: '44px'
+                } : {}}
+                whileHover={{ 
+                    scale: 1.05, 
+                    x: -6,
+                    transition: {
+                        type: "spring",
+                        stiffness: 400,
+                        damping: 25,
+                        duration: 0.2
+                    }
+                }}
+                whileTap={{ 
+                    scale: 0.95,
+                    transition: {
+                        type: "spring",
+                        stiffness: 600,
+                        damping: 30,
+                        duration: 0.1
+                    }
+                }}
             >
-                <motion.div className="rotate-180">
+                <motion.div 
+                    className="rotate-180"
+                    whileHover={{
+                        x: -2,
+                        transition: {
+                            type: "spring",
+                            stiffness: 400,
+                            damping: 25,
+                            duration: 0.2
+                        }
+                    }}
+                >
                     {ICONS.CHEVRON_RIGHT}
                 </motion.div>
-                <span className="text-xs md:text-sm font-medium">返回</span>
+                <span className="text-xs md:text-sm font-medium group-hover:tracking-wider transition-all duration-300">返回</span>
+                
+                {/* 悬停时的光晕效果 */}
+                <motion.div
+                    className="absolute inset-0 rounded-full bg-gradient-to-r from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                    initial={{ scale: 0.8 }}
+                    whileHover={{ scale: 1 }}
+                    transition={{ duration: 0.3 }}
+                />
             </motion.button>
 
             {/* 移动端为固定返回按钮留出空间 */}
-            <div className={isMobile ? 'mt-20' : ''}>
+            <div className={isMobile ? 'mt-16' : ''}>
                 <header className="mb-12 md:mb-20">
                     <div className="flex items-center gap-2 md:gap-3 text-white/30 text-[9px] md:text-[10px] font-bold uppercase tracking-widest md:tracking-[0.3em] mb-4 md:mb-6">
                         <span>{post.date}</span>
