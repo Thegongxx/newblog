@@ -7,12 +7,14 @@ import { useNotesCache } from '../services/cacheService';
 import { ICONS } from '../constants';
 import { Z_INDEX } from '../constants/zIndex';
 import { useIsMobile } from '../hooks/useResponsive';
+import { usePageTransition } from '../hooks/usePageTransition';
 import type { FileNote } from '../types';
 
 const NoteDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const { setNavigationMethod } = usePageTransition();
   const [error, setError] = useState<string | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   
@@ -113,7 +115,15 @@ const NoteDetail: React.FC = () => {
       <div className="max-w-4xl mx-auto">
         {/* 返回按钮 - 移动端优化位置 */}
         <motion.button
-          onClick={() => navigate('/notes')}
+          onClick={() => {
+            // 设置返回动画
+            if (isMobile) {
+              setNavigationMethod('slideLeft'); // 移动端从左滑入
+            } else {
+              setNavigationMethod('slideUp'); // 桌面端从下方滑入
+            }
+            navigate('/notes');
+          }}
           className={`group flex items-center gap-2 text-white/60 hover:text-white transition-all duration-300 mb-6 md:mb-8 px-4 py-2 rounded-full backdrop-blur-xl bg-white/[0.02] border border-white/5 ${
             isMobile ? 'fixed top-28 left-4' : 'relative'
           }`}

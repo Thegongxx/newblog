@@ -57,7 +57,7 @@ export const pageTransitions = {
   slideUp: {
     initial: { y: '30%', opacity: 0 },
     animate: { y: 0, opacity: 1 },
-    exit: { y: 0, opacity: 0 },
+    exit: { y: 0, opacity: 0 }, // 原页面保持位置，只是渐出
     transition: {
       desktop: getDesktopTransition(0.4),
       mobile: getMobileTransition(0.35)
@@ -112,7 +112,7 @@ export const pageTransitions = {
   slideLeft: {
     initial: { x: '-30%', opacity: 0, scale: 0.95 },
     animate: { x: 0, opacity: 1, scale: 1 },
-    exit: { x: '100%', opacity: 0 },
+    exit: { x: 0, opacity: 0 }, // 原页面保持位置，只是渐出
     transition: {
       desktop: getDesktopTransition(0.3),
       mobile: getMobileTransition(0.25)

@@ -8,6 +8,7 @@ import { Z_INDEX } from '../constants/zIndex';
 import { engagementApi } from '../services/supabaseService';
 import { Post } from '../types';
 import { useIsMobile } from '../hooks/useResponsive';
+import { usePageTransition } from '../hooks/usePageTransition';
 
 interface PostDetailProps {
     posts: Post[];
@@ -19,20 +20,27 @@ const PostDetail: React.FC<PostDetailProps> = ({ posts, loading }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const isMobile = useIsMobile();
+    const { setNavigationMethod } = usePageTransition();
     const post = posts.find(p => p.slug === slug);
 
     // Google Material Design 风格的返回动画
     const handleBackToList = () => {
-        // 立即导航，不要退出动画
+        // 设置返回动画
+        if (isMobile) {
+            setNavigationMethod('slideLeft'); // 移动端从左滑入
+        } else {
+            setNavigationMethod('slideUp'); // 桌面端从下方滑入
+        }
+        
+        // 优先使用来源信息进行导航
         if (location.state?.from) {
             navigate(location.state.from);
         } else {
-            // 如果没有来源信息，使用浏览器历史记录
-            if (window.history.length > 1) {
-                navigate(-1);
+            // 根据当前路径判断返回目标
+            if (location.pathname.includes('/post/')) {
+                navigate('/'); // 返回主页
             } else {
-                // 最后的备选方案：返回主页
-                navigate('/');
+                navigate('/'); // 默认返回主页
             }
         }
     };

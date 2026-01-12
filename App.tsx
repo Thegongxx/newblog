@@ -529,7 +529,7 @@ const AppInner = () => {
           </div>
           
           {isMobile ? (
-            // 移动端苹果风格3D翻转效果
+            // 移动端苹果风格翻转效果
             <div className="flex gap-6 text-xs uppercase tracking-wider font-bold text-white/60">
               {[
                 { label: 'QQ', value: CONTACT_INFO.QQ },
@@ -539,80 +539,10 @@ const AppInner = () => {
                 <motion.button
                   key={contact.label}
                   onClick={() => handleCopy(contact.value, contact.label)}
-                  className="group relative h-10 w-16 rounded-lg"
-                  style={{ 
-                    perspective: '1000px',
-                    transformStyle: 'preserve-3d'
-                  }}
-                  whileTap={{
-                    scale: 0.95,
-                    transition: {
-                      type: "spring",
-                      stiffness: 600,
-                      damping: 30,
-                      duration: 0.1
-                    }
-                  }}
-                >
-                  {/* 前面 - 显示标签 */}
-                  <motion.div 
-                    className="absolute inset-0 flex items-center justify-center bg-white/5 rounded-lg border border-white/10 backdrop-blur-sm"
-                    style={{ 
-                      backfaceVisibility: 'hidden',
-                      transformStyle: 'preserve-3d'
-                    }}
-                    animate={{ rotateY: 0 }}
-                    whileHover={{ rotateY: 180 }}
-                    transition={{
-                      type: "spring",
-                      stiffness: 300,
-                      damping: 25,
-                      duration: 0.6
-                    }}
-                  >
-                    <span className="text-white/80">{contact.label}</span>
-                  </motion.div>
-                  
-                  {/* 背面 - 显示COPY */}
-                  <motion.div 
-                    className="absolute inset-0 flex items-center justify-center bg-white/15 rounded-lg border border-white/20 backdrop-blur-sm"
-                    style={{ 
-                      backfaceVisibility: 'hidden',
-                      transformStyle: 'preserve-3d',
-                      rotateY: '180deg'
-                    }}
-                    animate={{ rotateY: 180 }}
-                    whileHover={{ rotateY: 0 }}
-                    transition={{
-                      type: "spring",
-                      stiffness: 300,
-                      damping: 25,
-                      duration: 0.6
-                    }}
-                  >
-                    <span className="text-white font-bold text-[10px]">COPY</span>
-                  </motion.div>
-                </motion.button>
-              ))}
-            </div>
-          ) : (
-            // 桌面端苹果风格3D翻转效果
-            <div className="flex gap-12 text-sm uppercase tracking-wider font-bold text-white/60">
-              {[
-                { label: 'QQ', value: CONTACT_INFO.QQ },
-                { label: 'WX', value: CONTACT_INFO.WX },
-                { label: 'MAIL', value: CONTACT_INFO.MAIL }
-              ].map((contact) => (
-                <motion.button
-                  key={contact.label}
-                  onClick={() => handleCopy(contact.value, contact.label)}
-                  className="group relative h-12 w-20 rounded-lg"
-                  style={{ 
-                    perspective: '1000px',
-                    transformStyle: 'preserve-3d'
-                  }}
+                  className="group relative overflow-hidden h-10 w-16 hover:text-white rounded-lg elastic-scale"
                   whileHover={{
-                    y: -3,
+                    scale: 1.05,
+                    y: -2,
                     transition: {
                       type: "spring",
                       stiffness: 400,
@@ -630,43 +560,92 @@ const AppInner = () => {
                     }
                   }}
                 >
-                  {/* 前面 - 显示标签 */}
-                  <motion.div 
-                    className="absolute inset-0 flex items-center justify-center bg-white/5 rounded-lg border border-white/10 backdrop-blur-sm"
-                    style={{ 
-                      backfaceVisibility: 'hidden',
-                      transformStyle: 'preserve-3d'
-                    }}
-                    animate={{ rotateY: 0 }}
-                    whileHover={{ rotateY: 180 }}
+                  <motion.div
+                    className="absolute inset-0 flex items-center justify-center"
+                    animate={{ y: 0 }}
+                    whileHover={{ y: '-100%' }}
                     transition={{
                       type: "spring",
-                      stiffness: 280,
-                      damping: 22,
-                      duration: 0.7
+                      stiffness: 400,
+                      damping: 25,
+                      duration: 0.3
                     }}
                   >
-                    <span className="text-white/80">{contact.label}</span>
+                    {contact.label}
                   </motion.div>
-                  
-                  {/* 背面 - 显示COPY */}
-                  <motion.div 
-                    className="absolute inset-0 flex items-center justify-center bg-white/15 rounded-lg border border-white/20 backdrop-blur-sm"
-                    style={{ 
-                      backfaceVisibility: 'hidden',
-                      transformStyle: 'preserve-3d',
-                      rotateY: '180deg'
-                    }}
-                    animate={{ rotateY: 180 }}
-                    whileHover={{ rotateY: 0 }}
+                  <motion.div
+                    className="absolute inset-0 flex items-center justify-center text-white font-bold bg-white/10 rounded-lg"
+                    animate={{ y: '100%' }}
+                    whileHover={{ y: 0 }}
                     transition={{
                       type: "spring",
-                      stiffness: 280,
-                      damping: 22,
-                      duration: 0.7
+                      stiffness: 400,
+                      damping: 25,
+                      duration: 0.3
                     }}
                   >
-                    <span className="text-white font-bold">COPY</span>
+                    COPY
+                  </motion.div>
+                </motion.button>
+              ))}
+            </div>
+          ) : (
+            // 桌面端苹果风格联系方式
+            <div className="flex gap-12 text-sm uppercase tracking-wider font-bold text-white/60">
+              {[
+                { label: 'QQ', value: CONTACT_INFO.QQ },
+                { label: 'WX', value: CONTACT_INFO.WX },
+                { label: 'MAIL', value: CONTACT_INFO.MAIL }
+              ].map((contact) => (
+                <motion.button
+                  key={contact.label}
+                  onClick={() => handleCopy(contact.value, contact.label)}
+                  className="group relative overflow-hidden h-12 w-20 hover:text-white rounded-lg"
+                  whileHover={{
+                    scale: 1.05,
+                    y: -2,
+                    transition: {
+                      type: "spring",
+                      stiffness: 400,
+                      damping: 25,
+                      duration: 0.2
+                    }
+                  }}
+                  whileTap={{
+                    scale: 0.95,
+                    transition: {
+                      type: "spring",
+                      stiffness: 600,
+                      damping: 30,
+                      duration: 0.1
+                    }
+                  }}
+                >
+                  <motion.div
+                    className="absolute inset-0 flex items-center justify-center"
+                    animate={{ y: 0 }}
+                    whileHover={{ y: '-100%' }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 400,
+                      damping: 25,
+                      duration: 0.35
+                    }}
+                  >
+                    {contact.label}
+                  </motion.div>
+                  <motion.div
+                    className="absolute inset-0 flex items-center justify-center text-white font-bold bg-white/10 rounded-lg"
+                    animate={{ y: '100%' }}
+                    whileHover={{ y: 0 }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 400,
+                      damping: 25,
+                      duration: 0.35
+                    }}
+                  >
+                    COPY
                   </motion.div>
                 </motion.button>
               ))}
