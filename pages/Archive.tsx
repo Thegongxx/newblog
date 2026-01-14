@@ -53,16 +53,16 @@ const Archive: React.FC<ArchiveProps> = ({ posts, loading, onSelectPost }) => {
 
   if (loading) {
     return (
-      <div className="max-w-4xl py-12">
-        <div className="animate-pulse">
-          <div className="h-12 w-48 bg-white/5 rounded-lg mb-12" />
-          <div className="space-y-8">
+      <div className="max-w-4xl py-10 md:py-12">
+        <div className="animate-pulse space-y-10">
+          <div className="h-10 w-40 bg-white/5 rounded-lg" />
+          <div className="space-y-6">
             {[1, 2, 3].map(i => (
-              <div key={i} className="space-y-4">
-                <div className="h-8 w-20 bg-white/5 rounded" />
-                <div className="space-y-3">
+              <div key={i} className="space-y-3">
+                <div className="h-6 w-16 bg-white/5 rounded" />
+                <div className="space-y-2">
                   {[1, 2, 3].map(j => (
-                    <div key={j} className="h-6 w-full bg-white/5 rounded" />
+                    <div key={j} className="h-5 w-full bg-white/5 rounded" />
                   ))}
                 </div>
               </div>
@@ -81,11 +81,11 @@ const Archive: React.FC<ArchiveProps> = ({ posts, loading, onSelectPost }) => {
       animate="visible"
     >
       <motion.div className="mb-10 md:mb-16" variants={itemVariants}>
-        <h1 className="text-4xl md:text-6xl font-bold tracking-tighter mb-4 md:mb-6 text-white">
+        <h1 className="text-3xl md:text-6xl font-bold tracking-tight mb-3 md:mb-5 text-white">
           Archive
         </h1>
-        <p className="text-white/40 text-base md:text-lg">
-          {posts.length} 篇文章
+        <p className="text-white/40 text-sm md:text-base">
+          一起翻一翻之前写下的东西 · {posts.length} 篇
         </p>
       </motion.div>
 
@@ -107,7 +107,7 @@ const Archive: React.FC<ArchiveProps> = ({ posts, loading, onSelectPost }) => {
                 </span>
               </div>
 
-              <div className="space-y-8 md:space-y-12">
+              <div className="space-y-7 md:space-y-10">
                 {yearMonths.map(yearMonth => {
                   const monthPosts = yearData[yearMonth];
                   const [, monthStr] = yearMonth.split('-');

@@ -29,6 +29,8 @@ export default defineConfig(({ mode }) => {
             'vendor-react': ['react', 'react-dom', 'react-router-dom'],
             'vendor-motion': ['framer-motion'],
             'vendor-supabase': ['@supabase/supabase-js'],
+            'vendor-helmet': ['react-helmet-async'],
+            'vendor-swr': ['swr'],
           },
         },
       },
@@ -38,6 +40,8 @@ export default defineConfig(({ mode }) => {
       minify: 'esbuild',
       target: 'es2020',
       sourcemap: false, // 生产环境不生成 sourcemap
+      // 启用 gzip 压缩提示
+      reportCompressedSize: true,
     },
   };
 });

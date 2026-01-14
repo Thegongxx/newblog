@@ -49,27 +49,33 @@ const Feed: React.FC<FeedProps> = memo(({ posts, loading, onSelectPost }) => {
     return notes[index];
   }, [notes]); // 每天更换一次
 
-  // 移动端极简动画 - Google风格
+  // 移动端极简布局 + 轻量动效
   if (isMobile) {
+    const hour = new Date().getHours();
+    const isNight = hour >= 23 || hour < 6;
+
     return (
       <div className="space-y-8 overflow-hidden">
-        {/* 移动端简化Hero */}
-        <section className="min-h-[40vh] flex flex-col justify-center space-y-6">
+        {/* 移动端 Hero - 更紧凑、减少大写与压迫感 */}
+        <section className="min-h-[32vh] flex flex-col justify-center space-y-5">
           <div className="space-y-4">
-            <h4 className="text-white/30 uppercase tracking-[0.3em] text-[8px] font-bold">
-              Digital Sanctuary
-            </h4>
-            <h1 className="text-3xl font-black tracking-tight leading-tight text-white">
-              Aura <br />
-              <span className="text-white/30 italic font-light">Laboratory.</span>
+            <p className="text-[11px] text-white/40 tracking-[0.18em] uppercase font-semibold">
+              Aura · Digital Sanctuary
+            </p>
+            <h1 className="text-[26px] font-semibold tracking-tight leading-snug text-white">
+              一个安静的角落，
+              <br />
+              记录技术与情绪的折射。
             </h1>
-            <p className="text-sm text-white/50 font-light max-w-xs leading-relaxed">
-              探索技术与情感之间的无形联系。
+            <p className="text-[13px] text-white/55 font-light max-w-xs leading-relaxed">
+              {isNight
+                ? '这么晚还在看屏幕，就当这里是陪你醒着的一盏小灯。'
+                : '短一点、轻一点，让你滑动时不需要思考排版，只关注内容本身。'}
             </p>
           </div>
         </section>
 
-        {/* 移动端简化Loading */}
+        {/* 移动端 Loading 骨架 */}
         {loading && (
           <section className="space-y-4">
             {[1, 2, 3, 4].map(i => (
@@ -78,41 +84,46 @@ const Feed: React.FC<FeedProps> = memo(({ posts, loading, onSelectPost }) => {
           </section>
         )}
 
-        {/* 移动端简化文章列表 */}
+        {/* 移动端文章列表 */}
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-medium text-white/60 uppercase tracking-wide">Latest</h2>
-            <div className="text-[10px] text-white/30">{latestPosts.length}</div>
+            <h2 className="text-[12px] font-medium text-white/65 tracking-wide">最新文章</h2>
+            <div className="text-[10px] text-white/35">{latestPosts.length}</div>
           </div>
 
           <div className="space-y-4">
+            {latestPosts.length === 0 && !loading && (
+              <div className="border border-dashed border-white/10 rounded-xl px-4 py-8 text-center text-[12px] text-white/40">
+                这里还空着，留给以后的一些故事。
+              </div>
+            )}
             {latestPosts.map((post) => (
               <div
                 key={post.id}
-                className="bg-white/[0.02] border border-white/5 rounded-lg overflow-hidden active:bg-white/[0.04] transition-all duration-300 active:scale-[0.98] active:border-white/10 relative group"
+                className="bg-white/[0.02] border border-white/5 rounded-xl overflow-hidden active:bg-white/[0.04] transition-all duration-200 active:scale-[0.97] active:border-white/10 relative group"
                 onClick={() => onSelectPost(post)}
               >
-                {/* 点击时的涟漪效果 */}
-                <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent opacity-0 group-active:opacity-100 transition-opacity duration-200 pointer-events-none" />
+                {/* 点击时的轻微光带 */}
+                <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent opacity-0 group-active:opacity-100 transition-opacity duration-150 pointer-events-none" />
                 
                 <div className="p-4 space-y-3 relative z-10">
-                  <div className="flex items-center gap-2 text-white/40 text-[10px] uppercase tracking-wide group-active:text-white/60 transition-colors duration-200">
+                  <div className="flex items-center gap-2 text-white/40 text-[10px] tracking-wide group-active:text-white/60 transition-colors duration-150">
                     <span>{post.category}</span>
                     <span className="w-1 h-1 rounded-full bg-white/20 group-active:bg-white/40 transition-colors duration-200" />
                     <span>{post.date}</span>
                   </div>
-                  <h3 className="text-base font-semibold text-white leading-snug line-clamp-2 group-active:text-white/90 transition-colors duration-200">
+                  <h3 className="text-[16px] font-semibold text-white leading-snug line-clamp-2 group-active:text-white/90 transition-colors duration-150">
                     {post.title}
                   </h3>
-                  <p className="text-sm text-white/60 leading-relaxed line-clamp-2 group-active:text-white/70 transition-colors duration-200">
-                    {post.excerpt}
+                  <p className="text-[13px] text-white/60 leading-relaxed line-clamp-2 group-active:text-white/70 transition-colors duration-150">
+                    {post.excerpt.length > 70 ? `${post.excerpt.slice(0, 70)}…` : post.excerpt}
                   </p>
                   <div className="flex items-center justify-between pt-2">
-                    <span className="text-[10px] text-white/30 uppercase tracking-wide group-active:text-white/50 transition-colors duration-200">
+                    <span className="text-[10px] text-white/30 tracking-wide group-active:text-white/50 transition-colors duration-150">
                       {post.readingTime}
                     </span>
-                    <span className="text-[10px] text-white/30 uppercase tracking-wide group-active:text-white/50 group-active:translate-x-1 transition-all duration-200">
-                      阅读更多 →
+                    <span className="text-[10px] text-white/35 tracking-wide group-active:text-white/60 group-active:translate-x-1 transition-all duration-150">
+                      阅读全文 →
                     </span>
                   </div>
                 </div>

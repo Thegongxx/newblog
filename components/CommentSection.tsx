@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../services/supabaseService';
 import LikeButton from './LikeButton';
 import type { Comment } from '../types';
+import { useToast } from '../hooks/useToast';
 
 interface CommentSectionProps {
     targetId: string;
@@ -20,6 +21,7 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
         parent_id: ''
     });
     const [replyingTo, setReplyingTo] = useState<string | null>(null);
+    const { showToast } = useToast();
 
     // 加载评论
     React.useEffect(() => {
@@ -131,13 +133,13 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
 
             // 重新加载评论
             await loadComments();
-            alert('评论已提交！');
+            showToast('评论已提交，已轻轻放在这里。', 'success');
         } catch (error) {
             console.error('Failed to submit comment:', error);
             if (error instanceof Error) {
-                alert(`评论提交失败: ${error.message}`);
+                showToast(`评论提交失败：${error.message}`, 'error');
             } else {
-                alert('评论提交失败，请检查网络连接或稍后重试');
+                showToast('评论提交失败，请检查网络或稍后重试。', 'error');
             }
         } finally {
             setLoading(false);

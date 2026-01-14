@@ -6,8 +6,8 @@ import { SWRConfig } from 'swr';
 import Intro from './components/Intro';
 import Assistant from './components/Assistant';
 import ErrorBoundary from './components/ErrorBoundary';
-import PageTransition from './components/PageTransition';
-import MobilePageTransition from './components/MobilePageTransition';
+import MobileNavigation from './components/mobile/MobileNavigation';
+import DesktopNavigation from './components/desktop/DesktopNavigation';
 import PageTransitionMask from './components/PageTransitionMask';
 import { MagneticButton, RippleButton } from './components/HoverEffects';
 import { CONTACT_INFO } from './constants';
@@ -16,6 +16,7 @@ import { usePostsCache, useNotesCache } from './services/cacheService';
 import { useIsMobile } from './hooks/useResponsive';
 import { usePageTransition } from './hooks/usePageTransition';
 import { useMobileOptimization } from './hooks/useMobileOptimization';
+import { useToast } from './hooks/useToast';
 
 // 直接导入所有页面组件 - 避免懒加载导致的首次切换延迟
 import Feed from './pages/Feed';
@@ -30,26 +31,38 @@ const AppInner = () => {
   const location = useLocation();
   const [showIntro, setShowIntro] = useState(true);
   const [scrollY, setScrollY] = useState(0);
-  const [toast, setToast] = useState({ show: false, msg: '', type: 'success' });
-  
+  const [toast, setToast] = useState({ show: false, msg: '', type: 'success' as 'success' | 'info' | 'error' });
+
   // 使用页面切换动画 hook
   const { setNavigationMethod } = usePageTransition();
-  
+
   const isMobile = useIsMobile();
-  
+
   // 移动端优化
   useMobileOptimization();
 
+  // 全局 Toast 事件监听（供 useToast 调用）
+  useEffect(() => {
+    const handleToastEvent = (e: Event) => {
+      const detail = (e as CustomEvent<{ message: string; type?: 'success' | 'info' | 'error' }>).detail;
+      if (!detail) return;
+      showToast(detail.message, detail.type);
+    };
+
+    window.addEventListener('aura:toast', handleToastEvent as EventListener);
+    return () => window.removeEventListener('aura:toast', handleToastEvent as EventListener);
+  }, []);
+
   const { data: posts = [], isLoading: postsLoading, error: postsError } = usePostsCache();
   const { data: notes = [], isLoading: notesLoading, error: notesError } = useNotesCache();
-  
+
   const loading = postsLoading || notesLoading;
   const error = postsError?.message || notesError?.message || null;
 
   // 滚动追踪 - 用于导航栏渐变，移动端优化
   useEffect(() => {
     let ticking = false;
-    
+
     const handleScroll = () => {
       if (!ticking) {
         requestAnimationFrame(() => {
@@ -59,12 +72,12 @@ const AppInner = () => {
         ticking = true;
       }
     };
-    
+
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const showToast = (msg: string, type = 'success') => {
+  const showToast = (msg: string, type: 'success' | 'info' | 'error' = 'success') => {
     setToast({ show: true, msg, type });
     setTimeout(() => setToast(prev => ({ ...prev, show: false })), 2500);
   };
@@ -77,7 +90,7 @@ const AppInner = () => {
         showToast(`${label} 已复制到剪贴板`);
         return;
       }
-      
+
       // 移动端降级方案：使用传统的 execCommand
       const textArea = document.createElement('textarea');
       textArea.value = text;
@@ -87,7 +100,7 @@ const AppInner = () => {
       textArea.style.opacity = '0';
       textArea.setAttribute('readonly', '');
       document.body.appendChild(textArea);
-      
+
       // 移动端需要特殊处理
       if (isMobile) {
         textArea.style.position = 'absolute';
@@ -101,14 +114,14 @@ const AppInner = () => {
         textArea.style.boxShadow = 'none';
         textArea.style.background = 'transparent';
       }
-      
+
       textArea.focus();
       textArea.select();
       textArea.setSelectionRange(0, 99999); // 移动端兼容
-      
+
       const success = document.execCommand('copy');
       document.body.removeChild(textArea);
-      
+
       if (success) {
         showToast(`${label} 已复制到剪贴板`);
       } else {
@@ -135,14 +148,14 @@ const AppInner = () => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
-    
+
     // 设置导航方式 - 移动端优化
     const currentPath = location.pathname;
     const isToDetail = path.includes('/post/') || path.includes('/note/');
     const isFromDetail = currentPath.includes('/post/') || currentPath.includes('/note/');
     const isToAbout = path === '/about';
     const isFromAbout = currentPath === '/about';
-    
+
     if (isMobile) {
       // 移动端使用原生App风格的左右滑动
       if (isToDetail && !isFromDetail) {
@@ -166,7 +179,7 @@ const AppInner = () => {
         setNavigationMethod('fade');
       }
     }
-    
+
     navigate(path);
   };
 
@@ -194,11 +207,11 @@ const AppInner = () => {
       {/* Toast - 苹果风格通知 */}
       <AnimatePresence>
         {toast.show && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: -30, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -30, scale: 0.9 }}
-            transition={{ 
+            transition={{
               type: "spring",
               stiffness: 400,
               damping: 25,
@@ -207,18 +220,16 @@ const AppInner = () => {
             className={`fixed ${isMobile ? 'inset-x-4 top-4' : 'top-8 right-8'} pointer-events-none`}
             style={{ zIndex: Z_INDEX.TOAST }}
           >
-            <div className={`${isMobile ? 'w-full' : 'max-w-sm'} px-4 py-3 rounded-xl text-sm font-medium border shadow-2xl backdrop-blur-xl ${
-              toast.type === 'error' 
-                ? 'bg-red-500/90 text-white border-red-400/50' 
-                : toast.type === 'info'
+            <div className={`${isMobile ? 'w-full' : 'max-w-sm'} px-4 py-3 rounded-xl text-sm font-medium border shadow-2xl backdrop-blur-xl ${toast.type === 'error'
+              ? 'bg-red-500/90 text-white border-red-400/50'
+              : toast.type === 'info'
                 ? 'bg-blue-500/90 text-white border-blue-400/50'
                 : 'bg-green-500/90 text-white border-green-400/50'
-            }`}>
+              }`}>
               <div className="flex items-start gap-3">
-                <div className={`w-2 h-2 rounded-full mt-1 flex-shrink-0 ${
-                  toast.type === 'error' ? 'bg-red-300' : 
+                <div className={`w-2 h-2 rounded-full mt-1 flex-shrink-0 ${toast.type === 'error' ? 'bg-red-300' :
                   toast.type === 'info' ? 'bg-blue-300' : 'bg-green-300'
-                }`} />
+                  }`} />
                 <div className="flex-1 min-w-0">
                   <p className="break-words">{toast.msg}</p>
                 </div>
@@ -229,16 +240,16 @@ const AppInner = () => {
       </AnimatePresence>
 
       {/* Navigation - iPhone灵动岛风格，固定在屏幕顶部 */}
-      <motion.nav 
+      <motion.nav
         className={`fixed top-0 left-0 right-0 ${isMobile ? 'px-4 pt-3' : 'flex justify-center pt-6 px-4'}`}
-        style={{ 
+        style={{
           zIndex: Z_INDEX.NAVIGATION,
           willChange: 'transform',
           backfaceVisibility: 'hidden',
         }}
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ 
+        transition={{
           type: "spring",
           stiffness: 300,
           damping: 30,
@@ -247,7 +258,7 @@ const AppInner = () => {
       >
         {isMobile ? (
           // 移动端灵动岛风格导航 - 苹果风格交互
-          <motion.div 
+          <motion.div
             className="flex items-center justify-between py-3 px-4 rounded-full bg-black/20 backdrop-blur-md border border-white/10 ripple-effect"
             style={{
               transition: 'all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)', // 苹果标准缓动
@@ -256,7 +267,7 @@ const AppInner = () => {
               backdropFilter: `blur(${Math.max(8, navBlur * 0.6)}px) saturate(150%)`,
               borderColor: `rgba(255, 255, 255, ${Math.max(0.08, navBorder * 0.8)})`,
             }}
-            whileHover={{ 
+            whileHover={{
               scale: 1.02,
               y: -1,
               transition: {
@@ -266,7 +277,7 @@ const AppInner = () => {
                 duration: 0.2
               }
             }}
-            whileTap={{ 
+            whileTap={{
               scale: 0.98,
               transition: {
                 type: "spring",
@@ -276,14 +287,14 @@ const AppInner = () => {
               }
             }}
           >
-            <MagneticButton 
+            <MagneticButton
               onClick={() => navigate('/')}
               className="text-lg font-bold tracking-tight text-white"
               strength={0.2}
             >
               AURA
             </MagneticButton>
-            
+
             <div className="flex gap-4 text-xs font-medium">
               {[
                 { path: '/notes', label: 'Notes' },
@@ -292,12 +303,11 @@ const AppInner = () => {
               ].map((item) => (
                 <motion.button
                   key={item.path}
-                  onClick={() => handleNavigate(item.path)} 
-                  className={`px-2 py-1 rounded-full transition-all duration-200 ${
-                    location.pathname === item.path 
-                      ? 'text-white bg-white/20' 
-                      : 'text-white/60'
-                  }`}
+                  onClick={() => handleNavigate(item.path)}
+                  className={`px-2 py-1 rounded-full transition-all duration-200 ${location.pathname === item.path
+                    ? 'text-white bg-white/20'
+                    : 'text-white/60'
+                    }`}
                   whileHover={{
                     scale: 1.05,
                     color: 'rgba(255, 255, 255, 1)',
@@ -325,9 +335,9 @@ const AppInner = () => {
           </motion.div>
         ) : (
           // 桌面端苹果风格导航
-          <motion.div 
+          <motion.div
             className="relative rounded-full px-10 py-3 magnetic-hover"
-            style={{ 
+            style={{
               backgroundColor: `rgba(0, 0, 0, ${navOpacity})`,
               backdropFilter: `blur(${navBlur}px) saturate(${150 + scrollProgress * 30}%)`,
               boxShadow: scrollProgress > 0.2 ? `0 8px 32px rgba(0, 0, 0, ${navShadow})` : 'none',
@@ -336,8 +346,8 @@ const AppInner = () => {
               borderColor: `rgba(255, 255, 255, ${navBorder})`,
               transition: 'all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)', // 苹果标准缓动
             }}
-            whileHover={{ 
-              scale: 1.02, 
+            whileHover={{
+              scale: 1.02,
               y: -2,
               transition: {
                 type: "spring",
@@ -346,7 +356,7 @@ const AppInner = () => {
                 duration: 0.2
               }
             }}
-            whileTap={{ 
+            whileTap={{
               scale: 0.98,
               transition: {
                 type: "spring",
@@ -357,7 +367,7 @@ const AppInner = () => {
             }}
           >
             <div className="relative flex items-center gap-12">
-              <MagneticButton 
+              <MagneticButton
                 onClick={() => navigate('/')}
                 className="text-lg font-bold tracking-tight text-white/90 hover:text-white transition-all duration-300 relative overflow-hidden group"
                 strength={0.3}
@@ -366,7 +376,7 @@ const AppInner = () => {
                 <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg blur-sm" />
                 <span className="relative z-10 group-hover:tracking-wider transition-all duration-300">AURA</span>
               </MagneticButton>
-              
+
               <div className="flex gap-6 text-sm font-medium">
                 {[
                   { path: '/notes', label: 'Notes' },
@@ -375,12 +385,11 @@ const AppInner = () => {
                 ].map((item) => (
                   <motion.button
                     key={item.path}
-                    onClick={() => handleNavigate(item.path)} 
-                    className={`px-4 py-2 rounded-full transition-all duration-200 liquid-morph ${
-                      location.pathname === item.path 
-                        ? 'text-white bg-white/15' 
-                        : 'text-white/60 hover:text-white hover:bg-white/10'
-                    }`}
+                    onClick={() => handleNavigate(item.path)}
+                    className={`px-4 py-2 rounded-full transition-all duration-200 liquid-morph ${location.pathname === item.path
+                      ? 'text-white bg-white/15'
+                      : 'text-white/60 hover:text-white hover:bg-white/10'
+                      }`}
                     whileHover={{
                       scale: 1.05,
                       y: -1,
@@ -412,7 +421,7 @@ const AppInner = () => {
       </motion.nav>
 
       {/* Main Content - 智能页面切换动画系统 */}
-      <motion.main 
+      <motion.main
         className={`${isMobile ? 'pb-32 px-4 pt-20' : 'pb-48 px-6 pt-24'} max-w-7xl mx-auto relative`}
         style={{
           willChange: 'transform',
@@ -425,8 +434,8 @@ const AppInner = () => {
         }}
       >
         <ErrorBoundary>
-          <AnimatePresence 
-            mode="wait" 
+          <AnimatePresence
+            mode="wait"
             initial={false}
             onExitComplete={() => {
               // 确保退出动画完成后再进行滚动
@@ -436,80 +445,80 @@ const AppInner = () => {
             <Routes location={location} key={location.pathname}>
               <Route path="/" element={
                 isMobile ? (
-                  <MobilePageTransition>
+                  <MobileNavigation>
                     <Feed posts={posts} loading={loading} onSelectPost={(p) => {
                       setNavigationMethod('slideRight');
                       navigate(`/post/${p.slug}`, { state: { from: '/' } });
                     }} />
-                  </MobilePageTransition>
+                  </MobileNavigation>
                 ) : (
-                  <PageTransition>
+                  <DesktopNavigation>
                     <Feed posts={posts} loading={loading} onSelectPost={(p) => {
                       setNavigationMethod('slideDown');
                       navigate(`/post/${p.slug}`, { state: { from: '/' } });
                     }} />
-                  </PageTransition>
+                  </DesktopNavigation>
                 )
               } />
               <Route path="/post/:slug" element={
                 isMobile ? (
-                  <MobilePageTransition>
+                  <MobileNavigation>
                     <PostDetail posts={posts} loading={loading} />
-                  </MobilePageTransition>
+                  </MobileNavigation>
                 ) : (
-                  <PageTransition>
+                  <DesktopNavigation>
                     <PostDetail posts={posts} loading={loading} />
-                  </PageTransition>
+                  </DesktopNavigation>
                 )
               } />
               <Route path="/notes" element={
                 isMobile ? (
-                  <MobilePageTransition>
+                  <MobileNavigation>
                     <Notes notes={notes} loading={loading} />
-                  </MobilePageTransition>
+                  </MobileNavigation>
                 ) : (
-                  <PageTransition>
+                  <DesktopNavigation>
                     <Notes notes={notes} loading={loading} />
-                  </PageTransition>
+                  </DesktopNavigation>
                 )
               } />
               <Route path="/note/:id" element={
                 isMobile ? (
-                  <MobilePageTransition>
+                  <MobileNavigation>
                     <NoteDetail />
-                  </MobilePageTransition>
+                  </MobileNavigation>
                 ) : (
-                  <PageTransition>
+                  <DesktopNavigation>
                     <NoteDetail />
-                  </PageTransition>
+                  </DesktopNavigation>
                 )
               } />
               <Route path="/archive" element={
                 isMobile ? (
-                  <MobilePageTransition>
+                  <MobileNavigation>
                     <Archive posts={posts} loading={loading} onSelectPost={(p) => {
                       setNavigationMethod('slideRight');
                       navigate(`/post/${p.slug}`, { state: { from: '/archive' } });
                     }} />
-                  </MobilePageTransition>
+                  </MobileNavigation>
                 ) : (
-                  <PageTransition>
+                  <DesktopNavigation>
                     <Archive posts={posts} loading={loading} onSelectPost={(p) => {
                       setNavigationMethod('slideDown');
                       navigate(`/post/${p.slug}`, { state: { from: '/archive' } });
                     }} />
-                  </PageTransition>
+                  </DesktopNavigation>
                 )
               } />
               <Route path="/about" element={
                 isMobile ? (
-                  <MobilePageTransition>
+                  <MobileNavigation>
                     <About />
-                  </MobilePageTransition>
+                  </MobileNavigation>
                 ) : (
-                  <PageTransition>
+                  <DesktopNavigation>
                     <About />
-                  </PageTransition>
+                  </DesktopNavigation>
                 )
               } />
               <Route path="*" element={<Navigate to="/" replace />} />
@@ -527,7 +536,7 @@ const AppInner = () => {
           <div className={`${isMobile ? 'text-2xl mb-6' : 'text-5xl mb-16'} font-bold tracking-tighter opacity-20 select-none`}>
             AURA
           </div>
-          
+
           {isMobile ? (
             // 移动端恢复翻转效果 - 缩小尺寸
             <div className="flex gap-6 text-xs uppercase tracking-wider font-bold text-white/60">
@@ -573,7 +582,7 @@ const AppInner = () => {
               ))}
             </div>
           )}
-          
+
           <p className={`${isMobile ? 'mt-8 text-[10px]' : 'mt-24 text-xs'} text-white/20 tracking-wider uppercase`}>
             Designed for clarity © 2024
           </p>

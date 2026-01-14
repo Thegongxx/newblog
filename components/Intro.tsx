@@ -65,15 +65,21 @@ const Intro: React.FC<IntroProps> = ({ onComplete }) => {
   }, [onComplete]);
 
   return (
-    <div className={`fixed inset-0 z-[100] bg-black flex items-center justify-center transition-opacity duration-[2000ms] ease-in-out ${phase === 'fade' ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+    <div
+      className={`fixed inset-0 z-[100] bg-black flex items-center justify-center transition-opacity duration-[2000ms] ease-in-out ${phase === 'fade' ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+    >
       {/* Expanding Iris Effect - Slower expansion (2500ms) */}
       <div 
         className={`absolute rounded-full bg-white transition-all duration-[2500ms] ease-[cubic-bezier(0.23,1,0.32,1)] ${phase === 'dot' ? 'w-1 h-1' : 'w-[250vmax] h-[250vmax]'}`}
       />
       
-      <div className="relative z-10 flex flex-col items-center mix-blend-difference">
+      <div className="relative z-10 flex flex-col items-center mix-blend-difference px-6 text-center">
         {/* Cipher Text Title - Slower transition */}
-        <h1 className={`text-7xl md:text-9xl font-bold tracking-tighter transition-all duration-[1500ms] ${phase === 'expand' ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'} text-white font-mono`}>
+        <h1
+          className={`text-5xl md:text-9xl font-bold tracking-tighter transition-all duration-[1500ms] ${
+            phase === 'expand' ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          } text-white font-mono`}
+        >
           {displayText}
         </h1>
         
@@ -88,6 +94,7 @@ const Intro: React.FC<IntroProps> = ({ onComplete }) => {
           </p>
           <div className="h-[1px] w-8 bg-white/50" />
         </div>
+
       </div>
     </div>
   );
