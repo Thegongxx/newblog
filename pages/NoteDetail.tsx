@@ -158,7 +158,6 @@ const NoteDetail: React.FC = () => {
               }
             }}
           >
-          >
             {ICONS.CHEVRON_RIGHT}
           </motion.div>
           <span className="text-xs md:text-sm font-medium group-hover:tracking-wider transition-all duration-300">

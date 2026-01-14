@@ -2,7 +2,6 @@
 export { supabase } from './supabase';
 export { postsApi } from './posts';
 export { notesApi } from './notes';
-export { commentsApi, noteCommentsApi } from './comments';
 
 // Keep legacy APIs for backward compatibility
 import { supabase } from './supabase';

@@ -9,7 +9,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import MobileNavigation from './components/mobile/MobileNavigation';
 import DesktopNavigation from './components/desktop/DesktopNavigation';
 import PageTransitionMask from './components/PageTransitionMask';
-import { MagneticButton, RippleButton } from './components/HoverEffects';
+import { MagneticButton } from './components/HoverEffects';
 import { CONTACT_INFO } from './constants';
 import { Z_INDEX } from './constants/zIndex';
 import { usePostsCache, useNotesCache } from './services/cacheService';
