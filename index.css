@@ -157,6 +157,16 @@
   .apple-hover:hover {
     transform: translateY(-2px) scale(1.02);
   }
+
+  /* 全局物理感点击类 */
+  .press-sink {
+    transition: transform 0.2s var(--apple-ease);
+  }
+
+  .press-sink:active {
+    transform: scale(0.96);
+    transition-duration: 0.1s;
+  }
 }
 
 /* 苹果风格的动画关键帧优化 */
@@ -203,19 +213,20 @@
 
 /* 移动端苹果风格优化 */
 @media (max-width: 768px) {
-  /* 移动端使用苹果标准的简化模糊效果 */
+  /* 移动端使用苹果标准的简化模糊效果 - 进一步提升通透感 */
   .backdrop-blur-xl {
-    backdrop-filter: blur(8px) !important;
-    background-color: rgba(0, 0, 0, 0.6) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    background-color: rgba(0, 0, 0, 0.45) !important;
   }
   
   .backdrop-blur-3xl {
-    backdrop-filter: blur(12px) !important;
-    background-color: rgba(0, 0, 0, 0.7) !important;
+    backdrop-filter: blur(40px) saturate(200%) !important;
+    background-color: rgba(0, 0, 0, 0.5) !important;
   }
   
   .backdrop-blur-md {
-    backdrop-filter: blur(4px) !important;
+    backdrop-filter: blur(12px) saturate(160%) !important;
+    background-color: rgba(0, 0, 0, 0.3) !important;
   }
   
   /* 移动端苹果风格阴影 */

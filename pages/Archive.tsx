@@ -1,5 +1,6 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
+import { Helmet } from 'react-helmet-async';
 
 interface ArchiveProps {
   posts: any[];
@@ -7,42 +8,40 @@ interface ArchiveProps {
   onSelectPost?: (post: any) => void;
 }
 
-// 统一动画配置
-const containerVariants = {
-    hidden: { x: '100%', opacity: 0 },
-    visible: {
-        x: 0,
-        opacity: 1,
-        transition: { 
-            type: "tween",
-            ease: [0.25, 0.1, 0.25, 1],
-            duration: 0.4, 
-            staggerChildren: 0.08 
-        }
+const containerVariants: Variants = {
+  hidden: { x: '100%', opacity: 0 },
+  visible: {
+    x: 0,
+    opacity: 1,
+    transition: {
+      type: "tween" as const,
+      ease: [0.25, 0.1, 0.25, 1],
+      duration: 0.4,
+      staggerChildren: 0.08
     }
+  }
 };
 
-const itemVariants = {
-    hidden: { x: 20, opacity: 0 },
-    visible: { 
-        x: 0,
-        opacity: 1, 
-        transition: { 
-            type: "tween",
-            ease: [0.25, 0.1, 0.25, 1],
-            duration: 0.4 
-        } 
+const itemVariants: Variants = {
+  hidden: { x: 20, opacity: 0 },
+  visible: {
+    x: 0,
+    opacity: 1,
+    transition: {
+      type: "tween" as const,
+      ease: [0.25, 0.1, 0.25, 1],
+      duration: 0.4
     }
+  }
 };
 
 const Archive: React.FC<ArchiveProps> = ({ posts, loading, onSelectPost }) => {
-  // 按年月分组文章
   const postsByYearMonth = posts.reduce((acc, post) => {
     const date = new Date(post.created_at);
     const year = date.getFullYear();
-    const month = date.getMonth() + 1; // 月份从0开始，需要+1
+    const month = date.getMonth() + 1;
     const yearMonth = `${year}-${month.toString().padStart(2, '0')}`;
-    
+
     if (!acc[year]) acc[year] = {};
     if (!acc[year][yearMonth]) acc[year][yearMonth] = [];
     acc[year][yearMonth].push(post);
@@ -74,138 +73,130 @@ const Archive: React.FC<ArchiveProps> = ({ posts, loading, onSelectPost }) => {
   }
 
   return (
-    <motion.div 
-      className="max-w-4xl py-8 md:py-12"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
-      <motion.div className="mb-10 md:mb-16" variants={itemVariants}>
-        <h1 className="text-3xl md:text-6xl font-bold tracking-tight mb-3 md:mb-5 text-white">
-          Archive
-        </h1>
-        <p className="text-white/40 text-sm md:text-base">
-          一起翻一翻之前写下的东西 · {posts.length} 篇
-        </p>
-      </motion.div>
-
-      <motion.div className="space-y-12 md:space-y-20" variants={itemVariants}>
-        {years.map(year => {
-          const yearData = postsByYearMonth[Number(year)];
-          const yearMonths = Object.keys(yearData).sort((a, b) => b.localeCompare(a));
-          const totalPostsInYear = Object.values(yearData).flat().length;
-          
-          return (
-            <motion.div key={year} className="group" variants={itemVariants}>
-              <div className="flex items-center gap-4 md:gap-6 mb-6 md:mb-12">
-                <h2 className="text-2xl md:text-4xl font-bold text-white/80">
-                  {year}
-                </h2>
-                <div className="flex-1 h-px bg-white/10" />
-                <span className="text-xs md:text-sm text-white/30 font-medium">
-                  {totalPostsInYear} 篇
-                </span>
-              </div>
-
-              <div className="space-y-7 md:space-y-10">
-                {yearMonths.map(yearMonth => {
-                  const monthPosts = yearData[yearMonth];
-                  const [, monthStr] = yearMonth.split('-');
-                  const monthNames = ['一月', '二月', '三月', '四月', '五月', '六月', 
-                                    '七月', '八月', '九月', '十月', '十一月', '十二月'];
-                  const monthName = monthNames[parseInt(monthStr) - 1];
-                  
-                  return (
-                    <div key={yearMonth} className="ml-2 md:ml-8">
-                      <div className="flex items-center gap-3 md:gap-4 mb-4 md:mb-6">
-                        <h3 className="text-base md:text-xl font-semibold text-white/60">
-                          {monthName}
-                        </h3>
-                        <div className="flex-1 h-px bg-white/5" />
-                      </div>
-
-                      <div className="space-y-2 md:space-y-4">
-                        {monthPosts.map((post, index) => (
-                          <motion.article 
-                            key={post.id}
-                            className="group/post cursor-pointer relative overflow-hidden"
-                            onClick={() => onSelectPost?.(post)}
-                            // 桌面端：书架翻阅效果
-                            whileHover={{
-                              x: 8,
-                              transition: { 
-                                type: "spring", 
-                                stiffness: 400, 
-                                damping: 25 
-                              }
-                            }}
-                            // 移动端：轻微缩放
-                            whileTap={{
-                              scale: 0.98,
-                              x: 4,
-                              transition: { duration: 0.1 }
-                            }}
-                          >
-                            {/* 桌面端专属：书脊光效 */}
-                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-white/20 via-white/10 to-white/5 opacity-0 group-hover/post:opacity-100 transition-opacity duration-300 rounded-r" />
-                            
-                            {/* 桌面端专属：悬停背景 */}
-                            <div className="absolute inset-0 bg-gradient-to-r from-white/[0.02] to-transparent opacity-0 group-hover/post:opacity-100 transition-opacity duration-300 rounded-xl" />
-                            
-                            <div className="flex items-start gap-3 md:gap-6 p-3 md:p-4 rounded-xl transition-all duration-300 relative z-10">
-                              <div className="flex-shrink-0 w-8 md:w-12 text-right">
-                                <time className={`text-[10px] md:text-xs font-mono transition-all duration-300 ${
-                                  'text-white/30 group-hover/post:text-white/50 group-hover/post:font-bold'
-                                }`}>
-                                  {new Date(post.created_at).toLocaleDateString('zh-CN', {
-                                    day: '2-digit'
-                                  })}
-                                </time>
-                              </div>
-                              
-                              <div className="flex-1 min-w-0">
-                                <h4 className={`text-sm md:text-lg font-medium line-clamp-1 transition-all duration-300 ${
-                                  'text-white/70 group-hover/post:text-white group-hover/post:translate-x-2'
-                                }`}>
-                                  {post.title}
-                                </h4>
-                                
-                                {/* 移动端隐藏摘要 */}
-                                {post.excerpt && (
-                                  <p className={`hidden md:block text-sm leading-relaxed line-clamp-1 mt-1 transition-all duration-300 ${
-                                    'text-white/30 group-hover/post:text-white/50'
-                                  }`}>
-                                    {post.excerpt}
-                                  </p>
-                                )}
-                              </div>
-
-                              <div className={`flex-shrink-0 transition-all duration-300 ${
-                                'text-white/20 group-hover/post:text-white/60 group-hover/post:translate-x-1 group-hover/post:scale-110'
-                              }`}>
-                                →
-                              </div>
-                            </div>
-                          </motion.article>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </motion.div>
-          );
-        })}
-      </motion.div>
-
-      {posts.length === 0 && !loading && (
-        <motion.div className="text-center py-16 md:py-24" variants={itemVariants}>
-          <div className="text-white/20 text-4xl md:text-6xl mb-4 md:mb-6">📝</div>
-          <h3 className="text-xl md:text-2xl font-bold text-white/40 mb-2 md:mb-4">暂无文章</h3>
-          <p className="text-white/30 text-sm md:text-base">还没有发布任何文章</p>
+    <>
+      <Helmet>
+        <title>Archive · Aura Blog</title>
+        <meta name="description" content="翻一翻之前写下的东西，记录技术与生活的点滴。" />
+      </Helmet>
+      <motion.div
+        className="max-w-4xl py-8 md:py-12"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <motion.div className="mb-10 md:mb-16" variants={itemVariants}>
+          <h1 className="text-3xl md:text-6xl font-bold tracking-tight mb-3 md:mb-5 text-white">
+            Archive
+          </h1>
+          <p className="text-white/40 text-sm md:text-base">
+            一起翻一翻之前写下的东西 · {posts.length} 篇
+          </p>
         </motion.div>
-      )}
-    </motion.div>
+
+        <motion.div className="space-y-12 md:space-y-20" variants={itemVariants}>
+          {years.map(year => {
+            const yearData = postsByYearMonth[Number(year)];
+            const yearMonths = Object.keys(yearData).sort((a, b) => b.localeCompare(a));
+            const totalPostsInYear = Object.values(yearData).flat().length;
+
+            return (
+              <motion.div key={year} className="group" variants={itemVariants}>
+                <div className="flex items-center gap-4 md:gap-6 mb-6 md:mb-12">
+                  <h2 className="text-2xl md:text-4xl font-bold text-white/80">
+                    {year}
+                  </h2>
+                  <div className="flex-1 h-px bg-white/10" />
+                  <span className="text-xs md:text-sm text-white/30 font-medium">
+                    {totalPostsInYear} 篇
+                  </span>
+                </div>
+
+                <div className="space-y-7 md:space-y-10">
+                  {yearMonths.map(yearMonth => {
+                    const monthPosts = yearData[yearMonth];
+                    const [, monthStr] = yearMonth.split('-');
+                    const monthNames = ['一月', '二月', '三月', '四月', '五月', '六月',
+                      '七月', '八月', '九月', '十月', '十一月', '十二月'];
+                    const monthName = monthNames[parseInt(monthStr) - 1];
+
+                    return (
+                      <div key={yearMonth} className="ml-2 md:ml-8">
+                        <div className="flex items-center gap-3 md:gap-4 mb-4 md:mb-6">
+                          <h3 className="text-base md:text-xl font-semibold text-white/60">
+                            {monthName}
+                          </h3>
+                          <div className="flex-1 h-px bg-white/5" />
+                        </div>
+
+                        <div className="space-y-2 md:space-y-4">
+                          {monthPosts.map((post) => (
+                            <motion.article
+                              key={post.id}
+                              className="group/post cursor-pointer relative overflow-hidden"
+                              onClick={() => onSelectPost?.(post)}
+                              whileHover={{
+                                x: 8,
+                                transition: {
+                                  type: "spring",
+                                  stiffness: 400,
+                                  damping: 25
+                                }
+                              }}
+                              whileTap={{
+                                scale: 0.98,
+                                x: 4,
+                                transition: { duration: 0.1 }
+                              }}
+                            >
+                              <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-white/20 via-white/10 to-white/5 opacity-0 group-hover/post:opacity-100 transition-opacity duration-300 rounded-r" />
+                              <div className="absolute inset-0 bg-gradient-to-r from-white/[0.02] to-transparent opacity-0 group-hover/post:opacity-100 transition-opacity duration-300 rounded-xl" />
+
+                              <div className="flex items-start gap-3 md:gap-6 p-3 md:p-4 rounded-xl transition-all duration-300 relative z-10">
+                                <div className="flex-shrink-0 w-8 md:w-12 text-right">
+                                  <time className="text-[10px] md:text-xs font-mono transition-all duration-300 text-white/30 group-hover/post:text-white/50 group-hover/post:font-bold">
+                                    {new Date(post.created_at).toLocaleDateString('zh-CN', {
+                                      day: '2-digit'
+                                    })}
+                                  </time>
+                                </div>
+
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="text-sm md:text-lg font-medium line-clamp-1 transition-all duration-300 text-white/70 group-hover/post:text-white group-hover/post:translate-x-2">
+                                    {post.title}
+                                  </h4>
+
+                                  {post.excerpt && (
+                                    <p className="hidden md:block text-sm leading-relaxed line-clamp-1 mt-1 transition-all duration-300 text-white/30 group-hover/post:text-white/50">
+                                      {post.excerpt}
+                                    </p>
+                                  )}
+                                </div>
+
+                                <div className="flex-shrink-0 transition-all duration-300 text-white/20 group-hover/post:text-white/60 group-hover/post:translate-x-1 group-hover/post:scale-110">
+                                  →
+                                </div>
+                              </div>
+                            </motion.article>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            );
+          })}
+        </motion.div>
+
+        {posts.length === 0 && !loading && (
+          <motion.div className="text-center py-16 md:py-24" variants={itemVariants}>
+            <div className="text-white/20 text-4xl md:text-6xl mb-4 md:mb-6">📝</div>
+            <h3 className="text-xl md:text-2xl font-bold text-white/40 mb-2 md:mb-4">暂无文章</h3>
+            <p className="text-white/30 text-sm md:text-base">还没有发布任何文章</p>
+          </motion.div>
+        )}
+      </motion.div>
+    </>
   );
 };
 

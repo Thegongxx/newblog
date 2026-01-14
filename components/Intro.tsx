@@ -1,102 +1,137 @@
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useIsMobile } from '../hooks/useResponsive';
 
 interface IntroProps {
   onComplete: () => void;
 }
 
 const Intro: React.FC<IntroProps> = ({ onComplete }) => {
-  const [phase, setPhase] = useState<'dot' | 'expand' | 'fade'>('dot');
+  const isMobile = useIsMobile();
+  const [phase, setPhase] = useState<'dot' | 'expand' | 'text' | 'fade'>('dot');
   const [displayText, setDisplayText] = useState('');
-  const [subTextOpacity, setSubTextOpacity] = useState(0);
-  
+  const [isFinished, setIsFinished] = useState(false);
+
   // Cipher Config
   const targetText = "Aura";
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ!<>-_\\/[]{}—=+*^?#";
   const intervalRef = useRef<any>(null);
 
+  // 动画时长配置 (单位：秒)
+  const TIMING = useMemo(() => ({
+    expandDelay: isMobile ? 0.6 : 0.8,
+    textDelay: isMobile ? 1.2 : 1.5,
+    fadeDelay: isMobile ? 2.8 : 3.5,
+    totalDuration: isMobile ? 4.0 : 4.8, // 包含退出动画
+    forceSkip: 4.5 // 绝对兜底时间
+  }), [isMobile]);
+
   useEffect(() => {
-    // 1. Expansion Sequence - Slower start (1.2s delay)
-    const t1 = setTimeout(() => setPhase('expand'), 1200);
-    
-    // 2. Cipher Text Effect - Starts later (2.0s) and decodes slower
+    // 强制跳过逻辑 - 彻底杜绝黑屏死锁
+    const skipTimer = setTimeout(() => {
+      if (!isFinished) {
+        console.warn("Intro animation timeout, forcing complete.");
+        onComplete();
+      }
+    }, TIMING.forceSkip * 1000);
+
+    // 1. 启动展开
+    const tExpand = setTimeout(() => setPhase('expand'), TIMING.expandDelay * 1000);
+
+    // 2. 文本效果
+    const tTextPhase = setTimeout(() => setPhase('text'), TIMING.textDelay * 1000);
     const tCipher = setTimeout(() => {
       let iteration = 0;
       clearInterval(intervalRef.current);
-      
+
       intervalRef.current = setInterval(() => {
-        setDisplayText(prev => 
+        setDisplayText(
           targetText
             .split("")
             .map((letter, index) => {
-              if (index < iteration) {
-                return targetText[index];
-              }
+              if (index < iteration) return targetText[index];
               return chars[Math.floor(Math.random() * chars.length)];
             })
             .join("")
         );
 
-        if (iteration >= targetText.length) {
-          clearInterval(intervalRef.current);
-        }
-        
-        // Slower decryption speed: require 4 cycles to lock a letter instead of 3
-        iteration += 1 / 4; 
-      }, 50); // Slower tick rate (50ms instead of 30ms)
-    }, 2000);
+        if (iteration >= targetText.length) clearInterval(intervalRef.current);
+        iteration += 1 / 3;
+      }, 40);
+    }, TIMING.textDelay * 1000 + 200);
 
-    // 3. Subtext Fade In - Much later (3.5s)
-    const tSub = setTimeout(() => setSubTextOpacity(1), 3500);
+    // 3. 渐变退出
+    const tFade = setTimeout(() => setPhase('fade'), TIMING.fadeDelay * 1000);
 
-    // 4. Exit Sequence - Let it linger (5.5s)
-    const t2 = setTimeout(() => setPhase('fade'), 5500);
-    // 5. Unmount (6.5s)
-    const t3 = setTimeout(onComplete, 6500);
+    // 4. 完成挂载
+    const tEnd = setTimeout(() => {
+      setIsFinished(true);
+      onComplete();
+    }, TIMING.totalDuration * 1000);
 
     return () => {
-      clearTimeout(t1);
+      clearTimeout(skipTimer);
+      clearTimeout(tExpand);
+      clearTimeout(tTextPhase);
       clearTimeout(tCipher);
-      clearTimeout(tSub);
-      clearTimeout(t2);
-      clearTimeout(t3);
+      clearTimeout(tFade);
+      clearTimeout(tEnd);
       clearInterval(intervalRef.current);
     };
-  }, [onComplete]);
+  }, [onComplete, TIMING, targetText, isFinished]);
 
   return (
-    <div
-      className={`fixed inset-0 z-[100] bg-black flex items-center justify-center transition-opacity duration-[2000ms] ease-in-out ${phase === 'fade' ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
-    >
-      {/* Expanding Iris Effect - Slower expansion (2500ms) */}
-      <div 
-        className={`absolute rounded-full bg-white transition-all duration-[2500ms] ease-[cubic-bezier(0.23,1,0.32,1)] ${phase === 'dot' ? 'w-1 h-1' : 'w-[250vmax] h-[250vmax]'}`}
-      />
-      
-      <div className="relative z-10 flex flex-col items-center mix-blend-difference px-6 text-center">
-        {/* Cipher Text Title - Slower transition */}
-        <h1
-          className={`text-5xl md:text-9xl font-bold tracking-tighter transition-all duration-[1500ms] ${
-            phase === 'expand' ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          } text-white font-mono`}
+    <AnimatePresence>
+      {phase !== 'fade' && (
+        <motion.div
+          initial={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.8, ease: "easeInOut" }}
+          className="fixed inset-0 z-[100] bg-black flex items-center justify-center overflow-hidden"
         >
-          {displayText}
-        </h1>
-        
-        {/* Subtext - Slower transition */}
-        <div 
-          className="mt-6 flex items-center gap-3 transition-all duration-[1500ms]"
-          style={{ opacity: subTextOpacity, transform: subTextOpacity ? 'translateY(0)' : 'translateY(10px)' }}
-        >
-          <div className="h-[1px] w-8 bg-white/50" />
-          <p className="text-[10px] uppercase tracking-[0.4em] font-medium text-white">
-            Space for Curious Minds
-          </p>
-          <div className="h-[1px] w-8 bg-white/50" />
-        </div>
+          {/* Iris Effect - 使用 scale 代替 vmax 单位以提升稳定性 */}
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: phase === 'dot' ? 0 : 40 }}
+            transition={{
+              duration: 1.5,
+              ease: [0.16, 1, 0.3, 1],
+              delay: 0.1
+            }}
+            className="absolute w-20 h-20 rounded-full bg-white"
+          />
 
-      </div>
-    </div>
+          <div className={`relative z-10 flex flex-col items-center px-6 text-center ${isMobile ? '' : 'mix-blend-difference'}`}>
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{
+                opacity: phase === 'text' ? 1 : 0,
+                y: phase === 'text' ? 0 : 20
+              }}
+              transition={{ duration: 0.6 }}
+              className="text-6xl md:text-9xl font-bold tracking-tighter font-mono"
+              style={{ color: isMobile ? '#000' : '#fff' }}
+            >
+              {displayText}
+            </motion.h1>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: phase === 'text' ? 0.6 : 0 }}
+              transition={{ delay: 0.4 }}
+              className="mt-6 flex items-center gap-3"
+            >
+              <div className="h-[1px] w-6 bg-black md:bg-white/50" />
+              <p className="text-[10px] uppercase tracking-[0.4em] font-medium text-black md:text-white">
+                Aura Sanctuary
+              </p>
+              <div className="h-[1px] w-6 bg-black md:bg-white/50" />
+            </motion.div>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 

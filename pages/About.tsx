@@ -1,32 +1,33 @@
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
+import { Helmet } from 'react-helmet-async';
 import aboutMd from '../content/pages/about.md?raw';
 
 // 统一动画配置 - 与其他页面保持一致
-const containerVariants = {
+const containerVariants: Variants = {
     hidden: { x: '100%', opacity: 0 },
     visible: {
         x: 0,
         opacity: 1,
-        transition: { 
-            type: "tween",
+        transition: {
+            type: "tween" as const,
             ease: [0.25, 0.1, 0.25, 1],
-            duration: 0.4, 
-            staggerChildren: 0.1 
+            duration: 0.4,
+            staggerChildren: 0.1
         }
     }
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
     hidden: { x: 20, opacity: 0 },
-    visible: { 
+    visible: {
         x: 0,
-        opacity: 1, 
-        transition: { 
-            type: "tween",
+        opacity: 1,
+        transition: {
+            type: "tween" as const,
             ease: [0.25, 0.1, 0.25, 1],
-            duration: 0.4 
-        } 
+            duration: 0.4
+        }
     }
 };
 
@@ -38,10 +39,10 @@ const About: React.FC = () => {
         // Simple markdown parser
         const frontmatterRegex = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/;
         const match = aboutMd.match(frontmatterRegex);
-        
+
         if (match) {
             const [, frontmatterStr, markdownContent] = match;
-            
+
             // Parse frontmatter
             const fm: any = {};
             frontmatterStr.split('\n').forEach(line => {
@@ -51,7 +52,7 @@ const About: React.FC = () => {
                 }
             });
             setFrontmatter(fm);
-            
+
             // Convert markdown to HTML
             const htmlContent = markdownContent
                 .replace(/^# (.*$)/gm, '<h1 class="text-6xl font-bold mb-8 text-white">$1</h1>')
@@ -70,7 +71,7 @@ const About: React.FC = () => {
                 })
                 .filter(p => p !== '')
                 .join('\n');
-            
+
             setContent(htmlContent);
         } else {
             // No frontmatter, simple conversion
@@ -82,29 +83,35 @@ const About: React.FC = () => {
                 .map(p => p.trim() ? `<p class="text-white/60 leading-relaxed text-lg mb-4">${p.trim()}</p>` : '')
                 .filter(p => p !== '')
                 .join('\n');
-            
+
             setContent(simpleHtml);
         }
     }, []);
 
     return (
-        <motion.div 
-            className="max-w-3xl py-8 md:py-12"
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-        >
-            <motion.header className="mb-10 md:mb-16" variants={itemVariants}>
-                <h1 className="text-4xl md:text-8xl font-bold tracking-tighter mb-4 md:mb-8 italic">ABOUT.</h1>
-                <p className="text-base md:text-xl text-white/30 font-light max-w-lg">关于这个空间，关于我。</p>
-            </motion.header>
+        <>
+            <Helmet>
+                <title>About · Aura Blog</title>
+                <meta name="description" content="关于这个空间，关于我。探索 minimalist aesthetics and intelligence。" />
+            </Helmet>
+            <motion.div
+                className="max-w-3xl py-8 md:py-12"
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+            >
+                <motion.header className="mb-10 md:mb-16" variants={itemVariants}>
+                    <h1 className="text-4xl md:text-8xl font-bold tracking-tighter mb-4 md:mb-8 italic">ABOUT.</h1>
+                    <p className="text-base md:text-xl text-white/30 font-light max-w-lg">关于这个空间，关于我。</p>
+                </motion.header>
 
-            <motion.article 
-                className="prose prose-invert max-w-none prose-p:text-sm prose-p:md:text-base prose-headings:text-lg prose-headings:md:text-xl"
-                variants={itemVariants}
-                dangerouslySetInnerHTML={{ __html: content }}
-            />
-        </motion.div>
+                <motion.article
+                    className="prose prose-invert max-w-none prose-p:text-sm prose-p:md:text-base prose-headings:text-lg prose-headings:md:text-xl"
+                    variants={itemVariants}
+                    dangerouslySetInnerHTML={{ __html: content }}
+                />
+            </motion.div>
+        </>
     );
 };
 

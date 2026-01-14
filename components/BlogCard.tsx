@@ -23,6 +23,8 @@ const BlogCard: React.FC<BlogCardProps> = memo(({ post, onClick, featured }) => 
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         transition={{ type: "spring", stiffness: 400, damping: 25 }}
+        role="button"
+        aria-label={`阅读文章: ${post.title}`}
       >
         <div className="flex items-center gap-2 text-white/40 text-[10px] uppercase tracking-wide">
           <span>{post.category}</span>
@@ -57,7 +59,9 @@ const BlogCard: React.FC<BlogCardProps> = memo(({ post, onClick, featured }) => 
     <div
       className={`group relative ${featured ? 'h-[380px]' : 'h-[320px]'} bg-white/[0.03] backdrop-blur-3xl rounded-2xl transition-all duration-300 hover:bg-white/[0.05] cursor-pointer`}
       onClick={onClick}
-      style={{ 
+      role="button"
+      aria-label={`阅读文章: ${post.title}`}
+      style={{
         willChange: 'transform',
         backfaceVisibility: 'hidden',
         transform: 'translateZ(0)'

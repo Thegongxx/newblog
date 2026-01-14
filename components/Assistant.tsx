@@ -28,22 +28,22 @@ const Assistant = () => {
   const [retryInfo, setRetryInfo] = useState<{ show: boolean; lastPrompt: string }>({ show: false, lastPrompt: '' });
   const [rateLimited, setRateLimited] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  
+
   // 路由和移动端检测
   const location = useLocation();
   const isMobile = useIsMobile();
-  
+
   // 可访问性支持
   const prefersReducedMotion = useReducedMotion();
-  
+
   // 触摸设备检测
   const [isTouchDevice, setIsTouchDevice] = useState(false);
-  
+
   useEffect(() => {
     const checkTouchDevice = () => {
       setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0);
     };
-    
+
     checkTouchDevice();
     window.addEventListener('resize', checkTouchDevice);
     return () => window.removeEventListener('resize', checkTouchDevice);
@@ -51,14 +51,14 @@ const Assistant = () => {
 
   // 优化的状态切换处理 - 苹果风格交互
   const [isAnimating, setIsAnimating] = useState(false);
-  
+
   const handleToggle = useCallback(() => {
     // 防止动画期间的重复点击
     if (isAnimating) return;
-    
+
     setIsAnimating(true);
     setIsOpen(prev => !prev);
-    
+
     // 苹果标准动画时长
     setTimeout(() => {
       setIsAnimating(false);
@@ -71,7 +71,7 @@ const Assistant = () => {
       if (event.key === 'Escape' && isOpen) {
         handleToggle();
       }
-      
+
       // Alt + A 快捷键打开/关闭AI助手
       if (event.altKey && event.key === 'a') {
         event.preventDefault();
@@ -80,7 +80,15 @@ const Assistant = () => {
     };
 
     document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+
+    // 监听导航栏触发的打开指令
+    const handleRemoteToggle = () => handleToggle();
+    window.addEventListener('aura:toggle-assistant', handleRemoteToggle);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('aura:toggle-assistant', handleRemoteToggle);
+    };
   }, [isOpen, handleToggle]);
 
   useEffect(() => {
@@ -185,151 +193,149 @@ const Assistant = () => {
 
   return (
     <>
-      {/* 苹果风格的FAB按钮 - 跟随页面流动 */}
-      <motion.button
-        onClick={handleToggle}
-        disabled={isAnimating}
-        className={`assistant-button fixed flex items-center justify-center bg-white shadow-lg border-0 focus:outline-none focus:ring-0 overflow-hidden ${
-          isMobile 
-            ? 'bottom-6 right-4' // 移动端固定在屏幕右下角
-            : 'bottom-8 right-8'  // 桌面端固定在屏幕右下角
-        } ${isAnimating ? 'pointer-events-none' : ''}`}
-        style={{
-          height: isMobile ? '48px' : '56px',
-          width: isMobile ? (isOpen ? '48px' : '100px') : (isOpen ? '56px' : '120px'),
-          borderRadius: isMobile ? '24px' : '28px',
-          willChange: 'transform, width',
-          backfaceVisibility: 'hidden',
-          zIndex: Z_INDEX.AI_ASSISTANT,
-        }}
-        initial={false}
-        animate={{
-          width: isOpen ? (isMobile ? 48 : 56) : (isMobile ? 100 : 120),
-          paddingLeft: isOpen ? 0 : (isMobile ? 12 : 16),
-          paddingRight: isOpen ? 0 : (isMobile ? 12 : 16),
-        }}
-        transition={{
-          type: "spring",
-          stiffness: 400,
-          damping: 30,
-          mass: 0.8,
-          duration: 0.35, // 苹果标准时长
-        }}
-        whileHover={!isAnimating ? {
-          scale: 1.05,
-          y: -2,
-          boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
-          transition: {
+      {/* 苹果风格的FAB按钮 - 移动端已整合进 Bottom Bar，故隐藏 */}
+      {!isMobile && (
+        <motion.button
+          onClick={handleToggle}
+          disabled={isAnimating}
+          className={`assistant-button fixed flex items-center justify-center bg-white shadow-lg border-0 focus:outline-none focus:ring-0 overflow-hidden bottom-8 right-8 ${isAnimating ? 'pointer-events-none' : ''}`}
+          style={{
+            height: '56px',
+            width: isOpen ? '56px' : '120px',
+            borderRadius: '28px',
+            willChange: 'transform, width',
+            backfaceVisibility: 'hidden',
+            zIndex: Z_INDEX.AI_ASSISTANT,
+          }}
+          initial={false}
+          animate={{
+            width: isOpen ? 56 : 120,
+            paddingLeft: isOpen ? 0 : 16,
+            paddingRight: isOpen ? 0 : 16,
+          }}
+          transition={{
             type: "spring",
             stiffness: 400,
-            damping: 25,
-            duration: 0.2
-          }
-        } : {}}
-        whileTap={!isAnimating ? {
-          scale: 0.95,
-          y: 0,
-          transition: {
-            type: "spring",
-            stiffness: 600,
             damping: 30,
-            duration: 0.1
-          }
-        } : {}}
-        aria-label={isOpen ? "关闭AI助手" : "打开AI助手"}
-        aria-expanded={isOpen}
-      >
-        {/* 苹果风格的涟漪效果背景 */}
-        <motion.div
-          className="absolute inset-0 bg-black/5 rounded-full"
-          initial={{ scale: 0, opacity: 0 }}
-          whileTap={{ 
-            scale: 1, 
-            opacity: 1,
+            mass: 0.8,
+            duration: 0.35,
+          }}
+          whileHover={!isAnimating ? {
+            scale: 1.05,
+            y: -2,
+            boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
             transition: {
               type: "spring",
-              stiffness: 500,
-              damping: 30,
-              duration: 0.15
+              stiffness: 400,
+              damping: 25,
+              duration: 0.2
             }
-          }}
-        />
-        
-        <AnimatePresence mode="wait">
-          {isOpen ? (
-            <motion.div
-              key="close-icon"
-              initial={{ opacity: 0, rotate: -90, scale: 0.8 }}
-              animate={{ opacity: 1, rotate: 0, scale: 1 }}
-              exit={{ opacity: 0, rotate: 90, scale: 0.8 }}
-              transition={{
+          } : {}}
+          whileTap={!isAnimating ? {
+            scale: 0.95,
+            y: 0,
+            transition: {
+              type: "spring",
+              stiffness: 600,
+              damping: 30,
+              duration: 0.1
+            }
+          } : {}}
+          aria-label={isOpen ? "关闭AI助手" : "打开AI助手"}
+          aria-expanded={isOpen}
+        >
+          {/* 苹果风格的涟漪效果背景 */}
+          <motion.div
+            className="absolute inset-0 bg-black/5 rounded-full"
+            initial={{ scale: 0, opacity: 0 }}
+            whileTap={{
+              scale: 1,
+              opacity: 1,
+              transition: {
                 type: "spring",
-                stiffness: 400,
-                damping: 25,
-                duration: 0.35
-              }}
-              className="relative flex items-center justify-center w-6 h-6"
-            >
-              {/* 苹果风格的关闭图标 */}
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                className="text-gray-700"
-              >
-                <motion.path
-                  d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
-                  fill="currentColor"
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  animate={{ pathLength: 1, opacity: 1 }}
-                  transition={{ 
-                    type: "spring",
-                    stiffness: 300,
-                    damping: 25,
-                    duration: 0.4 
-                  }}
-                />
-              </svg>
-            </motion.div>
-          ) : (
-            <motion.div
-              key="open-content"
-              initial={{ opacity: 0, x: -8, scale: 0.9 }}
-              animate={{ opacity: 1, x: 0, scale: 1 }}
-              exit={{ opacity: 0, x: 8, scale: 0.9 }}
-              transition={{
-                type: "spring",
-                stiffness: 400,
-                damping: 25,
-                duration: 0.35
-              }}
-              className="flex items-center gap-3"
-            >
+                stiffness: 500,
+                damping: 30,
+                duration: 0.15
+              }
+            }}
+          />
+
+          <AnimatePresence mode="wait">
+            {isOpen ? (
               <motion.div
-                className="text-gray-700 text-lg"
-                animate={prefersReducedMotion ? {} : {
-                  rotate: [0, 3, -3, 0],
-                  scale: [1, 1.02, 1]
-                }}
-                transition={prefersReducedMotion ? {} : {
+                key="close-icon"
+                initial={{ opacity: 0, rotate: -90, scale: 0.8 }}
+                animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                exit={{ opacity: 0, rotate: 90, scale: 0.8 }}
+                transition={{
                   type: "spring",
-                  stiffness: 200,
-                  damping: 20,
-                  duration: 2.5,
-                  repeat: Infinity,
-                  repeatDelay: 3,
+                  stiffness: 400,
+                  damping: 25,
+                  duration: 0.35
                 }}
+                className="relative flex items-center justify-center w-6 h-6"
               >
-                {ICONS.AI}
+                {/* 苹果风格的关闭图标 */}
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  className="text-gray-700"
+                >
+                  <motion.path
+                    d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+                    fill="currentColor"
+                    initial={{ pathLength: 0, opacity: 0 }}
+                    animate={{ pathLength: 1, opacity: 1 }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 300,
+                      damping: 25,
+                      duration: 0.4
+                    }}
+                  />
+                </svg>
               </motion.div>
-              <span className="font-medium text-gray-800 tracking-normal" style={{ fontSize: isMobile ? '12px' : '14px' }}>
-                Aura
-              </span>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.button>
+            ) : (
+              <motion.div
+                key="open-content"
+                initial={{ opacity: 0, x: -8, scale: 0.9 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                exit={{ opacity: 0, x: 8, scale: 0.9 }}
+                transition={{
+                  type: "spring",
+                  stiffness: 400,
+                  damping: 25,
+                  duration: 0.35
+                }}
+                className="flex items-center gap-3"
+              >
+                <motion.div
+                  className="text-gray-700 text-lg"
+                  animate={prefersReducedMotion ? {} : {
+                    rotate: [0, 3, -3, 0],
+                    scale: [1, 1.02, 1]
+                  }}
+                  transition={prefersReducedMotion ? {} : {
+                    type: "spring",
+                    stiffness: 200,
+                    damping: 20,
+                    duration: 2.5,
+                    repeat: Infinity,
+                    repeatDelay: 3,
+                  }}
+                >
+                  {ICONS.AI}
+                </motion.div>
+                <span className="font-medium text-gray-800 text-sm tracking-normal">
+                  Aura
+                </span>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.button>
+      )}
 
       {/* 优化的聊天面板 */}
       <AnimatePresence>
@@ -340,37 +346,28 @@ const Assistant = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{
-                type: "spring",
-                stiffness: 300,
-                damping: 30,
-                duration: 0.3
-              }}
               className="fixed inset-0 bg-black/40"
-              style={{ 
-                willChange: 'opacity',
-                backfaceVisibility: 'hidden',
+              style={{
                 zIndex: Z_INDEX.MODAL_BACKDROP
               }}
               onClick={handleToggle}
-              aria-label="点击关闭AI助手"
             />
-            
+
             {/* 苹果风格的聊天面板 */}
             <motion.div
-              initial={{ 
-                opacity: 0, 
-                y: 30, 
+              initial={{
+                opacity: 0,
+                y: 30,
                 scale: 0.95
               }}
-              animate={{ 
-                opacity: 1, 
-                y: 0, 
+              animate={{
+                opacity: 1,
+                y: 0,
                 scale: 1
               }}
-              exit={{ 
-                opacity: 0, 
-                y: 30, 
+              exit={{
+                opacity: 0,
+                y: 30,
                 scale: 0.95
               }}
               transition={{
@@ -384,33 +381,26 @@ const Assistant = () => {
               style={{
                 // 移动端和桌面端不同的定位 - 固定在屏幕上
                 ...(isMobile ? {
-                  bottom: '6rem', // 在固定的AI助手按钮上方
-                  right: '1rem', // 与按钮右边对齐
-                  left: '1rem', // 左边距，确保不超出屏幕
-                  width: 'auto', // 自动宽度
-                  maxHeight: '60vh',
-                  maxWidth: '20rem', // 最大宽度限制
+                  bottom: '7.5rem', // 避开 Bottom Bar
+                  right: '1rem',
+                  left: '1rem',
+                  maxHeight: '70vh',
                 } : {
-                  bottom: '6rem', // 在固定的AI助手按钮上方
-                  right: '2rem', // 与按钮右边对齐
+                  bottom: '6rem',
+                  right: '2rem',
                   width: '24rem',
                   maxHeight: '32rem',
                 }),
-                boxShadow: '0 24px 38px rgba(0,0,0,0.4), 0 9px 46px rgba(0,0,0,0.24)',
-                willChange: 'transform, opacity',
-                backfaceVisibility: 'hidden',
                 zIndex: Z_INDEX.MODAL
               }}
               role="dialog"
-              aria-label="AI助手聊天面板"
-              aria-modal="true"
             >
               {/* Header - 苹果风格 */}
-              <motion.div 
+              <motion.div
                 className="px-6 py-5 border-b border-gray-700/50 flex items-center justify-between bg-gradient-to-r from-gray-800/50 to-gray-900/30"
                 initial={{ opacity: 0, y: -15 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ 
+                transition={{
                   type: "spring",
                   stiffness: 400,
                   damping: 25,
@@ -419,29 +409,29 @@ const Assistant = () => {
                 }}
               >
                 <div className="flex items-center gap-3">
-                  <motion.div 
+                  <motion.div
                     className="w-2 h-2 bg-green-400 rounded-full"
-                    animate={prefersReducedMotion ? {} : { 
+                    animate={prefersReducedMotion ? {} : {
                       scale: [1, 1.2, 1],
                       opacity: [0.7, 1, 0.7]
                     }}
-                    transition={prefersReducedMotion ? {} : { 
+                    transition={prefersReducedMotion ? {} : {
                       type: "spring",
                       stiffness: 200,
                       damping: 20,
-                      duration: 2, 
+                      duration: 2,
                       repeat: Infinity
                     }}
                   />
                   <h3 className="text-gray-300 text-xs font-medium uppercase tracking-wider">Assistant Aura</h3>
                 </div>
                 {rateLimited && (
-                  <motion.span 
+                  <motion.span
                     className="text-xs text-amber-400 bg-amber-900/30 px-2 py-1 rounded-full border border-amber-700/30"
                     initial={{ scale: 0, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     exit={{ scale: 0, opacity: 0 }}
-                    transition={{ 
+                    transition={{
                       type: "spring",
                       stiffness: 400,
                       damping: 25,
@@ -454,33 +444,33 @@ const Assistant = () => {
               </motion.div>
 
               {/* Messages - Material Design风格 */}
-              <div 
-                ref={scrollRef} 
+              <div
+                ref={scrollRef}
                 className="flex-1 overflow-y-auto px-6 py-4 space-y-4 bg-gradient-to-b from-gray-800/20 to-gray-900/10"
-                style={{ 
+                style={{
                   willChange: 'scroll-position',
                   backfaceVisibility: 'hidden'
                 }}
               >
                 {messages.length === 0 ? (
-                  <motion.div 
+                  <motion.div
                     className="text-center py-12"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ 
-                      delay: 0.2, 
+                    transition={{
+                      delay: 0.2,
                       duration: 0.3,
                       ease: [0.4, 0.0, 0.2, 1]
                     }}
                   >
-                    <motion.div 
+                    <motion.div
                       className="text-gray-500 mb-4 text-2xl"
-                      animate={prefersReducedMotion ? {} : { 
+                      animate={prefersReducedMotion ? {} : {
                         rotate: [0, 3, -3, 0],
                         scale: [1, 1.02, 1]
                       }}
-                      transition={prefersReducedMotion ? {} : { 
-                        duration: 4, 
+                      transition={prefersReducedMotion ? {} : {
+                        duration: 4,
                         repeat: Infinity,
                         repeatDelay: 2,
                         ease: [0.4, 0.0, 0.2, 1]
@@ -493,22 +483,21 @@ const Assistant = () => {
                   </motion.div>
                 ) : (
                   messages.map((m, i) => (
-                    <motion.div 
-                      key={i} 
+                    <motion.div
+                      key={i}
                       className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
                       initial={{ opacity: 0, y: 10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
-                      transition={{ 
+                      transition={{
                         delay: Math.min(i * 0.05, 0.2),
                         duration: 0.25,
                         ease: [0.4, 0.0, 0.2, 1]
                       }}
                     >
-                      <div className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm shadow-sm ${
-                        m.role === 'user' 
-                          ? 'bg-blue-600 text-white shadow-lg' 
-                          : 'bg-gray-800/80 text-gray-200 border border-gray-700/50'
-                      }`}>
+                      <div className={`max-w-[80%] px-4 py-3 rounded-2xl text-sm shadow-sm ${m.role === 'user'
+                        ? 'bg-blue-600 text-white shadow-lg'
+                        : 'bg-gray-800/80 text-gray-200 border border-gray-700/50'
+                        }`}>
                         {m.content || <TypingIndicator />}
                       </div>
                     </motion.div>
@@ -518,16 +507,16 @@ const Assistant = () => {
 
               {/* Retry Button - 黑色主题 */}
               {retryInfo.show && !isLoading && (
-                <motion.div 
+                <motion.div
                   className="px-6 pb-2"
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
-                  transition={{ 
+                  transition={{
                     duration: 0.15,
                     ease: "easeOut"
                   }}
-                  style={{ 
+                  style={{
                     willChange: 'height, opacity',
                     backfaceVisibility: 'hidden'
                   }}
@@ -543,12 +532,12 @@ const Assistant = () => {
               )}
 
               {/* Input - Material Design风格 */}
-              <motion.div 
+              <motion.div
                 className="px-6 pb-6 bg-gradient-to-t from-gray-800/50 to-transparent"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ 
-                  delay: 0.15, 
+                transition={{
+                  delay: 0.15,
                   duration: 0.25,
                   ease: [0.4, 0.0, 0.2, 1]
                 }}
@@ -567,14 +556,13 @@ const Assistant = () => {
                   <motion.button
                     onClick={() => sendMessage(input)}
                     disabled={!input.trim() || isLoading || !!rateLimited}
-                    className={`absolute right-2 top-2 w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center transition-all duration-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 ${
-                      input.trim() && !rateLimited ? 'opacity-100 hover:bg-blue-500' : 'opacity-30'
-                    }`}
-                    whileHover={input.trim() && !rateLimited ? { 
+                    className={`absolute right-2 top-2 w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center transition-all duration-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 ${input.trim() && !rateLimited ? 'opacity-100 hover:bg-blue-500' : 'opacity-30'
+                      }`}
+                    whileHover={input.trim() && !rateLimited ? {
                       scale: 1.05,
                       transition: { duration: 0.15, ease: [0.4, 0.0, 0.2, 1] }
                     } : {}}
-                    whileTap={input.trim() && !rateLimited ? { 
+                    whileTap={input.trim() && !rateLimited ? {
                       scale: 0.95,
                       transition: { duration: 0.1, ease: [0.4, 0.0, 0.2, 1] }
                     } : {}}

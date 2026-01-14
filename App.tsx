@@ -7,6 +7,7 @@ import Intro from './components/Intro';
 import Assistant from './components/Assistant';
 import ErrorBoundary from './components/ErrorBoundary';
 import MobileNavigation from './components/mobile/MobileNavigation';
+import MobileBottomBar from './components/mobile/MobileBottomBar';
 import DesktopNavigation from './components/desktop/DesktopNavigation';
 import PageTransitionMask from './components/PageTransitionMask';
 import { MagneticButton } from './components/HoverEffects';
@@ -304,6 +305,7 @@ const AppInner = () => {
                 <motion.button
                   key={item.path}
                   onClick={() => handleNavigate(item.path)}
+                  aria-label={`跳转到 ${item.label} 页面`}
                   className={`px-2 py-1 rounded-full transition-all duration-200 ${location.pathname === item.path
                     ? 'text-white bg-white/20'
                     : 'text-white/60'
@@ -386,6 +388,7 @@ const AppInner = () => {
                   <motion.button
                     key={item.path}
                     onClick={() => handleNavigate(item.path)}
+                    aria-label={`跳转到 ${item.label} 页面`}
                     className={`px-4 py-2 rounded-full transition-all duration-200 liquid-morph ${location.pathname === item.path
                       ? 'text-white bg-white/15'
                       : 'text-white/60 hover:text-white hover:bg-white/10'
@@ -420,15 +423,20 @@ const AppInner = () => {
         )}
       </motion.nav>
 
+      {/* Mobile Bottom Bar - 仅在移动端显示且非 Intro 状态下 */}
+      {isMobile && !showIntro && (
+        <MobileBottomBar onNavigate={handleNavigate} />
+      )}
+
       {/* Main Content - 智能页面切换动画系统 */}
       <motion.main
-        className={`${isMobile ? 'pb-32 px-4 pt-20' : 'pb-48 px-6 pt-24'} max-w-7xl mx-auto relative`}
+        className={`${isMobile ? 'pb-36 px-4 pt-8' : 'pb-48 px-6 pt-24'} max-w-7xl mx-auto relative`}
         style={{
           willChange: 'transform',
           backfaceVisibility: 'hidden',
           transform: 'translateZ(0)',
           // 确保主容器有最小高度，避免页面切换时的空白
-          minHeight: 'calc(100vh - 8rem)',
+          minHeight: 'calc(100vh - 4rem)',
           // 添加背景色确保切换时不会透出其他内容
           backgroundColor: 'transparent'
         }}
