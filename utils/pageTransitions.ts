@@ -31,69 +31,69 @@ const getDesktopTransition = (duration: number) => ({
 
 // 页面切换动画配置
 export const pageTransitions = {
-  // 淡入淡出 - 用于同级页面切换
+  // 淡入淡出 - 用于同级页面切换（列表 <-> 列表、详情 <-> 详情）
   fade: {
-    initial: { opacity: 0 },
-    animate: { opacity: 1 },
-    exit: { opacity: 0 },
+    initial: { opacity: 0, y: 8 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -8 },
     transition: {
-      desktop: getDesktopTransition(0.3),
+      desktop: getDesktopTransition(0.28),
+      mobile: getMobileTransition(0.28)
+    }
+  },
+
+  // 列表 -> 详情：轻轻浮起的下滑进入
+  slideDown: {
+    initial: { y: 32, opacity: 0 },
+    animate: { y: 0, opacity: 1 },
+    exit: { y: -8, opacity: 0.4 },
+    transition: {
+      desktop: getDesktopTransition(0.36),
+      mobile: getMobileTransition(0.34) // 移动端稍快一点
+    }
+  },
+
+  // 详情 -> 列表：向上的回落
+  slideUp: {
+    initial: { y: -8, opacity: 0 },
+    animate: { y: 0, opacity: 1 },
+    exit: { y: 16, opacity: 0 },
+    transition: {
+      desktop: getDesktopTransition(0.32),
       mobile: getMobileTransition(0.3)
     }
   },
 
-  // 从上方滑入 - 用于进入详情页
-  slideDown: {
-    initial: { y: '-100%', opacity: 0 },
-    animate: { y: 0, opacity: 1 },
-    exit: { y: 0, opacity: 0 },
+  // 推拉效果 - 兜底的左右切换
+  push: {
+    initial: { x: '100%', opacity: 0 },
+    animate: { x: 0, opacity: 1 },
+    exit: { x: '-20%', opacity: 0 },
     transition: {
-      desktop: getDesktopTransition(0.4),
-      mobile: getMobileTransition(0.35) // 移动端稍快
+      desktop: getDesktopTransition(0.3),
+      mobile: getMobileTransition(0.25)
     }
   },
 
-  // 从下方滑入 - 用于返回列表页
-  slideUp: {
-    initial: { y: '30%', opacity: 0 },
-    animate: { y: 0, opacity: 1 },
-    exit: { y: 0, opacity: 0 }, // 原页面保持位置，只是渐出
+  // 缩放进入 - 用于特殊页面如 About
+  zoomIn: {
+    initial: { opacity: 0, scale: 0.94, filter: 'blur(4px)' },
+    animate: { opacity: 1, scale: 1, filter: 'blur(0px)' },
+    exit: { opacity: 0, scale: 1.03, filter: 'blur(2px)' },
     transition: {
       desktop: getDesktopTransition(0.4),
       mobile: getMobileTransition(0.35)
     }
   },
 
-  // 推拉效果 - 传统的左右切换
-  push: {
-    initial: { x: '100%', opacity: 0 },
-    animate: { x: 0, opacity: 1 },
-    exit: { x: '-100%', opacity: 0 },
-    transition: {
-      desktop: getDesktopTransition(0.3),
-      mobile: getMobileTransition(0.25) // 移动端更快的推拉
-    }
-  },
-
-  // 缩放进入 - 用于特殊页面如About
-  zoomIn: {
-    initial: { opacity: 0, scale: 0.95 },
-    animate: { opacity: 1, scale: 1 },
-    exit: { opacity: 0, scale: 1.05 },
-    transition: {
-      desktop: getDesktopTransition(0.4),
-      mobile: getMobileTransition(0.3)
-    }
-  },
-
   // 缩放退出
   zoomOut: {
-    initial: { opacity: 0, scale: 1.05 },
+    initial: { opacity: 0, scale: 1.03 },
     animate: { opacity: 1, scale: 1 },
-    exit: { opacity: 0, scale: 0.95 },
+    exit: { opacity: 0, scale: 0.97 },
     transition: {
-      desktop: getDesktopTransition(0.4),
-      mobile: getMobileTransition(0.3)
+      desktop: getDesktopTransition(0.35),
+      mobile: getMobileTransition(0.32)
     }
   },
 
