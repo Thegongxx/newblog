@@ -4,20 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "6d9aac795d5c6d1d",
+        "id": "b3071f3a9a7d7883",
         "type": "tabs",
         "children": [
           {
-            "id": "6bba0019fbc961f5",
+            "id": "2a527498eff67183",
             "type": "leaf",
             "state": {
-              "type": "bases",
+              "type": "split-diff-view",
               "state": {
-                "file": "未命名 2.base",
-                "viewName": "表格"
+                "aFile": "content/未命名.base",
+                "bFile": "content/未命名.base",
+                "aRef": ""
               },
-              "icon": "lucide-table",
-              "title": "未命名 2"
+              "icon": "diff",
+              "title": "Diff: 未命名.base  (Working Tree)"
             }
           }
         ]
@@ -73,8 +74,7 @@
               "title": "书签"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
@@ -193,14 +193,14 @@
       "bases:创建新数据库": false
     }
   },
-  "active": "6bba0019fbc961f5",
+  "active": "77b4e255143a595c",
   "lastOpenFiles": [
+    "未命名.base",
+    "未命名 1.base",
+    "转移/1.md",
     "未命名 2.base",
     "notes/reading-notes.md",
-    "未命名 1.base",
     "pages/about.md",
-    "未命名.base",
-    "转移/1.md",
     "转移/2.md",
     "未命名.md",
     "转移",
