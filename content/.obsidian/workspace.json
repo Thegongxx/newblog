@@ -4,21 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "8f7af49f4eaf7d30",
+        "id": "23fb5c1e7b22370d",
         "type": "tabs",
         "children": [
           {
-            "id": "e83781297f7dbf0f",
+            "id": "0002f6ff1854a2f7",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "split-diff-view",
               "state": {
-                "file": "转移/1.md",
-                "mode": "source",
-                "source": false
+                "aFile": "content/转移/1.md",
+                "bFile": "content/转移/1.md",
+                "aRef": ""
               },
-              "icon": "lucide-file",
-              "title": "1"
+              "icon": "diff",
+              "title": "Diff: 1  (Working Tree)"
             }
           }
         ]
@@ -193,11 +193,11 @@
       "bases:创建新数据库": false
     }
   },
-  "active": "e83781297f7dbf0f",
+  "active": "0002f6ff1854a2f7",
   "lastOpenFiles": [
+    "转移/1.md",
     "未命名.base",
     "未命名 1.base",
-    "转移/1.md",
     "未命名 2.base",
     "notes/reading-notes.md",
     "pages/about.md",
