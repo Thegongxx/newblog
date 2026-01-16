@@ -4,21 +4,20 @@
     "type": "split",
     "children": [
       {
-        "id": "4723eb6ecc8ea4fd",
+        "id": "6d9aac795d5c6d1d",
         "type": "tabs",
         "children": [
           {
-            "id": "5d8043928dbbb90d",
+            "id": "6bba0019fbc961f5",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "bases",
               "state": {
-                "file": "转移/1.md",
-                "mode": "source",
-                "source": false
+                "file": "未命名 2.base",
+                "viewName": "表格"
               },
-              "icon": "lucide-file",
-              "title": "1"
+              "icon": "lucide-table",
+              "title": "未命名 2"
             }
           }
         ]
@@ -53,7 +52,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "tag:productivity, tips, workflow",
+                "query": "",
                 "matchingCase": true,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -74,7 +73,8 @@
               "title": "书签"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -193,14 +193,17 @@
       "bases:创建新数据库": false
     }
   },
-  "active": "5d8043928dbbb90d",
+  "active": "6bba0019fbc961f5",
   "lastOpenFiles": [
+    "未命名 2.base",
+    "notes/reading-notes.md",
+    "未命名 1.base",
+    "pages/about.md",
+    "未命名.base",
     "转移/1.md",
     "转移/2.md",
     "未命名.md",
-    "pages/about.md",
     "转移",
-    "notes/reading-notes.md",
     "notes/daily-reflection.md",
     "notes/design-inspiration.md",
     "notes/productivity-tips.md",
@@ -216,13 +219,11 @@
     "notes/数字时代的思考.md",
     "notes/设计的本质.md",
     "posts/极简主义的美学.md",
-    "未命名.base",
     "posts/你好.md",
     "notes/freedom.md",
     "posts/hello-aura.md",
     "notes/heroism.md",
     "2024-03-12.md",
-    "未命名.canvas",
-    "posts/test-automation.md"
+    "未命名.canvas"
   ]
 }
