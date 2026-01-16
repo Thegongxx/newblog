@@ -4,21 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "b3071f3a9a7d7883",
+        "id": "8f7af49f4eaf7d30",
         "type": "tabs",
         "children": [
           {
-            "id": "2a527498eff67183",
+            "id": "e83781297f7dbf0f",
             "type": "leaf",
             "state": {
-              "type": "split-diff-view",
+              "type": "markdown",
               "state": {
-                "aFile": "content/未命名.base",
-                "bFile": "content/未命名.base",
-                "aRef": ""
+                "file": "转移/1.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "diff",
-              "title": "Diff: 未命名.base  (Working Tree)"
+              "icon": "lucide-file",
+              "title": "1"
             }
           }
         ]
@@ -193,7 +193,7 @@
       "bases:创建新数据库": false
     }
   },
-  "active": "77b4e255143a595c",
+  "active": "e83781297f7dbf0f",
   "lastOpenFiles": [
     "未命名.base",
     "未命名 1.base",
