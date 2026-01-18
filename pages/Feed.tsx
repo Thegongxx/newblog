@@ -299,7 +299,7 @@ const Feed: React.FC<FeedProps> = memo(({ posts, loading, onSelectPost }) => {
           </div>
 
           <div className="flex-[1.2] w-full flex justify-center items-center relative min-h-[400px]">
-            <div className="absolute inset-0 bg-white/[0.02] blur-3xl rounded-full opacity-50 group-hover:opacity-70 transition-opacity duration-500" />
+            {/* <div className="absolute inset-0 bg-white/[0.02] blur-3xl rounded-full opacity-50 group-hover:opacity-70 transition-opacity duration-500" /> */}
 
             <div className="relative z-10 w-full max-w-lg flex flex-col space-y-12 group cursor-pointer hover:scale-[1.02] transition-all duration-500">
               <div className="flex items-center gap-3 opacity-60 group-hover:opacity-100 transition-opacity duration-300">

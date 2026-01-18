@@ -342,9 +342,111 @@ body {
   transition: background-color 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), color 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-/* Light Mode Overrides for Tailwind Utilities */
+/* Background Overrides - Use Warm Brown base instead of pure black for softer look */
+[data-theme='light'] .bg-white\/5 {
+  background-color: rgba(44, 44, 30, 0.04);
+}
+
+[data-theme='light'] .bg-white\/10 {
+  background-color: rgba(44, 44, 30, 0.08);
+  /* More visible warm gray */
+}
+
+[data-theme='light'] .bg-white\/20 {
+  background-color: rgba(44, 44, 30, 0.12);
+}
+
+[data-theme='light'] .bg-white\/\[0\.02\] {
+  background-color: rgba(44, 44, 30, 0.02);
+}
+
+[data-theme='light'] .bg-white\/\[0\.03\] {
+  background-color: rgba(255, 255, 255, 0.8);
+  /* Card surfaces become white */
+}
+
+/* Border Overrides - Warm Brown */
+[data-theme='light'] .border-white\/5 {
+  border-color: rgba(44, 44, 30, 0.05);
+}
+
+[data-theme='light'] .border-white\/10 {
+  border-color: rgba(44, 44, 30, 0.1);
+}
+
+[data-theme='light'] .border-white\/20 {
+  border-color: rgba(44, 44, 30, 0.15);
+}
+
+[data-theme='light'] .border-white\/\[0\.08\] {
+  border-color: rgba(44, 44, 30, 0.08);
+}
+
+/* Selection - Warm Brown */
+[data-theme='light'] ::selection {
+  background-color: rgba(44, 44, 30, 0.15);
+  color: #2C2C1E;
+}
+
+/* Fix for Light Mode Hover States */
+[data-theme='light'] .group:hover .group-hover\:text-white {
+  color: #2C2C1E !important;
+}
+
+/* Assistant & UI Grays - Optimized for Light Mode "Cream" feel */
+[data-theme='light'] .bg-gray-900\/95 {
+  background-color: rgba(255, 255, 245, 0.95) !important;
+  /* Creamy White panel */
+  border: 1px solid rgba(44, 44, 30, 0.08);
+  box-shadow: 0 12px 40px rgba(44, 44, 30, 0.15) !important;
+  color: #2C2C1E;
+}
+
+/* Assistant Bubble - Receive */
+[data-theme='light'] .bg-gray-800\/80 {
+  background-color: rgba(44, 44, 30, 0.05);
+  border: 1px solid rgba(44, 44, 30, 0.05);
+  color: #2C2C1E;
+}
+
+/* Assistant Input Area fade */
+[data-theme='light'] .bg-gradient-to-t {
+  background: linear-gradient(to top, rgba(254, 252, 232, 1), transparent) !important;
+}
+
+/* Assistant Button (FAB) Specifics */
+[data-theme='light'] .assistant-button.bg-white {
+  background-color: #FFFEF9 !important;
+  /* Very bright cream */
+  color: #2C2C1E !important;
+  border: 1px solid rgba(44, 44, 30, 0.08) !important;
+  box-shadow: 0 4px 20px rgba(44, 44, 30, 0.12) !important;
+}
+
+[data-theme='light'] .assistant-button svg {
+  color: #2C2C1E !important;
+}
+
+/* Input Fields */
+[data-theme='light'] input.text-gray-200 {
+  color: #2C2C1E;
+}
+
+[data-theme='light'] input::placeholder {
+  color: rgba(44, 44, 30, 0.4) !important;
+}
+
+/* General Text Overrides for Light Mode */
+[data-theme='light'] .text-gray-200,
+[data-theme='light'] .text-gray-300,
+[data-theme='light'] .text-gray-400,
+[data-theme='light'] .text-gray-500,
+[data-theme='light'] .text-gray-700 {
+  color: rgba(44, 44, 30, 0.8) !important;
+}
+
 [data-theme='light'] .text-white {
-  color: var(--text-main);
+  color: #2C2C1E !important;
 }
 
 [data-theme='light'] .text-white\/90 {
@@ -383,139 +485,28 @@ body {
   color: rgba(44, 44, 30, 0.1);
 }
 
-[data-theme='light'] .text-white\/5 {
-  color: rgba(44, 44, 30, 0.05);
+/* Force cursor color */
+[data-theme='light'] {
+  caret-color: #2C2C1E;
 }
 
-/* Background Overrides */
-[data-theme='light'] .bg-white\/5 {
-  background-color: rgba(0, 0, 0, 0.03);
+/* Ripple */
+[data-theme='light'] .ripple-effect::before {
+  background: rgba(44, 44, 30, 0.15);
 }
 
-[data-theme='light'] .bg-white\/10 {
-  background-color: rgba(0, 0, 0, 0.06);
+[data-theme='light'] .group:active .ripple-effect::before {
+  background: rgba(44, 44, 30, 0.2);
 }
 
-[data-theme='light'] .bg-white\/20 {
-  background-color: rgba(0, 0, 0, 0.12);
-}
-
-[data-theme='light'] .bg-white\/\[0\.02\] {
-  background-color: rgba(0, 0, 0, 0.02);
-}
-
-[data-theme='light'] .bg-white\/\[0\.03\] {
-  background-color: rgba(255, 255, 255, 0.5);
-}
-
-/* Border Overrides */
-[data-theme='light'] .border-white\/5 {
-  border-color: rgba(0, 0, 0, 0.04);
-}
-
-[data-theme='light'] .border-white\/10 {
-  border-color: rgba(0, 0, 0, 0.08);
-}
-
-[data-theme='light'] .border-white\/20 {
-  border-color: rgba(0, 0, 0, 0.15);
-}
-
-[data-theme='light'] .border-white\/\[0\.08\] {
-  border-color: rgba(0, 0, 0, 0.06);
-}
-
-/* Selection */
+/* Light Mode Text Selection - More Obvious */
 [data-theme='light'] ::selection {
-  background-color: rgba(0, 0, 0, 0.08);
-  color: var(--text-main);
-}
-
-/* Fix for Light Mode Hover States (Notes, etc.) */
-/* In light mode, we want the text to stay dark on hover, not turn white */
-[data-theme='light'] .group:hover .group-hover\:text-white {
-  color: #2C2C1E !important;
-}
-
-[data-theme='light'] .group:active .group-active\:text-white\/95 {
-  color: rgba(44, 44, 30, 0.95) !important;
-}
-
-[data-theme='light'] .group:hover .group-hover\:text-white\/70 {
-  color: rgba(44, 44, 30, 0.8) !important;
-}
-
-[data-theme='light'] .group:active .group-active\:text-white\/70 {
-  color: rgba(44, 44, 30, 0.7) !important;
-}
-
-[data-theme='light'] .group:hover .group-hover\:text-white\/60 {
-  color: rgba(44, 44, 30, 0.7) !important;
-}
-
-[data-theme='light'] .group:hover .group-hover\:scale-110 {
-  /* Optional: Ensure scaling doesn't break layout if needed, but mainly color */
-}
-
-/* Missing Opacity Overrides */
-[data-theme='light'] .text-white\/35 {
-  color: rgba(44, 44, 30, 0.35);
-}
-
-[data-theme='light'] .text-white\/22 {
-  color: rgba(44, 44, 30, 0.22);
-}
-
-[data-theme='light'] .text-white\/55 {
-  color: rgba(44, 44, 30, 0.55);
-}
-
-/* Placeholders */
-[data-theme='light'] .placeholder-white\/20::placeholder {
-  color: rgba(44, 44, 30, 0.2);
-}
-
-/* Assistant & UI Grays - Light Mode Adaptation */
-[data-theme='light'] .bg-gray-900\/95 {
-  background-color: rgba(254, 252, 232, 0.95);
-  /* Match theme bg */
+  background-color: rgba(44, 44, 30, 0.15);
   color: #2C2C1E;
 }
 
-[data-theme='light'] .bg-gray-800\/80 {
-  background-color: rgba(0, 0, 0, 0.04);
-  color: #2C2C1E;
-}
-
-[data-theme='light'] .bg-gray-800\/50 {
-  background-color: rgba(0, 0, 0, 0.02);
-}
-
-[data-theme='light'] .border-gray-700\/50 {
-  border-color: rgba(0, 0, 0, 0.06);
-}
-
-[data-theme='light'] .text-gray-200 {
-  color: #2C2C1E;
-}
-
-[data-theme='light'] .text-gray-300 {
-  color: rgba(44, 44, 30, 0.8);
-}
-
-[data-theme='light'] .text-gray-400 {
-  color: rgba(44, 44, 30, 0.5);
-}
-
-[data-theme='light'] .text-gray-500 {
-  color: rgba(44, 44, 30, 0.4);
-}
-
-[data-theme='light'] .text-gray-700 {
-  color: rgba(44, 44, 30, 0.6);
-}
-
-/* Fix for Input fields ensuring text is readable */
-[data-theme='light'] input.text-gray-200 {
-  color: #2C2C1E;
+/* Force dark text on hover gradients in light mode */
+[data-theme='light'] .from-white\/10 {
+  --tw-gradient-from: rgba(0, 0, 0, 0.1) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
 }

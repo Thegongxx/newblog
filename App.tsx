@@ -403,8 +403,8 @@ const AppInner = () => {
         </ErrorBoundary>
       </motion.main>
 
-      {/* AI助手 - 固定在屏幕右下角，像导航栏一样跟随用户 */}
-      <Assistant />
+      {/* AI助手 - 仅在桌面端显示 */}
+      {!isMobile && <Assistant />}
 
       {/* Footer - 响应式优化 */}
       <footer className="py-12 md:py-32 px-4 md:px-6 border-t border-white/10">
