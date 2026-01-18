@@ -68,7 +68,7 @@ const Feed: React.FC<FeedProps> = memo(({ posts, loading, onSelectPost }) => {
         title: 'Welcome',
         content: 'Digital Sanctuary awaits your thoughts.',
         date: new Date().toLocaleDateString(),
-        tags: ['AURA']
+        tags: ['XUAN']
       };
     }
     const index = Math.floor(Date.now() / (1000 * 60 * 60 * 24)) % notes.length;
@@ -82,7 +82,7 @@ const Feed: React.FC<FeedProps> = memo(({ posts, loading, onSelectPost }) => {
     return (
       <>
         <Helmet>
-          <title>Aura · Digital Sanctuary</title>
+          <title>Xuan · Digital Sanctuary</title>
           <meta name="description" content="一个安静的角落，记录技术与情绪的折射。" />
         </Helmet>
         <div className="space-y-12 pb-20">
@@ -97,7 +97,7 @@ const Feed: React.FC<FeedProps> = memo(({ posts, loading, onSelectPost }) => {
               <h1 className="text-4xl font-bold tracking-tight leading-tight text-white">
                 在这里，
                 <br />
-                <span className="text-white/30">记录生活的折射。</span>
+                <span className="text-white/30">记录轩轩的生活折射。</span>
               </h1>
             </motion.div>
           </section>

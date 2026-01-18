@@ -8,7 +8,7 @@ import React from 'react';
 export const CONTACT_INFO = {
   QQ: '123456789',
   WX: 'Your_WX_ID',
-  MAIL: 'hello@aura.com'
+  MAIL: 'hello@xuan.com'
 };
 
 /**

@@ -7,6 +7,8 @@ interface IntroProps {
   onComplete: () => void;
 }
 
+const AppleEasing = [0.23, 1, 0.32, 1];
+
 const Intro: React.FC<IntroProps> = ({ onComplete }) => {
   const isMobile = useIsMobile();
   const [phase, setPhase] = useState<'dot' | 'expand' | 'text' | 'fade'>('dot');
@@ -14,18 +16,18 @@ const Intro: React.FC<IntroProps> = ({ onComplete }) => {
   const [isFinished, setIsFinished] = useState(false);
 
   // Cipher Config
-  const targetText = "Aura";
+  const targetText = "Xuan";
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ!<>-_\\/[]{}—=+*^?#";
   const intervalRef = useRef<any>(null);
 
   // 动画时长配置 (单位：秒)
   const TIMING = useMemo(() => ({
-    expandDelay: isMobile ? 0.6 : 0.8,
-    textDelay: isMobile ? 1.2 : 1.5,
-    fadeDelay: isMobile ? 3.5 : 4.0, // Delay fade out to allow reading
-    totalDuration: isMobile ? 4.5 : 5.5,
-    forceSkip: 6.0 // 绝对兜底时间
-  }), [isMobile]);
+    expandDelay: 0.8,
+    textDelay: 1.8,
+    fadeDelay: 4.5,
+    totalDuration: 5.5,
+    forceSkip: 7.0
+  }), []);
 
   const handleComplete = () => {
     if (isFinished) return;
@@ -34,21 +36,13 @@ const Intro: React.FC<IntroProps> = ({ onComplete }) => {
   };
 
   useEffect(() => {
-    // 强制跳过逻辑 - 彻底杜绝黑屏死锁
-    const skipTimer = setTimeout(() => {
-      console.warn("Intro animation timeout, forcing complete.");
-      handleComplete();
-    }, TIMING.forceSkip * 1000);
-
-    // 1. 启动展开
+    const skipTimer = setTimeout(() => handleComplete(), TIMING.forceSkip * 1000);
     const tExpand = setTimeout(() => setPhase('expand'), TIMING.expandDelay * 1000);
-
-    // 2. 文本效果
     const tTextPhase = setTimeout(() => setPhase('text'), TIMING.textDelay * 1000);
+
     const tCipher = setTimeout(() => {
       let iteration = 0;
       clearInterval(intervalRef.current);
-
       intervalRef.current = setInterval(() => {
         setDisplayText(
           targetText
@@ -59,19 +53,13 @@ const Intro: React.FC<IntroProps> = ({ onComplete }) => {
             })
             .join("")
         );
-
         if (iteration >= targetText.length) clearInterval(intervalRef.current);
-        iteration += 1 / 3;
-      }, 40);
-    }, TIMING.textDelay * 1000 + 200);
+        iteration += 1 / 4;
+      }, 50);
+    }, TIMING.textDelay * 1000 + 400);
 
-    // 3. 渐变退出
     const tFade = setTimeout(() => setPhase('fade'), TIMING.fadeDelay * 1000);
-
-    // 4. 完成挂载
-    const tEnd = setTimeout(() => {
-      handleComplete();
-    }, TIMING.totalDuration * 1000);
+    const tEnd = setTimeout(() => handleComplete(), TIMING.totalDuration * 1000);
 
     return () => {
       clearTimeout(skipTimer);
@@ -82,7 +70,7 @@ const Intro: React.FC<IntroProps> = ({ onComplete }) => {
       clearTimeout(tEnd);
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [TIMING]); // Remove dependencies that change mid-effect to avoid resets
+  }, [TIMING]);
 
   return (
     <AnimatePresence>
@@ -90,47 +78,52 @@ const Intro: React.FC<IntroProps> = ({ onComplete }) => {
         <motion.div
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.8, ease: "easeInOut" }}
+          transition={{ duration: 1, ease: AppleEasing as any }}
           className="fixed inset-0 z-[100] bg-black flex items-center justify-center overflow-hidden cursor-pointer"
-          onClick={handleComplete} // 点击跳过
+          onClick={handleComplete}
         >
-          {/* Iris Effect - 使用 scale 代替 vmax 单位以提升稳定性 */}
+          {/* Enhanced Iris Effect */}
           <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: phase === 'dot' ? 0 : 50 }} // Increase scale to ensure coverage
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{
+              scale: phase === 'dot' ? 0.05 : 60,
+              opacity: 1
+            }}
             transition={{
-              duration: 1.5,
-              ease: [0.16, 1, 0.3, 1],
+              duration: 2.2,
+              ease: AppleEasing as any,
               delay: 0.1
             }}
             className="absolute w-20 h-20 rounded-full bg-white"
+            style={{ filter: "blur(2px)" }}
           />
 
-          <div className={`relative z-10 flex flex-col items-center px-6 text-center ${isMobile ? '' : 'mix-blend-difference'}`}>
+          <div className="relative z-10 flex flex-col items-center px-6 text-center mix-blend-difference">
             <motion.h1
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 15, filter: 'blur(10px)' }}
               animate={{
                 opacity: phase === 'text' ? 1 : 0,
-                y: phase === 'text' ? 0 : 20
+                y: phase === 'text' ? 0 : 15,
+                filter: phase === 'text' ? 'blur(0px)' : 'blur(10px)'
               }}
-              transition={{ duration: 0.6 }}
-              className="text-6xl md:text-9xl font-bold tracking-tighter font-mono"
-              style={{ color: isMobile ? '#000' : '#fff' }}
+              transition={{ duration: 1.2, ease: AppleEasing as any }}
+              className="text-7xl md:text-[10rem] font-bold tracking-tighter uppercase"
+              style={{ color: '#fff' }}
             >
-              {displayText || "Aura"}
+              {displayText || "Xuan"}
             </motion.h1>
 
             <motion.div
               initial={{ opacity: 0 }}
-              animate={{ opacity: phase === 'text' ? 0.6 : 0 }}
-              transition={{ delay: 0.4 }}
-              className="mt-6 flex items-center gap-3"
+              animate={{ opacity: phase === 'text' ? 0.35 : 0 }}
+              transition={{ delay: 1, duration: 1 }}
+              className="mt-12 flex items-center gap-4"
             >
-              <div className="h-[1px] w-6 bg-black md:bg-white/50" />
-              <p className="text-[10px] uppercase tracking-[0.4em] font-medium text-black md:text-white">
-                Tap to Enter
+              <div className="h-[1px] w-8 bg-white/40" />
+              <p className="text-[11px] uppercase tracking-[0.6em] font-medium text-white">
+                Focus on Clarity
               </p>
-              <div className="h-[1px] w-6 bg-black md:bg-white/50" />
+              <div className="h-[1px] w-8 bg-white/40" />
             </motion.div>
           </div>
         </motion.div>

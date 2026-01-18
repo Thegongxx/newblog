@@ -40,8 +40,8 @@ const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
     return (
         <>
             <Helmet>
-                <title>Notes · Aura Blog</title>
-                <meta name="description" content="那些转瞬即逝的想法，在安静的留白里慢慢沉淀。" />
+                <title>Notes · Xuan Blog</title>
+                <meta name="description" content="只为引起你的共鸣。" />
             </Helmet>
             <div className="py-8 md:py-12">
                 <motion.header
@@ -54,7 +54,7 @@ const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
                         Notes
                     </h2>
                     <p className="text-sm md:text-lg text-white/35 font-light max-w-lg">
-                        那些转瞬即逝的想法，在安静的留白里慢慢沉淀。
+                        只为引起你的共鸣。
                     </p>
                 </motion.header>
 
@@ -103,14 +103,13 @@ const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
                                 }}
                                 onClick={() => navigate(`/note/${note.id}`, { state: { from: '/notes' } })}
                                 whileHover={!isMobile ? {
-                                    y: -8,
-                                    rotateX: 2,
-                                    rotateY: 1,
-                                    scale: 1.02,
+                                    y: -10,
+                                    rotateX: 1,
+                                    rotateY: 0.5,
+                                    scale: 1.015,
                                     transition: {
-                                        type: "spring",
-                                        stiffness: 300,
-                                        damping: 30
+                                        duration: 0.6,
+                                        ease: [0.23, 1, 0.32, 1]
                                     }
                                 } : {}}
                                 whileTap={isMobile ? {

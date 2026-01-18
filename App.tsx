@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, Navig
 import { HelmetProvider, Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SWRConfig } from 'swr';
+import Intro from './components/Intro';
 import Assistant from './components/Assistant';
 import ErrorBoundary from './components/ErrorBoundary';
 import DesktopNavigation from './components/desktop/DesktopNavigation';
@@ -27,13 +28,13 @@ import Archive from './pages/Archive';
 const AppInner = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const isMobile = useIsMobile();
+  const [showIntro, setShowIntro] = useState(!isMobile);
   const [scrollY, setScrollY] = useState(0);
   const [toast, setToast] = useState({ show: false, msg: '', type: 'success' as 'success' | 'info' | 'error' });
 
   // 使用页面切换动画 hook
   const { setNavigationMethod } = usePageTransition();
-
-  const isMobile = useIsMobile();
 
   // 移动端优化
   useMobileOptimization();
@@ -167,8 +168,9 @@ const AppInner = () => {
     navigate(path);
   };
 
-
-
+  if (showIntro && location.pathname === '/' && !isMobile) {
+    return <Intro onComplete={() => setShowIntro(false)} />;
+  }
   // 导航栏渐变计算 - 移动端优化
   const scrollProgress = Math.min(scrollY / (isMobile ? 60 : 80), 1);
   const navOpacity = 0.02 + scrollProgress * (isMobile ? 0.3 : 0.4);
@@ -179,7 +181,7 @@ const AppInner = () => {
   return (
     <div className="min-h-screen selection:bg-white/20 selection:text-white isolate">
       <Helmet>
-        <title>Aura - 极简主义个人空间</title>
+        <title>Xuan - 极简主义个人空间</title>
         <meta name="description" content="A digital sanctuary for minimalist aesthetics and intelligence." />
       </Helmet>
 
@@ -281,7 +283,7 @@ const AppInner = () => {
             >
               {/* 苹果风格的悬停背景光效 */}
               <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg blur-sm" />
-              <span className="relative z-10 group-hover:tracking-wider transition-all duration-300">AURA</span>
+              <span className="relative z-10 group-hover:tracking-wider transition-all duration-300">XUAN</span>
             </MagneticButton>
 
             <div className={`flex items-center ${isMobile ? 'gap-1' : 'gap-6'} text-xs md:text-sm font-medium`}>

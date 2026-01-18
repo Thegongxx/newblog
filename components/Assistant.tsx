@@ -275,7 +275,7 @@ const Assistant = () => {
                   {ICONS.AI}
                 </motion.div>
                 <span className={`font-medium text-sm tracking-wide ${isMobile ? 'text-white' : 'text-gray-800'}`}>
-                  Ask Xx
+                  Ask 轩轩
                 </span>
               </motion.div>
             )}
@@ -369,7 +369,7 @@ const Assistant = () => {
                       repeat: Infinity
                     }}
                   />
-                  <h3 className="text-gray-300 text-xs font-medium uppercase tracking-wider">Assistant Xx</h3>
+                  <h3 className="text-gray-300 text-xs font-medium uppercase tracking-wider">Assistant 轩轩</h3>
                 </div>
                 {rateLimited && (
                   <motion.span
