@@ -404,9 +404,12 @@ body {
 
 /* Assistant Bubble - Receive */
 [data-theme='light'] .bg-gray-800\/80 {
-  background-color: rgba(44, 44, 30, 0.05);
-  border: 1px solid rgba(44, 44, 30, 0.05);
+  background-color: #fff;
+  /* Pure white input background for better contrast */
+  border: 1px solid rgba(44, 44, 30, 0.15);
+  /* Stronger border */
   color: #2C2C1E;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
 }
 
 /* Assistant Input Area fade */
@@ -433,7 +436,7 @@ body {
 }
 
 [data-theme='light'] input::placeholder {
-  color: rgba(44, 44, 30, 0.4) !important;
+  color: rgba(44, 44, 30, 0.5) !important;
 }
 
 /* General Text Overrides for Light Mode */
@@ -490,7 +493,30 @@ body {
   caret-color: #2C2C1E;
 }
 
-/* Ripple */
+/* Light Mode Cursor Overrides - Brown Dot */
+[data-theme='light'] html,
+[data-theme='light'] body {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Ccircle cx='4' cy='4' r='3' fill='%232C2C1E' /%3E%3C/svg%3E") 4 4, auto !important;
+}
+
+[data-theme='light'] a,
+[data-theme='light'] button,
+[data-theme='light'] [role="button"],
+[data-theme='light'] input,
+[data-theme='light'] textarea,
+[data-theme='light'] .cursor-pointer {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Ccircle cx='5' cy='5' r='4' fill='%232C2C1E' /%3E%3C/svg%3E") 5 5, pointer !important;
+}
+
+/* Ripple - Targets the JS created .click-ripple */
+[data-theme='light'] .click-ripple {
+  background: rgba(44, 44, 30, 0.25) !important;
+  /* Definite visible brown */
+  mix-blend-mode: multiply !important;
+  /* Better blending on light background */
+}
+
+/* Also override any legacy ripple classes */
 [data-theme='light'] .ripple-effect::before {
   background: rgba(44, 44, 30, 0.15);
 }
