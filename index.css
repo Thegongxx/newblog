@@ -393,6 +393,50 @@ body {
   color: #2C2C1E !important;
 }
 
+/* Comprehensive Hover Overrides for Light Mode */
+[data-theme='light'] .hover\:text-white:hover {
+  color: #2C2C1E !important;
+}
+
+[data-theme='light'] .hover\:text-white\/90:hover,
+[data-theme='light'] .group:hover .group-hover\:text-white\/90 {
+  color: rgba(44, 44, 30, 0.9) !important;
+}
+
+[data-theme='light'] .hover\:text-white\/80:hover,
+[data-theme='light'] .group:hover .group-hover\:text-white\/80 {
+  color: rgba(44, 44, 30, 0.8) !important;
+}
+
+[data-theme='light'] .hover\:text-white\/70:hover,
+[data-theme='light'] .group:hover .group-hover\:text-white\/70 {
+  color: rgba(44, 44, 30, 0.7) !important;
+}
+
+[data-theme='light'] .hover\:text-white\/60:hover,
+[data-theme='light'] .group:hover .group-hover\:text-white\/60 {
+  color: rgba(44, 44, 30, 0.6) !important;
+}
+
+[data-theme='light'] .hover\:text-white\/50:hover,
+[data-theme='light'] .group:hover .group-hover\:text-white\/50 {
+  color: rgba(44, 44, 30, 0.5) !important;
+}
+
+[data-theme='light'] .hover\:text-white\/40:hover,
+[data-theme='light'] .group:hover .group-hover\:text-white\/40 {
+  color: rgba(44, 44, 30, 0.4) !important;
+}
+
+/* Fix for Active/Focus states */
+[data-theme='light'] .active\:text-white:active {
+  color: #2C2C1E !important;
+}
+
+[data-theme='light'] .focus\:text-white:focus {
+  color: #2C2C1E !important;
+}
+
 /* Assistant & UI Grays - Optimized for Light Mode "Cream" feel */
 [data-theme='light'] .bg-gray-900\/95 {
   background-color: rgba(255, 255, 245, 0.95) !important;
@@ -470,44 +514,170 @@ body {
   color: rgba(44, 44, 30, 0.8) !important;
 }
 
+/* Comprehensive Light Mode Overrides for White-related Tailwind Utilities */
 [data-theme='light'] .text-white {
   color: #2C2C1E !important;
 }
 
+[data-theme='light'] .text-white\/95 {
+  color: rgba(44, 44, 30, 0.95) !important;
+}
+
 [data-theme='light'] .text-white\/90 {
-  color: rgba(44, 44, 30, 0.9);
+  color: rgba(44, 44, 30, 0.9) !important;
+}
+
+[data-theme='light'] .text-white\/85 {
+  color: rgba(44, 44, 30, 0.85) !important;
 }
 
 [data-theme='light'] .text-white\/80 {
-  color: rgba(44, 44, 30, 0.8);
+  color: rgba(44, 44, 30, 0.8) !important;
+}
+
+[data-theme='light'] .text-white\/75 {
+  color: rgba(44, 44, 30, 0.75) !important;
 }
 
 [data-theme='light'] .text-white\/70 {
-  color: rgba(44, 44, 30, 0.7);
+  color: rgba(44, 44, 30, 0.7) !important;
 }
 
 [data-theme='light'] .text-white\/60 {
-  color: rgba(44, 44, 30, 0.6);
+  color: rgba(44, 44, 30, 0.6) !important;
 }
 
 [data-theme='light'] .text-white\/50 {
-  color: rgba(44, 44, 30, 0.5);
+  color: rgba(44, 44, 30, 0.5) !important;
+}
+
+[data-theme='light'] .text-white\/45 {
+  color: rgba(44, 44, 30, 0.45) !important;
 }
 
 [data-theme='light'] .text-white\/40 {
-  color: rgba(44, 44, 30, 0.4);
+  color: rgba(44, 44, 30, 0.4) !important;
+}
+
+[data-theme='light'] .text-white\/35 {
+  color: rgba(44, 44, 30, 0.35) !important;
 }
 
 [data-theme='light'] .text-white\/30 {
-  color: rgba(44, 44, 30, 0.3);
+  color: rgba(44, 44, 30, 0.3) !important;
+}
+
+[data-theme='light'] .text-white\/25 {
+  color: rgba(44, 44, 30, 0.25) !important;
 }
 
 [data-theme='light'] .text-white\/20 {
-  color: rgba(44, 44, 30, 0.2);
+  color: rgba(44, 44, 30, 0.2) !important;
+}
+
+[data-theme='light'] .text-white\/15 {
+  color: rgba(44, 44, 30, 0.15) !important;
 }
 
 [data-theme='light'] .text-white\/10 {
-  color: rgba(44, 44, 30, 0.1);
+  color: rgba(44, 44, 30, 0.1) !important;
+}
+
+[data-theme='light'] .text-white\/5 {
+  color: rgba(44, 44, 30, 0.05) !important;
+}
+
+/* Backgrounds - Convert semi-transparent white to semi-transparent brown */
+[data-theme='light'] .bg-white\/5 {
+  background-color: rgba(44, 44, 30, 0.05) !important;
+}
+
+[data-theme='light'] .bg-white\/10 {
+  background-color: rgba(44, 44, 30, 0.1) !important;
+}
+
+[data-theme='light'] .bg-white\/15 {
+  background-color: rgba(44, 44, 30, 0.15) !important;
+}
+
+[data-theme='light'] .bg-white\/20 {
+  background-color: rgba(44, 44, 30, 0.2) !important;
+}
+
+[data-theme='light'] .hover\:bg-white\/10:hover {
+  background-color: rgba(44, 44, 30, 0.1) !important;
+}
+
+[data-theme='light'] .hover\:bg-white\/20:hover {
+  background-color: rgba(44, 44, 30, 0.2) !important;
+}
+
+/* Shadows - Convert white shadows to brown shadows */
+[data-theme='light'] .shadow-white\/5 {
+  --tw-shadow-color: rgba(44, 44, 30, 0.05) !important;
+  --tw-shadow: var(--tw-shadow-colored) !important;
+}
+
+[data-theme='light'] .shadow-white\/10 {
+  --tw-shadow-color: rgba(44, 44, 30, 0.1) !important;
+  --tw-shadow: var(--tw-shadow-colored) !important;
+}
+
+[data-theme='light'] .shadow-white\/20 {
+  --tw-shadow-color: rgba(44, 44, 30, 0.2) !important;
+  --tw-shadow: var(--tw-shadow-colored) !important;
+}
+
+/* Borders & Divides */
+[data-theme='light'] .border-white\/5 {
+  border-color: rgba(44, 44, 30, 0.05) !important;
+}
+
+[data-theme='light'] .border-white\/10 {
+  border-color: rgba(44, 44, 30, 0.1) !important;
+}
+
+[data-theme='light'] .border-white\/20 {
+  border-color: rgba(44, 44, 30, 0.2) !important;
+}
+
+[data-theme='light'] .divide-white\/5> :not([hidden])~ :not([hidden]) {
+  border-color: rgba(44, 44, 30, 0.05) !important;
+}
+
+[data-theme='light'] .divide-white\/10> :not([hidden])~ :not([hidden]) {
+  border-color: rgba(44, 44, 30, 0.1) !important;
+}
+
+/* Hover Overrides with !important */
+[data-theme='light'] .hover\:text-white\/90:hover,
+[data-theme='light'] .group:hover .group-hover\:text-white\/90 {
+  color: rgba(44, 44, 30, 0.9) !important;
+}
+
+[data-theme='light'] .hover\:text-white\/80:hover,
+[data-theme='light'] .group:hover .group-hover\:text-white\/80 {
+  color: rgba(44, 44, 30, 0.8) !important;
+}
+
+[data-theme='light'] .hover\:text-white\/70:hover,
+[data-theme='light'] .group:hover .group-hover\:text-white\/70 {
+  color: rgba(44, 44, 30, 0.7) !important;
+}
+
+[data-theme='light'] .hover\:text-white\/60:hover,
+[data-theme='light'] .group:hover .group-hover\:text-white\/60 {
+  color: rgba(44, 44, 30, 0.6) !important;
+}
+
+[data-theme='light'] .hover\:text-white\/50:hover,
+[data-theme='light'] .group:hover .group-hover\:text-white\/50 {
+  color: rgba(44, 44, 30, 0.5) !important;
+}
+
+[data-theme='light'] .hover\:text-white\/40:hover,
+[data-theme='light'] .group:hover .group-hover\:text-white\/40 {
+  color: rgba(44, 44, 30, 0.4) !important;
 }
 
 /* Force cursor color */
