@@ -402,19 +402,41 @@ body {
   color: #2C2C1E;
 }
 
-/* Assistant Bubble - Receive */
+/* Assistant Bubble - Receive & Input Base */
 [data-theme='light'] .bg-gray-800\/80 {
   background-color: #fff;
   /* Pure white input background for better contrast */
   border: 1px solid rgba(44, 44, 30, 0.15);
   /* Stronger border */
   color: #2C2C1E;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+/* Assistant Input Focus State Fix - Critical */
+[data-theme='light'] .focus\:bg-gray-800:focus {
+  background-color: #FFFFFF !important;
+  border-color: rgba(44, 44, 30, 0.2) !important;
+  color: #2C2C1E !important;
+  box-shadow: 0 0 0 2px rgba(44, 44, 30, 0.05);
 }
 
 /* Assistant Input Area fade */
 [data-theme='light'] .bg-gradient-to-t {
   background: linear-gradient(to top, rgba(254, 252, 232, 1), transparent) !important;
+}
+
+/* Light Mode Gradients (Like Toast Fix) */
+[data-theme='light'] .from-black\/95 {
+  --tw-gradient-from: rgba(255, 255, 255, 0.95) !important;
+  background-color: rgba(255, 255, 255, 0.95);
+}
+
+[data-theme='light'] .to-gray-900\/95 {
+  --tw-gradient-to: rgba(255, 255, 240, 0.95) !important;
+}
+
+[data-theme='light'] .from-gray-800\/50 {
+  --tw-gradient-from: rgba(44, 44, 30, 0.05) !important;
 }
 
 /* Assistant Button (FAB) Specifics */

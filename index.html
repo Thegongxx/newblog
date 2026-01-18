@@ -1,6 +1,6 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,9 +13,10 @@
         :root {
             /* 移除未使用的 CSS 变量 */
         }
-        
+
         /* High-performance Custom Cursor */
-        html, body {
+        html,
+        body {
             cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Ccircle cx='4' cy='4' r='3' fill='white' /%3E%3C/svg%3E") 4 4, auto;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             -webkit-font-smoothing: antialiased;
@@ -26,7 +27,12 @@
         }
 
         /* Pointer Cursor for interactive elements */
-        a, button, [role="button"], input, textarea, .cursor-pointer {
+        a,
+        button,
+        [role="button"],
+        input,
+        textarea,
+        .cursor-pointer {
             cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Ccircle cx='5' cy='5' r='4' fill='white' /%3E%3C/svg%3E") 5 5, pointer !important;
         }
 
@@ -41,33 +47,18 @@
             --mx: 50%;
             --my: 50%;
         }
-        
-        /* 鼠标跟随光晕 - GPU 加速 */
-        .aura-bg::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(
-                600px circle at var(--mx) var(--my),
-                rgba(255, 255, 255, 0.03) 0%,
-                rgba(255, 255, 255, 0.01) 40%,
-                transparent 70%
-            );
-            pointer-events: none;
-            transform: translateZ(0);
-            transition: background 0.3s ease-out;
-        }
-        
+
+        /* 鼠标跟随光晕 - 已移除 */
+        /* .aura-bg::after { ... } */
+
         /* 静态氛围光 */
         .aura-bg::before {
             content: '';
             position: absolute;
             inset: 0;
-            background: radial-gradient(
-                ellipse 120% 60% at 50% 0%,
-                rgba(255, 255, 255, 0.015) 0%,
-                transparent 50%
-            );
+            background: radial-gradient(ellipse 120% 60% at 50% 0%,
+                    rgba(255, 255, 255, 0.015) 0%,
+                    transparent 50%);
             pointer-events: none;
             transform: translateZ(0);
         }
@@ -78,13 +69,22 @@
         }
 
         /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { 
-            background: rgba(255,255,255,0.1); 
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 20px;
         }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
 
         /* 统一的玻璃拟态效果 */
         .glass {
@@ -100,7 +100,7 @@
             pointer-events: none;
             width: 40px;
             height: 40px;
-            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 70%);
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.8) 0%, transparent 70%);
             border-radius: 50%;
             transform: translate(-50%, -50%) scale(0);
             z-index: 9999;
@@ -109,8 +109,15 @@
         }
 
         @keyframes glimmer-bloom {
-            0% { transform: translate(-50%, -50%) scale(0); opacity: 0.8; }
-            100% { transform: translate(-50%, -50%) scale(3); opacity: 0; }
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 0.8;
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(3);
+                opacity: 0;
+            }
         }
 
         /* 点击涟漪效果 */
@@ -127,11 +134,18 @@
         }
 
         @keyframes ripple-expand {
-            0% { transform: translate(-50%, -50%) scale(0); opacity: 0.6; }
-            100% { transform: translate(-50%, -50%) scale(8); opacity: 0; }
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 0.6;
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(8);
+                opacity: 0;
+            }
         }
     </style>
-<script type="importmap">
+    <script type="importmap">
 {
   "imports": {
     "@google/genai": "https://esm.sh/@google/genai@^1.34.0",
@@ -142,33 +156,13 @@
 }
 </script>
 </head>
+
 <body>
     <div class="aura-bg"></div>
     <div id="root"></div>
     <script>
-        // 丝滑鼠标跟随光晕 - 使用 requestAnimationFrame 节流
-        const bg = document.querySelector('.aura-bg');
-        let targetX = 50, targetY = 50, currentX = 50, currentY = 50;
-        let rafId = null;
-        
-        function updateGlow() {
-            currentX += (targetX - currentX) * 0.08;
-            currentY += (targetY - currentY) * 0.08;
-            bg.style.setProperty('--mx', currentX + '%');
-            bg.style.setProperty('--my', currentY + '%');
-            
-            if (Math.abs(targetX - currentX) > 0.1 || Math.abs(targetY - currentY) > 0.1) {
-                rafId = requestAnimationFrame(updateGlow);
-            } else {
-                rafId = null;
-            }
-        }
-        
-        document.addEventListener('mousemove', (e) => {
-            targetX = (e.clientX / window.innerWidth) * 100;
-            targetY = (e.clientY / window.innerHeight) * 100;
-            if (!rafId) rafId = requestAnimationFrame(updateGlow);
-        }, { passive: true });
+        // 丝滑鼠标跟随光晕 - 已移除
+        // const bg = document.querySelector('.aura-bg'); ...
 
         // 点击涟漪效果
         document.addEventListener('click', (e) => {
@@ -182,4 +176,5 @@
     </script>
     <script type="module" src="./index.tsx"></script>
 </body>
+
 </html>
