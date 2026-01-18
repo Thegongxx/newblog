@@ -75,8 +75,8 @@ const Archive: React.FC<ArchiveProps> = ({ posts, loading, onSelectPost }) => {
   return (
     <>
       <Helmet>
-        <title>Archive · Aura Blog</title>
-        <meta name="description" content="翻一翻之前写下的东西，记录技术与生活的点滴。" />
+        <title>Archive · Xuan Blog</title>
+        <meta name="description" content="翻一翻之前写下的东西。" />
       </Helmet>
       <motion.div
         className="max-w-4xl py-8 md:py-12"

@@ -91,8 +91,8 @@ const About: React.FC = () => {
     return (
         <>
             <Helmet>
-                <title>About · Aura Blog</title>
-                <meta name="description" content="关于这个空间，关于我。探索 minimalist aesthetics and intelligence。" />
+                <title>About · Xuan Blog</title>
+                <meta name="description" content="关于这个空间，关于我。" />
             </Helmet>
             <motion.div
                 className="max-w-3xl py-8 md:py-12"

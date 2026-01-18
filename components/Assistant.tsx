@@ -83,11 +83,11 @@ const Assistant = () => {
 
     // 监听导航栏触发的打开指令
     const handleRemoteToggle = () => handleToggle();
-    window.addEventListener('aura:toggle-assistant', handleRemoteToggle);
+    window.addEventListener('xuan:toggle-assistant', handleRemoteToggle);
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('aura:toggle-assistant', handleRemoteToggle);
+      window.removeEventListener('xuan:toggle-assistant', handleRemoteToggle);
     };
   }, [isOpen, handleToggle]);
 
@@ -117,7 +117,7 @@ const Assistant = () => {
     setRetryInfo({ show: false, lastPrompt: prompt });
 
     try {
-      const context = `这是一个名为 Xx 的极简主义个人博客，专注于设计、技术和生活思考。`;
+      const context = `欢迎来到我的世界`;
       const stream = askNvidiaStream(prompt, context);
 
       let fullContent = '';
@@ -275,7 +275,7 @@ const Assistant = () => {
                   {ICONS.AI}
                 </motion.div>
                 <span className={`font-medium text-sm tracking-wide ${isMobile ? 'text-white' : 'text-gray-800'}`}>
-                  Ask 轩轩
+                  Xx
                 </span>
               </motion.div>
             )}
@@ -369,7 +369,7 @@ const Assistant = () => {
                       repeat: Infinity
                     }}
                   />
-                  <h3 className="text-gray-300 text-xs font-medium uppercase tracking-wider">Assistant 轩轩</h3>
+                  <h3 className="text-gray-300 text-xs font-medium uppercase tracking-wider">Assistant xx</h3>
                 </div>
                 {rateLimited && (
                   <motion.span
@@ -424,7 +424,7 @@ const Assistant = () => {
                     >
                       {ICONS.AI}
                     </motion.div>
-                    <p className="text-gray-300 text-sm font-medium">我是你的 AI 助手 Aura</p>
+                    <p className="text-gray-300 text-sm font-medium">我是xx</p>
                     <p className="text-gray-500 text-xs mt-2">有什么可以帮助你的吗？</p>
                   </motion.div>
                 ) : (

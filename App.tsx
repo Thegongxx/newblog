@@ -47,8 +47,8 @@ const AppInner = () => {
       showToast(detail.message, detail.type);
     };
 
-    window.addEventListener('aura:toast', handleToastEvent as EventListener);
-    return () => window.removeEventListener('aura:toast', handleToastEvent as EventListener);
+    window.addEventListener('xuan:toast', handleToastEvent as EventListener);
+    return () => window.removeEventListener('xuan:toast', handleToastEvent as EventListener);
   }, []);
 
   const { data: posts = [], isLoading: postsLoading, error: postsError } = usePostsCache();
@@ -408,7 +408,7 @@ const AppInner = () => {
       <footer className="py-12 md:py-32 px-4 md:px-6 border-t border-white/10">
         <div className="max-w-7xl mx-auto flex flex-col items-center text-center">
           <div className="text-2xl md:text-5xl mb-6 md:mb-16 font-bold tracking-tighter opacity-20 select-none">
-            AURA
+            XUAN
           </div>
 
           {/* 统一的联系方式 - 响应式 */}

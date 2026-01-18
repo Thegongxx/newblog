@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aura | Personal Space</title>
+    <title>Xuan | Personal Space</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -37,7 +37,7 @@
         }
 
         /* Interactive Ambient Background - 丝滑交互背景 */
-        .aura-bg {
+        .xuan-bg {
             position: fixed;
             inset: 0;
             z-index: -1;
@@ -49,10 +49,10 @@
         }
 
         /* 鼠标跟随光晕 - 已移除 */
-        /* .aura-bg::after { ... } */
+        /* .xuan-bg::after { ... } */
 
         /* 静态氛围光 */
-        .aura-bg::before {
+        .xuan-bg::before {
             content: '';
             position: absolute;
             inset: 0;
@@ -158,11 +158,11 @@
 </head>
 
 <body>
-    <div class="aura-bg"></div>
+    <div class="xuan-bg"></div>
     <div id="root"></div>
     <script>
         // 丝滑鼠标跟随光晕 - 已移除
-        // const bg = document.querySelector('.aura-bg'); ...
+        // const bg = document.querySelector('.xuan-bg'); ...
 
         // 点击涟漪效果
         document.addEventListener('click', (e) => {

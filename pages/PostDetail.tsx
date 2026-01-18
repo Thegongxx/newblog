@@ -85,7 +85,7 @@ const PostDetail: React.FC<PostDetailProps> = ({ posts, loading }) => {
         return (
             <>
                 <Helmet>
-                    <title>Loading... - Aura Blog</title>
+                    <title>Loading... - Xuan Blog</title>
                     <meta name="description" content="Loading post content..." />
                 </Helmet>
                 <div className="max-w-4xl mx-auto animate-pulse">
@@ -110,7 +110,7 @@ const PostDetail: React.FC<PostDetailProps> = ({ posts, loading }) => {
         return (
             <>
                 <Helmet>
-                    <title>Post Not Found - Aura Blog</title>
+                    <title>Post Not Found - Xuan Blog</title>
                     <meta name="description" content="The post you are looking for does not exist." />
                 </Helmet>
                 <div className="max-w-4xl mx-auto py-20 text-center">
@@ -132,7 +132,7 @@ const PostDetail: React.FC<PostDetailProps> = ({ posts, loading }) => {
     return (
         <>
             <Helmet>
-                <title>{post.title} - Aura Blog</title>
+                <title>{post.title} - Xuan Blog</title>
                 <meta name="description" content={post.excerpt} />
                 <meta property="og:title" content={post.title} />
                 <meta property="og:description" content={post.excerpt} />

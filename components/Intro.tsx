@@ -16,8 +16,8 @@ const Intro: React.FC<IntroProps> = ({ onComplete }) => {
   const [isFinished, setIsFinished] = useState(false);
 
   // Cipher Config
-  const targetText = "Xuan";
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ!<>-_\\/[]{}—=+*^?#";
+  const targetText = "xuan";
+  const chars = "abcdefghijklmnopqrstuvwxyz!<>-_\\/[]{}—=+*^?#";
   const intervalRef = useRef<any>(null);
 
   // 动画时长配置 (单位：秒)
@@ -107,10 +107,10 @@ const Intro: React.FC<IntroProps> = ({ onComplete }) => {
                 filter: phase === 'text' ? 'blur(0px)' : 'blur(10px)'
               }}
               transition={{ duration: 1.2, ease: AppleEasing as any }}
-              className="text-7xl md:text-[10rem] font-bold tracking-tighter uppercase"
+              className="text-5xl md:text-[7rem] font-bold tracking-tighter"
               style={{ color: '#fff' }}
             >
-              {displayText || "Xuan"}
+              {displayText || "xuan"}
             </motion.h1>
 
             <motion.div

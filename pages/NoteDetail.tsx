@@ -74,7 +74,7 @@ const NoteDetail: React.FC = () => {
     return (
       <>
         <Helmet>
-          <title>Error - Aura Blog</title>
+          <title>Error - Xuan Blog</title>
         </Helmet>
         <div className="py-12" style={appleFadeIn}>
           <div className="max-w-4xl mx-auto text-center">
@@ -110,7 +110,7 @@ const NoteDetail: React.FC = () => {
     return (
       <>
         <Helmet>
-          <title>Loading Note... - Aura Blog</title>
+          <title>Loading Note... - Xuan Blog</title>
         </Helmet>
       </>
     );
@@ -121,7 +121,7 @@ const NoteDetail: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>{note.title} - Note · Aura Blog</title>
+        <title>{note.title} - Note · Xuan Blog</title>
         <meta name="description" content={note.content.substring(0, 160)} />
         <meta property="og:title" content={note.title} />
         <meta property="og:description" content={note.content.substring(0, 160)} />

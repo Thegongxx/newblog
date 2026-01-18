@@ -134,7 +134,7 @@ async function syncPost(filePath, fileName) {
     html_content: markdownToHtml(body), excerpt: metadata.excerpt || '',
     category: metadata.category || null, cover_image: coverImage || '',
     reading_time: metadata.reading_time || 5, published: metadata.published !== false,
-    author: metadata.author || 'Aura',
+    author: metadata.author || 'Xuan',
     created_at: metadata.date ? new Date(metadata.date).toISOString() : new Date().toISOString(),
     updated_at: new Date().toISOString()
   };
@@ -154,7 +154,7 @@ async function syncNote(filePath, fileName) {
 
   const data = {
     slug, title: metadata.title || slug, text: body, content: body,
-    category: metadata.category || null, author: metadata.author || 'Aura',
+    category: metadata.category || null, author: metadata.author || 'Xuan',
     tags: parseTags(metadata.tags),
     created_at: metadata.date ? new Date(metadata.date).toISOString() : new Date().toISOString(),
     updated_at: new Date().toISOString()

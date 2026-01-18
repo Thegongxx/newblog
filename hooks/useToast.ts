@@ -15,7 +15,7 @@ export const useToast = (): ToastController => {
   const showToast = useCallback((message: string, type: ToastType = 'success') => {
     if (typeof window === 'undefined') return;
 
-    const event = new CustomEvent('aura:toast', {
+    const event = new CustomEvent('xuan:toast', {
       detail: { message, type },
     });
 
