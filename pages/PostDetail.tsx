@@ -211,8 +211,12 @@ const PostDetail: React.FC<PostDetailProps> = ({ posts, loading }) => {
                         </div>
                         <div className="flex items-center gap-2 md:gap-3 text-white/30 text-[9px] md:text-[10px] font-bold uppercase tracking-widest md:tracking-[0.3em] mb-4 md:mb-6">
                             <span>{post.date}</span>
-                            <span className="w-1 h-1 rounded-full bg-white/20"></span>
-                            <span>{post.category}</span>
+                            {post.category && (
+                                <>
+                                    <span className="w-1 h-1 rounded-full bg-white/20"></span>
+                                    <span>{post.category}</span>
+                                </>
+                            )}
                         </div>
                         <h1 className="text-3xl md:text-7xl font-bold tracking-tighter mb-6 md:mb-10 leading-tight">{post.title}</h1>
                         <div className="flex items-center justify-between mb-6 md:mb-10">

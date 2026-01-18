@@ -1,8 +1,5 @@
 ---
 title: 关于我
-slug: about
-date: 2024-01-01
-category: System
 published: true
 excerpt: Aura 是一个极简主义的数字避风港，在这里美学与智能相遇。
 ---

@@ -27,8 +27,12 @@ const BlogCard: React.FC<BlogCardProps> = memo(({ post, onClick, featured }) => 
         aria-label={`阅读文章: ${post.title}`}
       >
         <div className="flex items-center gap-2 text-white/40 text-[10px] uppercase tracking-wide">
-          <span>{post.category}</span>
-          <span className="w-1 h-1 rounded-full bg-white/20" />
+          {post.category && (
+            <>
+              <span>{post.category}</span>
+              <span className="w-1 h-1 rounded-full bg-white/20" />
+            </>
+          )}
           <span>{post.date}</span>
         </div>
         <h3 className="text-base font-semibold text-white leading-snug line-clamp-2">
@@ -85,9 +89,11 @@ const BlogCard: React.FC<BlogCardProps> = memo(({ post, onClick, featured }) => 
       </div>
 
       {/* 分类标签 */}
-      <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-[9px] font-bold text-white uppercase tracking-wider z-20">
-        {post.category}
-      </div>
+      {post.category && (
+        <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-[9px] font-bold text-white uppercase tracking-wider z-20">
+          {post.category}
+        </div>
+      )}
 
       {/* 内容区域 */}
       <div className="absolute inset-x-0 bottom-0 p-5 flex flex-col justify-end z-20">
