@@ -18,7 +18,7 @@
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
     transition: all 0.35s var(--apple-ease);
   }
-  
+
   /* 移动端glass样式优化 */
   @media (max-width: 768px) {
     .glass {
@@ -26,25 +26,25 @@
       box-shadow: 0 2px 15px rgba(0, 0, 0, 0.2);
     }
   }
-  
+
   .view-transition {
     animation: aura-entrance 0.35s var(--apple-ease) forwards;
     will-change: transform, opacity, filter;
   }
-  
+
   .custom-scrollbar::-webkit-scrollbar {
     @apply w-1;
   }
-  
+
   .custom-scrollbar::-webkit-scrollbar-track {
     @apply bg-transparent;
   }
-  
+
   .custom-scrollbar::-webkit-scrollbar-thumb {
     @apply bg-white/10 rounded-[10px];
     transition: background-color 0.2s var(--apple-ease);
   }
-  
+
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     @apply bg-white/20;
   }
@@ -56,16 +56,16 @@
     perspective: 1000px;
     transition: all 0.2s var(--apple-ease);
   }
-  
+
   .apple-button:hover {
     transform: translateY(-1px) scale(1.02);
   }
-  
+
   .apple-button:active {
     transform: translateY(0) scale(0.98);
     transition-duration: 0.1s;
   }
-  
+
   /* AI助手苹果风格动画优化 */
   .assistant-button {
     transform: translateZ(0);
@@ -73,20 +73,20 @@
     perspective: 1000px;
     transition: all 0.35s var(--apple-ease);
   }
-  
+
   .assistant-panel {
     transform: translateZ(0);
     backface-visibility: hidden;
     perspective: 1000px;
     transition: all 0.35s var(--apple-ease);
   }
-  
+
   /* 涟漪点击效果 */
   .ripple-effect {
     position: relative;
     overflow: hidden;
   }
-  
+
   .ripple-effect::before {
     content: '';
     position: absolute;
@@ -101,14 +101,14 @@
     pointer-events: none;
     opacity: 0;
   }
-  
+
   .ripple-effect:active::before {
     width: 300px;
     height: 300px;
     opacity: 1;
     transition: width 0.6s, height 0.6s, opacity 0.1s;
   }
-  
+
   /* 移动端触摸优化 */
   @media (max-width: 768px) {
     .ripple-effect:active::before {
@@ -116,18 +116,18 @@
       height: 200px;
     }
   }
-  
+
   .assistant-panel {
     transform-style: preserve-3d;
   }
-  
+
   /* 硬件加速优化 */
   .gpu-accelerated {
     transform: translateZ(0);
     backface-visibility: hidden;
     will-change: transform;
   }
-  
+
   /* 减少重绘的优化 */
   .optimized-animation {
     contain: layout style paint;
@@ -143,17 +143,17 @@
     backface-visibility: hidden;
     perspective: 1000px;
   }
-  
+
   /* 苹果风格的弹性效果 */
   .apple-spring {
     transition: all 0.35s var(--apple-spring);
   }
-  
+
   /* 苹果风格的悬停效果 */
   .apple-hover {
     transition: all 0.2s var(--apple-ease);
   }
-  
+
   .apple-hover:hover {
     transform: translateY(-2px) scale(1.02);
   }
@@ -175,6 +175,7 @@
     opacity: 0;
     transform: translateY(20px) scale(0.95);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -186,9 +187,11 @@
   0% {
     transform: scale(1);
   }
+
   50% {
     transform: scale(1.05);
   }
+
   100% {
     transform: scale(1);
   }
@@ -201,7 +204,7 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-  
+
   :root {
     --apple-ease: ease !important;
     --apple-ease-in: ease-in !important;
@@ -213,69 +216,70 @@
 
 /* 移动端苹果风格优化 */
 @media (max-width: 768px) {
+
   /* 移动端使用苹果标准的简化模糊效果 - 进一步提升通透感 */
   .backdrop-blur-xl {
     backdrop-filter: blur(20px) saturate(180%) !important;
     background-color: rgba(0, 0, 0, 0.45) !important;
   }
-  
+
   .backdrop-blur-3xl {
     backdrop-filter: blur(40px) saturate(200%) !important;
     background-color: rgba(0, 0, 0, 0.5) !important;
   }
-  
+
   .backdrop-blur-md {
     backdrop-filter: blur(12px) saturate(160%) !important;
     background-color: rgba(0, 0, 0, 0.3) !important;
   }
-  
+
   /* 移动端苹果风格阴影 */
   .shadow-2xl {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
   }
-  
+
   /* 移动端禁用复杂的hover效果，保留tap效果 */
   .group:hover .group-hover\:scale-103,
   .group:hover .group-hover\:scale-\[1\.02\] {
     transform: none !important;
   }
-  
+
   /* 移动端简化渐变 */
   .bg-gradient-to-t {
-    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent) !important;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent) !important;
   }
-  
+
   /* 移动端使用苹果标准动画时长 */
   * {
     animation-duration: 0.35s !important;
     transition-duration: 0.35s !important;
     transition-timing-function: var(--apple-ease) !important;
   }
-  
+
   /* 移动端优化字体渲染 */
   body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeSpeed;
   }
-  
+
   /* 移动端禁用3D变换 */
   .transform-style-preserve-3d {
     transform-style: flat !important;
   }
-  
+
   /* 移动端简化边框 */
   .border-white\/5,
   .border-white\/10,
   .border-white\/20 {
     border-color: rgba(255, 255, 255, 0.1) !important;
   }
-  
+
   /* 移动端苹果风格按钮 */
   .apple-button {
     transition: all 0.2s var(--apple-ease) !important;
   }
-  
+
   .apple-button:active {
     transform: scale(0.95) !important;
   }
@@ -286,18 +290,18 @@
   .hover\:scale-105:hover {
     transform: none !important;
   }
-  
+
   .hover\:bg-white\/10:hover {
     background-color: transparent !important;
   }
-  
+
   /* 苹果风格的触摸反馈 */
   .group:active .group-hover\:scale-103,
   .apple-button:active {
     transform: scale(0.95) !important;
     transition: transform 0.1s var(--apple-ease-out) !important;
   }
-  
+
   /* 触摸设备的弹性反馈 */
   button:active,
   .apple-button:active {
@@ -306,7 +310,8 @@
 }
 
 /* 高DPI屏幕优化 */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+@media (-webkit-min-device-pixel-ratio: 2),
+(min-resolution: 192dpi) {
   .text-shadow {
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
@@ -322,8 +327,10 @@
 }
 
 [data-theme='light'] {
-  --bg-color: #FEFCE8; /* Pale Yellow - Morning Haze */
-  --text-main: #2C2C1E; /* Soft Dark Brown/Black */
+  --bg-color: #FEFCE8;
+  /* Pale Yellow - Morning Haze */
+  --text-main: #2C2C1E;
+  /* Soft Dark Brown/Black */
   --glass-bg: rgba(255, 255, 255, 0.6);
   --glass-border: rgba(0, 0, 0, 0.06);
   --hover-bg: rgba(0, 0, 0, 0.05);
@@ -336,33 +343,179 @@ body {
 }
 
 /* Light Mode Overrides for Tailwind Utilities */
-[data-theme='light'] .text-white { color: var(--text-main); }
-[data-theme='light'] .text-white\/90 { color: rgba(44, 44, 30, 0.9); }
-[data-theme='light'] .text-white\/80 { color: rgba(44, 44, 30, 0.8); }
-[data-theme='light'] .text-white\/70 { color: rgba(44, 44, 30, 0.7); }
-[data-theme='light'] .text-white\/60 { color: rgba(44, 44, 30, 0.6); }
-[data-theme='light'] .text-white\/50 { color: rgba(44, 44, 30, 0.5); }
-[data-theme='light'] .text-white\/40 { color: rgba(44, 44, 30, 0.4); }
-[data-theme='light'] .text-white\/30 { color: rgba(44, 44, 30, 0.3); }
-[data-theme='light'] .text-white\/20 { color: rgba(44, 44, 30, 0.2); }
-[data-theme='light'] .text-white\/10 { color: rgba(44, 44, 30, 0.1); }
-[data-theme='light'] .text-white\/5 { color: rgba(44, 44, 30, 0.05); }
+[data-theme='light'] .text-white {
+  color: var(--text-main);
+}
+
+[data-theme='light'] .text-white\/90 {
+  color: rgba(44, 44, 30, 0.9);
+}
+
+[data-theme='light'] .text-white\/80 {
+  color: rgba(44, 44, 30, 0.8);
+}
+
+[data-theme='light'] .text-white\/70 {
+  color: rgba(44, 44, 30, 0.7);
+}
+
+[data-theme='light'] .text-white\/60 {
+  color: rgba(44, 44, 30, 0.6);
+}
+
+[data-theme='light'] .text-white\/50 {
+  color: rgba(44, 44, 30, 0.5);
+}
+
+[data-theme='light'] .text-white\/40 {
+  color: rgba(44, 44, 30, 0.4);
+}
+
+[data-theme='light'] .text-white\/30 {
+  color: rgba(44, 44, 30, 0.3);
+}
+
+[data-theme='light'] .text-white\/20 {
+  color: rgba(44, 44, 30, 0.2);
+}
+
+[data-theme='light'] .text-white\/10 {
+  color: rgba(44, 44, 30, 0.1);
+}
+
+[data-theme='light'] .text-white\/5 {
+  color: rgba(44, 44, 30, 0.05);
+}
 
 /* Background Overrides */
-[data-theme='light'] .bg-white\/5 { background-color: rgba(0, 0, 0, 0.03); }
-[data-theme='light'] .bg-white\/10 { background-color: rgba(0, 0, 0, 0.06); }
-[data-theme='light'] .bg-white\/20 { background-color: rgba(0, 0, 0, 0.12); }
-[data-theme='light'] .bg-white\/\[0\.02\] { background-color: rgba(0, 0, 0, 0.02); }
-[data-theme='light'] .bg-white\/\[0\.03\] { background-color: rgba(255, 255, 255, 0.5); }
+[data-theme='light'] .bg-white\/5 {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+[data-theme='light'] .bg-white\/10 {
+  background-color: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme='light'] .bg-white\/20 {
+  background-color: rgba(0, 0, 0, 0.12);
+}
+
+[data-theme='light'] .bg-white\/\[0\.02\] {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+[data-theme='light'] .bg-white\/\[0\.03\] {
+  background-color: rgba(255, 255, 255, 0.5);
+}
 
 /* Border Overrides */
-[data-theme='light'] .border-white\/5 { border-color: rgba(0, 0, 0, 0.04); }
-[data-theme='light'] .border-white\/10 { border-color: rgba(0, 0, 0, 0.08); }
-[data-theme='light'] .border-white\/20 { border-color: rgba(0, 0, 0, 0.15); }
-[data-theme='light'] .border-white\/\[0\.08\] { border-color: rgba(0, 0, 0, 0.06); }
+[data-theme='light'] .border-white\/5 {
+  border-color: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme='light'] .border-white\/10 {
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme='light'] .border-white\/20 {
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+[data-theme='light'] .border-white\/\[0\.08\] {
+  border-color: rgba(0, 0, 0, 0.06);
+}
 
 /* Selection */
 [data-theme='light'] ::selection {
   background-color: rgba(0, 0, 0, 0.08);
   color: var(--text-main);
+}
+
+/* Fix for Light Mode Hover States (Notes, etc.) */
+/* In light mode, we want the text to stay dark on hover, not turn white */
+[data-theme='light'] .group:hover .group-hover\:text-white {
+  color: #2C2C1E !important;
+}
+
+[data-theme='light'] .group:active .group-active\:text-white\/95 {
+  color: rgba(44, 44, 30, 0.95) !important;
+}
+
+[data-theme='light'] .group:hover .group-hover\:text-white\/70 {
+  color: rgba(44, 44, 30, 0.8) !important;
+}
+
+[data-theme='light'] .group:active .group-active\:text-white\/70 {
+  color: rgba(44, 44, 30, 0.7) !important;
+}
+
+[data-theme='light'] .group:hover .group-hover\:text-white\/60 {
+  color: rgba(44, 44, 30, 0.7) !important;
+}
+
+[data-theme='light'] .group:hover .group-hover\:scale-110 {
+  /* Optional: Ensure scaling doesn't break layout if needed, but mainly color */
+}
+
+/* Missing Opacity Overrides */
+[data-theme='light'] .text-white\/35 {
+  color: rgba(44, 44, 30, 0.35);
+}
+
+[data-theme='light'] .text-white\/22 {
+  color: rgba(44, 44, 30, 0.22);
+}
+
+[data-theme='light'] .text-white\/55 {
+  color: rgba(44, 44, 30, 0.55);
+}
+
+/* Placeholders */
+[data-theme='light'] .placeholder-white\/20::placeholder {
+  color: rgba(44, 44, 30, 0.2);
+}
+
+/* Assistant & UI Grays - Light Mode Adaptation */
+[data-theme='light'] .bg-gray-900\/95 {
+  background-color: rgba(254, 252, 232, 0.95);
+  /* Match theme bg */
+  color: #2C2C1E;
+}
+
+[data-theme='light'] .bg-gray-800\/80 {
+  background-color: rgba(0, 0, 0, 0.04);
+  color: #2C2C1E;
+}
+
+[data-theme='light'] .bg-gray-800\/50 {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+[data-theme='light'] .border-gray-700\/50 {
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme='light'] .text-gray-200 {
+  color: #2C2C1E;
+}
+
+[data-theme='light'] .text-gray-300 {
+  color: rgba(44, 44, 30, 0.8);
+}
+
+[data-theme='light'] .text-gray-400 {
+  color: rgba(44, 44, 30, 0.5);
+}
+
+[data-theme='light'] .text-gray-500 {
+  color: rgba(44, 44, 30, 0.4);
+}
+
+[data-theme='light'] .text-gray-700 {
+  color: rgba(44, 44, 30, 0.6);
+}
+
+/* Fix for Input fields ensuring text is readable */
+[data-theme='light'] input.text-gray-200 {
+  color: #2C2C1E;
 }
