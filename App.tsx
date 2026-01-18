@@ -225,13 +225,14 @@ const AppInner = () => {
         )}
       </AnimatePresence>
 
-      {/* Navigation - 响应式导航栏，固定在屏幕顶部 */}
+      {/* Navigation - 响应式导航栏，移动端灵动岛风格 */}
       <motion.nav
-        className="fixed top-0 left-0 right-0 px-4 pt-3 md:px-6 md:pt-6 flex justify-center"
+        className={`fixed top-0 left-0 right-0 flex justify-center ${isMobile ? 'pt-4' : 'px-6 pt-6'}`}
         style={{
           zIndex: Z_INDEX.NAVIGATION,
           willChange: 'transform',
           backfaceVisibility: 'hidden',
+          pointerEvents: 'none', // Allow clicks to pass through around the nav
         }}
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -244,15 +245,17 @@ const AppInner = () => {
       >
         {/* 统一的响应式导航栏 */}
         <motion.div
-          className="relative rounded-full px-4 py-2 md:px-10 md:py-3 w-full md:w-auto max-w-full md:max-w-none magnetic-hover"
+          className={`relative magnetic-hover ${isMobile ? 'rounded-[2rem] px-5 py-3' : 'rounded-full px-10 py-3 w-auto'}`}
           style={{
-            backgroundColor: `rgba(0, 0, 0, ${navOpacity})`,
-            backdropFilter: `blur(${navBlur}px) saturate(${150 + scrollProgress * 30}%)`,
-            boxShadow: scrollProgress > 0.2 ? `0 8px 32px rgba(0, 0, 0, ${navShadow})` : 'none',
+            pointerEvents: 'auto', // Re-enable clicks
+            backgroundColor: isMobile ? 'rgba(0, 0, 0, 0.85)' : `rgba(0, 0, 0, ${navOpacity})`,
+            backdropFilter: isMobile ? 'blur(20px) saturate(180%)' : `blur(${navBlur}px) saturate(${150 + scrollProgress * 30}%)`,
+            boxShadow: isMobile ? '0 4px 20px rgba(0,0,0,0.4)' : (scrollProgress > 0.2 ? `0 8px 32px rgba(0, 0, 0, ${navShadow})` : 'none'),
             borderWidth: '1px',
             borderStyle: 'solid',
-            borderColor: `rgba(255, 255, 255, ${navBorder})`,
+            borderColor: isMobile ? 'rgba(255, 255, 255, 0.15)' : `rgba(255, 255, 255, ${navBorder})`,
             transition: 'all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+            minWidth: isMobile ? '160px' : 'auto', // 移动端保证最小宽度
           }}
           whileHover={{
             scale: 1.02,
@@ -274,10 +277,10 @@ const AppInner = () => {
             }
           }}
         >
-          <div className="relative flex items-center justify-between md:gap-12">
+          <div className={`relative flex items-center justify-between ${isMobile ? 'gap-4' : 'gap-12'}`}>
             <MagneticButton
               onClick={() => navigate('/')}
-              className="text-base md:text-lg font-bold tracking-tight text-white/90 hover:text-white transition-all duration-300 relative overflow-hidden group min-w-[44px] min-h-[44px] flex items-center justify-center"
+              className={`font-bold tracking-tight text-white/90 hover:text-white transition-all duration-300 relative overflow-hidden group min-w-[44px] min-h-[44px] flex items-center justify-center ${isMobile ? 'text-sm' : 'text-lg'}`}
               strength={0.3}
             >
               {/* 苹果风格的悬停背景光效 */}
@@ -285,19 +288,24 @@ const AppInner = () => {
               <span className="relative z-10 group-hover:tracking-wider transition-all duration-300">AURA</span>
             </MagneticButton>
 
-            <div className="flex gap-3 md:gap-6 text-xs md:text-sm font-medium">
+            <div className={`flex items-center ${isMobile ? 'gap-1' : 'gap-6'} text-xs md:text-sm font-medium`}>
               {[
-                { path: '/notes', label: 'Notes' },
-                { path: '/archive', label: 'Archive' },
-                { path: '/about', label: 'About' }
+                { path: '/notes', label: isMobile ? 'Notes' : 'Notes', icon: '📝' }, // Simplified for mobile if needed
+                { path: '/archive', label: isMobile ? 'Archive' : 'Archive', icon: '📂' },
+                { path: '/about', label: isMobile ? 'About' : 'About', icon: '👋' }
               ].map((item) => (
                 <motion.button
                   key={item.path}
                   onClick={() => handleNavigate(item.path)}
                   aria-label={`跳转到 ${item.label} 页面`}
-                  className={`px-2 py-1 md:px-4 md:py-2 rounded-full transition-all duration-200 liquid-morph min-w-[44px] min-h-[44px] flex items-center justify-center ${location.pathname === item.path
-                    ? 'text-white bg-white/15'
-                    : 'text-white/60 hover:text-white hover:bg-white/10'
+                  className={`rounded-full transition-all duration-200 liquid-morph flex items-center justify-center 
+                    ${isMobile
+                      ? 'min-w-[32px] min-h-[32px] px-2 text-[10px]'
+                      : 'min-w-[44px] min-h-[44px] px-4 py-2'
+                    } 
+                    ${location.pathname === item.path
+                      ? 'text-white bg-white/15'
+                      : 'text-white/60 hover:text-white hover:bg-white/10'
                     }`}
                   whileHover={{
                     scale: 1.05,

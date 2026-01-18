@@ -22,18 +22,22 @@ const Intro: React.FC<IntroProps> = ({ onComplete }) => {
   const TIMING = useMemo(() => ({
     expandDelay: isMobile ? 0.6 : 0.8,
     textDelay: isMobile ? 1.2 : 1.5,
-    fadeDelay: isMobile ? 2.8 : 3.5,
-    totalDuration: isMobile ? 4.0 : 4.8, // 包含退出动画
-    forceSkip: 4.5 // 绝对兜底时间
+    fadeDelay: isMobile ? 3.5 : 4.0, // Delay fade out to allow reading
+    totalDuration: isMobile ? 4.5 : 5.5,
+    forceSkip: 6.0 // 绝对兜底时间
   }), [isMobile]);
+
+  const handleComplete = () => {
+    if (isFinished) return;
+    setIsFinished(true);
+    onComplete();
+  };
 
   useEffect(() => {
     // 强制跳过逻辑 - 彻底杜绝黑屏死锁
     const skipTimer = setTimeout(() => {
-      if (!isFinished) {
-        console.warn("Intro animation timeout, forcing complete.");
-        onComplete();
-      }
+      console.warn("Intro animation timeout, forcing complete.");
+      handleComplete();
     }, TIMING.forceSkip * 1000);
 
     // 1. 启动展开
@@ -66,8 +70,7 @@ const Intro: React.FC<IntroProps> = ({ onComplete }) => {
 
     // 4. 完成挂载
     const tEnd = setTimeout(() => {
-      setIsFinished(true);
-      onComplete();
+      handleComplete();
     }, TIMING.totalDuration * 1000);
 
     return () => {
@@ -77,9 +80,9 @@ const Intro: React.FC<IntroProps> = ({ onComplete }) => {
       clearTimeout(tCipher);
       clearTimeout(tFade);
       clearTimeout(tEnd);
-      clearInterval(intervalRef.current);
+      if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [onComplete, TIMING, targetText, isFinished]);
+  }, [TIMING]); // Remove dependencies that change mid-effect to avoid resets
 
   return (
     <AnimatePresence>
@@ -88,12 +91,13 @@ const Intro: React.FC<IntroProps> = ({ onComplete }) => {
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8, ease: "easeInOut" }}
-          className="fixed inset-0 z-[100] bg-black flex items-center justify-center overflow-hidden"
+          className="fixed inset-0 z-[100] bg-black flex items-center justify-center overflow-hidden cursor-pointer"
+          onClick={handleComplete} // 点击跳过
         >
           {/* Iris Effect - 使用 scale 代替 vmax 单位以提升稳定性 */}
           <motion.div
             initial={{ scale: 0 }}
-            animate={{ scale: phase === 'dot' ? 0 : 40 }}
+            animate={{ scale: phase === 'dot' ? 0 : 50 }} // Increase scale to ensure coverage
             transition={{
               duration: 1.5,
               ease: [0.16, 1, 0.3, 1],
@@ -113,7 +117,7 @@ const Intro: React.FC<IntroProps> = ({ onComplete }) => {
               className="text-6xl md:text-9xl font-bold tracking-tighter font-mono"
               style={{ color: isMobile ? '#000' : '#fff' }}
             >
-              {displayText}
+              {displayText || "Aura"}
             </motion.h1>
 
             <motion.div
@@ -124,7 +128,7 @@ const Intro: React.FC<IntroProps> = ({ onComplete }) => {
             >
               <div className="h-[1px] w-6 bg-black md:bg-white/50" />
               <p className="text-[10px] uppercase tracking-[0.4em] font-medium text-black md:text-white">
-                Aura Sanctuary
+                Tap to Enter
               </p>
               <div className="h-[1px] w-6 bg-black md:bg-white/50" />
             </motion.div>

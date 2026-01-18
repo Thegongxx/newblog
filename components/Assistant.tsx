@@ -193,25 +193,30 @@ const Assistant = () => {
 
   return (
     <>
-      {/* 苹果风格的FAB按钮 - 移动端现在也显示，并悬浮在内容之上 */}
+      {/* 苹果风格的FAB按钮 - 移动端灵动悬浮球 */}
       {true && (
         <motion.button
           onClick={handleToggle}
           disabled={isAnimating}
-          className={`assistant-button fixed flex items-center justify-center shadow-lg border-0 focus:outline-none focus:ring-0 overflow-hidden ${isMobile ? 'bottom-24 right-4 bg-white text-black' : 'bottom-8 right-8 bg-white'} ${isAnimating ? 'pointer-events-none' : ''}`}
+          className={`assistant-button fixed flex items-center justify-center border-0 focus:outline-none focus:ring-0 overflow-hidden 
+            ${isMobile
+              ? 'bottom-6 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-2xl text-white shadow-[0_8px_32px_rgba(0,0,0,0.3)] border border-white/10'
+              : 'bottom-8 right-8 bg-white shadow-lg text-black'
+            } 
+            ${isAnimating ? 'pointer-events-none' : ''}`}
           style={{
-            height: '56px',
-            width: isOpen ? '56px' : (isMobile ? '56px' : '120px'), // 移动端只显示图标
-            borderRadius: '28px',
+            height: isMobile ? '50px' : '56px',
+            width: isOpen ? (isMobile ? '50px' : '56px') : (isMobile ? '140px' : '120px'), // 移动端展示长条形
+            borderRadius: isMobile ? '25px' : '28px',
             willChange: 'transform, width',
             backfaceVisibility: 'hidden',
             zIndex: Z_INDEX.AI_ASSISTANT,
+            transform: isMobile && !isOpen ? 'translateX(-50%)' : 'none', // Center confirm
           }}
           initial={false}
           animate={{
-            width: isOpen ? 56 : (isMobile ? 56 : 120),
-            paddingLeft: isOpen ? 0 : (isMobile ? 0 : 16),
-            paddingRight: isOpen ? 0 : (isMobile ? 0 : 16),
+            width: isOpen ? (isMobile ? 50 : 56) : (isMobile ? 140 : 120), // 打开缩成球，关闭展开
+            transform: isMobile ? 'translateX(-50%)' : 'none',
           }}
           transition={{
             type: "spring",
@@ -224,41 +229,20 @@ const Assistant = () => {
             scale: 1.05,
             y: -2,
             boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
-            transition: {
-              type: "spring",
-              stiffness: 400,
-              damping: 25,
-              duration: 0.2
-            }
+            transition: { type: "spring", duration: 0.2 }
           } : {}}
           whileTap={!isAnimating ? {
             scale: 0.95,
             y: 0,
-            transition: {
-              type: "spring",
-              stiffness: 600,
-              damping: 30,
-              duration: 0.1
-            }
+            transition: { type: "spring", duration: 0.1 }
           } : {}}
           aria-label={isOpen ? "关闭AI助手" : "打开AI助手"}
           aria-expanded={isOpen}
         >
-          {/* 苹果风格的涟漪效果背景 */}
-          <motion.div
-            className="absolute inset-0 bg-black/5 rounded-full"
-            initial={{ scale: 0, opacity: 0 }}
-            whileTap={{
-              scale: 1,
-              opacity: 1,
-              transition: {
-                type: "spring",
-                stiffness: 500,
-                damping: 30,
-                duration: 0.15
-              }
-            }}
-          />
+          {/* iOS 风格的黑色磨砂背景光泽 */}
+          {isMobile && !isOpen && (
+            <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />
+          )}
 
           <AnimatePresence mode="wait">
             {isOpen ? (
@@ -267,69 +251,31 @@ const Assistant = () => {
                 initial={{ opacity: 0, rotate: -90, scale: 0.8 }}
                 animate={{ opacity: 1, rotate: 0, scale: 1 }}
                 exit={{ opacity: 0, rotate: 90, scale: 0.8 }}
-                transition={{
-                  type: "spring",
-                  stiffness: 400,
-                  damping: 25,
-                  duration: 0.35
-                }}
                 className="relative flex items-center justify-center w-6 h-6"
               >
-                {/* 苹果风格的关闭图标 */}
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  className="text-gray-700"
-                >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className={isMobile ? "text-white" : "text-gray-700"}>
                   <motion.path
                     d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
                     fill="currentColor"
-                    initial={{ pathLength: 0, opacity: 0 }}
-                    animate={{ pathLength: 1, opacity: 1 }}
-                    transition={{
-                      type: "spring",
-                      stiffness: 300,
-                      damping: 25,
-                      duration: 0.4
-                    }}
                   />
                 </svg>
               </motion.div>
             ) : (
               <motion.div
                 key="open-content"
-                initial={{ opacity: 0, x: -8, scale: 0.9 }}
-                animate={{ opacity: 1, x: 0, scale: 1 }}
-                exit={{ opacity: 0, x: 8, scale: 0.9 }}
-                transition={{
-                  type: "spring",
-                  stiffness: 400,
-                  damping: 25,
-                  duration: 0.35
-                }}
-                className="flex items-center gap-3"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                className="flex items-center gap-2 px-1"
               >
                 <motion.div
-                  className="text-gray-700 text-lg"
-                  animate={prefersReducedMotion ? {} : {
-                    rotate: [0, 3, -3, 0],
-                    scale: [1, 1.02, 1]
-                  }}
-                  transition={prefersReducedMotion ? {} : {
-                    type: "spring",
-                    stiffness: 200,
-                    damping: 20,
-                    duration: 2.5,
-                    repeat: Infinity,
-                    repeatDelay: 3,
-                  }}
+                  // 模拟 Siri 球体颜色
+                  className={isMobile ? "text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 text-xl" : "text-gray-700 text-lg"}
                 >
                   {ICONS.AI}
                 </motion.div>
-                <span className="font-medium text-gray-800 text-sm tracking-normal">
-                  Aura
+                <span className={`font-medium text-sm tracking-wide ${isMobile ? 'text-white' : 'text-gray-800'}`}>
+                  Ask Aura
                 </span>
               </motion.div>
             )}
