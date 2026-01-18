@@ -311,3 +311,58 @@
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
 }
+
+/* Theme Support */
+:root {
+  --bg-color: #050505;
+  --text-main: #ffffff;
+  --glass-bg: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --hover-bg: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme='light'] {
+  --bg-color: #FEFCE8; /* Pale Yellow - Morning Haze */
+  --text-main: #2C2C1E; /* Soft Dark Brown/Black */
+  --glass-bg: rgba(255, 255, 255, 0.6);
+  --glass-border: rgba(0, 0, 0, 0.06);
+  --hover-bg: rgba(0, 0, 0, 0.05);
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  transition: background-color 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), color 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Light Mode Overrides for Tailwind Utilities */
+[data-theme='light'] .text-white { color: var(--text-main); }
+[data-theme='light'] .text-white\/90 { color: rgba(44, 44, 30, 0.9); }
+[data-theme='light'] .text-white\/80 { color: rgba(44, 44, 30, 0.8); }
+[data-theme='light'] .text-white\/70 { color: rgba(44, 44, 30, 0.7); }
+[data-theme='light'] .text-white\/60 { color: rgba(44, 44, 30, 0.6); }
+[data-theme='light'] .text-white\/50 { color: rgba(44, 44, 30, 0.5); }
+[data-theme='light'] .text-white\/40 { color: rgba(44, 44, 30, 0.4); }
+[data-theme='light'] .text-white\/30 { color: rgba(44, 44, 30, 0.3); }
+[data-theme='light'] .text-white\/20 { color: rgba(44, 44, 30, 0.2); }
+[data-theme='light'] .text-white\/10 { color: rgba(44, 44, 30, 0.1); }
+[data-theme='light'] .text-white\/5 { color: rgba(44, 44, 30, 0.05); }
+
+/* Background Overrides */
+[data-theme='light'] .bg-white\/5 { background-color: rgba(0, 0, 0, 0.03); }
+[data-theme='light'] .bg-white\/10 { background-color: rgba(0, 0, 0, 0.06); }
+[data-theme='light'] .bg-white\/20 { background-color: rgba(0, 0, 0, 0.12); }
+[data-theme='light'] .bg-white\/\[0\.02\] { background-color: rgba(0, 0, 0, 0.02); }
+[data-theme='light'] .bg-white\/\[0\.03\] { background-color: rgba(255, 255, 255, 0.5); }
+
+/* Border Overrides */
+[data-theme='light'] .border-white\/5 { border-color: rgba(0, 0, 0, 0.04); }
+[data-theme='light'] .border-white\/10 { border-color: rgba(0, 0, 0, 0.08); }
+[data-theme='light'] .border-white\/20 { border-color: rgba(0, 0, 0, 0.15); }
+[data-theme='light'] .border-white\/\[0\.08\] { border-color: rgba(0, 0, 0, 0.06); }
+
+/* Selection */
+[data-theme='light'] ::selection {
+  background-color: rgba(0, 0, 0, 0.08);
+  color: var(--text-main);
+}

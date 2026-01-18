@@ -193,15 +193,15 @@ const Assistant = () => {
 
   return (
     <>
-      {/* 苹果风格的FAB按钮 - 移动端已整合进 Bottom Bar，故隐藏 */}
-      {!isMobile && (
+      {/* 苹果风格的FAB按钮 - 移动端现在也显示，并悬浮在内容之上 */}
+      {true && (
         <motion.button
           onClick={handleToggle}
           disabled={isAnimating}
-          className={`assistant-button fixed flex items-center justify-center bg-white shadow-lg border-0 focus:outline-none focus:ring-0 overflow-hidden bottom-8 right-8 ${isAnimating ? 'pointer-events-none' : ''}`}
+          className={`assistant-button fixed flex items-center justify-center shadow-lg border-0 focus:outline-none focus:ring-0 overflow-hidden ${isMobile ? 'bottom-24 right-4 bg-white text-black' : 'bottom-8 right-8 bg-white'} ${isAnimating ? 'pointer-events-none' : ''}`}
           style={{
             height: '56px',
-            width: isOpen ? '56px' : '120px',
+            width: isOpen ? '56px' : (isMobile ? '56px' : '120px'), // 移动端只显示图标
             borderRadius: '28px',
             willChange: 'transform, width',
             backfaceVisibility: 'hidden',
@@ -209,9 +209,9 @@ const Assistant = () => {
           }}
           initial={false}
           animate={{
-            width: isOpen ? 56 : 120,
-            paddingLeft: isOpen ? 0 : 16,
-            paddingRight: isOpen ? 0 : 16,
+            width: isOpen ? 56 : (isMobile ? 56 : 120),
+            paddingLeft: isOpen ? 0 : (isMobile ? 0 : 16),
+            paddingRight: isOpen ? 0 : (isMobile ? 0 : 16),
           }}
           transition={{
             type: "spring",

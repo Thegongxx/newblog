@@ -93,4 +93,5 @@ class Logger {
 }
 
 export const logger = new Logger();
-export { Logger, LogLevel, LogEntry };
+export { Logger };
+export type { LogLevel, LogEntry };
