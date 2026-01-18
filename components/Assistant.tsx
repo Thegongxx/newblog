@@ -117,7 +117,7 @@ const Assistant = () => {
     setRetryInfo({ show: false, lastPrompt: prompt });
 
     try {
-      const context = `这是一个名为 Aura 的极简主义个人博客，专注于设计、技术和生活思考。`;
+      const context = `这是一个名为 Xx 的极简主义个人博客，专注于设计、技术和生活思考。`;
       const stream = askNvidiaStream(prompt, context);
 
       let fullContent = '';
@@ -275,7 +275,7 @@ const Assistant = () => {
                   {ICONS.AI}
                 </motion.div>
                 <span className={`font-medium text-sm tracking-wide ${isMobile ? 'text-white' : 'text-gray-800'}`}>
-                  Ask Aura
+                  Ask Xx
                 </span>
               </motion.div>
             )}
@@ -369,7 +369,7 @@ const Assistant = () => {
                       repeat: Infinity
                     }}
                   />
-                  <h3 className="text-gray-300 text-xs font-medium uppercase tracking-wider">Assistant Aura</h3>
+                  <h3 className="text-gray-300 text-xs font-medium uppercase tracking-wider">Assistant Xx</h3>
                 </div>
                 {rateLimited && (
                   <motion.span

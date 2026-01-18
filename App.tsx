@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, Navig
 import { HelmetProvider, Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SWRConfig } from 'swr';
-import Intro from './components/Intro';
 import Assistant from './components/Assistant';
 import ErrorBoundary from './components/ErrorBoundary';
 import DesktopNavigation from './components/desktop/DesktopNavigation';
@@ -28,7 +27,6 @@ import Archive from './pages/Archive';
 const AppInner = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [showIntro, setShowIntro] = useState(true);
   const [scrollY, setScrollY] = useState(0);
   const [toast, setToast] = useState({ show: false, msg: '', type: 'success' as 'success' | 'info' | 'error' });
 
@@ -169,9 +167,7 @@ const AppInner = () => {
     navigate(path);
   };
 
-  if (showIntro && location.pathname === '/') {
-    return <Intro onComplete={() => setShowIntro(false)} />;
-  }
+
 
   // 导航栏渐变计算 - 移动端优化
   const scrollProgress = Math.min(scrollY / (isMobile ? 60 : 80), 1);
@@ -245,17 +241,17 @@ const AppInner = () => {
       >
         {/* 统一的响应式导航栏 */}
         <motion.div
-          className={`relative magnetic-hover ${isMobile ? 'rounded-[2rem] px-5 py-3' : 'rounded-full px-10 py-3 w-auto'}`}
+          className={`relative magnetic-hover ${isMobile ? 'rounded-full px-4 py-2' : 'rounded-full px-10 py-3 w-auto'}`}
           style={{
             pointerEvents: 'auto', // Re-enable clicks
-            backgroundColor: isMobile ? 'rgba(0, 0, 0, 0.85)' : `rgba(0, 0, 0, ${navOpacity})`,
-            backdropFilter: isMobile ? 'blur(20px) saturate(180%)' : `blur(${navBlur}px) saturate(${150 + scrollProgress * 30}%)`,
-            boxShadow: isMobile ? '0 4px 20px rgba(0,0,0,0.4)' : (scrollProgress > 0.2 ? `0 8px 32px rgba(0, 0, 0, ${navShadow})` : 'none'),
+            backgroundColor: isMobile ? 'rgba(0, 0, 0, 0.8)' : `rgba(0, 0, 0, ${navOpacity})`,
+            backdropFilter: isMobile ? 'blur(16px) saturate(160%)' : `blur(${navBlur}px) saturate(${150 + scrollProgress * 30}%)`,
+            boxShadow: isMobile ? '0 2px 10px rgba(0,0,0,0.2)' : (scrollProgress > 0.2 ? `0 8px 32px rgba(0, 0, 0, ${navShadow})` : 'none'),
             borderWidth: '1px',
             borderStyle: 'solid',
-            borderColor: isMobile ? 'rgba(255, 255, 255, 0.15)' : `rgba(255, 255, 255, ${navBorder})`,
+            borderColor: isMobile ? 'rgba(255, 255, 255, 0.1)' : `rgba(255, 255, 255, ${navBorder})`,
             transition: 'all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-            minWidth: isMobile ? '160px' : 'auto', // 移动端保证最小宽度
+            minWidth: isMobile ? '140px' : 'auto', // 移动端保证最小宽度
           }}
           whileHover={{
             scale: 1.02,

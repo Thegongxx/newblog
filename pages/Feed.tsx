@@ -7,7 +7,7 @@ import LikeButton from '../components/LikeButton';
 import { Post } from '../types';
 import { getAllNotes } from '../utils/notes';
 import { useIsMobile } from '../hooks/useResponsive';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme } from '@/context/ThemeContext';
 
 interface FeedProps {
   posts: Post[];
@@ -86,47 +86,31 @@ const Feed: React.FC<FeedProps> = memo(({ posts, loading, onSelectPost }) => {
           <meta name="description" content="一个安静的角落，记录技术与情绪的折射。" />
         </Helmet>
         <div className="space-y-12 pb-20">
-          {/* 沉浸式头部 - 更大的字号与纯净的留白 */}
-          <section className="pt-12 pb-6">
+          {/* 简洁头部 */}
+          <section className="pt-8 pb-4">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-              className="space-y-6"
+              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              className="space-y-4"
             >
-              <div className="flex items-center gap-3">
-                <span className="w-1.5 h-1.5 rounded-full bg-white/20" />
-                <p className="text-[10px] text-white/30 tracking-[0.3em] uppercase font-bold">
-                  Aura Sanctuary
-                </p>
-              </div>
-              <h1 className="text-[42px] font-bold tracking-tight leading-[1.1] text-white italic">
-                探索技术与
+              <h1 className="text-4xl font-bold tracking-tight leading-tight text-white">
+                在这里，
                 <br />
-                <span className="text-white/20 not-italic">情绪的折射。</span>
+                <span className="text-white/30">记录生活的折射。</span>
               </h1>
-              <p className="text-[14px] text-white/40 font-light max-w-[280px] leading-relaxed">
-                {isNight
-                  ? '夜深了。这里的文字陪你一起醒着，直到晨光初现。'
-                  : '剔除冗余。在这里，滑动是一种律动，阅读是一种呼吸。'}
-              </p>
             </motion.div>
           </section>
 
-          {/* 推荐卡片或最新文章列表 */}
-          <section className="space-y-8">
-            <div className="flex items-end justify-between px-1">
-              <h2 className="text-[11px] font-black text-white/20 tracking-[0.2em] uppercase">Latest Reflections</h2>
-              <div className="w-12 h-[1px] bg-white/5 mb-1.5" />
-            </div>
-
-            <div className="space-y-6">
+          {/* 最新文章列表 - 极简 */}
+          <section className="space-y-4">
+            <div className="space-y-4">
               {loading && [1, 2, 3].map(i => (
-                <div key={i} className="h-48 rounded-[2rem] bg-white/[0.02] border border-white/5 animate-pulse" />
+                <div key={i} className="h-24 rounded-2xl bg-white/[0.02] border border-white/5 animate-pulse" />
               ))}
 
               {!loading && latestPosts.length === 0 && (
-                <div className="px-6 py-12 rounded-[2rem] border border-dashed border-white/10 text-center text-white/30 text-xs italic">
+                <div className="px-6 py-12 rounded-2xl border border-dashed border-white/10 text-center text-white/30 text-xs italic">
                   等待第一个故事的开启...
                 </div>
               )}
@@ -134,46 +118,33 @@ const Feed: React.FC<FeedProps> = memo(({ posts, loading, onSelectPost }) => {
               {latestPosts.map((post, idx) => (
                 <motion.div
                   key={post.id}
-                  initial={{ opacity: 0, y: 30 }}
+                  initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                  className="group relative"
+                  transition={{ delay: idx * 0.05, duration: 0.4 }}
+                  className="group"
                   onClick={() => onSelectPost(post)}
                 >
                   <motion.div
-                    whileTap={{ scale: 0.96 }}
-                    className="relative overflow-hidden bg-white/[0.03] backdrop-blur-md border border-white/5 rounded-[2.5rem] p-7 transition-colors active:bg-white/[0.06] active:border-white/10"
+                    whileTap={{ scale: 0.98 }}
+                    className="bg-white/[0.02] border border-white/5 rounded-2xl p-5 active:bg-white/[0.04] transition-colors"
                   >
-                    {/* 背景微光 */}
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 blur-[50px] rounded-full -mr-10 -mt-10" />
-
-                    <div className="relative z-10 space-y-4">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] px-3 py-1 rounded-full bg-white/5 text-white/40 font-bold tracking-wider uppercase">
-                          {post.category}
-                        </span>
-                        <span className="text-[10px] text-white/20 font-mono italic">
-                          {post.date}
-                        </span>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between text-[10px] text-white/30 uppercase tracking-wider font-medium">
+                        {post.category && <span>{post.category}</span>}
+                        <span>{post.date}</span>
                       </div>
 
-                      <h3 className="text-xl font-bold text-white/90 leading-snug line-clamp-2 pr-4">
+                      <h3 className="text-lg font-bold text-white/90 leading-snug">
                         {post.title}
                       </h3>
 
-                      <p className="text-[13px] text-white/50 leading-relaxed line-clamp-2">
-                        {post.excerpt}
-                      </p>
-
-                      <div className="flex items-center justify-between pt-2">
-                        <div className="flex items-center gap-2">
-                          <span className="w-1 h-1 rounded-full bg-white/20" />
-                          <span className="text-[10px] text-white/30 tracking-wide">
-                            {post.readingTime}
-                          </span>
-                        </div>
-                        <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/40 group-active:translate-x-1 transition-transform">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                      <div className="flex items-center justify-between pt-1">
+                        <span className="text-[10px] text-white/30 tracking-wide uppercase">
+                          {post.readingTime}
+                        </span>
+                        <div className="flex items-center gap-1 text-white/20">
+                          <span className="text-[9px] uppercase tracking-tighter">Read</span>
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
                         </div>
                       </div>
                     </div>
