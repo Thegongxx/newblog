@@ -42,8 +42,6 @@ const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
             }
         },
         hover: !isMobile ? {
-            y: -8,
-            scale: 1.02,
             transition: {
                 type: "spring",
                 stiffness: 400,
