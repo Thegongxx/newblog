@@ -144,22 +144,24 @@ const ScrollToTop: React.FC<ScrollToTopProps> = ({
                 className="text-white/15"
               />
               
-              {/* 进度环 */}
-              <circle
-                cx="22"
-                cy="22"
-                r="18"
-                fill="none"
-                stroke={getProgressColor()}
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeDasharray={circumference}
-                strokeDashoffset={strokeDashoffset}
-                className="transition-all duration-300 drop-shadow-sm"
-                style={{
-                  filter: `drop-shadow(0 0 ${isHovered ? '6px' : '3px'} ${getProgressColor()}40)`
-                }}
-              />
+              {/* 进度环 - 当滚动进度超过0.15时显示 */}
+              {scrollProgress > 0.15 && (
+                <circle
+                  cx="22"
+                  cy="22"
+                  r="18"
+                  fill="none"
+                  stroke={getProgressColor()}
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeDasharray={circumference}
+                  strokeDashoffset={strokeDashoffset}
+                  className="transition-all duration-300 drop-shadow-sm"
+                  style={{
+                    filter: `drop-shadow(0 0 ${isHovered ? '6px' : '3px'} ${getProgressColor()}40)`
+                  }}
+                />
+              )}
             </svg>
 
             {/* 箭头图标 */}
