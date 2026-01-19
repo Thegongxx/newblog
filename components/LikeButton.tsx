@@ -242,7 +242,7 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
             <button
                 onClick={handleLike}
                 disabled={false} // 不禁用，以便显示提示
-                className={`group flex items-center gap-2 rounded-full transition-all duration-300 ${
+                className={`group relative flex items-center gap-2 rounded-full transition-all duration-300 overflow-hidden ${
                     isMobile ? 'px-3 py-1.5 text-sm' : 'px-4 py-2'
                 } ${
                     locked ? 'opacity-40 grayscale cursor-not-allowed' : 
@@ -262,10 +262,29 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                     touchAction: 'manipulation'
                 }}
             >
-                <div className="relative">
+                {/* 苹果风格的点击涟漪效果 */}
+                {animating && !locked && (
+                    <div className="absolute inset-0 pointer-events-none">
+                        {/* 主涟漪 */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-rose-500/30 to-pink-500/30 rounded-full animate-apple-ripple" />
+                        {/* 次级涟漪 */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-rose-400/20 to-pink-400/20 rounded-full animate-apple-ripple-delayed" />
+                        {/* 光晕效果 */}
+                        <div className="absolute inset-0 bg-rose-500/10 rounded-full animate-apple-glow blur-sm" />
+                    </div>
+                )}
+
+                {/* 背景脉冲效果 */}
+                {animating && !locked && (
+                    <div className="absolute inset-0 bg-gradient-to-r from-rose-500/5 to-pink-500/5 rounded-full animate-apple-pulse" />
+                )}
+
+                <div className="relative z-10">
                     <svg
-                        className={`w-5 h-5 transition-all duration-300 ${
+                        className={`w-5 h-5 transition-all duration-500 ${
                             liked ? 'fill-current scale-110' : 'fill-none scale-100'
+                        } ${
+                            animating && !locked ? 'animate-apple-heart-bounce' : ''
                         }`}
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -278,36 +297,79 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                         />
                     </svg>
 
+                    {/* 心跳效果 */}
                     {animating && !locked && (
-                        <div className="absolute inset-0 animate-ping">
-                            <svg className="w-5 h-5 fill-current text-rose-500 opacity-50" viewBox="0 0 24 24">
+                        <div className="absolute inset-0 animate-apple-heartbeat">
+                            <svg className="w-5 h-5 fill-current text-rose-500 opacity-60" viewBox="0 0 24 24">
                                 <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                             </svg>
                         </div>
                     )}
                 </div>
 
-                <span className="text-sm font-bold tracking-tight tabular-nums transition-all">
+                <span className={`relative z-10 text-sm font-bold tracking-tight tabular-nums transition-all duration-300 ${
+                    animating && !locked ? 'animate-apple-number-bounce' : ''
+                }`}>
                     {count}
                 </span>
 
-                {/* 悬浮粒子扩散效果 */}
+                {/* 增强的粒子爆炸效果 */}
                 {!locked && animating && (
                     <div className="absolute inset-0 pointer-events-none">
-                        {[...Array(12)].map((_, i) => (
+                        {/* 主要粒子 */}
+                        {[...Array(16)].map((_, i) => (
                             <div
-                                key={i}
-                                className="absolute left-1/2 top-1/2 animate-apple-particle"
+                                key={`main-${i}`}
+                                className="absolute left-1/2 top-1/2 animate-apple-particle-enhanced"
                                 style={{
-                                    '--angle': `${Math.random() * 360}deg`,
-                                    '--distance': `${Math.random() * 60 + 40}px`,
-                                    '--size': `${Math.random() * 4 + 4}px`,
-                                    '--delay': `${Math.random() * 0.2}s`,
+                                    '--angle': `${(360 / 16) * i + Math.random() * 20 - 10}deg`,
+                                    '--distance': `${Math.random() * 80 + 60}px`,
+                                    '--size': `${Math.random() * 6 + 6}px`,
+                                    '--delay': `${Math.random() * 0.3}s`,
+                                    '--duration': `${0.8 + Math.random() * 0.4}s`,
                                     width: 'var(--size)',
                                     height: 'var(--size)',
                                 } as React.CSSProperties}
                             >
-                                <div className="w-full h-full bg-rose-500/40 rounded-full blur-[1px]" />
+                                <div className="w-full h-full bg-gradient-to-br from-rose-400 to-pink-500 rounded-full shadow-lg" />
+                            </div>
+                        ))}
+                        
+                        {/* 次级小粒子 */}
+                        {[...Array(24)].map((_, i) => (
+                            <div
+                                key={`secondary-${i}`}
+                                className="absolute left-1/2 top-1/2 animate-apple-particle-small"
+                                style={{
+                                    '--angle': `${Math.random() * 360}deg`,
+                                    '--distance': `${Math.random() * 120 + 40}px`,
+                                    '--size': `${Math.random() * 3 + 2}px`,
+                                    '--delay': `${Math.random() * 0.4}s`,
+                                    width: 'var(--size)',
+                                    height: 'var(--size)',
+                                } as React.CSSProperties}
+                            >
+                                <div className="w-full h-full bg-rose-300/60 rounded-full blur-[0.5px]" />
+                            </div>
+                        ))}
+
+                        {/* 星形闪烁效果 */}
+                        {[...Array(8)].map((_, i) => (
+                            <div
+                                key={`star-${i}`}
+                                className="absolute left-1/2 top-1/2 animate-apple-star-twinkle"
+                                style={{
+                                    '--angle': `${(360 / 8) * i}deg`,
+                                    '--distance': `${30 + Math.random() * 20}px`,
+                                    '--delay': `${Math.random() * 0.5}s`,
+                                } as React.CSSProperties}
+                            >
+                                <div className="w-2 h-2 bg-white/80 rounded-full animate-pulse" 
+                                     style={{ 
+                                         clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)',
+                                         filter: 'drop-shadow(0 0 4px rgba(255, 255, 255, 0.8))'
+                                     }} 
+                                />
                             </div>
                         ))}
                     </div>
@@ -315,22 +377,214 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
             </button>
 
             <style>{`
-                @keyframes apple-particle {
+                /* 苹果风格涟漪效果 */
+                @keyframes apple-ripple {
+                    0% {
+                        transform: scale(0);
+                        opacity: 0.8;
+                    }
+                    50% {
+                        opacity: 0.4;
+                    }
+                    100% {
+                        transform: scale(4);
+                        opacity: 0;
+                    }
+                }
+
+                @keyframes apple-ripple-delayed {
+                    0% {
+                        transform: scale(0);
+                        opacity: 0.6;
+                    }
+                    60% {
+                        opacity: 0.3;
+                    }
+                    100% {
+                        transform: scale(3.5);
+                        opacity: 0;
+                    }
+                }
+
+                @keyframes apple-glow {
+                    0% {
+                        transform: scale(1);
+                        opacity: 0;
+                    }
+                    50% {
+                        transform: scale(2);
+                        opacity: 0.6;
+                    }
+                    100% {
+                        transform: scale(3);
+                        opacity: 0;
+                    }
+                }
+
+                @keyframes apple-pulse {
+                    0%, 100% {
+                        transform: scale(1);
+                        opacity: 0.2;
+                    }
+                    50% {
+                        transform: scale(1.1);
+                        opacity: 0.4;
+                    }
+                }
+
+                /* 心形图标弹跳效果 */
+                @keyframes apple-heart-bounce {
+                    0% {
+                        transform: scale(1);
+                    }
+                    15% {
+                        transform: scale(1.3) rotate(-5deg);
+                    }
+                    30% {
+                        transform: scale(1.1) rotate(3deg);
+                    }
+                    45% {
+                        transform: scale(1.2) rotate(-2deg);
+                    }
+                    60% {
+                        transform: scale(1.05) rotate(1deg);
+                    }
+                    100% {
+                        transform: scale(1.1) rotate(0deg);
+                    }
+                }
+
+                /* 心跳效果 */
+                @keyframes apple-heartbeat {
+                    0%, 100% {
+                        transform: scale(1);
+                        opacity: 0;
+                    }
+                    25% {
+                        transform: scale(1.2);
+                        opacity: 0.6;
+                    }
+                    50% {
+                        transform: scale(1);
+                        opacity: 0.3;
+                    }
+                    75% {
+                        transform: scale(1.1);
+                        opacity: 0.4;
+                    }
+                }
+
+                /* 数字弹跳效果 */
+                @keyframes apple-number-bounce {
+                    0% {
+                        transform: translateY(0);
+                    }
+                    30% {
+                        transform: translateY(-8px) scale(1.1);
+                    }
+                    60% {
+                        transform: translateY(-2px) scale(1.05);
+                    }
+                    100% {
+                        transform: translateY(0) scale(1);
+                    }
+                }
+
+                /* 增强的粒子效果 */
+                @keyframes apple-particle-enhanced {
                     0% {
                         transform: translate(-50%, -50%) rotate(0deg) scale(0);
                         opacity: 0;
                     }
-                    20% {
+                    10% {
                         opacity: 1;
                         transform: translate(-50%, -50%) rotate(var(--angle)) translateY(0) scale(1.2);
+                    }
+                    70% {
+                        opacity: 0.8;
+                        transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(-0.7 * var(--distance))) scale(1);
                     }
                     100% {
                         transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(-1 * var(--distance))) scale(0);
                         opacity: 0;
                     }
                 }
-                .animate-apple-particle {
-                    animation: apple-particle 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
+                @keyframes apple-particle-small {
+                    0% {
+                        transform: translate(-50%, -50%) rotate(0deg) scale(0);
+                        opacity: 0;
+                    }
+                    20% {
+                        opacity: 0.8;
+                        transform: translate(-50%, -50%) rotate(var(--angle)) translateY(0) scale(1);
+                    }
+                    100% {
+                        transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(-1 * var(--distance))) scale(0);
+                        opacity: 0;
+                    }
+                }
+
+                /* 星形闪烁效果 */
+                @keyframes apple-star-twinkle {
+                    0% {
+                        transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(-1 * var(--distance))) scale(0) rotate(0deg);
+                        opacity: 0;
+                    }
+                    20% {
+                        opacity: 1;
+                        transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(-1 * var(--distance))) scale(1) rotate(180deg);
+                    }
+                    80% {
+                        opacity: 0.6;
+                        transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(-1 * var(--distance))) scale(0.8) rotate(360deg);
+                    }
+                    100% {
+                        transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(-1 * var(--distance))) scale(0) rotate(540deg);
+                        opacity: 0;
+                    }
+                }
+
+                .animate-apple-ripple {
+                    animation: apple-ripple 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                }
+
+                .animate-apple-ripple-delayed {
+                    animation: apple-ripple-delayed 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
+                }
+
+                .animate-apple-glow {
+                    animation: apple-glow 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                }
+
+                .animate-apple-pulse {
+                    animation: apple-pulse 0.8s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+                }
+
+                .animate-apple-heart-bounce {
+                    animation: apple-heart-bounce 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+                }
+
+                .animate-apple-heartbeat {
+                    animation: apple-heartbeat 1.2s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+                }
+
+                .animate-apple-number-bounce {
+                    animation: apple-number-bounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+                }
+
+                .animate-apple-particle-enhanced {
+                    animation: apple-particle-enhanced var(--duration) cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                    animation-delay: var(--delay);
+                }
+
+                .animate-apple-particle-small {
+                    animation: apple-particle-small 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                    animation-delay: var(--delay);
+                }
+
+                .animate-apple-star-twinkle {
+                    animation: apple-star-twinkle 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
                     animation-delay: var(--delay);
                 }
             `}</style>

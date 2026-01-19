@@ -9,6 +9,7 @@ export const Z_INDEX = {
   // 导航层级 - 灵动岛风格，不需要太高层级
   NAVIGATION: 40,
   BACK_BUTTON: 35, // 返回按钮在导航栏下面
+  SCROLL_TO_TOP: 45, // 滚动到顶部按钮，略高于导航栏
   
   // 弹窗层级
   MODAL_BACKDROP: 50,

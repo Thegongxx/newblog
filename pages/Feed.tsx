@@ -229,11 +229,11 @@ const Feed: React.FC<FeedProps> = memo(({ posts, loading, onSelectPost }) => {
             <div className="space-y-6">
               <h4 className="text-white/20 uppercase tracking-[0.6em] text-[10px] font-black flex items-center gap-4">
                 <span className="w-8 h-[1px] bg-white/10" />
-                Digital Sanctuary
+                Personal space
               </h4>
               <h1 className="text-8xl font-black tracking-tighter leading-[0.85] text-white">
                 Xuan <br />
-                <span className="text-white/20 italic font-light">Laboratory.</span>
+                <span className="text-white/20 italic font-light">MyPersonBlog</span>
               </h1>
             </div>
             <p className="text-xl text-white/40 font-light max-w-md leading-relaxed border-l-2 border-white/5 pl-8 py-2">

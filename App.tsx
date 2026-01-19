@@ -9,6 +9,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import DesktopNavigation from './components/desktop/DesktopNavigation';
 import PageTransitionMask from './components/PageTransitionMask';
 import { MagneticButton } from './components/HoverEffects';
+import ScrollToTop from './components/ScrollToTop';
 import { CONTACT_INFO } from './constants';
 import { Z_INDEX } from './constants/zIndex';
 import { usePostsCache, useNotesCache } from './services/cacheService';
@@ -403,6 +404,9 @@ const AppInner = () => {
 
       {/* AI助手 - 仅在桌面端显示 */}
       {!isMobile && <Assistant />}
+
+      {/* 滚动到顶部按钮 - 全平台显示 */}
+      <ScrollToTop threshold={isMobile ? 200 : 300} />
 
       {/* Footer - 响应式优化 */}
       <footer className="py-12 md:py-32 px-4 md:px-6 border-t border-white/10">
