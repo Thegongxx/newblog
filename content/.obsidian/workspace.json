@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "pages/about.md",
+                "file": "posts/未命名.md",
                 "mode": "source",
                 "source": true
               },
               "icon": "lucide-file",
-              "title": "about"
+              "title": "未命名"
             }
           }
         ]
@@ -195,18 +195,18 @@
   },
   "active": "3f4ab5bbf3da8926",
   "lastOpenFiles": [
-    "notes/TEST.md",
-    "notes/样板.md",
-    "Pasted image 20260120015258.png",
-    "posts/未命名.md",
     "posts/样板.md",
+    "posts/未命名.md",
+    "notes/TEST.md",
+    "pages/about.md",
+    "Pasted image 20260120015258.png",
+    "notes/样板.md",
     "未命名 1.base",
     "未命名.base",
     "posts/obsidian-workflow.md",
     "posts/web-development-trends-2024.md",
     "posts/hello-world.md",
     "posts/minimalist-design-philosophy.md",
-    "pages/about.md",
     "notes/reading-notes.md",
     "转移/1.md",
     "未命名 2.base",
