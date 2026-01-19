@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MagneticButton } from './HoverEffects';
 import { Z_INDEX } from '../constants/zIndex';
 import { useIsMobile } from '../hooks/useResponsive';
+import { MOBILE_NAV_CONFIG } from '../constants/mobileNavigation';
 
 interface ScrollToTopProps {
   threshold?: number; // 显示按钮的滚动阈值
@@ -51,16 +51,16 @@ const ScrollToTop: React.FC<ScrollToTopProps> = ({
     });
   };
 
-  // 苹果风格的圆形进度指示器 - 更细分的进度
-  const circumference = 2 * Math.PI * 18; // 增大半径到18
+  // 苹果风格的圆形进度指示器
+  const circumference = 2 * Math.PI * 18;
   const strokeDashoffset = circumference - (scrollProgress * circumference);
   
   // 根据进度计算颜色
   const getProgressColor = () => {
-    if (scrollProgress < 0.3) return '#60a5fa'; // 蓝色开始
-    if (scrollProgress < 0.6) return '#34d399'; // 绿色中间
-    if (scrollProgress < 0.9) return '#fbbf24'; // 黄色接近
-    return '#f87171'; // 红色完成
+    if (scrollProgress < 0.3) return '#60a5fa';
+    if (scrollProgress < 0.6) return '#34d399';
+    if (scrollProgress < 0.9) return '#fbbf24';
+    return '#f87171';
   };
 
   return (
@@ -95,36 +95,38 @@ const ScrollToTop: React.FC<ScrollToTopProps> = ({
             duration: 0.35
           }}
         >
-          <div
+          <motion.div
             className={`
-              group relative overflow-hidden
+              group relative overflow-hidden cursor-pointer
               ${isMobile ? 'w-14 h-14' : 'w-16 h-16'}
               rounded-full
-              backdrop-blur-xl saturate-150
-              border border-white/10
-              shadow-2xl
               transition-all duration-300 ease-out
-              hover:scale-105 hover:shadow-3xl
+              ${!isMobile ? 'hover:scale-105 hover:shadow-3xl' : ''}
               active:scale-95
-              apple-button
-              cursor-pointer
-              
-              /* 深色模式样式 */
-              bg-gray-900/60 hover:bg-gray-800/70
-              
-              /* 浅色模式样式 */
-              [data-theme='light'] & {
-                bg-white/90 hover:bg-white/95
-                border-gray-300/30
-                shadow-gray-400/20
-              }
             `}
+            style={isMobile ? {
+              backgroundColor: 'rgba(0, 0, 0, 0.85)',
+              backdropFilter: `blur(${MOBILE_NAV_CONFIG.VISUAL.BACKDROP_BLUR}px) saturate(180%)`,
+              boxShadow: `0 4px 20px rgba(0,0,0,${MOBILE_NAV_CONFIG.VISUAL.SHADOW_OPACITY}), 0 0 0 ${MOBILE_NAV_CONFIG.VISUAL.BORDER_WIDTH}px rgba(255,255,255,${MOBILE_NAV_CONFIG.VISUAL.BORDER_OPACITY})`,
+              borderWidth: `${MOBILE_NAV_CONFIG.VISUAL.BORDER_WIDTH}px`,
+              borderStyle: 'solid',
+              borderColor: `rgba(255, 255, 255, ${MOBILE_NAV_CONFIG.VISUAL.BORDER_OPACITY})`,
+            } : {
+              backdropFilter: 'blur(20px) saturate(150%)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+              backgroundColor: 'rgba(31, 41, 55, 0.6)',
+            }}
             onClick={scrollToTop}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
+            onMouseEnter={() => !isMobile && setIsHovered(true)}
+            onMouseLeave={() => !isMobile && setIsHovered(false)}
+            whileHover={!isMobile ? { scale: 1.05 } : {}}
+            whileTap={{ scale: 0.95 }}
           >
-            {/* 背景光效 */}
-            <div className="absolute inset-0 bg-gradient-to-t from-white/5 to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full" />
+            {/* 背景光效 - 仅PC端 */}
+            {!isMobile && (
+              <div className="absolute inset-0 bg-gradient-to-t from-white/5 to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full" />
+            )}
             
             {/* 进度环背景 */}
             <svg 
@@ -139,10 +141,10 @@ const ScrollToTop: React.FC<ScrollToTopProps> = ({
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
-                className="text-white/15 [data-theme='light'] &:text-gray-400/30"
+                className="text-white/15"
               />
               
-              {/* 进度环 - 细分显示 */}
+              {/* 进度环 */}
               <circle
                 cx="22"
                 cy="22"
@@ -178,12 +180,12 @@ const ScrollToTop: React.FC<ScrollToTopProps> = ({
                 height={isMobile ? "18" : "20"}
                 viewBox="0 0 24 24"
                 fill="none"
-                className="text-black/90 transition-colors duration-300"
-                whileHover={{ y: -1 }}
+                className="text-white/90 transition-colors duration-300"
+                whileHover={!isMobile ? { y: -1 } : {}}
                 whileTap={{ y: 0 }}
-                animate={{
+                animate={!isMobile ? {
                   y: isHovered ? [-1, 1, -1] : 0,
-                }}
+                } : {}}
                 transition={{
                   duration: isHovered ? 1.5 : 0.3,
                   repeat: isHovered ? Infinity : 0,
@@ -208,21 +210,23 @@ const ScrollToTop: React.FC<ScrollToTopProps> = ({
               </motion.svg>
             </div>
 
-            {/* 点击涟漪效果 */}
-            <div className="absolute inset-0 rounded-full overflow-hidden">
-              <motion.div
-                className="absolute inset-0 bg-white/20 [data-theme='light'] &:bg-gray-600/20 rounded-full scale-0"
-                whileTap={{
-                  scale: [0, 1.2, 0],
-                  opacity: [0.8, 0.4, 0]
-                }}
-                transition={{
-                  duration: 0.4,
-                  ease: [0.25, 0.46, 0.45, 0.94]
-                }}
-              />
-            </div>
-          </div>
+            {/* 点击涟漪效果 - 仅PC端 */}
+            {!isMobile && (
+              <div className="absolute inset-0 rounded-full overflow-hidden">
+                <motion.div
+                  className="absolute inset-0 bg-white/20 rounded-full scale-0"
+                  whileTap={{
+                    scale: [0, 1.2, 0],
+                    opacity: [0.8, 0.4, 0]
+                  }}
+                  transition={{
+                    duration: 0.4,
+                    ease: [0.25, 0.46, 0.45, 0.94]
+                  }}
+                />
+              </div>
+            )}
+          </motion.div>
         </motion.div>
       )}
     </AnimatePresence>

@@ -13,6 +13,7 @@ import ScrollToTop from './components/ScrollToTop';
 import GlobalRipple from './components/GlobalRipple';
 import { CONTACT_INFO } from './constants';
 import { Z_INDEX } from './constants/zIndex';
+import { MOBILE_NAV_CONFIG } from './constants/mobileNavigation';
 import { haptics } from './utils/haptics';
 import { usePostsCache, useNotesCache } from './services/cacheService';
 import { useIsMobile } from './hooks/useResponsive';
@@ -281,25 +282,29 @@ const AppInner = () => {
       >
         {/* 统一的响应式导航栏 */}
         <motion.div
-          className={`relative magnetic-hover ${isMobile ? 'rounded-full px-4 py-2' : 'rounded-full px-10 py-3 w-auto'}`}
+          className={`relative magnetic-hover ${isMobile ? 'rounded-full' : 'rounded-full px-10 py-3 w-auto'}`}
           style={{
             pointerEvents: 'auto',
             backgroundColor: isMobile ? 'rgba(0, 0, 0, 0.85)' : `rgba(0, 0, 0, ${navOpacity})`,
-            backdropFilter: isMobile ? 'blur(20px) saturate(180%)' : `blur(${navBlur}px) saturate(${150 + scrollProgress * 30}%)`,
-            boxShadow: isMobile ? '0 4px 20px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.1)' : (scrollProgress > 0.2 ? `0 8px 32px rgba(0, 0, 0, ${navShadow})` : 'none'),
-            borderWidth: '1px',
+            backdropFilter: isMobile ? `blur(${MOBILE_NAV_CONFIG.VISUAL.BACKDROP_BLUR}px) saturate(180%)` : `blur(${navBlur}px) saturate(${150 + scrollProgress * 30}%)`,
+            boxShadow: isMobile ? `0 4px 20px rgba(0,0,0,${MOBILE_NAV_CONFIG.VISUAL.SHADOW_OPACITY}), 0 0 0 ${MOBILE_NAV_CONFIG.VISUAL.BORDER_WIDTH}px rgba(255,255,255,${MOBILE_NAV_CONFIG.VISUAL.BORDER_OPACITY})` : (scrollProgress > 0.2 ? `0 8px 32px rgba(0, 0, 0, ${navShadow})` : 'none'),
+            borderWidth: isMobile ? `${MOBILE_NAV_CONFIG.VISUAL.BORDER_WIDTH}px` : '1px',
             borderStyle: 'solid',
-            borderColor: isMobile ? 'rgba(255, 255, 255, 0.15)' : `rgba(255, 255, 255, ${navBorder})`,
+            borderColor: isMobile ? `rgba(255, 255, 255, ${MOBILE_NAV_CONFIG.VISUAL.BORDER_OPACITY})` : `rgba(255, 255, 255, ${navBorder})`,
             transition: 'all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-            minWidth: isMobile ? '200px' : 'auto',
+            minWidth: isMobile ? `${MOBILE_NAV_CONFIG.CONTAINER.MIN_WIDTH}px` : 'auto',
+            paddingLeft: isMobile ? `${MOBILE_NAV_CONFIG.CONTAINER.PADDING_X}px` : undefined,
+            paddingRight: isMobile ? `${MOBILE_NAV_CONFIG.CONTAINER.PADDING_X}px` : undefined,
+            paddingTop: isMobile ? `${MOBILE_NAV_CONFIG.CONTAINER.PADDING_Y}px` : undefined,
+            paddingBottom: isMobile ? `${MOBILE_NAV_CONFIG.CONTAINER.PADDING_Y}px` : undefined,
             position: 'relative',
             zIndex: 1,
           }}
         >
-          <div className={`relative flex items-center justify-between ${isMobile ? 'gap-3' : 'gap-12'}`}>
+          <div className={`relative flex items-center justify-between ${isMobile ? 'gap-4' : 'gap-12'}`}>
             <MagneticButton
               onClick={() => handleNavigate('/')}
-              className={`font-bold tracking-tight text-white/90 hover:text-white transition-all duration-300 relative overflow-hidden group min-w-[44px] min-h-[44px] flex items-center justify-center ${isMobile ? 'text-sm' : 'text-lg'}`}
+              className={`font-bold tracking-tight text-white/90 hover:text-white transition-all duration-300 relative overflow-hidden group min-w-[44px] min-h-[44px] flex items-center justify-center ${isMobile ? 'text-base' : 'text-lg'}`}
               strength={0.3}
             >
               {/* 苹果风格的悬停背景光效 */}
@@ -307,7 +312,7 @@ const AppInner = () => {
               <span className="relative z-10 group-hover:tracking-wider transition-all duration-300">XUAN</span>
             </MagneticButton>
 
-            <div className={`flex items-center ${isMobile ? 'gap-0.5' : 'gap-6'} text-xs md:text-sm font-medium relative`}>
+            <div className={`flex items-center ${isMobile ? 'gap-1.5' : 'gap-6'} text-xs md:text-sm font-medium relative`}>
               {/* 平滑高亮背景 - 桌面端 */}
               {!isMobile && (
                 <motion.div
@@ -342,7 +347,7 @@ const AppInner = () => {
                   aria-label={`跳转到 ${item.label} 页面`}
                   className={`rounded-full flex items-center justify-center relative z-10 transition-colors duration-200
                     ${isMobile
-                      ? 'min-w-[28px] min-h-[28px] px-1.5 text-[9px]'
+                      ? 'min-w-[44px] min-h-[44px] px-3 py-2 text-sm'
                       : 'min-w-[44px] min-h-[44px] px-4 py-2'
                     } 
                     ${location.pathname === item.path

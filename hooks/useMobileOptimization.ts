@@ -25,7 +25,7 @@ export const useMobileOptimization = () => {
       }
     };
 
-    // 优化触摸延迟
+    // 优化触摸延迟和视口设置
     const optimizeTouchDelay = () => {
       const meta = document.createElement('meta');
       meta.name = 'viewport';
@@ -39,18 +39,29 @@ export const useMobileOptimization = () => {
       }
     };
 
-    // 触摸反馈 - 移除通用震动，只保留视觉反馈
+    // 增强触摸反馈 - 针对导航栏优化
     const addTouchFeedback = (e: TouchEvent) => {
       const target = e.target as HTMLElement;
-      if (target.closest('button, [role="button"], a, .cursor-pointer')) {
-        // 只保留视觉反馈，移除震动
-        target.style.transform = 'scale(0.98)';
-        target.style.transition = 'transform 0.1s ease';
+      const interactiveElement = target.closest('button, [role="button"], a, .cursor-pointer');
+      
+      if (interactiveElement) {
+        const element = interactiveElement as HTMLElement;
+        
+        // 为导航栏按钮提供更舒适的触摸反馈
+        if (element.closest('nav')) {
+          element.style.transform = 'scale(0.95)';
+          element.style.transition = 'transform 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+          element.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+        } else {
+          element.style.transform = 'scale(0.98)';
+          element.style.transition = 'transform 0.1s ease';
+        }
         
         setTimeout(() => {
-          target.style.transform = '';
-          target.style.transition = '';
-        }, 100);
+          element.style.transform = '';
+          element.style.transition = '';
+          element.style.backgroundColor = '';
+        }, 150);
       }
     };
 

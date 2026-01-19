@@ -16,7 +16,10 @@ interface FeedProps {
 }
 
 const ThemeToggle = () => {
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme, isMobile } = useTheme();
+
+  // 移动端不显示主题切换按钮
+  if (isMobile) return null;
 
   return (
     <button
