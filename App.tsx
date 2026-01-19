@@ -34,6 +34,7 @@ const AppInner = () => {
   const [scrollY, setScrollY] = useState(0);
   const [toast, setToast] = useState({ show: false, msg: '', type: 'success' as 'success' | 'info' | 'error' });
   const [hoveredNavItem, setHoveredNavItem] = useState<string | null>(null);
+  const [navInteractionCount, setNavInteractionCount] = useState(0);
 
   // 使用页面切换动画 hook
   const { setNavigationMethod } = usePageTransition();
@@ -233,8 +234,8 @@ const AppInner = () => {
           zIndex: Z_INDEX.NAVIGATION,
           willChange: 'transform',
           backfaceVisibility: 'hidden',
-          pointerEvents: 'none', // Allow clicks to pass through around the nav
-          position: 'fixed', // 确保固定定位
+          pointerEvents: 'none',
+          position: 'fixed',
         }}
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -249,7 +250,7 @@ const AppInner = () => {
         <motion.div
           className={`relative magnetic-hover ${isMobile ? 'rounded-full px-4 py-2' : 'rounded-full px-10 py-3 w-auto'}`}
           style={{
-            pointerEvents: 'auto', // Re-enable clicks
+            pointerEvents: 'auto',
             backgroundColor: isMobile ? 'rgba(0, 0, 0, 0.85)' : `rgba(0, 0, 0, ${navOpacity})`,
             backdropFilter: isMobile ? 'blur(20px) saturate(180%)' : `blur(${navBlur}px) saturate(${150 + scrollProgress * 30}%)`,
             boxShadow: isMobile ? '0 4px 20px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.1)' : (scrollProgress > 0.2 ? `0 8px 32px rgba(0, 0, 0, ${navShadow})` : 'none'),
@@ -257,29 +258,17 @@ const AppInner = () => {
             borderStyle: 'solid',
             borderColor: isMobile ? 'rgba(255, 255, 255, 0.15)' : `rgba(255, 255, 255, ${navBorder})`,
             transition: 'all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-            minWidth: isMobile ? '200px' : 'auto', // 移动端保证最小宽度，更像灵动岛
-            // 确保移动端始终可见
+            minWidth: isMobile ? '200px' : 'auto',
             position: 'relative',
             zIndex: 1,
           }}
-          whileHover={{
-            scale: 1.02,
-            y: -2,
-            transition: {
-              type: "spring",
-              stiffness: 400,
-              damping: 25,
-              duration: 0.2
-            }
+          animate={{
+            scale: navInteractionCount > 10 ? [1, 1.02, 1] : 1,
+            rotateY: navInteractionCount > 20 ? [0, 5, 0] : 0,
           }}
-          whileTap={{
-            scale: 0.98,
-            transition: {
-              type: "spring",
-              stiffness: 600,
-              damping: 30,
-              duration: 0.1
-            }
+          transition={{
+            duration: navInteractionCount > 10 ? 0.6 : 0.2,
+            ease: "easeInOut"
           }}
         >
           <div className={`relative flex items-center justify-between ${isMobile ? 'gap-3' : 'gap-12'}`}>
@@ -306,27 +295,45 @@ const AppInner = () => {
                   animate={{
                     opacity: hoveredNavItem || ['/notes', '/archive', '/about'].includes(location.pathname) ? 1 : 0,
                     scale: hoveredNavItem ? 1.02 : 1,
+                    // 彩蛋：多次交互后的彩虹效果
+                    background: navInteractionCount > 15 ? [
+                      'rgba(255, 255, 255, 0.12)',
+                      'rgba(59, 130, 246, 0.12)',
+                      'rgba(16, 185, 129, 0.12)',
+                      'rgba(245, 158, 11, 0.12)',
+                      'rgba(239, 68, 68, 0.12)',
+                      'rgba(139, 92, 246, 0.12)',
+                      'rgba(255, 255, 255, 0.12)'
+                    ] : 'rgba(255, 255, 255, 0.12)'
                   }}
                   transition={{
                     type: "spring",
-                    stiffness: 400,
-                    damping: 30,
-                    mass: 0.8
+                    stiffness: 500,
+                    damping: 35,
+                    mass: 0.8,
+                    background: {
+                      duration: navInteractionCount > 15 ? 2 : 0.3,
+                      repeat: navInteractionCount > 15 ? Infinity : 0,
+                      ease: "linear"
+                    }
                   }}
                   layoutId="nav-highlight"
                 />
               )}
               
               {[
-                { path: '/notes', label: isMobile ? 'Notes' : 'Notes', icon: '📝' },
-                { path: '/archive', label: isMobile ? 'Archive' : 'Archive', icon: '📂' },
-                { path: '/about', label: isMobile ? 'About' : 'About', icon: '👋' }
+                { path: '/notes', label: isMobile ? 'Notes' : 'Notes', icon: '📝', emoji: '✨' },
+                { path: '/archive', label: isMobile ? 'Archive' : 'Archive', icon: '📂', emoji: '🎯' },
+                { path: '/about', label: isMobile ? 'About' : 'About', icon: '👋', emoji: '🚀' }
               ].map((item) => (
                 <motion.button
                   key={item.path}
-                  onClick={() => handleNavigate(item.path)}
+                  onClick={() => {
+                    handleNavigate(item.path);
+                    setNavInteractionCount(prev => prev + 1);
+                  }}
                   aria-label={`跳转到 ${item.label} 页面`}
-                  className={`rounded-full flex items-center justify-center relative z-10 transition-colors duration-150
+                  className={`rounded-full flex items-center justify-center relative z-10 transition-colors duration-200
                     ${isMobile
                       ? 'min-w-[28px] min-h-[28px] px-1.5 text-[9px]'
                       : 'min-w-[44px] min-h-[44px] px-4 py-2'
@@ -337,15 +344,20 @@ const AppInner = () => {
                         ? 'text-white'
                         : 'text-white/60'
                     }`}
-                  onMouseEnter={() => !isMobile && setHoveredNavItem(item.path)}
+                  onMouseEnter={() => {
+                    if (!isMobile) {
+                      setHoveredNavItem(item.path);
+                      setNavInteractionCount(prev => prev + 1);
+                    }
+                  }}
                   onMouseLeave={() => !isMobile && setHoveredNavItem(null)}
                   whileHover={!isMobile ? {
                     scale: 1.05,
                     y: -1,
                     transition: {
                       type: "spring",
-                      stiffness: 500,
-                      damping: 30,
+                      stiffness: 600,
+                      damping: 25,
                       duration: 0.15
                     }
                   } : {}}
@@ -366,13 +378,41 @@ const AppInner = () => {
                     }}
                     transition={{
                       type: "spring",
-                      stiffness: 400,
-                      damping: 25,
+                      stiffness: 500,
+                      damping: 30,
                       duration: 0.2
                     }}
                   >
-                    {item.label}
+                    {navInteractionCount > 25 && hoveredNavItem === item.path ? item.emoji : item.label}
                   </motion.span>
+                  
+                  {/* 彩蛋：粒子效果 */}
+                  {navInteractionCount > 30 && hoveredNavItem === item.path && (
+                    <div className="absolute inset-0 pointer-events-none">
+                      {[...Array(3)].map((_, i) => (
+                        <motion.div
+                          key={i}
+                          className="absolute w-1 h-1 bg-white/60 rounded-full"
+                          style={{
+                            left: '50%',
+                            top: '50%',
+                          }}
+                          animate={{
+                            x: [0, (Math.random() - 0.5) * 40],
+                            y: [0, (Math.random() - 0.5) * 40],
+                            opacity: [1, 0],
+                            scale: [0, 1, 0]
+                          }}
+                          transition={{
+                            duration: 1,
+                            delay: i * 0.1,
+                            repeat: Infinity,
+                            repeatDelay: 0.5
+                          }}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </motion.button>
               ))}
             </div>
@@ -451,8 +491,8 @@ const AppInner = () => {
       {/* AI助手 - 仅在桌面端显示 */}
       {!isMobile && <Assistant />}
 
-      {/* 滚动到顶部按钮 - 只在notes和文章页面显示 */}
-      {(location.pathname.includes('/note') || location.pathname.includes('/post')) && (
+      {/* 滚动到顶部按钮 - 只在详情页面显示 */}
+      {(location.pathname.includes('/note/') || location.pathname.includes('/post/')) && (
         <ScrollToTop threshold={isMobile ? 200 : 300} />
       )}
 
