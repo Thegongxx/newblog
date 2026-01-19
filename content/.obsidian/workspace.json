@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "pages/about.md",
+                "file": "posts/hello-world.md",
                 "mode": "source",
-                "source": false
+                "source": true
               },
               "icon": "lucide-file",
-              "title": "about"
+              "title": "hello-world"
             }
           }
         ]
@@ -74,8 +74,7 @@
               "title": "书签"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
@@ -194,18 +193,18 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "3b3c1d447412bb2e",
+  "active": "3f4ab5bbf3da8926",
   "lastOpenFiles": [
-    "notes/TEST.md",
-    "notes/reading-notes.md",
-    "转移/1.md",
     "posts/web-development-trends-2024.md",
     "posts/hello-world.md",
     "posts/minimalist-design-philosophy.md",
-    "未命名.base",
-    "未命名 1.base",
-    "未命名 2.base",
     "pages/about.md",
+    "未命名 1.base",
+    "未命名.base",
+    "notes/TEST.md",
+    "notes/reading-notes.md",
+    "转移/1.md",
+    "未命名 2.base",
     "转移/2.md",
     "未命名.md",
     "转移",
@@ -225,7 +224,6 @@
     "notes/freedom.md",
     "posts/hello-aura.md",
     "notes/heroism.md",
-    "2024-03-12.md",
     "未命名.canvas"
   ]
 }
