@@ -21,9 +21,10 @@ const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
             y: 0,
             opacity: 1,
             transition: {
-                type: "tween" as const,
-                ease: [0.25, 0.1, 0.25, 1],
-                duration: isMobile ? 0.35 : 0.45
+                type: "spring",
+                stiffness: 300,
+                damping: 30,
+                duration: 0.4
             }
         }
     };
@@ -34,19 +35,29 @@ const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
             y: 0,
             opacity: 1,
             transition: {
-                type: "tween" as const,
-                ease: [0.25, 0.1, 0.25, 1],
-                duration: isMobile ? 0.35 : 0.45
+                type: "spring",
+                stiffness: 300,
+                damping: 30,
+                duration: 0.4
             }
         },
         hover: !isMobile ? {
-            y: -10,
-            rotateX: 1,
-            rotateY: 0.5,
-            scale: 1.015,
+            y: -8,
+            scale: 1.02,
             transition: {
-                duration: 0.6,
-                ease: [0.23, 1, 0.32, 1]
+                type: "spring",
+                stiffness: 400,
+                damping: 25,
+                duration: 0.3
+            }
+        } : {},
+        tap: isMobile ? {
+            scale: 0.98,
+            transition: {
+                type: "spring",
+                stiffness: 400,
+                damping: 25,
+                duration: 0.1
             }
         } : {}
     };
@@ -54,8 +65,8 @@ const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
     const containerVariants: Variants = {
         animate: {
             transition: {
-                staggerChildren: isMobile ? 0.04 : 0.08,
-                delayChildren: isMobile ? 0.08 : 0.16
+                staggerChildren: 0.05,
+                delayChildren: 0.1
             }
         }
     };
@@ -116,17 +127,14 @@ const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
                             <motion.div
                                 key={note.id || i}
                                 className={`glass p-6 md:p-8 rounded-2xl md:rounded-[2.2rem] relative group border border-white/5 cursor-pointer ${isMobile
-                                    ? 'active:scale-[0.98] active:bg-white/[0.02] transition-all duration-200'
-                                    : 'hover:border-white/20 hover:shadow-2xl hover:shadow-white/5 transition-all duration-500'
+                                    ? 'transition-all duration-200'
+                                    : 'hover:border-white/15 transition-all duration-300'
                                     }`}
                                 variants={cardVariants}
                                 initial="initial"
                                 animate="animate"
                                 whileHover={!isMobile ? "hover" : undefined}
-                                whileTap={isMobile ? {
-                                    scale: 0.98,
-                                    transition: { duration: 0.1 }
-                                } : undefined}
+                                whileTap={isMobile ? "tap" : undefined}
                                 style={{
                                     willChange: 'transform',
                                     backfaceVisibility: 'hidden'
@@ -134,11 +142,24 @@ const Notes: React.FC<NotesProps> = ({ notes, loading }) => {
                                 onClick={() => navigate(`/note/${note.id}`, { state: { from: '/notes' } })}
                             >
                                 {!isMobile && (
-                                    <div className="absolute inset-0 bg-gradient-to-br from-white/4 via-transparent to-white/8 opacity-0 group-hover:opacity-100 transition-opacity duration-400 rounded-2xl md:rounded-[2.2rem]" />
+                                    <motion.div 
+                                        className="absolute inset-0 bg-gradient-to-br from-white/3 via-transparent to-white/6 opacity-0 rounded-2xl md:rounded-[2.2rem]"
+                                        initial={{ opacity: 0 }}
+                                        whileHover={{ 
+                                            opacity: 1,
+                                            transition: { duration: 0.3 }
+                                        }}
+                                    />
                                 )}
 
                                 {isMobile && (
-                                    <div className="absolute inset-0 bg-gradient-to-r from-white/3 to-transparent opacity-0 group-active:opacity-100 transition-opacity duration-150 rounded-2xl pointer-events-none" />
+                                    <motion.div 
+                                        className="absolute inset-0 bg-gradient-to-r from-white/2 to-transparent opacity-0 rounded-2xl pointer-events-none"
+                                        whileTap={{ 
+                                            opacity: 1,
+                                            transition: { duration: 0.1 }
+                                        }}
+                                    />
                                 )}
 
                                 <div className={`absolute top-4 left-4 md:top-7 md:left-7 scale-75 md:scale-100 origin-top-left transition-all duration-250 ${!isMobile ? 'group-hover:scale-110 group-hover:text-white/80' : 'group-active:scale-105'

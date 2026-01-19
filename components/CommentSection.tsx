@@ -155,7 +155,47 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
         setShowForm(true);
     };
 
-    // 渲染嵌套评论 - 使用与notes一致的苹果风格动画
+    // 渲染嵌套评论 - 使用统一的动画系统
+    const commentVariants = {
+        initial: { opacity: 0, y: 20 },
+        animate: { 
+            opacity: 1, 
+            y: 0,
+            transition: {
+                type: "spring" as const,
+                stiffness: 300,
+                damping: 30,
+                duration: 0.4
+            }
+        }
+    };
+
+    const formVariants = {
+        initial: { opacity: 0, height: 0, scale: 0.95 },
+        animate: { 
+            opacity: 1, 
+            height: 'auto', 
+            scale: 1,
+            transition: {
+                type: "spring" as const,
+                stiffness: 300,
+                damping: 30,
+                duration: 0.5
+            }
+        },
+        exit: { 
+            opacity: 0, 
+            height: 0, 
+            scale: 0.95,
+            transition: {
+                type: "spring" as const,
+                stiffness: 300,
+                damping: 30,
+                duration: 0.4
+            }
+        }
+    };
+
     const renderComment = (comment: Comment, depth = 0) => {
         const replies = comments.filter(c => c.parent_id === comment.id);
 
@@ -166,9 +206,7 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
             <motion.div
                 key={comment.id}
                 className={`group w-full ${isNested ? 'mt-4' : 'mb-8'}`}
-                initial={{ opacity: 0, x: 30 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+                variants={commentVariants}
             >
                 {/* Comment Content Card */}
                 <div className={`
@@ -183,7 +221,12 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
                             whileHover={{
                                 backgroundColor: "rgba(255, 255, 255, 0.15)",
                                 borderColor: "rgba(255, 255, 255, 0.2)",
-                                transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }
+                                transition: {
+                                    type: "spring" as const,
+                                    stiffness: 400,
+                                    damping: 25,
+                                    duration: 0.2
+                                }
                             }}
                         >
                             {comment.author[0].toUpperCase()}
@@ -233,18 +276,21 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
                         animate={{
                             opacity: 1,
                             height: 'auto',
-                            transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }
+                            transition: {
+                                type: "spring" as const,
+                                stiffness: 300,
+                                damping: 30,
+                                duration: 0.4
+                            }
                         }}
                     >
                         {replies.map((reply, index) => (
                             <motion.div
                                 key={reply.id}
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{
-                                    opacity: 1,
-                                    x: 0,
-                                    transition: { delay: index * 0.05, duration: 0.4 }
-                                }}
+                                variants={commentVariants}
+                                initial="initial"
+                                animate="animate"
+                                transition={{ delay: index * 0.05 }}
                             >
                                 {renderComment(reply, depth + 1)}
                             </motion.div>
@@ -325,43 +371,29 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
                 {showForm && (
                     <motion.div
                         className="mb-12 overflow-hidden"
-                        initial={{
-                            opacity: 0,
-                            height: 0,
-                        }}
-                        animate={{
-                            opacity: 1,
-                            height: 'auto',
-                        }}
-                        exit={{
-                            opacity: 0,
-                            height: 0,
-                        }}
-                        transition={{
-                            duration: 0.6,
-                            ease: [0.23, 1, 0.32, 1],
-                        }}
+                        variants={formVariants}
+                        initial="initial"
+                        animate="animate"
+                        exit="exit"
                     >
                         <motion.div
                             className="p-8 border border-white/5 rounded-3xl bg-white/[0.01]"
                             initial={{
-                                y: -20,
-                                scale: 0.95,
+                                y: -10,
                                 opacity: 0
                             }}
                             animate={{
                                 y: 0,
-                                scale: 1,
                                 opacity: 1
                             }}
                             exit={{
-                                y: -20,
-                                scale: 0.95,
+                                y: -10,
                                 opacity: 0
                             }}
                             transition={{
-                                duration: 0.5,
-                                ease: [0.23, 1, 0.32, 1],
+                                type: "spring" as const,
+                                stiffness: 400,
+                                damping: 25,
                                 delay: 0.1
                             }}
                         >
@@ -485,13 +517,10 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
                     {topLevelComments.map((comment, index) => (
                         <motion.div
                             key={comment.id}
-                            initial={{ opacity: 0, x: 30 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{
-                                duration: 0.4,
-                                delay: index * 0.05,
-                                ease: [0.25, 0.1, 0.25, 1]
-                            }}
+                            variants={commentVariants}
+                            initial="initial"
+                            animate="animate"
+                            transition={{ delay: index * 0.05 }}
                         >
                             {renderComment(comment)}
                         </motion.div>

@@ -85,6 +85,46 @@ export default function HomepageComments() {
         setShowForm(true);
     };
 
+    const commentVariants = {
+        initial: { opacity: 0, y: 20 },
+        animate: { 
+            opacity: 1, 
+            y: 0,
+            transition: {
+                type: "spring" as const,
+                stiffness: 300,
+                damping: 30,
+                duration: 0.4
+            }
+        }
+    };
+
+    const formVariants = {
+        initial: { opacity: 0, height: 0, scale: 0.95 },
+        animate: { 
+            opacity: 1, 
+            height: 'auto', 
+            scale: 1,
+            transition: {
+                type: "spring" as const,
+                stiffness: 300,
+                damping: 30,
+                duration: 0.5
+            }
+        },
+        exit: { 
+            opacity: 0, 
+            height: 0, 
+            scale: 0.95,
+            transition: {
+                type: "spring" as const,
+                stiffness: 300,
+                damping: 30,
+                duration: 0.4
+            }
+        }
+    };
+
     const renderComment = (comment: Comment, depth = 0) => {
         const replies = comments.filter(c => c.parent_id === comment.id);
         const isNested = depth > 0;
@@ -93,9 +133,7 @@ export default function HomepageComments() {
             <motion.div
                 key={comment.id}
                 className={`group w-full ${isNested ? 'mt-4' : 'mb-8'}`}
-                initial={{ opacity: 0, x: 30 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+                variants={commentVariants}
             >
                 <div className={`
                     relative 
@@ -108,6 +146,12 @@ export default function HomepageComments() {
                             whileHover={{
                                 backgroundColor: "rgba(255, 255, 255, 0.15)",
                                 borderColor: "rgba(255, 255, 255, 0.2)",
+                                transition: {
+                                    type: "spring" as const,
+                                    stiffness: 400,
+                                    damping: 25,
+                                    duration: 0.2
+                                }
                             }}
                         >
                             {comment.author[0].toUpperCase()}
@@ -148,14 +192,24 @@ export default function HomepageComments() {
                             ${isNested ? 'ml-0 border-l border-white/10 mt-3 pl-3' : 'ml-4 pl-4 border-l border-white/5 mt-4'}
                         `}
                         initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
+                        animate={{ 
+                            opacity: 1, 
+                            height: 'auto',
+                            transition: {
+                                type: "spring" as const,
+                                stiffness: 300,
+                                damping: 30,
+                                duration: 0.4
+                            }
+                        }}
                     >
                         {replies.map((reply, index) => (
                             <motion.div
                                 key={reply.id}
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: index * 0.05, duration: 0.4 }}
+                                variants={commentVariants}
+                                initial="initial"
+                                animate="animate"
+                                transition={{ delay: index * 0.05 }}
                             >
                                 {renderComment(reply, depth + 1)}
                             </motion.div>
@@ -191,10 +245,11 @@ export default function HomepageComments() {
             <AnimatePresence>
                 {showForm && (
                     <motion.div
-                        className="mb-12 p-8 border border-white/5 rounded-3xl bg-white/[0.01]"
-                        initial={{ opacity: 0, height: 0, x: 30 }}
-                        animate={{ opacity: 1, height: 'auto', x: 0 }}
-                        exit={{ opacity: 0, height: 0, x: 30 }}
+                        className="mb-12 p-8 border border-white/5 rounded-3xl bg-white/[0.01] overflow-hidden"
+                        variants={formVariants}
+                        initial="initial"
+                        animate="animate"
+                        exit="exit"
                     >
                         {replyingTo && (
                             <div className="mb-6 text-xs text-white/40 flex items-center justify-between">
@@ -261,10 +316,10 @@ export default function HomepageComments() {
                     {topLevelComments.map((comment, index) => (
                         <motion.div
                             key={comment.id}
-                            initial={{ opacity: 0, x: 30 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.4, delay: index * 0.05 }}
+                            variants={commentVariants}
+                            initial="initial"
+                            animate="animate"
+                            transition={{ delay: index * 0.05 }}
                         >
                             {renderComment(comment)}
                         </motion.div>
