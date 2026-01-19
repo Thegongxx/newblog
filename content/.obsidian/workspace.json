@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "notes/未命名.md",
+                "file": "pages/about.md",
                 "mode": "source",
                 "source": true
               },
               "icon": "lucide-file",
-              "title": "未命名"
+              "title": "about"
             }
           }
         ]
@@ -196,7 +196,8 @@
   "active": "3f4ab5bbf3da8926",
   "lastOpenFiles": [
     "notes/TEST.md",
-    "notes/未命名.md",
+    "notes/样板.md",
+    "Pasted image 20260120015258.png",
     "posts/未命名.md",
     "posts/样板.md",
     "未命名 1.base",
@@ -224,7 +225,6 @@
     "notes/设计的本质.md",
     "posts/极简主义的美学.md",
     "posts/你好.md",
-    "notes/freedom.md",
     "未命名.canvas"
   ]
 }
