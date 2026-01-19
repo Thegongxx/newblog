@@ -204,10 +204,10 @@ const Feed: React.FC<FeedProps> = memo(({ posts, loading, onSelectPost }) => {
   return (
     <>
       <Helmet>
-        <title>Aura Blog · Digital Sanctuary</title>
-        <meta name="description" content="探索技术与情感之间的无形联系。记录思考、技术与生活。" />
-        <meta property="og:title" content="Aura Blog" />
-        <meta property="og:description" content="一个安静的角落，记录技术与情绪的折射。" />
+        <title>Xuan Blog · Digital Sanctuary</title>
+        <meta name="description" content="welcome！！！" />
+        <meta property="og:title" content="Xuan Blog" />
+        <meta property="og:description" content="一个安静的角落。" />
         <meta property="og:type" content="website" />
       </Helmet>
       <motion.div
@@ -232,12 +232,12 @@ const Feed: React.FC<FeedProps> = memo(({ posts, loading, onSelectPost }) => {
                 Digital Sanctuary
               </h4>
               <h1 className="text-8xl font-black tracking-tighter leading-[0.85] text-white">
-                Aura <br />
+                Xuan <br />
                 <span className="text-white/20 italic font-light">Laboratory.</span>
               </h1>
             </div>
             <p className="text-xl text-white/40 font-light max-w-md leading-relaxed border-l-2 border-white/5 pl-8 py-2">
-              探索技术与情感之间的无形联系。
+              welcome！！！
             </p>
             <div className="flex items-center gap-8 pt-4">
               <button
