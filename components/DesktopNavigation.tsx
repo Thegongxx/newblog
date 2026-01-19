@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { ReactNode } from 'react';
-import { usePageTransition } from '../../hooks/usePageTransition';
-import { createPageVariants, getTransitionConfig } from '../../utils/pageTransitions';
+import { usePageTransition } from '../hooks/usePageTransition';
+import { createPageVariants, getTransitionConfig } from '../utils/pageTransitions';
 
 interface DesktopNavigationProps {
     children: ReactNode;

@@ -59,7 +59,11 @@ const ScrollToTop: React.FC<ScrollToTopProps> = ({
       {isVisible && (
         <motion.div
           className={`fixed ${isMobile ? 'bottom-6 left-4' : 'bottom-8 left-8'} ${className}`}
-          style={{ zIndex: Z_INDEX.SCROLL_TO_TOP }}
+          style={{ 
+            zIndex: Z_INDEX.SCROLL_TO_TOP,
+            position: 'fixed', // 确保固定定位
+            pointerEvents: 'auto' // 确保可以点击
+          }}
           initial={{ 
             opacity: 0, 
             scale: 0.8,

@@ -6,10 +6,10 @@ export const Z_INDEX = {
   STICKY: 20,
   FIXED: 30,
   
-  // 导航层级 - 灵动岛风格，不需要太高层级
-  NAVIGATION: 40,
+  // 导航层级 - 移动端需要更高层级确保始终可见
+  NAVIGATION: 9999, // 提高到最高层级，确保移动端始终可见
   BACK_BUTTON: 35, // 返回按钮在导航栏下面
-  SCROLL_TO_TOP: 45, // 滚动到顶部按钮，略高于导航栏
+  SCROLL_TO_TOP: 9998, // 滚动到顶部按钮，略低于导航栏但仍然很高
   
   // 弹窗层级
   MODAL_BACKDROP: 50,

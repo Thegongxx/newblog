@@ -6,7 +6,7 @@ import { SWRConfig } from 'swr';
 import Intro from './components/Intro';
 import Assistant from './components/Assistant';
 import ErrorBoundary from './components/ErrorBoundary';
-import DesktopNavigation from './components/desktop/DesktopNavigation';
+import DesktopNavigation from './components/DesktopNavigation';
 import PageTransitionMask from './components/PageTransitionMask';
 import { MagneticButton } from './components/HoverEffects';
 import ScrollToTop from './components/ScrollToTop';
@@ -181,7 +181,8 @@ const AppInner = () => {
   const navShadow = scrollProgress * (isMobile ? 0.2 : 0.3);
 
   return (
-    <div className="min-h-screen selection:bg-white/20 selection:text-white isolate">
+    <div className="min-h-screen selection:bg-white/20 selection:text-white"
+         style={{ isolation: 'auto' }}>
       <Helmet>
         <title>Xuan - 极简主义个人空间</title>
         <meta name="description" content="A digital sanctuary for minimalist aesthetics and intelligence." />
@@ -233,6 +234,7 @@ const AppInner = () => {
           willChange: 'transform',
           backfaceVisibility: 'hidden',
           pointerEvents: 'none', // Allow clicks to pass through around the nav
+          position: 'fixed', // 确保固定定位
         }}
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -256,6 +258,9 @@ const AppInner = () => {
             borderColor: isMobile ? 'rgba(255, 255, 255, 0.15)' : `rgba(255, 255, 255, ${navBorder})`,
             transition: 'all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
             minWidth: isMobile ? '200px' : 'auto', // 移动端保证最小宽度，更像灵动岛
+            // 确保移动端始终可见
+            position: 'relative',
+            zIndex: 1,
           }}
           whileHover={{
             scale: 1.02,
@@ -383,7 +388,8 @@ const AppInner = () => {
         style={{
           willChange: 'transform',
           backfaceVisibility: 'hidden',
-          transform: 'translateZ(0)',
+          // 移除可能影响固定定位的transform
+          // transform: 'translateZ(0)',
           // 确保主容器有最小高度，避免页面切换时的空白
           minHeight: 'calc(100vh - 4rem)',
           // 添加背景色确保切换时不会透出其他内容
