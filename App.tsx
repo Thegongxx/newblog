@@ -33,6 +33,7 @@ const AppInner = () => {
   const [showIntro, setShowIntro] = useState(!isMobile);
   const [scrollY, setScrollY] = useState(0);
   const [toast, setToast] = useState({ show: false, msg: '', type: 'success' as 'success' | 'info' | 'error' });
+  const [hoveredNavItem, setHoveredNavItem] = useState<string | null>(null);
 
   // 使用页面切换动画 hook
   const { setNavigationMethod } = usePageTransition();
@@ -226,7 +227,7 @@ const AppInner = () => {
 
       {/* Navigation - 响应式导航栏，移动端灵动岛风格 */}
       <motion.nav
-        className={`fixed top-0 left-0 right-0 flex justify-center ${isMobile ? 'pt-4' : 'px-6 pt-6'}`}
+        className={`fixed top-0 left-0 right-0 flex justify-center ${isMobile ? 'pt-2 px-4' : 'px-6 pt-6'}`}
         style={{
           zIndex: Z_INDEX.NAVIGATION,
           willChange: 'transform',
@@ -247,14 +248,14 @@ const AppInner = () => {
           className={`relative magnetic-hover ${isMobile ? 'rounded-full px-4 py-2' : 'rounded-full px-10 py-3 w-auto'}`}
           style={{
             pointerEvents: 'auto', // Re-enable clicks
-            backgroundColor: isMobile ? 'rgba(0, 0, 0, 0.8)' : `rgba(0, 0, 0, ${navOpacity})`,
-            backdropFilter: isMobile ? 'blur(16px) saturate(160%)' : `blur(${navBlur}px) saturate(${150 + scrollProgress * 30}%)`,
-            boxShadow: isMobile ? '0 2px 10px rgba(0,0,0,0.2)' : (scrollProgress > 0.2 ? `0 8px 32px rgba(0, 0, 0, ${navShadow})` : 'none'),
+            backgroundColor: isMobile ? 'rgba(0, 0, 0, 0.85)' : `rgba(0, 0, 0, ${navOpacity})`,
+            backdropFilter: isMobile ? 'blur(20px) saturate(180%)' : `blur(${navBlur}px) saturate(${150 + scrollProgress * 30}%)`,
+            boxShadow: isMobile ? '0 4px 20px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.1)' : (scrollProgress > 0.2 ? `0 8px 32px rgba(0, 0, 0, ${navShadow})` : 'none'),
             borderWidth: '1px',
             borderStyle: 'solid',
-            borderColor: isMobile ? 'rgba(255, 255, 255, 0.1)' : `rgba(255, 255, 255, ${navBorder})`,
+            borderColor: isMobile ? 'rgba(255, 255, 255, 0.15)' : `rgba(255, 255, 255, ${navBorder})`,
             transition: 'all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-            minWidth: isMobile ? '140px' : 'auto', // 移动端保证最小宽度
+            minWidth: isMobile ? '200px' : 'auto', // 移动端保证最小宽度，更像灵动岛
           }}
           whileHover={{
             scale: 1.02,
@@ -276,9 +277,9 @@ const AppInner = () => {
             }
           }}
         >
-          <div className={`relative flex items-center justify-between ${isMobile ? 'gap-4' : 'gap-12'}`}>
+          <div className={`relative flex items-center justify-between ${isMobile ? 'gap-3' : 'gap-12'}`}>
             <MagneticButton
-              onClick={() => navigate('/')}
+              onClick={() => handleNavigate('/')}
               className={`font-bold tracking-tight text-white/90 hover:text-white transition-all duration-300 relative overflow-hidden group min-w-[44px] min-h-[44px] flex items-center justify-center ${isMobile ? 'text-sm' : 'text-lg'}`}
               strength={0.3}
             >
@@ -287,9 +288,32 @@ const AppInner = () => {
               <span className="relative z-10 group-hover:tracking-wider transition-all duration-300">XUAN</span>
             </MagneticButton>
 
-            <div className={`flex items-center ${isMobile ? 'gap-1' : 'gap-6'} text-xs md:text-sm font-medium`}>
+            <div className={`flex items-center ${isMobile ? 'gap-0.5' : 'gap-6'} text-xs md:text-sm font-medium relative`}>
+              {/* 平滑高亮背景 - 桌面端 */}
+              {!isMobile && (
+                <motion.div
+                  className="absolute bg-white/12 rounded-full pointer-events-none"
+                  style={{
+                    backdropFilter: 'blur(8px)',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    boxShadow: '0 2px 12px rgba(255, 255, 255, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
+                  }}
+                  animate={{
+                    opacity: hoveredNavItem || ['/notes', '/archive', '/about'].includes(location.pathname) ? 1 : 0,
+                    scale: hoveredNavItem ? 1.02 : 1,
+                  }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 400,
+                    damping: 30,
+                    mass: 0.8
+                  }}
+                  layoutId="nav-highlight"
+                />
+              )}
+              
               {[
-                { path: '/notes', label: isMobile ? 'Notes' : 'Notes', icon: '📝' }, // Simplified for mobile if needed
+                { path: '/notes', label: isMobile ? 'Notes' : 'Notes', icon: '📝' },
                 { path: '/archive', label: isMobile ? 'Archive' : 'Archive', icon: '📂' },
                 { path: '/about', label: isMobile ? 'About' : 'About', icon: '👋' }
               ].map((item) => (
@@ -297,26 +321,29 @@ const AppInner = () => {
                   key={item.path}
                   onClick={() => handleNavigate(item.path)}
                   aria-label={`跳转到 ${item.label} 页面`}
-                  className={`rounded-full transition-all duration-200 liquid-morph flex items-center justify-center 
+                  className={`rounded-full flex items-center justify-center relative z-10 transition-colors duration-150
                     ${isMobile
-                      ? 'min-w-[32px] min-h-[32px] px-2 text-[10px]'
+                      ? 'min-w-[28px] min-h-[28px] px-1.5 text-[9px]'
                       : 'min-w-[44px] min-h-[44px] px-4 py-2'
                     } 
                     ${location.pathname === item.path
-                      ? 'text-white bg-white/15'
-                      : 'text-white/60 hover:text-white hover:bg-white/10'
+                      ? 'text-white'
+                      : hoveredNavItem === item.path
+                        ? 'text-white'
+                        : 'text-white/60'
                     }`}
-                  whileHover={{
+                  onMouseEnter={() => !isMobile && setHoveredNavItem(item.path)}
+                  onMouseLeave={() => !isMobile && setHoveredNavItem(null)}
+                  whileHover={!isMobile ? {
                     scale: 1.05,
                     y: -1,
-                    backgroundColor: 'rgba(255, 255, 255, 0.15)',
                     transition: {
                       type: "spring",
-                      stiffness: 400,
-                      damping: 25,
-                      duration: 0.2
+                      stiffness: 500,
+                      damping: 30,
+                      duration: 0.15
                     }
-                  }}
+                  } : {}}
                   whileTap={{
                     scale: 0.95,
                     transition: {
@@ -326,8 +353,21 @@ const AppInner = () => {
                       duration: 0.1
                     }
                   }}
+                  layout
                 >
-                  {item.label}
+                  <motion.span
+                    animate={{
+                      scale: hoveredNavItem === item.path || location.pathname === item.path ? 1.05 : 1,
+                    }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 400,
+                      damping: 25,
+                      duration: 0.2
+                    }}
+                  >
+                    {item.label}
+                  </motion.span>
                 </motion.button>
               ))}
             </div>
@@ -405,8 +445,10 @@ const AppInner = () => {
       {/* AI助手 - 仅在桌面端显示 */}
       {!isMobile && <Assistant />}
 
-      {/* 滚动到顶部按钮 - 全平台显示 */}
-      <ScrollToTop threshold={isMobile ? 200 : 300} />
+      {/* 滚动到顶部按钮 - 只在notes和文章页面显示 */}
+      {(location.pathname.includes('/note') || location.pathname.includes('/post')) && (
+        <ScrollToTop threshold={isMobile ? 200 : 300} />
+      )}
 
       {/* Footer - 响应式优化 */}
       <footer className="py-12 md:py-32 px-4 md:px-6 border-t border-white/10">
