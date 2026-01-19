@@ -95,9 +95,9 @@ const Feed: React.FC<FeedProps> = memo(({ posts, loading, onSelectPost }) => {
               className="space-y-4"
             >
               <h1 className="text-4xl font-bold tracking-tight leading-tight text-white">
-                在这里，
+                welcome,
                 <br />
-                <span className="text-white/30">记录轩轩的生活折射。</span>
+                <span className="text-white/30">Ghx's blog</span>
               </h1>
             </motion.div>
           </section>
