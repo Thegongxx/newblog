@@ -39,16 +39,11 @@ export const useMobileOptimization = () => {
       }
     };
 
-    // 触摸反馈
+    // 触摸反馈 - 移除通用震动，只保留视觉反馈
     const addTouchFeedback = (e: TouchEvent) => {
       const target = e.target as HTMLElement;
       if (target.closest('button, [role="button"], a, .cursor-pointer')) {
-        // 添加触摸反馈
-        if (navigator.vibrate) {
-          navigator.vibrate(10);
-        }
-        
-        // 视觉反馈
+        // 只保留视觉反馈，移除震动
         target.style.transform = 'scale(0.98)';
         target.style.transition = 'transform 0.1s ease';
         

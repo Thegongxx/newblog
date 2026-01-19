@@ -10,8 +10,10 @@ import DesktopNavigation from './components/DesktopNavigation';
 import PageTransitionMask from './components/PageTransitionMask';
 import { MagneticButton } from './components/HoverEffects';
 import ScrollToTop from './components/ScrollToTop';
+import GlobalRipple from './components/GlobalRipple';
 import { CONTACT_INFO } from './constants';
 import { Z_INDEX } from './constants/zIndex';
+import { haptics } from './utils/haptics';
 import { usePostsCache, useNotesCache } from './services/cacheService';
 import { useIsMobile } from './hooks/useResponsive';
 import { usePageTransition } from './hooks/usePageTransition';
@@ -88,6 +90,10 @@ const AppInner = () => {
       if (navigator.clipboard && window.isSecureContext) {
         await navigator.clipboard.writeText(text);
         showToast(`${label} 已复制到剪贴板`);
+        // 移动端震动反馈
+        if (isMobile) {
+          haptics.success();
+        }
         return;
       }
 
@@ -124,6 +130,10 @@ const AppInner = () => {
 
       if (success) {
         showToast(`${label} 已复制到剪贴板`);
+        // 移动端震动反馈
+        if (isMobile) {
+          haptics.success();
+        }
       } else {
         // 移动端最终降级：显示文本让用户手动复制
         if (isMobile) {
@@ -187,6 +197,9 @@ const AppInner = () => {
         <title>Xuan</title>
         <meta name="description" content="welcome" />
       </Helmet>
+
+      {/* 全局涟漪效果 */}
+      <GlobalRipple />
 
       {/* 页面切换遮罩 - 确保切换时不显示其他内容 */}
       <PageTransitionMask />

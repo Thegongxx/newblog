@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { engagementApi, supabase } from '../services/supabaseService';
 import { getBrowserFingerprint, checkIfLikedLocal, setLikedLocal } from '../utils/engagement';
+import { haptics } from '../utils/haptics';
 import { useIsMobile } from '../hooks/useResponsive';
 import { Z_INDEX } from '../constants/zIndex';
 
@@ -131,9 +132,9 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
             }, isMobile ? 400 : 600); // 移动端动画更快
         }
 
-        // 移动端触觉反馈
-        if (isMobile && window.navigator && window.navigator.vibrate) {
-            window.navigator.vibrate([10, 50, 10]); // 更丰富的震动模式
+        // 移动端触觉反馈 - 只在点赞成功时震动
+        if (isMobile) {
+            haptics.success();
         }
 
         // 后端同步
