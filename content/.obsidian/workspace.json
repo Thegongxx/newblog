@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "notes/未命名.md",
+                "file": "pages/about.md",
                 "mode": "source",
-                "source": true
+                "source": false
               },
               "icon": "lucide-file",
-              "title": "未命名"
+              "title": "about"
             }
           }
         ]
@@ -195,8 +195,8 @@
   },
   "active": "3f4ab5bbf3da8926",
   "lastOpenFiles": [
+    "notes/TEST.md",
     "notes/reading-notes.md",
-    "notes/未命名.md",
     "转移/1.md",
     "posts/web-development-trends-2024.md",
     "posts/hello-world.md",
