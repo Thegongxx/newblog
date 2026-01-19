@@ -11,10 +11,14 @@
             "id": "3f4ab5bbf3da8926",
             "type": "leaf",
             "state": {
-              "type": "graph",
-              "state": {},
-              "icon": "lucide-git-fork",
-              "title": "关系图谱"
+              "type": "markdown",
+              "state": {
+                "file": "notes/未命名.md",
+                "mode": "source",
+                "source": true
+              },
+              "icon": "lucide-file",
+              "title": "未命名"
             }
           }
         ]
@@ -191,14 +195,15 @@
   },
   "active": "3f4ab5bbf3da8926",
   "lastOpenFiles": [
-    "posts/web-development-trends-2024.md",
+    "notes/reading-notes.md",
+    "notes/未命名.md",
     "转移/1.md",
+    "posts/web-development-trends-2024.md",
     "posts/hello-world.md",
     "posts/minimalist-design-philosophy.md",
     "未命名.base",
     "未命名 1.base",
     "未命名 2.base",
-    "notes/reading-notes.md",
     "pages/about.md",
     "转移/2.md",
     "未命名.md",
