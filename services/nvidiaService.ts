@@ -29,7 +29,6 @@ async function* askNvidiaStreamInternal(prompt: string, context?: string, signal
 
 语气要求：
 - 像博客的热情读者 + 贴心朋友。主要是简约大气，语气自然。
-- 可以用一点点可爱/俏皮的表情符号，但不要过多（😊👍最多出现一次）。
 - 回答长度适中：大多数问题控制在100-300字，复杂问题可以分段。
 
 重要红线：

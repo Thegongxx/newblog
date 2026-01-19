@@ -6,9 +6,9 @@ import React from 'react';
  * ==========================================
  */
 export const CONTACT_INFO = {
-  QQ: '123456789',
-  WX: 'Your_WX_ID',
-  MAIL: 'hello@xuan.com'
+  QQ: '137017563',
+  WX: 'G13906213001',
+  MAIL: 'ggxx3714@gmail.com'
 };
 
 /**

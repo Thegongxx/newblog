@@ -178,7 +178,7 @@ const ScrollToTop: React.FC<ScrollToTopProps> = ({
                 height={isMobile ? "18" : "20"}
                 viewBox="0 0 24 24"
                 fill="none"
-                className="text-white/90 group-hover:text-white [data-theme='light'] &:text-gray-700/90 [data-theme='light'] group-hover &:text-gray-800 transition-colors duration-300"
+                className="text-black/90 transition-colors duration-300"
                 whileHover={{ y: -1 }}
                 whileTap={{ y: 0 }}
                 animate={{
@@ -223,44 +223,6 @@ const ScrollToTop: React.FC<ScrollToTopProps> = ({
               />
             </div>
           </div>
-
-          {/* 悬停提示 */}
-          <AnimatePresence>
-            {isHovered && (
-              <motion.div
-                className={`
-                  absolute -top-14 left-1/2 transform -translate-x-1/2
-                  px-3 py-2 rounded-lg text-xs font-medium
-                  backdrop-blur-xl saturate-150
-                  border border-white/10
-                  shadow-lg pointer-events-none
-                  whitespace-nowrap
-                  
-                  /* 深色模式 */
-                  bg-gray-900/80 text-white/90
-                  
-                  /* 浅色模式 */
-                  [data-theme='light'] & {
-                    bg-white/90 text-gray-800/90
-                    border-gray-300/20
-                  }
-                `}
-                initial={{ opacity: 0, y: 5, scale: 0.9 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 5, scale: 0.9 }}
-                transition={{
-                  type: "spring",
-                  stiffness: 400,
-                  damping: 25,
-                  duration: 0.2
-                }}
-              >
-                回到顶部 ({Math.round(scrollProgress * 100)}%)
-                {/* 小箭头 */}
-                <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-current opacity-20" />
-              </motion.div>
-            )}
-          </AnimatePresence>
         </motion.div>
       )}
     </AnimatePresence>

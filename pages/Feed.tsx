@@ -204,7 +204,7 @@ const Feed: React.FC<FeedProps> = memo(({ posts, loading, onSelectPost }) => {
   return (
     <>
       <Helmet>
-        <title>Xuan Blog · Digital Sanctuary</title>
+        <title>Xuan Blog</title>
         <meta name="description" content="welcome！！！" />
         <meta property="og:title" content="Xuan Blog" />
         <meta property="og:description" content="一个安静的角落。" />
@@ -233,7 +233,7 @@ const Feed: React.FC<FeedProps> = memo(({ posts, loading, onSelectPost }) => {
               </h4>
               <h1 className="text-8xl font-black tracking-tighter leading-[0.85] text-white">
                 Xuan <br />
-                <span className="text-white/20 italic font-light">MyPersonBlog</span>
+                <span className="text-white/20 italic font-light">PersonBlog</span>
               </h1>
             </div>
             <p className="text-xl text-white/40 font-light max-w-md leading-relaxed border-l-2 border-white/5 pl-8 py-2">

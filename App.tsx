@@ -34,7 +34,6 @@ const AppInner = () => {
   const [scrollY, setScrollY] = useState(0);
   const [toast, setToast] = useState({ show: false, msg: '', type: 'success' as 'success' | 'info' | 'error' });
   const [hoveredNavItem, setHoveredNavItem] = useState<string | null>(null);
-  const [navInteractionCount, setNavInteractionCount] = useState(0);
 
   // 使用页面切换动画 hook
   const { setNavigationMethod } = usePageTransition();
@@ -80,7 +79,7 @@ const AppInner = () => {
 
   const showToast = (msg: string, type: 'success' | 'info' | 'error' = 'success') => {
     setToast({ show: true, msg, type });
-    setTimeout(() => setToast(prev => ({ ...prev, show: false })), 2500);
+    setTimeout(() => setToast(prev => ({ ...prev, show: false })), isMobile ? 3000 : 2500);
   };
 
   const handleCopy = async (text: string, label: string) => {
@@ -185,41 +184,62 @@ const AppInner = () => {
     <div className="min-h-screen selection:bg-white/20 selection:text-white"
          style={{ isolation: 'auto' }}>
       <Helmet>
-        <title>Xuan - 极简主义个人空间</title>
-        <meta name="description" content="A digital sanctuary for minimalist aesthetics and intelligence." />
+        <title>Xuan</title>
+        <meta name="description" content="welcome" />
       </Helmet>
 
       {/* 页面切换遮罩 - 确保切换时不显示其他内容 */}
       <PageTransitionMask />
 
-      {/* Toast - 苹果风格通知 */}
+      {/* Toast - 苹果风格通知，移动端优化为弹窗 */}
       <AnimatePresence>
         {toast.show && (
           <motion.div
-            initial={{ opacity: 0, y: -30, scale: 0.9 }}
+            initial={{ opacity: 0, y: isMobile ? 50 : -30, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -30, scale: 0.9 }}
+            exit={{ opacity: 0, y: isMobile ? 50 : -30, scale: 0.9 }}
             transition={{
               type: "spring",
               stiffness: 400,
               damping: 25,
               duration: 0.35
             }}
-            className="fixed inset-x-4 top-4 md:inset-x-auto md:top-8 md:right-8 pointer-events-none"
+            className={`fixed ${
+              isMobile 
+                ? 'inset-x-4 bottom-20 top-auto pointer-events-auto' // 移动端可点击
+                : 'inset-x-4 top-4 md:inset-x-auto md:top-8 md:right-8 pointer-events-none' // 桌面端不可点击
+            }`}
             style={{ zIndex: Z_INDEX.TOAST }}
+            onClick={isMobile ? () => setToast(prev => ({ ...prev, show: false })) : undefined}
           >
-            <div className={`w-full md:max-w-sm px-4 py-3 rounded-xl text-sm font-medium border shadow-2xl backdrop-blur-xl ${toast.type === 'error'
-              ? 'bg-red-500/90 text-white border-red-400/50'
-              : toast.type === 'info'
-                ? 'bg-blue-500/90 text-white border-blue-400/50'
-                : 'bg-green-500/90 text-white border-green-400/50'
-              }`}>
+            <div className={`w-full ${isMobile ? 'max-w-none' : 'md:max-w-sm'} ${
+              isMobile 
+                ? 'px-6 py-4 rounded-2xl cursor-pointer' // 移动端添加点击样式
+                : 'px-4 py-3 rounded-xl'
+            } text-sm font-medium border shadow-2xl backdrop-blur-xl transition-transform duration-200 ${
+              isMobile ? 'active:scale-95' : ''
+            } ${
+              toast.type === 'error'
+                ? 'bg-red-500/90 text-white border-red-400/50'
+                : toast.type === 'info'
+                  ? 'bg-blue-500/90 text-white border-blue-400/50'
+                  : 'bg-green-500/90 text-white border-green-400/50'
+            }`}>
               <div className="flex items-start gap-3">
-                <div className={`w-2 h-2 rounded-full mt-1 flex-shrink-0 ${toast.type === 'error' ? 'bg-red-300' :
+                <div className={`${isMobile ? 'w-3 h-3 mt-0.5' : 'w-2 h-2 mt-1'} rounded-full flex-shrink-0 ${
+                  toast.type === 'error' ? 'bg-red-300' :
                   toast.type === 'info' ? 'bg-blue-300' : 'bg-green-300'
-                  }`} />
+                }`} />
                 <div className="flex-1 min-w-0">
-                  <p className="break-words">{toast.msg}</p>
+                  <p className={`break-words ${isMobile ? 'text-base' : 'text-sm'}`}>
+                    {toast.msg}
+                  </p>
+                  {/* 移动端添加关闭提示 */}
+                  {isMobile && (
+                    <p className="text-xs opacity-70 mt-1">
+                      轻触关闭
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -262,14 +282,6 @@ const AppInner = () => {
             position: 'relative',
             zIndex: 1,
           }}
-          animate={{
-            scale: navInteractionCount > 10 ? [1, 1.02, 1] : 1,
-            rotateY: navInteractionCount > 20 ? [0, 5, 0] : 0,
-          }}
-          transition={{
-            duration: navInteractionCount > 10 ? 0.6 : 0.2,
-            ease: "easeInOut"
-          }}
         >
           <div className={`relative flex items-center justify-between ${isMobile ? 'gap-3' : 'gap-12'}`}>
             <MagneticButton
@@ -295,43 +307,25 @@ const AppInner = () => {
                   animate={{
                     opacity: hoveredNavItem || ['/notes', '/archive', '/about'].includes(location.pathname) ? 1 : 0,
                     scale: hoveredNavItem ? 1.02 : 1,
-                    // 彩蛋：多次交互后的彩虹效果
-                    background: navInteractionCount > 15 ? [
-                      'rgba(255, 255, 255, 0.12)',
-                      'rgba(59, 130, 246, 0.12)',
-                      'rgba(16, 185, 129, 0.12)',
-                      'rgba(245, 158, 11, 0.12)',
-                      'rgba(239, 68, 68, 0.12)',
-                      'rgba(139, 92, 246, 0.12)',
-                      'rgba(255, 255, 255, 0.12)'
-                    ] : 'rgba(255, 255, 255, 0.12)'
                   }}
                   transition={{
                     type: "spring",
                     stiffness: 500,
                     damping: 35,
-                    mass: 0.8,
-                    background: {
-                      duration: navInteractionCount > 15 ? 2 : 0.3,
-                      repeat: navInteractionCount > 15 ? Infinity : 0,
-                      ease: "linear"
-                    }
+                    mass: 0.8
                   }}
                   layoutId="nav-highlight"
                 />
               )}
               
               {[
-                { path: '/notes', label: isMobile ? 'Notes' : 'Notes', icon: '📝', emoji: '✨' },
-                { path: '/archive', label: isMobile ? 'Archive' : 'Archive', icon: '📂', emoji: '🎯' },
-                { path: '/about', label: isMobile ? 'About' : 'About', icon: '👋', emoji: '🚀' }
+                { path: '/notes', label: isMobile ? 'Notes' : 'Notes', icon: '📝' },
+                { path: '/archive', label: isMobile ? 'Archive' : 'Archive', icon: '📂' },
+                { path: '/about', label: isMobile ? 'About' : 'About', icon: '👋' }
               ].map((item) => (
                 <motion.button
                   key={item.path}
-                  onClick={() => {
-                    handleNavigate(item.path);
-                    setNavInteractionCount(prev => prev + 1);
-                  }}
+                  onClick={() => handleNavigate(item.path)}
                   aria-label={`跳转到 ${item.label} 页面`}
                   className={`rounded-full flex items-center justify-center relative z-10 transition-colors duration-200
                     ${isMobile
@@ -344,75 +338,40 @@ const AppInner = () => {
                         ? 'text-white'
                         : 'text-white/60'
                     }`}
-                  onMouseEnter={() => {
-                    if (!isMobile) {
-                      setHoveredNavItem(item.path);
-                      setNavInteractionCount(prev => prev + 1);
-                    }
-                  }}
+                  onMouseEnter={() => !isMobile && setHoveredNavItem(item.path)}
                   onMouseLeave={() => !isMobile && setHoveredNavItem(null)}
                   whileHover={!isMobile ? {
-                    scale: 1.05,
-                    y: -1,
+                    scale: 1.02,
                     transition: {
                       type: "spring",
-                      stiffness: 600,
-                      damping: 25,
-                      duration: 0.15
+                      stiffness: 400,
+                      damping: 30,
+                      duration: 0.2
                     }
                   } : {}}
                   whileTap={{
-                    scale: 0.95,
+                    scale: 0.98,
                     transition: {
                       type: "spring",
-                      stiffness: 600,
+                      stiffness: 400,
                       damping: 30,
                       duration: 0.1
                     }
                   }}
-                  layout
                 >
                   <motion.span
                     animate={{
-                      scale: hoveredNavItem === item.path || location.pathname === item.path ? 1.05 : 1,
+                      scale: hoveredNavItem === item.path || location.pathname === item.path ? 1.02 : 1,
                     }}
                     transition={{
                       type: "spring",
-                      stiffness: 500,
+                      stiffness: 400,
                       damping: 30,
                       duration: 0.2
                     }}
                   >
-                    {navInteractionCount > 25 && hoveredNavItem === item.path ? item.emoji : item.label}
+                    {item.label}
                   </motion.span>
-                  
-                  {/* 彩蛋：粒子效果 */}
-                  {navInteractionCount > 30 && hoveredNavItem === item.path && (
-                    <div className="absolute inset-0 pointer-events-none">
-                      {[...Array(3)].map((_, i) => (
-                        <motion.div
-                          key={i}
-                          className="absolute w-1 h-1 bg-white/60 rounded-full"
-                          style={{
-                            left: '50%',
-                            top: '50%',
-                          }}
-                          animate={{
-                            x: [0, (Math.random() - 0.5) * 40],
-                            y: [0, (Math.random() - 0.5) * 40],
-                            opacity: [1, 0],
-                            scale: [0, 1, 0]
-                          }}
-                          transition={{
-                            duration: 1,
-                            delay: i * 0.1,
-                            repeat: Infinity,
-                            repeatDelay: 0.5
-                          }}
-                        />
-                      ))}
-                    </div>
-                  )}
                 </motion.button>
               ))}
             </div>
@@ -526,7 +485,7 @@ const AppInner = () => {
           </div>
 
           <p className="mt-8 md:mt-24 text-[10px] md:text-xs text-white/20 tracking-wider uppercase">
-            Designed for clarity © 2024
+            Thank you for your coming
           </p>
         </div>
       </footer>
