@@ -160,17 +160,6 @@ const ScrollToTop: React.FC<ScrollToTopProps> = ({
                   filter: `drop-shadow(0 0 ${isHovered ? '6px' : '3px'} ${getProgressColor()}40)`
                 }}
               />
-              
-              {/* 进度点 */}
-              {scrollProgress > 0.1 && (
-                <circle
-                  cx={22 + 18 * Math.cos((scrollProgress * 2 * Math.PI) - Math.PI / 2)}
-                  cy={22 + 18 * Math.sin((scrollProgress * 2 * Math.PI) - Math.PI / 2)}
-                  r="2"
-                  fill={getProgressColor()}
-                  className="animate-pulse"
-                />
-              )}
             </svg>
 
             {/* 箭头图标 */}
