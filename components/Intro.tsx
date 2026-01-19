@@ -121,7 +121,7 @@ const Intro: React.FC<IntroProps> = ({ onComplete }) => {
             >
               <div className="h-[1px] w-8 bg-white/40" />
               <p className="text-[11px] uppercase tracking-[0.6em] font-medium text-white">
-                Focus on Clarity
+                Welcome to My Space
               </p>
               <div className="h-[1px] w-8 bg-white/40" />
             </motion.div>

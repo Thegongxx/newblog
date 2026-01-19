@@ -324,114 +324,135 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
             <AnimatePresence>
                 {showForm && (
                     <motion.div
-                        className="mb-12 p-8 border border-white/5 rounded-3xl bg-white/[0.01] overflow-hidden"
+                        className="mb-12 overflow-hidden"
                         initial={{
                             opacity: 0,
                             height: 0,
-                            x: 30
                         }}
                         animate={{
                             opacity: 1,
                             height: 'auto',
-                            x: 0
                         }}
                         exit={{
                             opacity: 0,
                             height: 0,
-                            x: 30
                         }}
                         transition={{
-                            duration: 0.4,
-                            ease: [0.25, 0.1, 0.25, 1]
+                            duration: 0.6,
+                            ease: [0.23, 1, 0.32, 1],
                         }}
                     >
-                        {replyingTo && (
-                            <motion.div
-                                className="mb-6 text-xs text-white/40 flex items-center justify-between"
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0.1, duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
-                            >
-                                <span>Replying to <span className="text-white font-bold">@{replyingTo}</span></span>
-                                <button
-                                    onClick={() => {
-                                        setReplyingTo(null);
-                                        setFormData({ ...formData, parent_id: '' });
-                                    }}
-                                    className="text-red-400/60 hover:text-red-400 transition-colors duration-300"
+                        <motion.div
+                            className="p-8 border border-white/5 rounded-3xl bg-white/[0.01]"
+                            initial={{
+                                y: -20,
+                                scale: 0.95,
+                                opacity: 0
+                            }}
+                            animate={{
+                                y: 0,
+                                scale: 1,
+                                opacity: 1
+                            }}
+                            exit={{
+                                y: -20,
+                                scale: 0.95,
+                                opacity: 0
+                            }}
+                            transition={{
+                                duration: 0.5,
+                                ease: [0.23, 1, 0.32, 1],
+                                delay: 0.1
+                            }}
+                        >
+                            {replyingTo && (
+                                <motion.div
+                                    className="mb-6 text-xs text-white/40 flex items-center justify-between"
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.3, duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
                                 >
-                                    Cancel
-                                </button>
-                            </motion.div>
-                        )}
+                                    <span>Replying to <span className="text-white font-bold">@{replyingTo}</span></span>
+                                    <button
+                                        onClick={() => {
+                                            setReplyingTo(null);
+                                            setFormData({ ...formData, parent_id: '' });
+                                        }}
+                                        className="text-red-400/60 hover:text-red-400 transition-colors duration-300"
+                                    >
+                                        Cancel
+                                    </button>
+                                </motion.div>
+                            )}
 
-                        <form onSubmit={handleSubmit} className="space-y-6">
-                            <motion.div
-                                className="grid grid-cols-2 gap-4"
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0.15, duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
-                            >
-                                <input
-                                    type="text"
-                                    placeholder="Name *"
-                                    value={formData.author}
-                                    onChange={(e) => setFormData({ ...formData, author: e.target.value })}
-                                    className="px-0 py-2 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/40 transition-all duration-300"
-                                    required
-                                />
-                                <input
-                                    type="email"
-                                    placeholder="Email (Private)"
-                                    value={formData.email}
-                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                    className="px-0 py-2 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/40 transition-all duration-300"
-                                />
-                            </motion.div>
-                            <motion.textarea
-                                placeholder="Share your thoughts..."
-                                value={formData.content}
-                                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                                rows={3}
-                                className="w-full px-0 py-2 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/40 transition-all duration-300 resize-none"
-                                required
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0.2, duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
-                            />
-                            <motion.div
-                                className="flex justify-end"
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0.25, duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
-                            >
-                                <button
-                                    type="submit"
-                                    disabled={loading}
-                                    className="relative px-8 py-2 bg-white text-black text-[10px] font-black uppercase tracking-widest rounded-full hover:scale-105 active:scale-95 transition-all duration-300 disabled:opacity-70 overflow-hidden"
+                            <form onSubmit={handleSubmit} className="space-y-6">
+                                <motion.div
+                                    className="grid grid-cols-2 gap-4"
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.35, duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
                                 >
-                                    <span className={loading ? 'opacity-0' : 'opacity-100'}>Post Comment</span>
-                                    {loading && (
-                                        <motion.div
-                                            className="absolute inset-0 flex items-center justify-center"
-                                            initial={{ opacity: 0 }}
-                                            animate={{ opacity: 1 }}
-                                        >
-                                            <div className="flex gap-1">
-                                                {[0, 1, 2].map((i) => (
-                                                    <motion.div
-                                                        key={i}
-                                                        className="w-1.5 h-1.5 bg-black rounded-full"
-                                                        animate={{ opacity: [0.3, 1, 0.3], scale: [1, 1.2, 1] }}
-                                                        transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.1 }}
-                                                    />
-                                                ))}
-                                            </div>
-                                        </motion.div>
-                                    )}
-                                </button>
-                            </motion.div>
-                        </form>
+                                    <input
+                                        type="text"
+                                        placeholder="Name *"
+                                        value={formData.author}
+                                        onChange={(e) => setFormData({ ...formData, author: e.target.value })}
+                                        className="px-0 py-2 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/40 transition-all duration-300"
+                                        required
+                                    />
+                                    <input
+                                        type="email"
+                                        placeholder="Email (Private)"
+                                        value={formData.email}
+                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                        className="px-0 py-2 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/40 transition-all duration-300"
+                                    />
+                                </motion.div>
+                                <motion.textarea
+                                    placeholder="Share your thoughts..."
+                                    value={formData.content}
+                                    onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                                    rows={3}
+                                    className="w-full px-0 py-2 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/40 transition-all duration-300 resize-none"
+                                    required
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.4, duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                                />
+                                <motion.div
+                                    className="flex justify-end"
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.45, duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                                >
+                                    <button
+                                        type="submit"
+                                        disabled={loading}
+                                        className="relative px-8 py-2 bg-white text-black text-[10px] font-black uppercase tracking-widest rounded-full hover:scale-105 active:scale-95 transition-all duration-300 disabled:opacity-70 overflow-hidden"
+                                    >
+                                        <span className={loading ? 'opacity-0' : 'opacity-100'}>Post Comment</span>
+                                        {loading && (
+                                            <motion.div
+                                                className="absolute inset-0 flex items-center justify-center"
+                                                initial={{ opacity: 0 }}
+                                                animate={{ opacity: 1 }}
+                                            >
+                                                <div className="flex gap-1">
+                                                    {[0, 1, 2].map((i) => (
+                                                        <motion.div
+                                                            key={i}
+                                                            className="w-1.5 h-1.5 bg-black rounded-full"
+                                                            animate={{ opacity: [0.3, 1, 0.3], scale: [1, 1.2, 1] }}
+                                                            transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.1 }}
+                                                        />
+                                                    ))}
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </button>
+                                </motion.div>
+                            </form>
+                        </motion.div>
                     </motion.div>
                 )}
             </AnimatePresence>
