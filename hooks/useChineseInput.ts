@@ -1,49 +1,25 @@
 import { useState, useCallback } from 'react';
 
 /**
- * 专门处理中文输入法的Hook
- * 解决中文输入时的各种兼容性问题
+ * 简化的中文输入Hook
+ * 移除复杂逻辑，专注于基本功能
  */
 export function useChineseInput(initialValue: string = '') {
     const [value, setValue] = useState(initialValue);
-    const [isComposing, setIsComposing] = useState(false);
-
-    const handleCompositionStart = useCallback(() => {
-        setIsComposing(true);
-    }, []);
-
-    const handleCompositionEnd = useCallback((e: React.CompositionEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        setIsComposing(false);
-        // 确保在输入法结束时更新值
-        setValue(e.currentTarget.value);
-    }, []);
 
     const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const newValue = e.target.value;
-        // 始终更新值，让用户看到输入过程
-        setValue(newValue);
-    }, []);
-
-    const handleInput = useCallback((e: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        // 使用input事件作为备用，确保中文输入被捕获
-        const target = e.currentTarget;
-        setValue(target.value);
+        setValue(e.target.value);
     }, []);
 
     const reset = useCallback(() => {
         setValue('');
-        setIsComposing(false);
     }, []);
 
     return {
         value,
         setValue,
-        isComposing,
         handlers: {
             onChange: handleChange,
-            onInput: handleInput,
-            onCompositionStart: handleCompositionStart,
-            onCompositionEnd: handleCompositionEnd,
         },
         reset
     };

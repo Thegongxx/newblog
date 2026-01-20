@@ -5,7 +5,6 @@ import LikeButton from './LikeButton';
 import type { Comment } from '../types';
 import { useIsMobile } from '../hooks/useResponsive';
 import { useToast } from '../hooks/useToast';
-import { useChineseInput } from '../hooks/useChineseInput';
 
 export default function HomepageComments() {
     const [comments, setComments] = useState<Comment[]>([]);
@@ -14,10 +13,10 @@ export default function HomepageComments() {
     const [replyingTo, setReplyingTo] = useState<string | null>(null);
     const [parentId, setParentId] = useState('');
     
-    // 使用中文输入Hook
-    const authorInput = useChineseInput();
-    const emailInput = useChineseInput();
-    const contentInput = useChineseInput();
+    // 使用基本的状态管理
+    const [authorValue, setAuthorValue] = useState('');
+    const [emailValue, setEmailValue] = useState('');
+    const [contentValue, setContentValue] = useState('');
     
     const isMobile = useIsMobile();
     const { showToast } = useToast();
@@ -50,9 +49,9 @@ export default function HomepageComments() {
         e.preventDefault();
         
         // 清理和验证输入
-        const cleanAuthor = authorInput.value.trim();
-        const cleanContent = contentInput.value.trim();
-        const cleanEmail = emailInput.value.trim();
+        const cleanAuthor = authorValue.trim();
+        const cleanContent = contentValue.trim();
+        const cleanEmail = emailValue.trim();
         
         if (!cleanAuthor || !cleanContent) {
             alert('请填写姓名和内容哦 🌿');
@@ -91,9 +90,9 @@ export default function HomepageComments() {
             }
 
             // 重置表单
-            authorInput.reset();
-            emailInput.reset();
-            contentInput.reset();
+            setAuthorValue('');
+            setEmailValue('');
+            setContentValue('');
             setParentId('');
             setReplyingTo(null);
             setShowForm(false);
@@ -355,24 +354,24 @@ export default function HomepageComments() {
                                         <input
                                             type="text"
                                             placeholder="姓名 *"
-                                            value={authorInput.value}
-                                            {...authorInput.handlers}
+                                            value={authorValue}
+                                            onChange={(e) => setAuthorValue(e.target.value)}
                                             className="w-full px-0 py-3 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/40 transition-all duration-300"
                                             required
                                             maxLength={50}
                                             autoComplete="off"
                                         />
-                                        {authorInput.value.length > 40 && (
+                                        {authorValue.length > 40 && (
                                             <span className="absolute -bottom-5 left-0 text-xs text-yellow-400/60">
-                                                还能输入 {50 - authorInput.value.length} 个字符
+                                                还能输入 {50 - authorValue.length} 个字符
                                             </span>
                                         )}
                                     </div>
                                     <input
                                         type="email"
                                         placeholder="邮箱 (可选)"
-                                        value={emailInput.value}
-                                        {...emailInput.handlers}
+                                        value={emailValue}
+                                        onChange={(e) => setEmailValue(e.target.value)}
                                         className="w-full px-0 py-3 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/40 transition-all duration-300"
                                         autoComplete="off"
                                     />
@@ -380,8 +379,8 @@ export default function HomepageComments() {
                                 <div className="relative">
                                     <textarea
                                         placeholder="写下你的想法..."
-                                        value={contentInput.value}
-                                        {...contentInput.handlers}
+                                        value={contentValue}
+                                        onChange={(e) => setContentValue(e.target.value)}
                                         rows={4}
                                         className="w-full px-0 py-3 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/40 transition-all duration-300 resize-none"
                                         required
@@ -390,13 +389,13 @@ export default function HomepageComments() {
                                     />
                                     <div className="flex justify-between items-center mt-2">
                                         <span className={`text-xs transition-colors duration-300 ${
-                                            contentInput.value.length > 900 ? 'text-red-400/60' :
-                                            contentInput.value.length > 800 ? 'text-yellow-400/60' :
+                                            contentValue.length > 900 ? 'text-red-400/60' :
+                                            contentValue.length > 800 ? 'text-yellow-400/60' :
                                             'text-white/30'
                                         }`}>
-                                            {contentInput.value.length}/1000
+                                            {contentValue.length}/1000
                                         </span>
-                                        {contentInput.value.length > 900 && (
+                                        {contentValue.length > 900 && (
                                             <span className="text-xs text-red-400/60">
                                                 即将达到字数上限
                                             </span>
