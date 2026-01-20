@@ -20,12 +20,11 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
     const [toast, setToast] = useState<{ message: string; visible: boolean }>({ message: '', visible: false });
     const [isInitialized, setIsInitialized] = useState(false);
     const [clickCount, setClickCount] = useState(0);
-    const [comboCount, setComboCount] = useState(0);
+    const [isProcessing, setIsProcessing] = useState(false);
     
     const isMobile = useIsMobile();
     const mountedRef = useRef(true);
     const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-    const comboTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     // 持久化存储 Key - 针对单个内容
     const getStorageKey = () => `aura_like_${targetType}_${targetId}_${new Date().toISOString().split('T')[0]}`;
@@ -36,9 +35,6 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
             mountedRef.current = false;
             if (clickTimeoutRef.current) {
                 clearTimeout(clickTimeoutRef.current);
-            }
-            if (comboTimeoutRef.current) {
-                clearTimeout(comboTimeoutRef.current);
             }
         };
     }, []);
@@ -112,6 +108,9 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
     const handleLike = async (e: React.MouseEvent) => {
         e.stopPropagation();
 
+        // 防止重复处理
+        if (isProcessing) return;
+
         // 检查是否已达到上限
         const currentUserCount = parseInt(localStorage.getItem(getStorageKey()) || '0');
         
@@ -120,7 +119,7 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
             return;
         }
 
-        // 立即更新UI状态 - 无需等待
+        // 立即更新UI状态
         const newClickCount = currentUserCount + 1;
         setClickCount(newClickCount);
         setCount(prev => prev + 1);
@@ -132,32 +131,21 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
             showToast('不许这么喜欢我❤️');
         }
 
-        // 立即触发动画效果 - 连击时更快
+        // 触发动画效果
         setAnimating(true);
-        setComboCount(prev => prev + 1);
-        
-        // 重置连击计数器
-        if (comboTimeoutRef.current) {
-            clearTimeout(comboTimeoutRef.current);
-        }
-        comboTimeoutRef.current = setTimeout(() => {
-            if (mountedRef.current) {
-                setComboCount(0);
-            }
-        }, 800); // 缩短重置时间，提升连击体验
-
         setTimeout(() => {
             if (mountedRef.current) {
                 setAnimating(false);
             }
-        }, isMobile ? 150 : 200); // 更快的动画时间，支持连续点击
+        }, isMobile ? 400 : 600);
 
         // 移动端触觉反馈
         if (isMobile) {
             haptics.success();
         }
 
-        // 异步处理后端请求，不阻塞UI
+        // 防抖处理后端请求
+        setIsProcessing(true);
         if (clickTimeoutRef.current) {
             clearTimeout(clickTimeoutRef.current);
         }
@@ -193,8 +181,12 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                     localStorage.setItem(getStorageKey(), rollbackCount.toString());
                     showToast('点赞失败，请重试 😅');
                 }
+            } finally {
+                if (mountedRef.current) {
+                    setIsProcessing(false);
+                }
             }
-        }, 50); // 进一步缩短防抖时间，提升响应速度
+        }, 300); // 300ms防抖
     };
 
     // 在初始化完成前显示稳定状态，避免闪烁
@@ -231,14 +223,14 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
         <div className="relative inline-block" style={{ 
             isolation: 'isolate', 
             overflow: 'visible',
-            zIndex: Z_INDEX.LIKE_TOAST
+            zIndex: Z_INDEX.LIKE_TOAST // 确保整个容器在最高层级
         }}>
-            {/* Toast 提示 */}
+            {/* Apple 风格 Toast - 显示在按钮附近，避开导航栏 */}
             {toast.visible && (
                 <div 
                     className={`absolute pointer-events-none ${
                         isMobile 
-                            ? '-top-16 right-0 -translate-x-2'
+                            ? '-top-16 right-0 -translate-x-2' // 移动端偏左一点，不遮挡爱心
                             : '-top-20 left-1/2 -translate-x-1/2'
                     } animate-in fade-in zoom-in slide-in-from-bottom-2 duration-300`}
                     style={{ zIndex: Z_INDEX.LIKE_TOAST }}
@@ -246,14 +238,20 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                     <div className={`relative bg-gradient-to-r from-black/95 to-gray-900/95 backdrop-blur-xl border border-white/40 rounded-2xl shadow-2xl ${
                         isMobile ? 'px-4 py-2.5' : 'px-6 py-3'
                     }`}>
+                        {/* 发光效果 */}
                         <div className="absolute inset-0 bg-gradient-to-r from-rose-500/20 to-pink-500/20 rounded-2xl blur-sm" />
+                        
                         <span className={`relative font-bold text-white tracking-wide whitespace-nowrap ${
                             isMobile ? 'text-sm' : 'text-base'
                         }`}>
                             {toast.message}
                         </span>
+                        
+                        {/* 装饰性光点 */}
                         <div className="absolute -top-1 -right-1 w-2 h-2 bg-rose-400 rounded-full animate-pulse" />
                     </div>
+                    
+                    {/* 小箭头指向按钮 - 移动端调整箭头位置 */}
                     <div className={`absolute top-full ${
                         isMobile ? 'right-6' : 'left-1/2 -translate-x-1/2'
                     } ${
@@ -264,6 +262,7 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
 
             <button
                 onClick={handleLike}
+                disabled={false} // 不禁用，以便显示提示
                 className={`group relative flex items-center gap-2 rounded-full transition-all duration-300 overflow-hidden ${
                     isMobile ? 'px-3 py-1.5 text-sm' : 'px-4 py-2'
                 } ${
@@ -277,30 +276,24 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                         }`
                 } border ${className}`}
                 style={{
+                    // 移动端优化触摸区域
                     minHeight: isMobile ? '44px' : 'auto',
                     minWidth: isMobile ? '44px' : 'auto',
+                    // 防止双击缩放
                     touchAction: 'manipulation'
                 }}
             >
-                {/* 动态背景光效 */}
+                {/* 简洁的背景光效 */}
                 {animating && !locked && (
-                    <div className={`absolute inset-0 rounded-full transition-all duration-300 ${
-                        comboCount > 3 ? 'bg-gradient-to-r from-rose-500/40 to-pink-500/40 scale-125' :
-                        comboCount > 1 ? 'bg-gradient-to-r from-rose-500/30 to-pink-500/30 scale-110' :
-                        'bg-gradient-to-r from-rose-500/20 to-pink-500/20 scale-105'
-                    }`} />
+                    <div className="absolute inset-0 bg-gradient-to-r from-rose-500/20 to-pink-500/20 rounded-full animate-apple-glow-simple" />
                 )}
 
                 <div className="relative z-10">
                     <svg
-                        className={`w-5 h-5 transition-all duration-300 ${
+                        className={`w-5 h-5 transition-all duration-500 ${
                             liked ? 'fill-current scale-110' : 'fill-none scale-100'
                         } ${
-                            animating && !locked ? (
-                                comboCount > 3 ? 'scale-150' :
-                                comboCount > 1 ? 'scale-125' :
-                                'scale-110'
-                            ) : ''
+                            animating && !locked ? 'animate-apple-heart-simple' : ''
                         }`}
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -314,38 +307,125 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                     </svg>
                 </div>
 
-                <span className={`relative z-10 text-sm font-bold tracking-tight tabular-nums transition-all duration-200 ${
-                    animating && !locked ? (
-                        comboCount > 3 ? 'scale-110 -translate-y-1' :
-                        comboCount > 1 ? 'scale-105 -translate-y-0.5' :
-                        '-translate-y-0.5'
-                    ) : ''
+                <span className={`relative z-10 text-sm font-bold tracking-tight tabular-nums transition-all duration-300 ${
+                    animating && !locked ? 'animate-apple-number-simple' : ''
                 }`}>
                     {count}
                 </span>
 
-                {/* 简化的粒子效果 */}
-                {!locked && animating && comboCount > 1 && (
+                {/* 简洁的粒子效果 */}
+                {!locked && animating && (
                     <div className="absolute inset-0 pointer-events-none">
-                        {[...Array(comboCount > 3 ? 8 : 4)].map((_, i) => (
+                        {[...Array(6)].map((_, i) => (
                             <div
                                 key={i}
-                                className="absolute left-1/2 top-1/2 w-1 h-1 bg-rose-400 rounded-full opacity-80"
+                                className="absolute left-1/2 top-1/2 animate-apple-particle-simple"
                                 style={{
-                                    transform: `translate(-50%, -50%) rotate(${(360 / (comboCount > 3 ? 8 : 4)) * i}deg) translateY(-${20 + Math.random() * 20}px)`,
-                                    animation: `fadeOut 0.6s ease-out forwards`,
-                                    animationDelay: `${i * 0.05}s`
-                                }}
-                            />
+                                    '--angle': `${(360 / 6) * i}deg`,
+                                    '--distance': `${40 + Math.random() * 20}px`,
+                                    '--delay': `${i * 0.05}s`,
+                                } as React.CSSProperties}
+                            >
+                                <div className="w-1.5 h-1.5 bg-rose-400 rounded-full opacity-80" />
+                            </div>
                         ))}
+                    </div>
+                )}
+
+                {/* 苹果风格的涟漪 */}
+                {animating && !locked && (
+                    <div className="absolute inset-0 pointer-events-none">
+                        <div className="absolute inset-0 border-2 border-rose-400/30 rounded-full animate-apple-ripple-simple" />
                     </div>
                 )}
             </button>
 
             <style>{`
-                @keyframes fadeOut {
-                    0% { opacity: 0.8; transform: translate(-50%, -50%) scale(1); }
-                    100% { opacity: 0; transform: translate(-50%, -50%) scale(0); }
+                /* 简洁的背景光效 */
+                @keyframes apple-glow-simple {
+                    0% {
+                        opacity: 0;
+                        transform: scale(0.8);
+                    }
+                    50% {
+                        opacity: 1;
+                        transform: scale(1.1);
+                    }
+                    100% {
+                        opacity: 0;
+                        transform: scale(1.2);
+                    }
+                }
+
+                /* 简洁的心形弹跳 */
+                @keyframes apple-heart-simple {
+                    0% {
+                        transform: scale(1);
+                    }
+                    50% {
+                        transform: scale(1.3);
+                    }
+                    100% {
+                        transform: scale(1.1);
+                    }
+                }
+
+                /* 简洁的数字动画 */
+                @keyframes apple-number-simple {
+                    0% {
+                        transform: translateY(0);
+                    }
+                    50% {
+                        transform: translateY(-4px);
+                    }
+                    100% {
+                        transform: translateY(0);
+                    }
+                }
+
+                /* 简洁的粒子效果 */
+                @keyframes apple-particle-simple {
+                    0% {
+                        transform: translate(-50%, -50%) rotate(var(--angle)) translateY(0) scale(1);
+                        opacity: 1;
+                    }
+                    100% {
+                        transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(-1 * var(--distance))) scale(0);
+                        opacity: 0;
+                    }
+                }
+
+                /* 简洁的涟漪效果 */
+                @keyframes apple-ripple-simple {
+                    0% {
+                        transform: scale(1);
+                        opacity: 0.6;
+                    }
+                    100% {
+                        transform: scale(2.5);
+                        opacity: 0;
+                    }
+                }
+
+                .animate-apple-glow-simple {
+                    animation: apple-glow-simple 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+                }
+
+                .animate-apple-heart-simple {
+                    animation: apple-heart-simple 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+                }
+
+                .animate-apple-number-simple {
+                    animation: apple-number-simple 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+                }
+
+                .animate-apple-particle-simple {
+                    animation: apple-particle-simple 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+                    animation-delay: var(--delay);
+                }
+
+                .animate-apple-ripple-simple {
+                    animation: apple-ripple-simple 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
                 }
             `}</style>
         </div>

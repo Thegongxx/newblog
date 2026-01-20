@@ -4,7 +4,7 @@ import { supabase } from '../services/supabaseService';
 import LikeButton from './LikeButton';
 import type { Comment } from '../types';
 import { useIsMobile } from '../hooks/useResponsive';
-import { useToast } from './Toast';
+import { useToast } from '../hooks/useToast';
 
 export default function HomepageComments() {
     const [comments, setComments] = useState<Comment[]>([]);
@@ -18,7 +18,7 @@ export default function HomepageComments() {
     });
     const [replyingTo, setReplyingTo] = useState<string | null>(null);
     const isMobile = useIsMobile();
-    const { showToast, ToastComponent } = useToast();
+    const { showToast } = useToast();
 
     // 加载主页评论
     useEffect(() => {
@@ -53,18 +53,18 @@ export default function HomepageComments() {
         const cleanEmail = formData.email.trim();
         
         if (!cleanAuthor || !cleanContent) {
-            showToast('请填写姓名和内容哦 🌿', 'error');
+            alert('请填写姓名和内容哦 🌿');
             return;
         }
 
         // 验证内容长度
         if (cleanContent.length > 1000) {
-            showToast('评论内容太长了，请控制在1000字以内 📝', 'error');
+            alert('评论内容太长了，请控制在1000字以内 📝');
             return;
         }
 
         if (cleanAuthor.length > 50) {
-            showToast('姓名太长了，请控制在50字以内 ✨', 'error');
+            alert('姓名太长了，请控制在50字以内 ✨');
             return;
         }
 
@@ -92,19 +92,19 @@ export default function HomepageComments() {
             setReplyingTo(null);
             setShowForm(false);
             await loadComments();
-            showToast('留言已提交！✨', 'success');
+            alert('留言已提交！✨');
         } catch (error) {
             console.error('Failed to submit comment:', error);
             if (error instanceof Error) {
                 if (error.message.includes('duplicate') || error.message.includes('unique')) {
-                    showToast('留言重复了，请不要重复提交 😊', 'error');
+                    alert('留言重复了，请不要重复提交 😊');
                 } else if (error.message.includes('network') || error.message.includes('fetch')) {
-                    showToast('网络连接有问题，请检查网络后重试 🌐', 'error');
+                    alert('网络连接有问题，请检查网络后重试 🌐');
                 } else {
-                    showToast('留言提交失败，请稍后重试 😅', 'error');
+                    alert('留言提交失败，请稍后重试 😅');
                 }
             } else {
-                showToast('留言提交失败，请检查网络或稍后重试 🔄', 'error');
+                alert('留言提交失败，请检查网络或稍后重试 🔄');
             }
         } finally {
             setLoading(false);
@@ -323,153 +323,87 @@ export default function HomepageComments() {
                 </motion.button>
             </motion.div>
 
-            <AnimatePresence>
-                {showForm && (
-                    <motion.div
-                        className="mb-12 overflow-hidden"
-                        variants={formVariants}
-                        initial="initial"
-                        animate="animate"
-                        exit="exit"
-                    >
-                        <motion.div
-                            className="p-8 border border-white/5 rounded-3xl bg-white/[0.01]"
-                            initial={{
-                                y: -10,
-                                opacity: 0
-                            }}
-                            animate={{
-                                y: 0,
-                                opacity: 1
-                            }}
-                            exit={{
-                                y: -10,
-                                opacity: 0
-                            }}
-                            transition={{
-                                type: "spring" as const,
-                                stiffness: 400,
-                                damping: 25,
-                                delay: 0.1
-                            }}
-                        >
-                            {replyingTo && (
-                                <motion.div
-                                    className="mb-6 text-xs text-white/40 flex items-center justify-between"
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: 0.3, duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+            {showForm && (
+                <div className="mb-12">
+                    <div className="p-8 border border-white/5 rounded-3xl bg-white/[0.01]">
+                        {replyingTo && (
+                            <div className="mb-6 text-xs text-white/40 flex items-center justify-between">
+                                <span>回复 <span className="text-white font-bold">@{replyingTo}</span></span>
+                                <button
+                                    onClick={() => {
+                                        setReplyingTo(null);
+                                        setFormData({ ...formData, parent_id: '' });
+                                    }}
+                                    className="text-red-400/60 hover:text-red-400 transition-colors duration-300"
                                 >
-                                    <span>Replying to <span className="text-white font-bold">@{replyingTo}</span></span>
-                                    <button
-                                        onClick={() => {
-                                            setReplyingTo(null);
-                                            setFormData({ ...formData, parent_id: '' });
-                                        }}
-                                        className="text-red-400/60 hover:text-red-400 transition-colors duration-300"
-                                    >
-                                        Cancel
-                                    </button>
-                                </motion.div>
-                            )}
+                                    取消
+                                </button>
+                            </div>
+                        )}
                             <form onSubmit={handleSubmit} className="space-y-6">
-                                <motion.div
-                                    className="grid grid-cols-2 gap-4"
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: 0.35, duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-                                >
+                                <div className="grid grid-cols-2 gap-4">
                                     <div className="relative">
                                         <input
                                             type="text"
-                                            placeholder="Name *"
+                                            placeholder="姓名 *"
                                             value={formData.author}
                                             onChange={(e) => setFormData({ ...formData, author: e.target.value })}
-                                            className="w-full px-0 py-2 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/40 transition-all duration-300"
+                                            className="w-full px-0 py-3 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/40 transition-all duration-300"
                                             required
                                             maxLength={50}
                                         />
                                         {formData.author.length > 40 && (
                                             <span className="absolute -bottom-5 left-0 text-xs text-yellow-400/60">
-                                                {50 - formData.author.length} 字符剩余
+                                                还能输入 {50 - formData.author.length} 个字符
                                             </span>
                                         )}
                                     </div>
                                     <input
                                         type="email"
-                                        placeholder="Email (Private)"
+                                        placeholder="邮箱 (可选)"
                                         value={formData.email}
                                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                        className="w-full px-0 py-2 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/40 transition-all duration-300"
+                                        className="w-full px-0 py-3 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/40 transition-all duration-300"
                                     />
-                                </motion.div>
-                                <motion.div className="relative">
-                                    <motion.textarea
-                                        placeholder="Share your thoughts..."
+                                </div>
+                                <div className="relative">
+                                    <textarea
+                                        placeholder="写下你的想法..."
                                         value={formData.content}
                                         onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                                        rows={3}
-                                        className="w-full px-0 py-2 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/40 transition-all duration-300 resize-none"
+                                        rows={4}
+                                        className="w-full px-0 py-3 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/40 transition-all duration-300 resize-none"
                                         required
                                         maxLength={1000}
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: 0.4, duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
                                     />
                                     <div className="flex justify-between items-center mt-2">
                                         <span className={`text-xs transition-colors duration-300 ${
                                             formData.content.length > 900 ? 'text-red-400/60' :
                                             formData.content.length > 800 ? 'text-yellow-400/60' :
-                                            'text-white/20'
+                                            'text-white/30'
                                         }`}>
                                             {formData.content.length}/1000
                                         </span>
                                         {formData.content.length > 900 && (
                                             <span className="text-xs text-red-400/60">
-                                                内容即将达到上限
+                                                即将达到字数上限
                                             </span>
                                         )}
                                     </div>
-                                </motion.div>
-                                <motion.div
-                                    className="flex justify-end"
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: 0.45, duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-                                >
+                                </div>
+                                <div className="flex justify-end">
                                     <button
                                         type="submit"
                                         disabled={loading}
-                                        className="relative px-8 py-2 bg-white text-black text-[10px] font-black uppercase tracking-widest rounded-full hover:scale-105 active:scale-95 transition-all duration-300 disabled:opacity-70 overflow-hidden"
+                                        className="px-8 py-3 bg-white text-black text-xs font-bold uppercase tracking-widest rounded-full hover:scale-105 active:scale-95 transition-all duration-300 disabled:opacity-50"
                                     >
-                                        <span className={loading ? 'opacity-0' : 'opacity-100'}>
-                                            {loading ? 'Sending...' : 'Post Message'}
-                                        </span>
-                                        {loading && (
-                                            <motion.div
-                                                className="absolute inset-0 flex items-center justify-center"
-                                                initial={{ opacity: 0 }}
-                                                animate={{ opacity: 1 }}
-                                            >
-                                                <div className="flex gap-1">
-                                                    {[0, 1, 2].map((i) => (
-                                                        <motion.div
-                                                            key={i}
-                                                            className="w-1.5 h-1.5 bg-black rounded-full"
-                                                            animate={{ opacity: [0.3, 1, 0.3], scale: [1, 1.2, 1] }}
-                                                            transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.1 }}
-                                                        />
-                                                    ))}
-                                                </div>
-                                            </motion.div>
-                                        )}
+                                        {loading ? '提交中...' : '发布留言'}
                                     </button>
-                                </motion.div>
+                                </div>
                             </form>
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                    </div>
+                </div>
+            )}
 
             {loading && comments.length === 0 ? (
                 <div className="text-center text-white/40 py-12">加载中...</div>
@@ -492,7 +426,6 @@ export default function HomepageComments() {
                     ))}
                 </div>
             )}
-            <ToastComponent />
         </motion.section>
     );
 }
