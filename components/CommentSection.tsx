@@ -17,12 +17,15 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
     const [showForm, setShowForm] = useState(false);
     const [replyingTo, setReplyingTo] = useState<string | null>(null);
     const [parentId, setParentId] = useState('');
-    
+
     // 使用基本的状态管理
     const [authorValue, setAuthorValue] = useState('');
     const [emailValue, setEmailValue] = useState('');
     const [contentValue, setContentValue] = useState('');
-    
+
+    // 用于跟踪 IME 输入状态
+    const isComposing = React.useRef(false);
+
     const { showToast } = useToast();
     const isMobile = useIsMobile();
 
@@ -75,11 +78,11 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
     // 提交评论
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         const cleanAuthor = authorValue.trim();
         const cleanContent = contentValue.trim();
         const cleanEmail = emailValue.trim();
-        
+
         if (!cleanAuthor || !cleanContent) {
             alert('请填写姓名和内容哦 🌿');
             return;
@@ -268,10 +271,13 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="relative">
                                     <input
+                                        name="author"
                                         type="text"
                                         placeholder="姓名 *"
                                         value={authorValue}
-                                        onChange={(e) => setAuthorValue(e.target.value)}
+                                        onChange={(e) => { if (!isComposing.current) setAuthorValue(e.target.value); }}
+                                        onCompositionStart={() => { isComposing.current = true; }}
+                                        onCompositionEnd={(e) => { isComposing.current = false; setAuthorValue(e.currentTarget.value); }}
                                         className="w-full px-0 py-3 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/40 transition-all duration-300"
                                         required
                                         maxLength={50}
@@ -284,19 +290,25 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
                                     )}
                                 </div>
                                 <input
+                                    name="email"
                                     type="email"
                                     placeholder="邮箱 (可选)"
                                     value={emailValue}
-                                    onChange={(e) => setEmailValue(e.target.value)}
+                                    onChange={(e) => { if (!isComposing.current) setEmailValue(e.target.value); }}
+                                    onCompositionStart={() => { isComposing.current = true; }}
+                                    onCompositionEnd={(e) => { isComposing.current = false; setEmailValue(e.currentTarget.value); }}
                                     className="w-full px-0 py-3 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/40 transition-all duration-300"
                                     autoComplete="off"
                                 />
                             </div>
                             <div className="relative">
                                 <textarea
+                                    name="content"
                                     placeholder="写下你的想法..."
                                     value={contentValue}
-                                    onChange={(e) => setContentValue(e.target.value)}
+                                    onChange={(e) => { if (!isComposing.current) setContentValue(e.target.value); }}
+                                    onCompositionStart={() => { isComposing.current = true; }}
+                                    onCompositionEnd={(e) => { isComposing.current = false; setContentValue(e.currentTarget.value); }}
                                     rows={4}
                                     className="w-full px-0 py-3 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/40 transition-all duration-300 resize-none"
                                     required
@@ -304,11 +316,10 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
                                     autoComplete="off"
                                 />
                                 <div className="flex justify-between items-center mt-2">
-                                    <span className={`text-xs transition-colors duration-300 ${
-                                        contentValue.length > 900 ? 'text-red-400/60' :
+                                    <span className={`text-xs transition-colors duration-300 ${contentValue.length > 900 ? 'text-red-400/60' :
                                         contentValue.length > 800 ? 'text-yellow-400/60' :
-                                        'text-white/30'
-                                    }`}>
+                                            'text-white/30'
+                                        }`}>
                                         {contentValue.length}/1000
                                     </span>
                                     {contentValue.length > 900 && (
