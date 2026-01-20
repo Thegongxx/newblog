@@ -265,6 +265,22 @@
     transform: scale(0.96);
     transition-duration: 0.1s;
   }
+
+  /* Obsidian 图片样式适配 */
+  .obsidian-img {
+    @apply rounded-xl shadow-lg my-8 mx-auto block;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: transform 0.3s var(--apple-ease);
+  }
+
+  .zoomable {
+    transition: transform 0.3s var(--apple-ease), opacity 0.3s var(--apple-ease);
+  }
+
+  .zoomable:hover {
+    transform: scale(1.01);
+    opacity: 0.95;
+  }
 }
 
 /* 苹果风格的动画关键帧优化 */

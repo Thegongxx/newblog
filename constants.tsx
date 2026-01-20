@@ -11,6 +11,8 @@ export const CONTACT_INFO = {
   MAIL: 'ggxx3714@gmail.com'
 };
 
+export const DEFAULT_COVER = '/default-cover.jpg';
+
 /**
  * ==========================================
  * 2. 图标组件 (Icons)

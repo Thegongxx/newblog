@@ -1,6 +1,7 @@
 import useSWR, { mutate } from 'swr';
 import { postsApi } from './posts';
 import { notesApi } from './notes';
+import { DEFAULT_COVER } from '../constants';
 
 // Cache configuration
 const cacheConfig = {
@@ -15,7 +16,7 @@ const fetchPosts = async () => {
   const data = await postsApi.getAll();
   return data.map((post: any) => ({
     ...post,
-    image: post.cover_image,
+    image: post.cover_image || DEFAULT_COVER,
     date: new Date(post.created_at).toLocaleDateString('zh-CN'),
     readingTime: `${post.reading_time} 分钟`,
     content: post.html_content || post.content,
@@ -35,7 +36,7 @@ const fetchPost = async (slug: string) => {
   const post = await postsApi.getBySlug(slug);
   return {
     ...post,
-    image: post.cover_image,
+    image: post.cover_image || DEFAULT_COVER,
     date: new Date(post.created_at).toLocaleDateString('zh-CN'),
     readingTime: `${post.reading_time} 分钟`,
     content: post.html_content || post.content,

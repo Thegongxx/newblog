@@ -172,7 +172,7 @@ jobs:
         VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
       run: |
         echo "🔍 测试数据库连接..."
-        npm run test:supabase || echo "⚠️ 数据库连接测试失败"
+        npm run health || echo "⚠️ 数据库连接测试失败"
 
   # 📊 健康检查
   health-check:

@@ -4,6 +4,7 @@ import { Post } from '../types';
 import LikeButton from './LikeButton';
 import { useIsMobile } from '../hooks/useResponsive';
 import { TiltCard, GlowHover } from './HoverEffects';
+import { DEFAULT_COVER } from '../constants';
 
 interface BlogCardProps {
   post: Post;
@@ -71,7 +72,7 @@ const BlogCard: React.FC<BlogCardProps> = memo(({ post, onClick, featured }) => 
       {/* 全幅封面图容器 - 优化图片加载 */}
       <div className="absolute inset-0 rounded-2xl overflow-hidden">
         <img
-          src={post.image}
+          src={post.image || DEFAULT_COVER}
           alt={post.title}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02] grayscale-[0.1] group-hover:grayscale-0 opacity-60 group-hover:opacity-80"
           loading="lazy"
