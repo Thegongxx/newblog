@@ -23,8 +23,10 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
     const [emailValue, setEmailValue] = useState('');
     const [contentValue, setContentValue] = useState('');
 
-    // 用于跟踪 IME 输入状态
-    const isComposing = React.useRef(false);
+    // 为输入框使用 Ref，以便使用非受控组件模式
+    const authorRef = React.useRef<HTMLInputElement>(null);
+    const emailRef = React.useRef<HTMLInputElement>(null);
+    const contentRef = React.useRef<HTMLTextAreaElement>(null);
 
     const { showToast } = useToast();
     const isMobile = useIsMobile();
@@ -147,6 +149,11 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
             setAuthorValue('');
             setEmailValue('');
             setContentValue('');
+
+            if (authorRef.current) authorRef.current.value = '';
+            if (emailRef.current) emailRef.current.value = '';
+            if (contentRef.current) contentRef.current.value = '';
+
             setParentId('');
             setReplyingTo(null);
             setShowForm(false);
@@ -271,13 +278,12 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="relative">
                                     <input
+                                        ref={authorRef}
                                         name="author"
                                         type="text"
                                         placeholder="姓名 *"
-                                        value={authorValue}
-                                        onChange={(e) => { if (!isComposing.current) setAuthorValue(e.target.value); }}
-                                        onCompositionStart={() => { isComposing.current = true; }}
-                                        onCompositionEnd={(e) => { isComposing.current = false; setAuthorValue(e.currentTarget.value); }}
+                                        defaultValue={authorValue}
+                                        onChange={(e) => setAuthorValue(e.target.value)}
                                         className="w-full px-0 py-3 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/40 transition-all duration-300"
                                         required
                                         maxLength={50}
@@ -290,25 +296,23 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
                                     )}
                                 </div>
                                 <input
+                                    ref={emailRef}
                                     name="email"
                                     type="email"
                                     placeholder="邮箱 (可选)"
-                                    value={emailValue}
-                                    onChange={(e) => { if (!isComposing.current) setEmailValue(e.target.value); }}
-                                    onCompositionStart={() => { isComposing.current = true; }}
-                                    onCompositionEnd={(e) => { isComposing.current = false; setEmailValue(e.currentTarget.value); }}
+                                    defaultValue={emailValue}
+                                    onChange={(e) => setEmailValue(e.target.value)}
                                     className="w-full px-0 py-3 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/40 transition-all duration-300"
                                     autoComplete="off"
                                 />
                             </div>
                             <div className="relative">
                                 <textarea
+                                    ref={contentRef}
                                     name="content"
                                     placeholder="写下你的想法..."
-                                    value={contentValue}
-                                    onChange={(e) => { if (!isComposing.current) setContentValue(e.target.value); }}
-                                    onCompositionStart={() => { isComposing.current = true; }}
-                                    onCompositionEnd={(e) => { isComposing.current = false; setContentValue(e.currentTarget.value); }}
+                                    defaultValue={contentValue}
+                                    onChange={(e) => setContentValue(e.target.value)}
                                     rows={4}
                                     className="w-full px-0 py-3 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/40 transition-all duration-300 resize-none"
                                     required
