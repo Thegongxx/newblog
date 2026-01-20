@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import CommentSection from '../components/CommentSection';
 import LikeButton from '../components/LikeButton';
+import PostSidebar from '../components/PostSidebar';
 import { ICONS, DEFAULT_COVER } from '../constants';
 import { Z_INDEX } from '../constants/zIndex';
 import { engagementApi } from '../services/supabaseService';
@@ -161,7 +162,7 @@ const PostDetail: React.FC<PostDetailProps> = ({ posts, loading }) => {
                 <meta name="twitter:description" content={post.excerpt} />
                 <meta name="twitter:image" content={post.image || DEFAULT_COVER} />
             </Helmet>
-            <div className="max-w-6xl mx-auto">
+            <div className="max-w-7xl mx-auto">
                 <motion.div
                     className="fixed left-0 top-0 h-[2px] bg-white/60 origin-left"
                     style={{
@@ -222,9 +223,9 @@ const PostDetail: React.FC<PostDetailProps> = ({ posts, loading }) => {
                     />
                 </motion.button>
 
-                <div className="lg:grid lg:grid-cols-[1fr_350px] gap-12 lg:gap-20 items-start">
-                    {/* 左侧主要内容 */}
-                    <div className="order-2 lg:order-1">
+                <div className="lg:grid lg:grid-cols-[1fr_320px] gap-12 lg:gap-16 items-start">
+                    {/* 主要内容区域 - 居中显示 */}
+                    <div className="max-w-4xl mx-auto lg:mx-0">
                         <header className="mb-12 md:mb-20">
                             <div className="mb-3 md:mb-4 text-[10px] md:text-xs text-white/30 tracking-[0.2em] uppercase">
                                 {breadcrumbLabel}
@@ -246,7 +247,7 @@ const PostDetail: React.FC<PostDetailProps> = ({ posts, loading }) => {
                                         <span>约 {post.readingTime}</span>
                                     )}
                                 </div>
-                                <div className="flex items-center gap-4 md:gap-6">
+                                <div className="flex items-center gap-4 md:gap-6 lg:hidden">
                                     <div className="flex flex-col items-end">
                                         <span className="text-[9px] md:text-[10px] uppercase tracking-widest text-white/20 font-bold mb-1">VIEWS</span>
                                         <span className="text-base md:text-lg font-light text-white/40 tabular-nums">{post.views || 0}</span>
@@ -287,30 +288,9 @@ const PostDetail: React.FC<PostDetailProps> = ({ posts, loading }) => {
                         </div>
                     </div>
 
-                    {/* 右侧边栏 - 桌面端展示封面 */}
-                    <div className="hidden lg:block sticky top-32 order-1 lg:order-2">
-                        <motion.div
-                            className="rounded-3xl overflow-hidden shadow-2xl border border-white/10 cursor-zoom-in relative group"
-                            whileHover={{ scale: 1.02 }}
-                            onClick={() => setZoomedImage(post.image || DEFAULT_COVER)}
-                        >
-                            <img
-                                src={post.image || DEFAULT_COVER}
-                                alt={post.title}
-                                className="w-full aspect-[3/4] object-cover transition-transform duration-500 group-hover:scale-110"
-                            />
-                            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                <div className="p-3 rounded-full bg-white/10 backdrop-blur-md text-white">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" /></svg>
-                                </div>
-                            </div>
-                        </motion.div>
-                        <div className="mt-6 px-4">
-                            <p className="text-[10px] uppercase tracking-widest text-white/20 font-bold mb-2">Cover Story</p>
-                            <p className="text-xs text-white/40 leading-relaxed italic">
-                                点击图片开启无边界沉浸阅读
-                            </p>
-                        </div>
+                    {/* 右侧边栏 - 桌面端显示TOC和其他功能 */}
+                    <div className="hidden lg:block">
+                        <PostSidebar post={post} />
                     </div>
                 </div>
             </div>
