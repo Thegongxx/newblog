@@ -3,7 +3,6 @@ title: test
 slug: test
 excerpt: test
 category: test
-cover_image: obsidian://open?vault=content&file=pictures%2F20251210_101143.jpg
 reading_time: 0
 published: true
 date: 2026-1-20

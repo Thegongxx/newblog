@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import CommentSection from '../components/CommentSection';
 import LikeButton from '../components/LikeButton';
-import { ICONS } from '../constants';
+import { ICONS, DEFAULT_COVER } from '../constants';
 import { Z_INDEX } from '../constants/zIndex';
 import { engagementApi } from '../services/supabaseService';
 import { Post } from '../types';
@@ -118,12 +118,12 @@ const PostDetail: React.FC<PostDetailProps> = ({ posts, loading }) => {
                 <meta name="description" content={post.excerpt} />
                 <meta property="og:title" content={post.title} />
                 <meta property="og:description" content={post.excerpt} />
-                <meta property="og:image" content={post.image} />
+                <meta property="og:image" content={post.image || DEFAULT_COVER} />
                 <meta property="og:type" content="article" />
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:title" content={post.title} />
                 <meta name="twitter:description" content={post.excerpt} />
-                <meta name="twitter:image" content={post.image} />
+                <meta name="twitter:image" content={post.image || DEFAULT_COVER} />
             </Helmet>
             <div className="max-w-4xl mx-auto relative">
                 <motion.button

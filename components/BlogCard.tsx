@@ -15,6 +15,14 @@ interface BlogCardProps {
 const BlogCard: React.FC<BlogCardProps> = memo(({ post, onClick, featured }) => {
   const isMobile = useIsMobile();
 
+  // 处理图片加载错误
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = e.currentTarget;
+    if (img.src !== DEFAULT_COVER) {
+      img.src = DEFAULT_COVER;
+    }
+  };
+
   // 移动端极简版本
   if (isMobile) {
     return (
@@ -77,6 +85,7 @@ const BlogCard: React.FC<BlogCardProps> = memo(({ post, onClick, featured }) => 
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02] grayscale-[0.1] group-hover:grayscale-0 opacity-60 group-hover:opacity-80"
           loading="lazy"
           decoding="async"
+          onError={handleImageError}
           style={{
             willChange: 'transform',
             backfaceVisibility: 'hidden'
