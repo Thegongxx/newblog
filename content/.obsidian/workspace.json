@@ -11,12 +11,14 @@
             "id": "7467b16b44e3fc0f",
             "type": "leaf",
             "state": {
-              "type": "image",
+              "type": "markdown",
               "state": {
-                "file": "pictures/20251210_101143.jpg"
+                "file": "posts/test.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "lucide-image",
-              "title": "20251210_101143"
+              "icon": "lucide-file",
+              "title": "test"
             }
           }
         ]
@@ -193,18 +195,18 @@
   },
   "active": "7467b16b44e3fc0f",
   "lastOpenFiles": [
-    "未命名.base",
-    "posts/test.md",
     "pictures/20251210_101143.jpg",
+    "posts/test.md",
+    "pages/about.md",
+    "未命名.base",
+    "notes/TEST.md",
     "pictures",
     "未命名.md",
-    "notes/TEST.md",
     "imag/未命名.md",
     "imag",
     "image/未命名",
     "image",
     "posts/toc-test.md",
-    "pages/about.md",
     "转移/notes样板.md",
     "转移/1.md",
     "转移/文章样板.md",
