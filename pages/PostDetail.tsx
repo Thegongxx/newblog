@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import CommentSection from '../components/CommentSection';
 import LikeButton from '../components/LikeButton';
-import TableOfContents from '../components/TableOfContents';
 import { ICONS } from '../constants';
 import { Z_INDEX } from '../constants/zIndex';
 import { engagementApi } from '../services/supabaseService';
@@ -223,11 +222,6 @@ const PostDetail: React.FC<PostDetailProps> = ({ posts, loading }) => {
                             <CommentSection targetId={post.id} targetType="post" />
                         </div>
                     </div>
-                </div>
-
-                {/* 右侧悬浮TOC目录 - 桌面端显示 */}
-                <div className="hidden xl:block fixed right-8 top-1/2 -translate-y-1/2 w-64 max-h-[70vh] overflow-y-auto">
-                    <TableOfContents content={post.content} />
                 </div>
             </div>
         </>

@@ -95,7 +95,8 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({ content, className = 
 
   // 检查是否有足够的内容显示TOC
   useEffect(() => {
-    setIsVisible(tocItems.length >= 2);
+    console.log('TOC Items:', tocItems); // 调试信息
+    setIsVisible(tocItems.length >= 1); // 降低显示条件，只要有1个标题就显示
   }, [tocItems]);
 
   // 点击跳转到对应标题
@@ -112,6 +113,27 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({ content, className = 
       });
     }
   };
+
+  if (!isVisible && tocItems.length === 0) {
+    // 显示占位符，方便调试
+    return (
+      <motion.div
+        className={`${className}`}
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={APPLE_EASING.spring}
+      >
+        <div className="glass rounded-xl p-4 space-y-3 backdrop-blur-md bg-white/[0.03] border border-white/10">
+          <h3 className="text-xs font-semibold text-white/70 uppercase tracking-wider mb-3">
+            目录
+          </h3>
+          <p className="text-xs text-white/40">
+            暂无目录内容
+          </p>
+        </div>
+      </motion.div>
+    );
+  }
 
   if (!isVisible) return null;
 
