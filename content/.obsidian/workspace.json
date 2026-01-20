@@ -94,17 +94,17 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "111.md",
+                "file": "posts/test.md",
                 "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
                 "showSearch": false,
                 "searchQuery": "",
                 "backlinkCollapsed": false,
-                "unlinkedCollapsed": true
+                "unlinkedCollapsed": false
               },
               "icon": "links-coming-in",
-              "title": "111 的反向链接列表"
+              "title": "test 的反向链接列表"
             }
           },
           {
@@ -156,12 +156,13 @@
             "state": {
               "type": "outline",
               "state": {
+                "file": "posts/test.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "大纲"
+              "title": "test 的大纲"
             }
           },
           {
@@ -175,7 +176,7 @@
             }
           }
         ],
-        "currentTab": 5
+        "currentTab": 4
       }
     ],
     "direction": "horizontal",
@@ -193,13 +194,13 @@
       "command-palette:打开命令面板": false
     }
   },
-  "active": "7467b16b44e3fc0f",
+  "active": "895d689258181e95",
   "lastOpenFiles": [
-    "pictures/20251210_101143.jpg",
-    "posts/test.md",
     "pages/about.md",
-    "未命名.base",
+    "posts/test.md",
     "notes/TEST.md",
+    "pictures/20251210_101143.jpg",
+    "未命名.base",
     "pictures",
     "未命名.md",
     "imag/未命名.md",
