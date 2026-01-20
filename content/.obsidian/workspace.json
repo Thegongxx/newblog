@@ -11,14 +11,14 @@
             "id": "dacbe2546343c2b5",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "split-diff-view",
               "state": {
-                "file": "posts/test.md",
-                "mode": "source",
-                "source": false
+                "aFile": "content/.obsidian/workspace.json",
+                "bFile": "content/.obsidian/workspace.json",
+                "aRef": ""
               },
-              "icon": "lucide-file",
-              "title": "test"
+              "icon": "diff",
+              "title": "Diff: workspace.json  (Working Tree)"
             }
           }
         ]
@@ -195,11 +195,13 @@
   },
   "active": "dacbe2546343c2b5",
   "lastOpenFiles": [
+    "posts/test.md",
+    "posts/toc-test.md",
     "pages/about.md",
     "notes/TEST.md",
-    "转移/文章样板.md",
     "转移/notes样板.md",
-    "posts/test.md",
+    "转移/1.md",
+    "转移/文章样板.md",
     "Pasted image 20260120015258.png",
     "未命名 1.base",
     "未命名.base",
@@ -208,7 +210,6 @@
     "posts/hello-world.md",
     "posts/minimalist-design-philosophy.md",
     "notes/reading-notes.md",
-    "转移/1.md",
     "未命名 2.base",
     "转移/2.md",
     "未命名.md",
