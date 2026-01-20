@@ -4,6 +4,7 @@ import { supabase } from '../services/supabaseService';
 import LikeButton from './LikeButton';
 import type { Comment } from '../types';
 import { useIsMobile } from '../hooks/useResponsive';
+import { useToast } from './Toast';
 
 export default function HomepageComments() {
     const [comments, setComments] = useState<Comment[]>([]);
@@ -17,6 +18,7 @@ export default function HomepageComments() {
     });
     const [replyingTo, setReplyingTo] = useState<string | null>(null);
     const isMobile = useIsMobile();
+    const { showToast, ToastComponent } = useToast();
 
     // 加载主页评论
     useEffect(() => {
@@ -44,8 +46,25 @@ export default function HomepageComments() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!formData.author || !formData.content) {
-            alert('请填写姓名和内容哦 🌿');
+        
+        // 清理和验证输入
+        const cleanAuthor = formData.author.trim();
+        const cleanContent = formData.content.trim();
+        const cleanEmail = formData.email.trim();
+        
+        if (!cleanAuthor || !cleanContent) {
+            showToast('请填写姓名和内容哦 🌿', 'error');
+            return;
+        }
+
+        // 验证内容长度
+        if (cleanContent.length > 1000) {
+            showToast('评论内容太长了，请控制在1000字以内 📝', 'error');
+            return;
+        }
+
+        if (cleanAuthor.length > 50) {
+            showToast('姓名太长了，请控制在50字以内 ✨', 'error');
             return;
         }
 
@@ -55,25 +74,38 @@ export default function HomepageComments() {
             const { data, error } = await supabase
                 .from('homepage_comments')
                 .insert([{
-                    author: formData.author.trim(),
-                    email: formData.email.trim() || 'anonymous@example.com',
-                    content: formData.content.trim(),
-                    parent_id: formData.parent_id || null, // Attempt to send parent_id
+                    author: cleanAuthor,
+                    email: cleanEmail || 'anonymous@example.com',
+                    content: cleanContent,
+                    parent_id: formData.parent_id || null,
                     approved: true
                 }])
                 .select()
                 .single();
 
-            if (error) throw error;
+            if (error) {
+                console.error('Supabase insert error:', error);
+                throw error;
+            }
 
             setFormData({ author: '', email: '', content: '', parent_id: '' });
             setReplyingTo(null);
             setShowForm(false);
             await loadComments();
-            alert('评论已提交！');
+            showToast('留言已提交！✨', 'success');
         } catch (error) {
             console.error('Failed to submit comment:', error);
-            alert('评论提交失败');
+            if (error instanceof Error) {
+                if (error.message.includes('duplicate') || error.message.includes('unique')) {
+                    showToast('留言重复了，请不要重复提交 😊', 'error');
+                } else if (error.message.includes('network') || error.message.includes('fetch')) {
+                    showToast('网络连接有问题，请检查网络后重试 🌐', 'error');
+                } else {
+                    showToast('留言提交失败，请稍后重试 😅', 'error');
+                }
+            } else {
+                showToast('留言提交失败，请检查网络或稍后重试 🔄', 'error');
+            }
         } finally {
             setLoading(false);
         }
@@ -347,14 +379,22 @@ export default function HomepageComments() {
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.35, duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
                                 >
-                                    <input
-                                        type="text"
-                                        placeholder="Name *"
-                                        value={formData.author}
-                                        onChange={(e) => setFormData({ ...formData, author: e.target.value })}
-                                        className="w-full px-0 py-2 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/40 transition-all duration-300"
-                                        required
-                                    />
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            placeholder="Name *"
+                                            value={formData.author}
+                                            onChange={(e) => setFormData({ ...formData, author: e.target.value })}
+                                            className="w-full px-0 py-2 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/40 transition-all duration-300"
+                                            required
+                                            maxLength={50}
+                                        />
+                                        {formData.author.length > 40 && (
+                                            <span className="absolute -bottom-5 left-0 text-xs text-yellow-400/60">
+                                                {50 - formData.author.length} 字符剩余
+                                            </span>
+                                        )}
+                                    </div>
                                     <input
                                         type="email"
                                         placeholder="Email (Private)"
@@ -363,17 +403,34 @@ export default function HomepageComments() {
                                         className="w-full px-0 py-2 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/40 transition-all duration-300"
                                     />
                                 </motion.div>
-                                <motion.textarea
-                                    placeholder="Share your thoughts..."
-                                    value={formData.content}
-                                    onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                                    rows={3}
-                                    className="w-full px-0 py-2 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/40 transition-all duration-300 resize-none"
-                                    required
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: 0.4, duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-                                />
+                                <motion.div className="relative">
+                                    <motion.textarea
+                                        placeholder="Share your thoughts..."
+                                        value={formData.content}
+                                        onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                                        rows={3}
+                                        className="w-full px-0 py-2 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/20 focus:outline-none focus:border-white/40 transition-all duration-300 resize-none"
+                                        required
+                                        maxLength={1000}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: 0.4, duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+                                    />
+                                    <div className="flex justify-between items-center mt-2">
+                                        <span className={`text-xs transition-colors duration-300 ${
+                                            formData.content.length > 900 ? 'text-red-400/60' :
+                                            formData.content.length > 800 ? 'text-yellow-400/60' :
+                                            'text-white/20'
+                                        }`}>
+                                            {formData.content.length}/1000
+                                        </span>
+                                        {formData.content.length > 900 && (
+                                            <span className="text-xs text-red-400/60">
+                                                内容即将达到上限
+                                            </span>
+                                        )}
+                                    </div>
+                                </motion.div>
                                 <motion.div
                                     className="flex justify-end"
                                     initial={{ opacity: 0, y: 10 }}
@@ -435,6 +492,7 @@ export default function HomepageComments() {
                     ))}
                 </div>
             )}
+            <ToastComponent />
         </motion.section>
     );
 }

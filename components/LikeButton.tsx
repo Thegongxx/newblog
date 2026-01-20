@@ -144,13 +144,13 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
             if (mountedRef.current) {
                 setComboCount(0);
             }
-        }, 1000); // 1秒后重置连击
+        }, 800); // 缩短重置时间，提升连击体验
 
         setTimeout(() => {
             if (mountedRef.current) {
                 setAnimating(false);
             }
-        }, isMobile ? 200 : 250); // 更快的动画时间，支持连续点击
+        }, isMobile ? 150 : 200); // 更快的动画时间，支持连续点击
 
         // 移动端触觉反馈
         if (isMobile) {
@@ -194,7 +194,7 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                     showToast('点赞失败，请重试 😅');
                 }
             }
-        }, 100); // 大幅缩短防抖时间，提升响应速度
+        }, 50); // 进一步缩短防抖时间，提升响应速度
     };
 
     // 在初始化完成前显示稳定状态，避免闪烁
