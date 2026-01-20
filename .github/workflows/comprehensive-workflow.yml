@@ -102,9 +102,9 @@ jobs:
 
   # 🔄 智能内容同步
   content-sync:
-    name: 🔄 内容同步
+    name: 🔄 自动内容同步
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    if: github.ref == 'refs/heads/main'
     needs: [build-verification]
     
     steps:
@@ -122,81 +122,22 @@ jobs:
     - name: 📦 安装依赖
       run: npm ci --prefer-offline --no-audit
       
-    - name: 🔍 检测变化类型
-      id: detect-changes
-      run: |
-        if [ "${{ github.event.inputs.sync_mode }}" = "force_all" ]; then
-          echo "sync_posts=true" >> $GITHUB_OUTPUT
-          echo "sync_notes=true" >> $GITHUB_OUTPUT
-          echo "🔄 强制同步所有内容"
-        elif [ "${{ github.event.inputs.sync_mode }}" = "posts_only" ]; then
-          echo "sync_posts=true" >> $GITHUB_OUTPUT
-          echo "sync_notes=false" >> $GITHUB_OUTPUT
-          echo "📝 仅同步文章"
-        elif [ "${{ github.event.inputs.sync_mode }}" = "notes_only" ]; then
-          echo "sync_posts=false" >> $GITHUB_OUTPUT
-          echo "sync_notes=true" >> $GITHUB_OUTPUT
-          echo "📓 仅同步笔记"
-        else
-          # 自动检测变化
-          if git diff --name-only HEAD~1 HEAD | grep -E '^content/posts/.*\.md$'; then
-            echo "sync_posts=true" >> $GITHUB_OUTPUT
-            echo "📝 检测到文章变化"
-          else
-            echo "sync_posts=false" >> $GITHUB_OUTPUT
-          fi
-          
-          if git diff --name-only HEAD~1 HEAD | grep -E '^content/notes/.*\.md$'; then
-            echo "sync_notes=true" >> $GITHUB_OUTPUT
-            echo "📓 检测到笔记变化"
-          else
-            echo "sync_notes=false" >> $GITHUB_OUTPUT
-          fi
-        fi
-        
-    - name: 🔌 系统健康检查
-      continue-on-error: true
-      env:
-        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-      run: |
-        echo "🏥 运行系统健康检查..."
-        npm run health || echo "⚠️ 健康检查发现问题，但继续同步"
-        
-    - name: 🧹 系统清理
-      continue-on-error: true
-      run: |
-        echo "🧹 运行系统清理..."
-        npm run cleanup || echo "⚠️ 清理过程中出现问题"
-        
-    - name: 📝 智能同步文章
-      if: steps.detect-changes.outputs.sync_posts == 'true'
+    - name: 🔄 自动完整同步
       continue-on-error: true
       env:
         VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
         SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
       run: |
-        echo "📝 开始智能同步文章..."
-        npm run sync:push
+        echo "🚀 开始自动完整同步（包含删除检测）..."
+        npm run sync:cleanup
         
-    - name: 📓 智能同步笔记
-      if: steps.detect-changes.outputs.sync_notes == 'true'
-      continue-on-error: true
-      env:
-        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-        SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-      run: |
-        echo "📓 开始智能同步笔记..."
-        npm run sync:push
-        
-    - name: ✅ 同步完成通知
+    - name: ✅ 自动同步完成
       if: always()
       run: |
-        echo "📊 同步结果汇总:"
-        echo "- 文章同步: ${{ steps.detect-changes.outputs.sync_posts == 'true' && '✅ 已执行' || '⏭️ 跳过' }}"
-        echo "- 笔记同步: ${{ steps.detect-changes.outputs.sync_notes == 'true' && '✅ 已执行' || '⏭️ 跳过' }}"
+        echo "📊 自动同步完成！"
+        echo "🔄 已执行完整同步（包含删除检测）"
+        echo "🚀 Vercel 将自动部署最新版本"
 
   # 🚀 部署预览 (可选)
   deploy-preview:
