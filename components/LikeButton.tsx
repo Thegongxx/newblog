@@ -20,7 +20,6 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
     const [toast, setToast] = useState<{ message: string; visible: boolean }>({ message: '', visible: false });
     const [isInitialized, setIsInitialized] = useState(false);
     const [clickCount, setClickCount] = useState(0);
-    const [isProcessing, setIsProcessing] = useState(false);
     
     const isMobile = useIsMobile();
     const mountedRef = useRef(true);
@@ -108,9 +107,6 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
     const handleLike = async (e: React.MouseEvent) => {
         e.stopPropagation();
 
-        // 防止重复处理
-        if (isProcessing) return;
-
         // 检查是否已达到上限
         const currentUserCount = parseInt(localStorage.getItem(getStorageKey()) || '0');
         
@@ -137,15 +133,14 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
             if (mountedRef.current) {
                 setAnimating(false);
             }
-        }, isMobile ? 400 : 600);
+        }, isMobile ? 100 : 200); // 减少动画时间，提升连击体验
 
         // 移动端触觉反馈
         if (isMobile) {
             haptics.success();
         }
 
-        // 防抖处理后端请求
-        setIsProcessing(true);
+        // 防抖处理后端请求 - 不阻止UI响应
         if (clickTimeoutRef.current) {
             clearTimeout(clickTimeoutRef.current);
         }
@@ -181,12 +176,8 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                     localStorage.setItem(getStorageKey(), rollbackCount.toString());
                     showToast('点赞失败，请重试 😅');
                 }
-            } finally {
-                if (mountedRef.current) {
-                    setIsProcessing(false);
-                }
             }
-        }, 300); // 300ms防抖
+        }, 100); // 大幅减少防抖时间，提升连击响应速度
     };
 
     // 在初始化完成前显示稳定状态，避免闪烁

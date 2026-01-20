@@ -17,6 +17,7 @@ export default function HomepageComments() {
         parent_id: ''
     });
     const [replyingTo, setReplyingTo] = useState<string | null>(null);
+    const [isComposing, setIsComposing] = useState(false); // 输入法状态
     const isMobile = useIsMobile();
     const { showToast } = useToast();
 
@@ -115,6 +116,15 @@ export default function HomepageComments() {
         setReplyingTo(authorName);
         setFormData({ ...formData, parent_id: commentId });
         setShowForm(true);
+    };
+
+    // 处理输入法事件
+    const handleCompositionStart = () => {
+        setIsComposing(true);
+    };
+
+    const handleCompositionEnd = () => {
+        setIsComposing(false);
     };
 
     const commentVariants = {
@@ -348,9 +358,13 @@ export default function HomepageComments() {
                                             placeholder="姓名 *"
                                             value={formData.author}
                                             onChange={(e) => setFormData({ ...formData, author: e.target.value })}
+                                            onCompositionStart={handleCompositionStart}
+                                            onCompositionEnd={handleCompositionEnd}
                                             className="w-full px-0 py-3 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/40 transition-all duration-300"
                                             required
                                             maxLength={50}
+                                            autoComplete="off"
+                                            spellCheck={false}
                                         />
                                         {formData.author.length > 40 && (
                                             <span className="absolute -bottom-5 left-0 text-xs text-yellow-400/60">
@@ -363,7 +377,11 @@ export default function HomepageComments() {
                                         placeholder="邮箱 (可选)"
                                         value={formData.email}
                                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                        onCompositionStart={handleCompositionStart}
+                                        onCompositionEnd={handleCompositionEnd}
                                         className="w-full px-0 py-3 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/40 transition-all duration-300"
+                                        autoComplete="off"
+                                        spellCheck={false}
                                     />
                                 </div>
                                 <div className="relative">
@@ -371,10 +389,15 @@ export default function HomepageComments() {
                                         placeholder="写下你的想法..."
                                         value={formData.content}
                                         onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                                        onCompositionStart={handleCompositionStart}
+                                        onCompositionEnd={handleCompositionEnd}
                                         rows={4}
                                         className="w-full px-0 py-3 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/40 transition-all duration-300 resize-none"
                                         required
                                         maxLength={1000}
+                                        autoComplete="off"
+                                        spellCheck={false}
+                                        style={{ imeMode: 'active' }}
                                     />
                                     <div className="flex justify-between items-center mt-2">
                                         <span className={`text-xs transition-colors duration-300 ${

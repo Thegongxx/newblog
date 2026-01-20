@@ -5,6 +5,7 @@ import LikeButton from './LikeButton';
 import type { Comment } from '../types';
 import { useToast } from '../hooks/useToast';
 import { useIsMobile } from '../hooks/useResponsive';
+import { useChineseInput } from '../hooks/useChineseInput';
 
 interface CommentSectionProps {
     targetId: string;
@@ -15,13 +16,14 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
     const [comments, setComments] = useState<Comment[]>([]);
     const [loading, setLoading] = useState(false);
     const [showForm, setShowForm] = useState(false);
-    const [formData, setFormData] = useState({
-        author: '',
-        email: '',
-        content: '',
-        parent_id: ''
-    });
     const [replyingTo, setReplyingTo] = useState<string | null>(null);
+    const [parentId, setParentId] = useState('');
+    
+    // 使用中文输入Hook
+    const authorInput = useChineseInput();
+    const emailInput = useChineseInput();
+    const contentInput = useChineseInput();
+    
     const { showToast } = useToast();
     const isMobile = useIsMobile();
 
@@ -75,9 +77,9 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         
-        const cleanAuthor = formData.author.trim();
-        const cleanContent = formData.content.trim();
-        const cleanEmail = formData.email.trim();
+        const cleanAuthor = authorInput.value.trim();
+        const cleanContent = contentInput.value.trim();
+        const cleanEmail = emailInput.value.trim();
         
         if (!cleanAuthor || !cleanContent) {
             alert('请填写姓名和内容哦 🌿');
@@ -108,7 +110,7 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
                         author: cleanAuthor,
                         email: cleanEmail || 'anonymous@example.com',
                         content: cleanContent,
-                        parent_id: formData.parent_id || null,
+                        parent_id: parentId || null,
                         approved: true
                     }])
                     .select()
@@ -123,7 +125,7 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
                         author: cleanAuthor,
                         email: cleanEmail || 'anonymous@example.com',
                         content: cleanContent,
-                        parent_id: formData.parent_id || null,
+                        parent_id: parentId || null,
                         approved: true
                     }])
                     .select()
@@ -139,7 +141,11 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
 
             console.log('Comment created successfully:', data);
 
-            setFormData({ author: '', email: '', content: '', parent_id: '' });
+            // 重置表单
+            authorInput.reset();
+            emailInput.reset();
+            contentInput.reset();
+            setParentId('');
             setReplyingTo(null);
             setShowForm(false);
 
@@ -166,7 +172,7 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
     // 回复评论
     const handleReply = (commentId: string, authorName: string) => {
         setReplyingTo(authorName);
-        setFormData({ ...formData, parent_id: commentId });
+        setParentId(commentId);
         setShowForm(true);
     };
 
@@ -250,7 +256,7 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
                                 <button
                                     onClick={() => {
                                         setReplyingTo(null);
-                                        setFormData({ ...formData, parent_id: '' });
+                                        setParentId('');
                                     }}
                                     className="text-red-400/60 hover:text-red-400 transition-colors duration-300"
                                 >
@@ -265,45 +271,52 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
                                     <input
                                         type="text"
                                         placeholder="姓名 *"
-                                        value={formData.author}
-                                        onChange={(e) => setFormData({ ...formData, author: e.target.value })}
+                                        value={authorInput.value}
+                                        {...authorInput.handlers}
                                         className="w-full px-0 py-3 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/40 transition-all duration-300"
                                         required
                                         maxLength={50}
+                                        autoComplete="off"
+                                        spellCheck={false}
                                     />
-                                    {formData.author.length > 40 && (
+                                    {authorInput.value.length > 40 && (
                                         <span className="absolute -bottom-5 left-0 text-xs text-yellow-400/60">
-                                            还能输入 {50 - formData.author.length} 个字符
+                                            还能输入 {50 - authorInput.value.length} 个字符
                                         </span>
                                     )}
                                 </div>
                                 <input
                                     type="email"
                                     placeholder="邮箱 (可选)"
-                                    value={formData.email}
-                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                    value={emailInput.value}
+                                    {...emailInput.handlers}
                                     className="w-full px-0 py-3 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/40 transition-all duration-300"
+                                    autoComplete="off"
+                                    spellCheck={false}
                                 />
                             </div>
                             <div className="relative">
                                 <textarea
                                     placeholder="写下你的想法..."
-                                    value={formData.content}
-                                    onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                                    value={contentInput.value}
+                                    {...contentInput.handlers}
                                     rows={4}
                                     className="w-full px-0 py-3 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/40 transition-all duration-300 resize-none"
                                     required
                                     maxLength={1000}
+                                    autoComplete="off"
+                                    spellCheck={false}
+                                    style={{ imeMode: 'active' }}
                                 />
                                 <div className="flex justify-between items-center mt-2">
                                     <span className={`text-xs transition-colors duration-300 ${
-                                        formData.content.length > 900 ? 'text-red-400/60' :
-                                        formData.content.length > 800 ? 'text-yellow-400/60' :
+                                        contentInput.value.length > 900 ? 'text-red-400/60' :
+                                        contentInput.value.length > 800 ? 'text-yellow-400/60' :
                                         'text-white/30'
                                     }`}>
-                                        {formData.content.length}/1000
+                                        {contentInput.value.length}/1000
                                     </span>
-                                    {formData.content.length > 900 && (
+                                    {contentInput.value.length > 900 && (
                                         <span className="text-xs text-red-400/60">
                                             即将达到字数上限
                                         </span>
