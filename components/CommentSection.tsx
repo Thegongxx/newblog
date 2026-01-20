@@ -277,7 +277,6 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
                                         required
                                         maxLength={50}
                                         autoComplete="off"
-                                        spellCheck={false}
                                     />
                                     {authorInput.value.length > 40 && (
                                         <span className="absolute -bottom-5 left-0 text-xs text-yellow-400/60">
@@ -292,7 +291,6 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
                                     {...emailInput.handlers}
                                     className="w-full px-0 py-3 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/40 transition-all duration-300"
                                     autoComplete="off"
-                                    spellCheck={false}
                                 />
                             </div>
                             <div className="relative">
@@ -305,8 +303,6 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
                                     required
                                     maxLength={1000}
                                     autoComplete="off"
-                                    spellCheck={false}
-                                    style={{ imeMode: 'active' }}
                                 />
                                 <div className="flex justify-between items-center mt-2">
                                     <span className={`text-xs transition-colors duration-300 ${

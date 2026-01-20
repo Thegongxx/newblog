@@ -20,11 +20,9 @@ export function useChineseInput(initialValue: string = '') {
 
     const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const newValue = e.target.value;
-        // 只有在非输入法状态下才立即更新
-        if (!isComposing) {
-            setValue(newValue);
-        }
-    }, [isComposing]);
+        // 始终更新值，让用户看到输入过程
+        setValue(newValue);
+    }, []);
 
     const handleInput = useCallback((e: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         // 使用input事件作为备用，确保中文输入被捕获
