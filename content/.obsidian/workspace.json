@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "posts/test.md",
+                "file": "imag/未命名.md",
                 "mode": "source",
-                "source": false
+                "source": true
               },
               "icon": "lucide-file",
-              "title": "test"
+              "title": "未命名"
             }
           }
         ]
@@ -195,8 +195,10 @@
   },
   "active": "7467b16b44e3fc0f",
   "lastOpenFiles": [
-    "notes/TEST.md",
     "posts/test.md",
+    "imag/未命名.md",
+    "imag",
+    "notes/TEST.md",
     "image/未命名",
     "image",
     "未命名.md",
