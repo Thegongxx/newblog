@@ -19,9 +19,12 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
     const [locked, setLocked] = useState(false);
     const [toast, setToast] = useState<{ message: string; visible: boolean }>({ message: '', visible: false });
     const [isInitialized, setIsInitialized] = useState(false);
+    const [clickCount, setClickCount] = useState(0);
+    const [isProcessing, setIsProcessing] = useState(false);
     
     const isMobile = useIsMobile();
     const mountedRef = useRef(true);
+    const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     // 持久化存储 Key - 针对单个内容
     const getStorageKey = () => `aura_like_${targetType}_${targetId}_${new Date().toISOString().split('T')[0]}`;
@@ -30,6 +33,9 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
         mountedRef.current = true;
         return () => {
             mountedRef.current = false;
+            if (clickTimeoutRef.current) {
+                clearTimeout(clickTimeoutRef.current);
+            }
         };
     }, []);
 
@@ -43,6 +49,7 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                 if (mountedRef.current) {
                     setLiked(isLiked);
                     setCount(initialCount);
+                    setClickCount(localUserCount);
                     
                     if (localUserCount >= 5) {
                         setLocked(true);
@@ -74,6 +81,7 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                 
                 if (mountedRef.current && dbUserCount >= 5) {
                     setLocked(true);
+                    setClickCount(5);
                     localStorage.setItem(getStorageKey(), dbUserCount.toString());
                 }
             } catch (err) {
@@ -100,73 +108,85 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
     const handleLike = async (e: React.MouseEvent) => {
         e.stopPropagation();
 
-        if (locked) {
+        // 防止重复处理
+        if (isProcessing) return;
+
+        // 检查是否已达到上限
+        const currentUserCount = parseInt(localStorage.getItem(getStorageKey()) || '0');
+        
+        if (locked || currentUserCount >= 5) {
             showToast('不许这么喜欢我❤️');
             return;
         }
 
-        // 检查当前用户对此内容的点赞次数
-        const currentUserCount = parseInt(localStorage.getItem(getStorageKey()) || '0');
-        if (currentUserCount >= 5) {
+        // 立即更新UI状态
+        const newClickCount = currentUserCount + 1;
+        setClickCount(newClickCount);
+        setCount(prev => prev + 1);
+        localStorage.setItem(getStorageKey(), newClickCount.toString());
+
+        // 检查是否达到上限
+        if (newClickCount >= 5) {
             setLocked(true);
             showToast('不许这么喜欢我❤️');
-            return;
         }
 
-        // UI 立即反馈
-        if (mountedRef.current) {
-            setCount(prev => prev + 1);
-            const nextUserCount = currentUserCount + 1;
-            localStorage.setItem(getStorageKey(), nextUserCount.toString());
-
-            if (nextUserCount >= 5) {
-                setLocked(true);
+        // 触发动画效果
+        setAnimating(true);
+        setTimeout(() => {
+            if (mountedRef.current) {
+                setAnimating(false);
             }
+        }, isMobile ? 400 : 600);
 
-            // 触发动画效果
-            setAnimating(true);
-            setTimeout(() => {
-                if (mountedRef.current) {
-                    setAnimating(false);
-                }
-            }, isMobile ? 400 : 600); // 移动端动画更快
-        }
-
-        // 移动端触觉反馈 - 只在点赞成功时震动
+        // 移动端触觉反馈
         if (isMobile) {
             haptics.success();
         }
 
-        // 后端同步
-        try {
-            const fingerprint = getBrowserFingerprint();
-            const result = await engagementApi.toggleLike(targetType, targetId, fingerprint);
-            
-            if (mountedRef.current) {
-                setLiked(true);
-                setLikedLocal(targetType, targetId, true);
+        // 防抖处理后端请求
+        setIsProcessing(true);
+        if (clickTimeoutRef.current) {
+            clearTimeout(clickTimeoutRef.current);
+        }
 
-                // 后端确认点赞次数
-                if (result.count >= 5) {
+        clickTimeoutRef.current = setTimeout(async () => {
+            try {
+                const fingerprint = getBrowserFingerprint();
+                const result = await engagementApi.toggleLike(targetType, targetId, fingerprint);
+                
+                if (mountedRef.current) {
+                    setLiked(true);
+                    setLikedLocal(targetType, targetId, true);
+
+                    // 后端确认点赞次数
+                    if (result.count >= 5) {
+                        setLocked(true);
+                        localStorage.setItem(getStorageKey(), '5');
+                    }
+                }
+            } catch (err: any) {
+                if (!mountedRef.current) return;
+                
+                if (err.message === 'CONTENT_LIMIT_REACHED') {
                     setLocked(true);
                     localStorage.setItem(getStorageKey(), '5');
+                    showToast('不许这么喜欢我❤️');
+                } else {
+                    console.error('Failed to toggle like:', err);
+                    // 回滚UI状态
+                    setCount(prev => prev - 1);
+                    const rollbackCount = Math.max(0, newClickCount - 1);
+                    setClickCount(rollbackCount);
+                    localStorage.setItem(getStorageKey(), rollbackCount.toString());
+                    showToast('点赞失败，请重试 😅');
+                }
+            } finally {
+                if (mountedRef.current) {
+                    setIsProcessing(false);
                 }
             }
-        } catch (err: any) {
-            if (!mountedRef.current) return;
-            
-            if (err.message === 'CONTENT_LIMIT_REACHED') {
-                setLocked(true);
-                localStorage.setItem(getStorageKey(), '5');
-                showToast('不许这么喜欢我❤️');
-            } else {
-                console.error('Failed to toggle like:', err);
-                // 回滚UI状态
-                setCount(prev => prev - 1);
-                localStorage.setItem(getStorageKey(), currentUserCount.toString());
-                showToast('点赞失败，请重试 😅');
-            }
-        }
+        }, 300); // 300ms防抖
     };
 
     // 在初始化完成前显示稳定状态，避免闪烁

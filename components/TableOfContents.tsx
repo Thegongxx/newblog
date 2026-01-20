@@ -117,45 +117,45 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({ content, className = 
 
   return (
     <motion.div
-      className={`sticky top-32 ${className}`}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      className={`${className}`}
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
       transition={APPLE_EASING.spring}
     >
-      <div className="glass rounded-2xl p-6 space-y-4">
-        <h3 className="text-sm font-semibold text-white/80 uppercase tracking-wider">
+      <div className="glass rounded-xl p-4 space-y-3 backdrop-blur-md bg-white/[0.03] border border-white/10">
+        <h3 className="text-xs font-semibold text-white/70 uppercase tracking-wider mb-3">
           目录
         </h3>
         
-        <nav className="space-y-1">
+        <nav className="space-y-1 max-h-96 overflow-y-auto">
           <AnimatePresence>
             {tocItems.map((item, index) => (
               <motion.button
                 key={item.id}
                 onClick={() => scrollToHeading(item.id)}
                 className={`
-                  block w-full text-left text-sm transition-all duration-200
-                  hover:text-white hover:bg-white/5 rounded-lg px-3 py-2
+                  block w-full text-left text-xs transition-all duration-200
+                  hover:text-white hover:bg-white/5 rounded-md px-2 py-1.5
                   ${activeId === item.id 
-                    ? 'text-white bg-white/10 border-l-2 border-white/40' 
-                    : 'text-white/60'
+                    ? 'text-white bg-white/10 border-l-2 border-white/50' 
+                    : 'text-white/50'
                   }
                 `}
                 style={{
-                  paddingLeft: `${(item.level - 1) * 12 + 12}px`
+                  paddingLeft: `${(item.level - 1) * 8 + 8}px`
                 }}
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{
                   ...APPLE_EASING.spring,
-                  delay: index * 0.05
+                  delay: index * 0.03
                 }}
                 whileHover={{
-                  x: 4,
-                  transition: { ...APPLE_EASING.spring, duration: 0.2 }
+                  x: 2,
+                  transition: { ...APPLE_EASING.spring, duration: 0.15 }
                 }}
               >
-                <span className="line-clamp-2 leading-relaxed">
+                <span className="line-clamp-2 leading-relaxed text-xs">
                   {item.text}
                 </span>
               </motion.button>
