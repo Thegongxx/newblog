@@ -119,7 +119,7 @@ export function useComments({ tableName, foreignKey, targetId }: UseCommentsOpti
                 } else if (err.message.includes('network') || err.message.includes('fetch')) {
                     alert('网络连接有问题，请检查网络后重试 🌐');
                 } else {
-                    alert('评论提交失败，请稍后重试 😅');
+                    alert(`评论提交失败: ${err.message} 😅`);
                 }
             } else {
                 alert('评论提交失败，请检查网络或稍后重试 🔄');
