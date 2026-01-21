@@ -7,7 +7,7 @@ export function getBrowserFingerprint(): string {
     if (typeof window === 'undefined') return 'server';
 
     // 检查本地存储
-    let fp = localStorage.getItem('aura_fingerprint');
+    let fp = localStorage.getItem('xuan_fingerprint');
     if (fp) return fp;
 
     // 生成新指纹
@@ -21,21 +21,22 @@ export function getBrowserFingerprint(): string {
     ];
 
     fp = btoa(unescape(encodeURIComponent(components.join('|')))).substring(0, 32);
-    localStorage.setItem('aura_fingerprint', fp);
+    localStorage.setItem('xuan_fingerprint', fp);
     return fp;
 }
 
 // 检查某个 ID 是否在本地已被点赞（用于即时 UI 反馈）
 export function checkIfLikedLocal(targetType: string, targetId: string): boolean {
-    const key = `aura_liked_${targetType}_${targetId}`;
+    const key = `xuan_liked_${targetType}_${targetId}`;
     return localStorage.getItem(key) === 'true';
 }
 
 export function setLikedLocal(targetType: string, targetId: string, liked: boolean): void {
-    const key = `aura_liked_${targetType}_${targetId}`;
+    const key = `xuan_liked_${targetType}_${targetId}`;
     if (liked) {
         localStorage.setItem(key, 'true');
     } else {
         localStorage.removeItem(key);
     }
 }
+

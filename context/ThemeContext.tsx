@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
 
 type Theme = 'dark' | 'light';
 
@@ -10,27 +10,31 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+// 简化的移动端检测，避免与 useResponsive 重复
+const MOBILE_BREAKPOINT = 640;
+
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [isMobile, setIsMobile] = useState(false);
-    
-    // 检测移动端
+    const [windowWidth, setWindowWidth] = useState(() =>
+        typeof window !== 'undefined' ? window.innerWidth : 1024
+    );
+
+    // 使用 useMemo 计算 isMobile，减少不必要的重渲染
+    const isMobile = useMemo(() => windowWidth < MOBILE_BREAKPOINT, [windowWidth]);
+
+    // 监听窗口变化
     useEffect(() => {
-        const checkMobile = () => {
-            setIsMobile(window.innerWidth < 640);
-        };
-        
-        checkMobile();
-        window.addEventListener('resize', checkMobile);
-        return () => window.removeEventListener('resize', checkMobile);
+        const handleResize = () => setWindowWidth(window.innerWidth);
+        window.addEventListener('resize', handleResize, { passive: true });
+        return () => window.removeEventListener('resize', handleResize);
     }, []);
-    
+
     const [theme, setTheme] = useState<Theme>(() => {
         // 移动端强制使用黑色主题
         if (typeof window !== 'undefined' && window.innerWidth < 640) {
             return 'dark';
         }
-        
-        const saved = localStorage.getItem('aura-theme');
+
+        const saved = localStorage.getItem('xuan-theme');
         return (saved as Theme) || 'dark';
     });
 
@@ -40,7 +44,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             setTheme('dark');
             document.documentElement.setAttribute('data-theme', 'dark');
         } else {
-            localStorage.setItem('aura-theme', theme);
+            localStorage.setItem('xuan-theme', theme);
             document.documentElement.setAttribute('data-theme', theme);
         }
     }, [theme, isMobile]);
@@ -48,7 +52,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const toggleTheme = () => {
         // 移动端不允许切换主题
         if (isMobile) return;
-        
+
         setTheme(prev => prev === 'dark' ? 'light' : 'dark');
     };
 

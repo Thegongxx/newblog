@@ -1,94 +1,43 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { supabase } from '../services/supabaseService';
 import LikeButton from './LikeButton';
 import type { Comment } from '../types';
 import { useIsMobile } from '../hooks/useResponsive';
-import { useToast } from '../hooks/useToast';
+import { useComments, commentAnimationVariants } from '../hooks/useComments';
 
 export default function HomepageComments() {
-    const [comments, setComments] = useState<Comment[]>([]);
-    const [loading, setLoading] = useState(false);
     const [showForm, setShowForm] = useState(false);
     const [replyingTo, setReplyingTo] = useState<string | null>(null);
     const [parentId, setParentId] = useState('');
-    
-    // 使用基本的状态管理
+
+    // 表单状态
     const [authorValue, setAuthorValue] = useState('');
     const [emailValue, setEmailValue] = useState('');
     const [contentValue, setContentValue] = useState('');
-    
+
     const isMobile = useIsMobile();
-    const { showToast } = useToast();
 
-    // 加载主页评论
-    useEffect(() => {
-        loadComments();
-    }, []);
-
-    const loadComments = async () => {
-        try {
-            setLoading(true);
-
-            const { data, error } = await supabase
-                .from('homepage_comments')
-                .select('*')
-                .eq('approved', true)
-                .order('created_at', { ascending: true });
-
-            if (error) throw error;
-            setComments(data || []);
-        } catch (error) {
-            console.error('Failed to load homepage comments:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    // 使用自定义 Hook
+    const {
+        comments,
+        topLevelComments,
+        loading,
+        submitComment
+    } = useComments({
+        tableName: 'homepage_comments'
+    });
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        
-        // 清理和验证输入
-        const cleanAuthor = authorValue.trim();
-        const cleanContent = contentValue.trim();
-        const cleanEmail = emailValue.trim();
-        
-        if (!cleanAuthor || !cleanContent) {
-            alert('请填写姓名和内容哦 🌿');
-            return;
-        }
 
-        // 验证内容长度
-        if (cleanContent.length > 1000) {
-            alert('评论内容太长了，请控制在1000字以内 📝');
-            return;
-        }
+        const success = await submitComment({
+            author: authorValue,
+            email: emailValue,
+            content: contentValue,
+            parentId
+        });
 
-        if (cleanAuthor.length > 50) {
-            alert('姓名太长了，请控制在50字以内 ✨');
-            return;
-        }
-
-        try {
-            setLoading(true);
-
-            const { data, error } = await supabase
-                .from('homepage_comments')
-                .insert([{
-                    author: cleanAuthor,
-                    email: cleanEmail || 'anonymous@example.com',
-                    content: cleanContent,
-                    parent_id: parentId || null,
-                    approved: true
-                }])
-                .select()
-                .single();
-
-            if (error) {
-                console.error('Supabase insert error:', error);
-                throw error;
-            }
-
+        if (success) {
             // 重置表单
             setAuthorValue('');
             setEmailValue('');
@@ -96,24 +45,7 @@ export default function HomepageComments() {
             setParentId('');
             setReplyingTo(null);
             setShowForm(false);
-            
-            await loadComments();
             alert('留言已提交！✨');
-        } catch (error) {
-            console.error('Failed to submit comment:', error);
-            if (error instanceof Error) {
-                if (error.message.includes('duplicate') || error.message.includes('unique')) {
-                    alert('留言重复了，请不要重复提交 😊');
-                } else if (error.message.includes('network') || error.message.includes('fetch')) {
-                    alert('网络连接有问题，请检查网络后重试 🌐');
-                } else {
-                    alert('留言提交失败，请稍后重试 �');
-                }
-            } else {
-                alert('留言提交失败，请检查网络或稍后重试 🔄');
-            }
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -123,49 +55,8 @@ export default function HomepageComments() {
         setShowForm(true);
     };
 
-
-
-    const commentVariants = {
-        initial: { opacity: 0, y: 20 },
-        animate: { 
-            opacity: 1, 
-            y: 0,
-            transition: {
-                type: "spring" as const,
-                stiffness: 300,
-                damping: 30,
-                duration: 0.4
-            }
-        }
-    };
-
-    const formVariants = {
-        initial: { opacity: 0, height: 0, scale: 0.95 },
-        animate: { 
-            opacity: 1, 
-            height: 'auto', 
-            scale: 1,
-            transition: {
-                type: "spring" as const,
-                stiffness: 300,
-                damping: 30,
-                duration: 0.5
-            }
-        },
-        exit: { 
-            opacity: 0, 
-            height: 0, 
-            scale: 0.95,
-            transition: {
-                type: "spring" as const,
-                stiffness: 300,
-                damping: 30,
-                duration: 0.4
-            }
-        }
-    };
-
     const renderComment = (comment: Comment, depth = 0) => {
+        // 获取回复 (直接从 comments 数组过滤，避免 Hook 依赖循环)
         const replies = comments.filter(c => c.parent_id === comment.id);
         const isNested = depth > 0;
 
@@ -173,7 +64,7 @@ export default function HomepageComments() {
             <motion.div
                 key={comment.id}
                 className={`group w-full ${isNested ? 'mt-4' : 'mb-8'}`}
-                variants={commentVariants}
+                variants={commentAnimationVariants.comment}
             >
                 <div className={`
                     relative 
@@ -232,8 +123,8 @@ export default function HomepageComments() {
                             ${isNested ? 'ml-0 border-l border-white/10 mt-3 pl-3' : 'ml-4 pl-4 border-l border-white/5 mt-4'}
                         `}
                         initial={{ opacity: 0, height: 0 }}
-                        animate={{ 
-                            opacity: 1, 
+                        animate={{
+                            opacity: 1,
                             height: 'auto',
                             transition: {
                                 type: "spring" as const,
@@ -246,7 +137,7 @@ export default function HomepageComments() {
                         {replies.map((reply, index) => (
                             <motion.div
                                 key={reply.id}
-                                variants={commentVariants}
+                                variants={commentAnimationVariants.comment}
                                 initial="initial"
                                 animate="animate"
                                 transition={{ delay: index * 0.05 }}
@@ -259,8 +150,6 @@ export default function HomepageComments() {
             </motion.div>
         );
     };
-
-    const topLevelComments = comments.filter(c => !c.parent_id);
 
     return (
         <motion.section
@@ -332,7 +221,13 @@ export default function HomepageComments() {
             </motion.div>
 
             {showForm && (
-                <div className="mb-12">
+                <motion.div
+                    className="mb-12"
+                    variants={commentAnimationVariants.form}
+                    initial="initial"
+                    animate="animate"
+                    exit="exit"
+                >
                     <div className="p-8 border border-white/5 rounded-3xl bg-white/[0.01]">
                         {replyingTo && (
                             <div className="mb-6 text-xs text-white/40 flex items-center justify-between">
@@ -348,72 +243,71 @@ export default function HomepageComments() {
                                 </button>
                             </div>
                         )}
-                            <form onSubmit={handleSubmit} className="space-y-6">
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="relative">
-                                        <input
-                                            type="text"
-                                            placeholder="姓名 *"
-                                            value={authorValue}
-                                            onChange={(e) => setAuthorValue(e.target.value)}
-                                            className="w-full px-0 py-3 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/40 transition-all duration-300"
-                                            required
-                                            maxLength={50}
-                                            autoComplete="off"
-                                        />
-                                        {authorValue.length > 40 && (
-                                            <span className="absolute -bottom-5 left-0 text-xs text-yellow-400/60">
-                                                还能输入 {50 - authorValue.length} 个字符
-                                            </span>
-                                        )}
-                                    </div>
-                                    <input
-                                        type="email"
-                                        placeholder="邮箱 (可选)"
-                                        value={emailValue}
-                                        onChange={(e) => setEmailValue(e.target.value)}
-                                        className="w-full px-0 py-3 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/40 transition-all duration-300"
-                                        autoComplete="off"
-                                    />
-                                </div>
+                        <form onSubmit={handleSubmit} className="space-y-6">
+                            <div className="grid grid-cols-2 gap-4">
                                 <div className="relative">
-                                    <textarea
-                                        placeholder="写下你的想法..."
-                                        value={contentValue}
-                                        onChange={(e) => setContentValue(e.target.value)}
-                                        rows={4}
-                                        className="w-full px-0 py-3 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/40 transition-all duration-300 resize-none"
+                                    <input
+                                        type="text"
+                                        placeholder="姓名 *"
+                                        value={authorValue}
+                                        onChange={(e) => setAuthorValue(e.target.value)}
+                                        className="w-full px-0 py-3 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/40 transition-all duration-300"
                                         required
-                                        maxLength={1000}
+                                        maxLength={50}
                                         autoComplete="off"
                                     />
-                                    <div className="flex justify-between items-center mt-2">
-                                        <span className={`text-xs transition-colors duration-300 ${
-                                            contentValue.length > 900 ? 'text-red-400/60' :
-                                            contentValue.length > 800 ? 'text-yellow-400/60' :
+                                    {authorValue.length > 40 && (
+                                        <span className="absolute -bottom-5 left-0 text-xs text-yellow-400/60">
+                                            还能输入 {50 - authorValue.length} 个字符
+                                        </span>
+                                    )}
+                                </div>
+                                <input
+                                    type="email"
+                                    placeholder="邮箱 (可选)"
+                                    value={emailValue}
+                                    onChange={(e) => setEmailValue(e.target.value)}
+                                    className="w-full px-0 py-3 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/40 transition-all duration-300"
+                                    autoComplete="off"
+                                />
+                            </div>
+                            <div className="relative">
+                                <textarea
+                                    placeholder="写下你的想法..."
+                                    value={contentValue}
+                                    onChange={(e) => setContentValue(e.target.value)}
+                                    rows={4}
+                                    className="w-full px-0 py-3 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/40 transition-all duration-300 resize-none"
+                                    required
+                                    maxLength={1000}
+                                    autoComplete="off"
+                                />
+                                <div className="flex justify-between items-center mt-2">
+                                    <span className={`text-xs transition-colors duration-300 ${contentValue.length > 900 ? 'text-red-400/60' :
+                                        contentValue.length > 800 ? 'text-yellow-400/60' :
                                             'text-white/30'
                                         }`}>
-                                            {contentValue.length}/1000
+                                        {contentValue.length}/1000
+                                    </span>
+                                    {contentValue.length > 900 && (
+                                        <span className="text-xs text-red-400/60">
+                                            即将达到字数上限
                                         </span>
-                                        {contentValue.length > 900 && (
-                                            <span className="text-xs text-red-400/60">
-                                                即将达到字数上限
-                                            </span>
-                                        )}
-                                    </div>
+                                    )}
                                 </div>
-                                <div className="flex justify-end">
-                                    <button
-                                        type="submit"
-                                        disabled={loading}
-                                        className="px-8 py-3 bg-white text-black text-xs font-bold uppercase tracking-widest rounded-full hover:scale-105 active:scale-95 transition-all duration-300 disabled:opacity-50"
-                                    >
-                                        {loading ? '提交中...' : '发布留言'}
-                                    </button>
-                                </div>
-                            </form>
+                            </div>
+                            <div className="flex justify-end">
+                                <button
+                                    type="submit"
+                                    disabled={loading}
+                                    className="px-8 py-3 bg-white text-black text-xs font-bold uppercase tracking-widest rounded-full hover:scale-105 active:scale-95 transition-all duration-300 disabled:opacity-50"
+                                >
+                                    {loading ? '提交中...' : '发布留言'}
+                                </button>
+                            </div>
+                        </form>
                     </div>
-                </div>
+                </motion.div>
             )}
 
             {loading && comments.length === 0 ? (
@@ -427,7 +321,7 @@ export default function HomepageComments() {
                     {topLevelComments.map((comment, index) => (
                         <motion.div
                             key={comment.id}
-                            variants={commentVariants}
+                            variants={commentAnimationVariants.comment}
                             initial="initial"
                             animate="animate"
                             transition={{ delay: index * 0.05 }}

@@ -20,13 +20,13 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
     const [toast, setToast] = useState<{ message: string; visible: boolean }>({ message: '', visible: false });
     const [isInitialized, setIsInitialized] = useState(false);
     const [clickCount, setClickCount] = useState(0);
-    
+
     const isMobile = useIsMobile();
     const mountedRef = useRef(true);
     const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     // 持久化存储 Key - 针对单个内容
-    const getStorageKey = () => `aura_like_${targetType}_${targetId}_${new Date().toISOString().split('T')[0]}`;
+    const getStorageKey = () => `xuan_like_${targetType}_${targetId}_${new Date().toISOString().split('T')[0]}`;
 
     useEffect(() => {
         mountedRef.current = true;
@@ -44,22 +44,22 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                 // 先设置本地状态，避免闪烁
                 const isLiked = checkIfLikedLocal(targetType, targetId);
                 const localUserCount = parseInt(localStorage.getItem(getStorageKey()) || '0');
-                
+
                 if (mountedRef.current) {
                     setLiked(isLiked);
                     setCount(initialCount);
                     setClickCount(localUserCount);
-                    
+
                     if (localUserCount >= 5) {
                         setLocked(true);
                     }
-                    
+
                     setIsInitialized(true);
                 }
 
                 // 然后异步获取最新数据
                 const total = await engagementApi.getLikeCount(targetType, targetId);
-                
+
                 if (mountedRef.current) {
                     setCount(total);
                 }
@@ -77,7 +77,7 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                     .single();
 
                 const dbUserCount = data?.count || 0;
-                
+
                 if (mountedRef.current && dbUserCount >= 5) {
                     setLocked(true);
                     setClickCount(5);
@@ -90,7 +90,7 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                 }
             }
         };
-        
+
         fetchInitial();
     }, [targetType, targetId, initialCount]);
 
@@ -109,7 +109,7 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
 
         // 检查是否已达到上限
         const currentUserCount = parseInt(localStorage.getItem(getStorageKey()) || '0');
-        
+
         if (locked || currentUserCount >= 5) {
             showToast('不许这么喜欢我❤️');
             return;
@@ -149,7 +149,7 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
             try {
                 const fingerprint = getBrowserFingerprint();
                 const result = await engagementApi.toggleLike(targetType, targetId, fingerprint);
-                
+
                 if (mountedRef.current) {
                     setLiked(true);
                     setLikedLocal(targetType, targetId, true);
@@ -162,7 +162,7 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                 }
             } catch (err: any) {
                 if (!mountedRef.current) return;
-                
+
                 if (err.message === 'CONTENT_LIMIT_REACHED') {
                     setLocked(true);
                     localStorage.setItem(getStorageKey(), '5');
@@ -211,61 +211,52 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
     }
 
     return (
-        <div className="relative inline-block" style={{ 
-            isolation: 'isolate', 
+        <div className="relative inline-block" style={{
+            isolation: 'isolate',
             overflow: 'visible',
             zIndex: Z_INDEX.LIKE_TOAST // 确保整个容器在最高层级
         }}>
             {/* Apple 风格 Toast - 显示在按钮附近，避开导航栏 */}
             {toast.visible && (
-                <div 
-                    className={`absolute pointer-events-none ${
-                        isMobile 
+                <div
+                    className={`absolute pointer-events-none ${isMobile
                             ? '-top-16 right-0 -translate-x-2' // 移动端偏左一点，不遮挡爱心
                             : '-top-20 left-1/2 -translate-x-1/2'
-                    } animate-in fade-in zoom-in slide-in-from-bottom-2 duration-300`}
+                        } animate-in fade-in zoom-in slide-in-from-bottom-2 duration-300`}
                     style={{ zIndex: Z_INDEX.LIKE_TOAST }}
                 >
-                    <div className={`relative bg-gradient-to-r from-black/95 to-gray-900/95 backdrop-blur-xl border border-white/40 rounded-2xl shadow-2xl ${
-                        isMobile ? 'px-4 py-2.5' : 'px-6 py-3'
-                    }`}>
+                    <div className={`relative bg-gradient-to-r from-black/95 to-gray-900/95 backdrop-blur-xl border border-white/40 rounded-2xl shadow-2xl ${isMobile ? 'px-4 py-2.5' : 'px-6 py-3'
+                        }`}>
                         {/* 发光效果 */}
                         <div className="absolute inset-0 bg-gradient-to-r from-rose-500/20 to-pink-500/20 rounded-2xl blur-sm" />
-                        
-                        <span className={`relative font-bold text-white tracking-wide whitespace-nowrap ${
-                            isMobile ? 'text-sm' : 'text-base'
-                        }`}>
+
+                        <span className={`relative font-bold text-white tracking-wide whitespace-nowrap ${isMobile ? 'text-sm' : 'text-base'
+                            }`}>
                             {toast.message}
                         </span>
-                        
+
                         {/* 装饰性光点 */}
                         <div className="absolute -top-1 -right-1 w-2 h-2 bg-rose-400 rounded-full animate-pulse" />
                     </div>
-                    
+
                     {/* 小箭头指向按钮 - 移动端调整箭头位置 */}
-                    <div className={`absolute top-full ${
-                        isMobile ? 'right-6' : 'left-1/2 -translate-x-1/2'
-                    } ${
-                        isMobile ? 'w-2 h-2' : 'w-2.5 h-2.5'
-                    } bg-gradient-to-br from-black/95 to-gray-900/95 border-r border-b border-white/40 rotate-45 -mt-1`} />
+                    <div className={`absolute top-full ${isMobile ? 'right-6' : 'left-1/2 -translate-x-1/2'
+                        } ${isMobile ? 'w-2 h-2' : 'w-2.5 h-2.5'
+                        } bg-gradient-to-br from-black/95 to-gray-900/95 border-r border-b border-white/40 rotate-45 -mt-1`} />
                 </div>
             )}
 
             <button
                 onClick={handleLike}
                 disabled={false} // 不禁用，以便显示提示
-                className={`group relative flex items-center gap-2 rounded-full transition-all duration-300 overflow-hidden ${
-                    isMobile ? 'px-3 py-1.5 text-sm' : 'px-4 py-2'
-                } ${
-                    locked ? 'opacity-40 grayscale cursor-not-allowed' : 
-                    isMobile ? 'active:scale-90 active:bg-white/20' : 'active:scale-95 hover:scale-105'
-                } ${
-                    liked
+                className={`group relative flex items-center gap-2 rounded-full transition-all duration-300 overflow-hidden ${isMobile ? 'px-3 py-1.5 text-sm' : 'px-4 py-2'
+                    } ${locked ? 'opacity-40 grayscale cursor-not-allowed' :
+                        isMobile ? 'active:scale-90 active:bg-white/20' : 'active:scale-95 hover:scale-105'
+                    } ${liked
                         ? 'bg-rose-500/10 text-rose-500 border-rose-500/20'
-                        : `bg-white/5 text-white/40 border-white/5 ${
-                            isMobile ? 'active:text-white/80 active:bg-white/15' : 'hover:text-white/60 hover:bg-white/10'
+                        : `bg-white/5 text-white/40 border-white/5 ${isMobile ? 'active:text-white/80 active:bg-white/15' : 'hover:text-white/60 hover:bg-white/10'
                         }`
-                } border ${className}`}
+                    } border ${className}`}
                 style={{
                     // 移动端优化触摸区域
                     minHeight: isMobile ? '44px' : 'auto',
@@ -281,11 +272,9 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
 
                 <div className="relative z-10">
                     <svg
-                        className={`w-5 h-5 transition-all duration-500 ${
-                            liked ? 'fill-current scale-110' : 'fill-none scale-100'
-                        } ${
-                            animating && !locked ? 'animate-apple-heart-simple' : ''
-                        }`}
+                        className={`w-5 h-5 transition-all duration-500 ${liked ? 'fill-current scale-110' : 'fill-none scale-100'
+                            } ${animating && !locked ? 'animate-apple-heart-simple' : ''
+                            }`}
                         stroke="currentColor"
                         viewBox="0 0 24 24"
                     >
@@ -298,9 +287,8 @@ export default function LikeButton({ targetType, targetId, initialCount = 0, cla
                     </svg>
                 </div>
 
-                <span className={`relative z-10 text-sm font-bold tracking-tight tabular-nums transition-all duration-300 ${
-                    animating && !locked ? 'animate-apple-number-simple' : ''
-                }`}>
+                <span className={`relative z-10 text-sm font-bold tracking-tight tabular-nums transition-all duration-300 ${animating && !locked ? 'animate-apple-number-simple' : ''
+                    }`}>
                     {count}
                 </span>
 

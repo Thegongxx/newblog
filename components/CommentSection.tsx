@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { supabase } from '../services/supabaseService';
 import LikeButton from './LikeButton';
 import type { Comment } from '../types';
-import { useToast } from '../hooks/useToast';
 import { useIsMobile } from '../hooks/useResponsive';
+import { useComments, commentAnimationVariants } from '../hooks/useComments';
 
 interface CommentSectionProps {
     targetId: string;
@@ -12,169 +11,49 @@ interface CommentSectionProps {
 }
 
 export default function CommentSection({ targetId, targetType = 'post' }: CommentSectionProps) {
-    const [comments, setComments] = useState<Comment[]>([]);
-    const [loading, setLoading] = useState(false);
     const [showForm, setShowForm] = useState(false);
     const [replyingTo, setReplyingTo] = useState<string | null>(null);
     const [parentId, setParentId] = useState('');
 
-    // 使用基本的状态管理
+    // 表单状态
     const [authorValue, setAuthorValue] = useState('');
     const [emailValue, setEmailValue] = useState('');
     const [contentValue, setContentValue] = useState('');
 
-    // 为输入框使用 Ref，以便使用非受控组件模式
-    const authorRef = React.useRef<HTMLInputElement>(null);
-    const emailRef = React.useRef<HTMLInputElement>(null);
-    const contentRef = React.useRef<HTMLTextAreaElement>(null);
-
-    const { showToast } = useToast();
     const isMobile = useIsMobile();
 
-    // 加载评论
-    React.useEffect(() => {
-        loadComments();
-    }, [targetId, targetType]);
-
-    const loadComments = async () => {
-        try {
-            setLoading(true);
-            console.log(`Loading ${targetType} comments for ID:`, targetId);
-
-            let data, error;
-
-            if (targetType === 'post') {
-                const result = await supabase
-                    .from('post_comments')
-                    .select('*')
-                    .eq('post_id', targetId)
-                    .eq('approved', true)
-                    .order('created_at', { ascending: true });
-                data = result.data;
-                error = result.error;
-            } else {
-                const result = await supabase
-                    .from('note_comments')
-                    .select('*')
-                    .eq('note_id', targetId)
-                    .eq('approved', true)
-                    .order('created_at', { ascending: true });
-                data = result.data;
-                error = result.error;
-            }
-
-            if (error) {
-                console.error('Supabase error:', error);
-                throw error;
-            }
-
-            console.log('Comments loaded:', data);
-            setComments(data || []);
-        } catch (error) {
-            console.error('Failed to load comments:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    // 使用自定义 Hook
+    const {
+        comments,
+        topLevelComments,
+        loading,
+        submitComment
+    } = useComments({
+        tableName: targetType === 'post' ? 'post_comments' : 'note_comments',
+        foreignKey: targetType === 'post' ? 'post_id' : 'note_id',
+        targetId
+    });
 
     // 提交评论
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        const cleanAuthor = authorValue.trim();
-        const cleanContent = contentValue.trim();
-        const cleanEmail = emailValue.trim();
+        const success = await submitComment({
+            author: authorValue,
+            email: emailValue,
+            content: contentValue,
+            parentId
+        });
 
-        if (!cleanAuthor || !cleanContent) {
-            alert('请填写姓名和内容哦 🌿');
-            return;
-        }
-
-        if (cleanContent.length > 1000) {
-            alert('评论内容太长了，请控制在1000字以内 📝');
-            return;
-        }
-
-        if (cleanAuthor.length > 50) {
-            alert('姓名太长了，请控制在50字以内 ✨');
-            return;
-        }
-
-        try {
-            setLoading(true);
-            console.log('Submitting comment:', { cleanAuthor, cleanContent, cleanEmail });
-
-            let data, error;
-
-            if (targetType === 'post') {
-                const result = await supabase
-                    .from('post_comments')
-                    .insert([{
-                        post_id: targetId,
-                        author: cleanAuthor,
-                        email: cleanEmail || 'anonymous@example.com',
-                        content: cleanContent,
-                        parent_id: parentId || null,
-                        approved: true
-                    }])
-                    .select()
-                    .single();
-                data = result.data;
-                error = result.error;
-            } else {
-                const result = await supabase
-                    .from('note_comments')
-                    .insert([{
-                        note_id: targetId,
-                        author: cleanAuthor,
-                        email: cleanEmail || 'anonymous@example.com',
-                        content: cleanContent,
-                        parent_id: parentId || null,
-                        approved: true
-                    }])
-                    .select()
-                    .single();
-                data = result.data;
-                error = result.error;
-            }
-
-            if (error) {
-                console.error('Supabase insert error:', error);
-                throw error;
-            }
-
-            console.log('Comment created successfully:', data);
-
+        if (success) {
             // 重置表单
             setAuthorValue('');
             setEmailValue('');
             setContentValue('');
-
-            if (authorRef.current) authorRef.current.value = '';
-            if (emailRef.current) emailRef.current.value = '';
-            if (contentRef.current) contentRef.current.value = '';
-
             setParentId('');
             setReplyingTo(null);
             setShowForm(false);
-
-            await loadComments();
             alert('评论已提交，已轻轻放在这里 ✨');
-        } catch (error) {
-            console.error('Failed to submit comment:', error);
-            if (error instanceof Error) {
-                if (error.message.includes('duplicate') || error.message.includes('unique')) {
-                    alert('评论重复了，请不要重复提交 😊');
-                } else if (error.message.includes('network') || error.message.includes('fetch')) {
-                    alert('网络连接有问题，请检查网络后重试 🌐');
-                } else {
-                    alert('评论提交失败，请稍后重试 😅');
-                }
-            } else {
-                alert('评论提交失败，请检查网络或稍后重试 🔄');
-            }
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -186,11 +65,16 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
     };
 
     const renderComment = (comment: Comment, depth = 0) => {
+        // 获取回复 (直接从 comments 数组过滤，避免 Hook 依赖循环)
         const replies = comments.filter(c => c.parent_id === comment.id);
         const isNested = depth > 0;
 
         return (
-            <div key={comment.id} className={`group w-full ${isNested ? 'mt-4' : 'mb-8'}`}>
+            <motion.div
+                key={comment.id}
+                className={`group w-full ${isNested ? 'mt-4' : 'mb-8'}`}
+                variants={commentAnimationVariants.comment}
+            >
                 <div className={`
                     relative 
                     ${isNested ? 'bg-white/[0.03] border border-white/5 rounded-2xl p-4' : ''}
@@ -235,11 +119,9 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
                         {replies.map((reply) => renderComment(reply, depth + 1))}
                     </div>
                 )}
-            </div>
+            </motion.div>
         );
     };
-
-    const topLevelComments = comments.filter(c => !c.parent_id);
 
     return (
         <div className="mt-24 max-w-2xl">
@@ -257,7 +139,13 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
 
             {/* 评论表单 */}
             {showForm && (
-                <div className="mb-12">
+                <motion.div
+                    className="mb-12"
+                    variants={commentAnimationVariants.form}
+                    initial="initial"
+                    animate="animate"
+                    exit="exit"
+                >
                     <div className="p-8 border border-white/5 rounded-3xl bg-white/[0.01]">
                         {replyingTo && (
                             <div className="mb-6 text-xs text-white/40 flex items-center justify-between">
@@ -278,11 +166,10 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="relative">
                                     <input
-                                        ref={authorRef}
                                         name="author"
                                         type="text"
                                         placeholder="姓名 *"
-                                        defaultValue={authorValue}
+                                        value={authorValue}
                                         onChange={(e) => setAuthorValue(e.target.value)}
                                         className="w-full px-0 py-3 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/40 transition-all duration-300"
                                         required
@@ -296,11 +183,10 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
                                     )}
                                 </div>
                                 <input
-                                    ref={emailRef}
                                     name="email"
                                     type="email"
                                     placeholder="邮箱 (可选)"
-                                    defaultValue={emailValue}
+                                    value={emailValue}
                                     onChange={(e) => setEmailValue(e.target.value)}
                                     className="w-full px-0 py-3 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/40 transition-all duration-300"
                                     autoComplete="off"
@@ -308,10 +194,9 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
                             </div>
                             <div className="relative">
                                 <textarea
-                                    ref={contentRef}
                                     name="content"
                                     placeholder="写下你的想法..."
-                                    defaultValue={contentValue}
+                                    value={contentValue}
                                     onChange={(e) => setContentValue(e.target.value)}
                                     rows={4}
                                     className="w-full px-0 py-3 bg-transparent border-b border-white/10 text-sm text-white placeholder-white/30 focus:outline-none focus:border-white/40 transition-all duration-300 resize-none"
@@ -344,7 +229,7 @@ export default function CommentSection({ targetId, targetType = 'post' }: Commen
                             </div>
                         </form>
                     </div>
-                </div>
+                </motion.div>
             )}
 
             {/* 评论列表 */}

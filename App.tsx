@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { HelmetProvider, Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SWRConfig } from 'swr';
@@ -11,7 +11,7 @@ import PageTransitionMask from './components/PageTransitionMask';
 import { MagneticButton } from './components/HoverEffects';
 import ScrollToTop from './components/ScrollToTop';
 import GlobalRipple from './components/GlobalRipple';
-import { CONTACT_INFO } from './constants';
+import Footer from './components/Footer';
 import { Z_INDEX } from './constants/zIndex';
 import { MOBILE_NAV_CONFIG } from './constants/mobileNavigation';
 import { haptics } from './utils/haptics';
@@ -19,7 +19,6 @@ import { usePostsCache, useNotesCache } from './services/cacheService';
 import { useIsMobile } from './hooks/useResponsive';
 import { usePageTransition } from './hooks/usePageTransition';
 import { useMobileOptimization } from './hooks/useMobileOptimization';
-import { useToast } from './hooks/useToast';
 
 // 直接导入所有页面组件 - 避免懒加载导致的首次切换延迟
 import Feed from './pages/Feed';
@@ -28,6 +27,7 @@ import Notes from './pages/Notes';
 import NoteDetail from './pages/NoteDetail';
 import About from './pages/About';
 import Archive from './pages/Archive';
+import NotFound from './pages/NotFound';
 
 const AppInner = () => {
   const navigate = useNavigate();
@@ -43,6 +43,12 @@ const AppInner = () => {
 
   // 移动端优化
   useMobileOptimization();
+
+  // Toast 显示函数
+  const showToast = (msg: string, type: 'success' | 'info' | 'error' = 'success') => {
+    setToast({ show: true, msg, type });
+    setTimeout(() => setToast(prev => ({ ...prev, show: false })), isMobile ? 3000 : 2500);
+  };
 
   // 全局 Toast 事件监听（供 useToast 调用）
   useEffect(() => {
@@ -79,80 +85,6 @@ const AppInner = () => {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  const showToast = (msg: string, type: 'success' | 'info' | 'error' = 'success') => {
-    setToast({ show: true, msg, type });
-    setTimeout(() => setToast(prev => ({ ...prev, show: false })), isMobile ? 3000 : 2500);
-  };
-
-  const handleCopy = async (text: string, label: string) => {
-    try {
-      // 移动端优化：检查是否支持Clipboard API
-      if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(text);
-        showToast(`${label} 已复制到剪贴板`);
-        // 移动端震动反馈
-        if (isMobile) {
-          haptics.success();
-        }
-        return;
-      }
-
-      // 移动端降级方案：使用传统的 execCommand
-      const textArea = document.createElement('textarea');
-      textArea.value = text;
-      textArea.style.position = 'fixed';
-      textArea.style.left = '-9999px';
-      textArea.style.top = '-9999px';
-      textArea.style.opacity = '0';
-      textArea.setAttribute('readonly', '');
-      document.body.appendChild(textArea);
-
-      // 移动端需要特殊处理
-      if (isMobile) {
-        textArea.style.position = 'absolute';
-        textArea.style.left = '0';
-        textArea.style.top = '0';
-        textArea.style.width = '1px';
-        textArea.style.height = '1px';
-        textArea.style.padding = '0';
-        textArea.style.border = 'none';
-        textArea.style.outline = 'none';
-        textArea.style.boxShadow = 'none';
-        textArea.style.background = 'transparent';
-      }
-
-      textArea.focus();
-      textArea.select();
-      textArea.setSelectionRange(0, 99999); // 移动端兼容
-
-      const success = document.execCommand('copy');
-      document.body.removeChild(textArea);
-
-      if (success) {
-        showToast(`${label} 已复制到剪贴板`);
-        // 移动端震动反馈
-        if (isMobile) {
-          haptics.success();
-        }
-      } else {
-        // 移动端最终降级：显示文本让用户手动复制
-        if (isMobile) {
-          showToast(`${label}: ${text}`, 'info');
-        } else {
-          showToast('复制失败，请手动复制', 'error');
-        }
-      }
-    } catch (error) {
-      console.error('Copy failed:', error);
-      // 移动端错误处理：显示文本内容
-      if (isMobile) {
-        showToast(`${label}: ${text}`, 'info');
-      } else {
-        showToast('复制失败，请手动复制', 'error');
-      }
-    }
-  };
 
   const handleNavigate = (path: string) => {
     if (location.pathname === path) {
@@ -193,7 +125,7 @@ const AppInner = () => {
 
   return (
     <div className="min-h-screen selection:bg-white/20 selection:text-white"
-         style={{ isolation: 'auto' }}>
+      style={{ isolation: 'auto' }}>
       <Helmet>
         <title>Xuan</title>
         <meta name="description" content="welcome" />
@@ -218,32 +150,27 @@ const AppInner = () => {
               damping: 25,
               duration: 0.35
             }}
-            className={`fixed ${
-              isMobile 
-                ? 'inset-x-4 bottom-20 top-auto pointer-events-auto' // 移动端可点击
-                : 'inset-x-4 top-4 md:inset-x-auto md:top-8 md:right-8 pointer-events-none' // 桌面端不可点击
-            }`}
+            className={`fixed ${isMobile
+              ? 'inset-x-4 bottom-20 top-auto pointer-events-auto' // 移动端可点击
+              : 'inset-x-4 top-4 md:inset-x-auto md:top-8 md:right-8 pointer-events-none' // 桌面端不可点击
+              }`}
             style={{ zIndex: Z_INDEX.TOAST }}
             onClick={isMobile ? () => setToast(prev => ({ ...prev, show: false })) : undefined}
           >
-            <div className={`w-full ${isMobile ? 'max-w-none' : 'md:max-w-sm'} ${
-              isMobile 
-                ? 'px-6 py-4 rounded-2xl cursor-pointer' // 移动端添加点击样式
-                : 'px-4 py-3 rounded-xl'
-            } text-sm font-medium border shadow-2xl backdrop-blur-xl transition-transform duration-200 ${
-              isMobile ? 'active:scale-95' : ''
-            } ${
-              toast.type === 'error'
+            <div className={`w-full ${isMobile ? 'max-w-none' : 'md:max-w-sm'} ${isMobile
+              ? 'px-6 py-4 rounded-2xl cursor-pointer' // 移动端添加点击样式
+              : 'px-4 py-3 rounded-xl'
+              } text-sm font-medium border shadow-2xl backdrop-blur-xl transition-transform duration-200 ${isMobile ? 'active:scale-95' : ''
+              } ${toast.type === 'error'
                 ? 'bg-red-500/90 text-white border-red-400/50'
                 : toast.type === 'info'
                   ? 'bg-blue-500/90 text-white border-blue-400/50'
                   : 'bg-green-500/90 text-white border-green-400/50'
-            }`}>
+              }`}>
               <div className="flex items-start gap-3">
-                <div className={`${isMobile ? 'w-3 h-3 mt-0.5' : 'w-2 h-2 mt-1'} rounded-full flex-shrink-0 ${
-                  toast.type === 'error' ? 'bg-red-300' :
+                <div className={`${isMobile ? 'w-3 h-3 mt-0.5' : 'w-2 h-2 mt-1'} rounded-full flex-shrink-0 ${toast.type === 'error' ? 'bg-red-300' :
                   toast.type === 'info' ? 'bg-blue-300' : 'bg-green-300'
-                }`} />
+                  }`} />
                 <div className="flex-1 min-w-0">
                   <p className={`break-words ${isMobile ? 'text-base' : 'text-sm'}`}>
                     {toast.msg}
@@ -335,7 +262,7 @@ const AppInner = () => {
                   layoutId="nav-highlight"
                 />
               )}
-              
+
               {[
                 { path: '/notes', label: isMobile ? 'Notes' : 'Notes', icon: '📝' },
                 { path: '/archive', label: isMobile ? 'Archive' : 'Archive', icon: '📂' },
@@ -459,7 +386,11 @@ const AppInner = () => {
                   <About />
                 </DesktopNavigation>
               } />
-              <Route path="*" element={<Navigate to="/" replace />} />
+              <Route path="*" element={
+                <DesktopNavigation>
+                  <NotFound />
+                </DesktopNavigation>
+              } />
             </Routes>
           </AnimatePresence>
         </ErrorBoundary>
@@ -473,40 +404,8 @@ const AppInner = () => {
         <ScrollToTop threshold={isMobile ? 200 : 300} />
       )}
 
-      {/* Footer - 响应式优化 */}
-      <footer className="py-12 md:py-32 px-4 md:px-6 border-t border-white/10">
-        <div className="max-w-7xl mx-auto flex flex-col items-center text-center">
-          <div className="text-2xl md:text-5xl mb-6 md:mb-16 font-bold tracking-tighter opacity-20 select-none">
-            XUAN
-          </div>
-
-          {/* 统一的联系方式 - 响应式 */}
-          <div className="flex gap-6 md:gap-12 text-xs md:text-sm uppercase tracking-wider font-bold text-white/60">
-            {[
-              { label: 'QQ', value: CONTACT_INFO.QQ },
-              { label: 'WX', value: CONTACT_INFO.WX },
-              { label: 'MAIL', value: CONTACT_INFO.MAIL }
-            ].map((contact) => (
-              <button
-                key={contact.label}
-                onClick={() => handleCopy(contact.value, contact.label)}
-                className="group relative overflow-hidden h-8 w-12 md:h-10 md:w-16 hover:text-white rounded-lg transition-colors duration-300"
-              >
-                <div className="absolute inset-0 flex items-center justify-center group-hover:-translate-y-full transition-transform duration-500">
-                  {contact.label}
-                </div>
-                <div className="absolute inset-0 flex items-center justify-center translate-y-full group-hover:translate-y-0 transition-transform duration-500 text-white font-bold bg-white/10 rounded-lg text-[10px] md:text-xs">
-                  COPY
-                </div>
-              </button>
-            ))}
-          </div>
-
-          <p className="mt-8 md:mt-24 text-[10px] md:text-xs text-white/20 tracking-wider uppercase">
-            Thank you for your coming
-          </p>
-        </div>
-      </footer>
+      {/* Footer 组件 */}
+      <Footer />
 
       {error && (
         <div className="fixed bottom-4 left-4 bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-2 rounded-lg text-sm">

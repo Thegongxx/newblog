@@ -1,4 +1,39 @@
+/**
+ * 类型定义 - 优化版
+ * 使用基础接口和扩展，提供更精确的类型约束
+ */
 
+// ==========================================
+// 基础评论接口
+// ==========================================
+export interface BaseComment {
+  id: string;
+  author: string;
+  email: string;
+  content: string;
+  parent_id?: string;
+  approved: boolean;
+  created_at: string;
+}
+
+export interface PostComment extends BaseComment {
+  post_id: string;
+}
+
+export interface NoteComment extends BaseComment {
+  note_id: string;
+}
+
+export interface HomepageComment extends BaseComment {
+  // 无需外键，直接使用基础接口
+}
+
+// 通用 Comment 类型（向后兼容）
+export type Comment = PostComment | NoteComment | HomepageComment;
+
+// ==========================================
+// 文章相关
+// ==========================================
 export interface Post {
   id: string;
   title: string;
@@ -20,6 +55,9 @@ export interface Post {
   readingTime?: string;
 }
 
+// ==========================================
+// 页面相关
+// ==========================================
 export interface Page {
   id: string;
   slug: string;
@@ -30,28 +68,9 @@ export interface Page {
   updated_at: string;
 }
 
-export interface Comment {
-  id: string;
-  post_id: string;
-  author: string;
-  email: string;
-  content: string;
-  parent_id?: string;
-  approved: boolean;
-  created_at: string;
-}
-
-export interface NoteComment {
-  id: string;
-  note_id: string;
-  author: string;
-  email: string;
-  content: string;
-  parent_id?: string;
-  approved: boolean;
-  created_at: string;
-}
-
+// ==========================================
+// 笔记相关
+// ==========================================
 export interface Note {
   id: string;
   text: string;
@@ -73,6 +92,9 @@ export interface FileNote {
   updated_at?: string;
 }
 
+// ==========================================
+// 其他
+// ==========================================
 export interface Quote {
   text: string;
   author: string;
@@ -90,4 +112,23 @@ export enum ViewState {
 export interface Message {
   role: 'user' | 'assistant';
   content: string;
+}
+
+// ==========================================
+// API 响应类型
+// ==========================================
+export interface ApiResponse<T> {
+  data: T | null;
+  error: string | null;
+  loading: boolean;
+}
+
+// ==========================================
+// 表单类型
+// ==========================================
+export interface CommentFormData {
+  author: string;
+  email: string;
+  content: string;
+  parentId?: string;
 }
